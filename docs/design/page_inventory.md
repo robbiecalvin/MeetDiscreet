@@ -66,7 +66,8 @@ integrations or production deployment. PUB-06 now has a public frontend profile 
 [the profile brief](./page_briefs/companion-profile.md); member/subscriber sections
 are labels only. PUB-05 now has an Offering detail route at `/?ad=<id>`; see
 [Offering brief](./page_briefs/offering-ad.md). PUB-08 now has How it works/reference plans at `/?page=how-it-works`; see
-[How it works brief](./page_briefs/how-it-works.md). Other inventory surfaces remain planned.
+[How it works brief](./page_briefs/how-it-works.md). USR-05/COM-08 now have a shared demo draft editor at `/?page=create-listing`; see
+[listing editor brief](./page_briefs/listing-editor.md). No saving or publication is connected. Other inventory surfaces remain planned.
 
 ## 4. Inventory Fields
 

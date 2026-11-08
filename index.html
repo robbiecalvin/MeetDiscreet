@@ -26,7 +26,7 @@
     <header class="site-header">
       <a class="wordmark" href="./" aria-label="MeetDiscreet home">meet<span>discreet</span><i aria-hidden="true">.</i></a>
       <nav class="desktop-nav" aria-label="Main navigation"><a class="active" href="#main" aria-current="page">Discover</a><a class="how-link" href="?page=how-it-works" data-how-link>How it works</a></nav>
-      <div class="account-actions"><button class="sign-in" data-info="signin">Sign in</button><button class="button small outline" data-info="post">Post a listing <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 12 12 4M4 4h8v8"/></svg></button></div>
+      <div class="account-actions"><button class="sign-in" data-info="signin">Sign in</button><a class="button small outline post-listing-link" href="?page=create-listing" data-editor-link aria-label="Post a listing"><span class="desktop-post-label">Post a listing</span><span class="mobile-post-label" aria-hidden="true">+ Post</span></a></div>
     </header>
     <main id="main" tabindex="-1">
       <div id="discovery-view">
@@ -47,7 +47,8 @@
       <section id="profile-view" hidden aria-label="Companion profile"></section>
       <section id="offering-view" hidden aria-label="Offering ad"></section>
       <section id="how-view" hidden aria-label="How it works"></section>
-      <footer><span class="footer-brand">A little time. A good connection.</span><div><a href="?page=how-it-works" data-how-link>How it works</a><button data-info="guidelines">Guidelines &amp; boundaries</button><button data-info="privacy">Privacy</button><button data-info="terms">Terms</button></div><span>© <span id="year"></span> MeetDiscreet</span></footer>
+      <section id="editor-view" hidden aria-label="Listing editor"></section>
+      <footer><span class="footer-brand">A little time. A good connection.</span><div><a href="?page=how-it-works" data-how-link>How it works</a><a href="?page=create-listing" data-editor-link>Post a listing</a><button data-info="guidelines">Guidelines &amp; boundaries</button><button data-info="privacy">Privacy</button><button data-info="terms">Terms</button></div><span>© <span id="year"></span> MeetDiscreet</span></footer>
     </main>
     <div class="view-dock"><span class="dock-caption">A different way to discover</span><button id="switch-view" class="button primary"><span id="view-icon" aria-hidden="true">☷</span><span id="view-label">Explore the ads</span><svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 12 12 4M4 4h8v8"/></svg></button></div>
   </div>

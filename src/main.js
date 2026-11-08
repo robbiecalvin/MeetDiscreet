@@ -3,6 +3,7 @@ import { providers, ads } from './data.js';
 import { renderProfile } from './profile.js';
 import { renderOffering } from './offering.js';
 import { renderHowItWorks } from './how-it-works.js';
+import { renderListingEditor } from './listing-editor.js';
 import { referencePrices, formatReferencePrice } from './pricing.js';
 
 const $ = (selector) => document.querySelector(selector);
@@ -74,14 +75,16 @@ function renderRoute() {
   const isProfile = id !== null;
   const isOffering = !isProfile && adId !== null;
   const isHow = !isProfile && !isOffering && params.get('page') === 'how-it-works';
-  $('#discovery-view').hidden = isProfile || isOffering || isHow;
+  const isEditor = !isProfile && !isOffering && params.get('page') === 'create-listing';
+  $('#editor-view').hidden = !isEditor;
+  $('#discovery-view').hidden = isProfile || isOffering || isHow || isEditor;
   $('#how-view').hidden = !isHow;
   $('#profile-view').hidden = !isProfile;
   $('#offering-view').hidden = !isOffering;
-  $('.view-dock').hidden = isProfile || isOffering || isHow;
+  $('.view-dock').hidden = isProfile || isOffering || isHow || isEditor;
   const discoverLink = $('.desktop-nav a');
   discoverLink.href = './';
-  if (isProfile || isOffering || isHow) discoverLink.removeAttribute('aria-current');
+  if (isProfile || isOffering || isHow || isEditor) discoverLink.removeAttribute('aria-current');
   else discoverLink.setAttribute('aria-current', 'page');
   document.querySelectorAll('[data-how-link]').forEach((link) => {
     if (isHow) link.setAttribute('aria-current', 'page');
@@ -105,6 +108,9 @@ function renderRoute() {
   } else if (isHow) {
     renderHowItWorks($('#how-view'), backToDiscovery);
     document.title = 'How it works · MeetDiscreet';
+  } else if (isEditor) {
+    renderListingEditor($('#editor-view'), backToDiscovery);
+    document.title = 'Create a listing · MeetDiscreet';
   } else document.title = 'Discover · MeetDiscreet';
 }
 function backToDiscovery() {
@@ -154,7 +160,7 @@ function showOffering(ad) {
 }
 window.addEventListener('popstate', () => {
   renderRoute();
-  if (!new URL(location.href).searchParams.has('profile') && !new URL(location.href).searchParams.has('ad') && new URL(location.href).searchParams.get('page') !== 'how-it-works') {
+  if (!new URL(location.href).searchParams.has('profile') && !new URL(location.href).searchParams.has('ad') && !['how-it-works', 'create-listing'].includes(new URL(location.href).searchParams.get('page'))) {
     window.scrollTo({ top: discoveryScroll, behavior: 'instant' });
     const card = state.view === 'ads' ? (selectedAdId && document.querySelector(`[data-ad="${selectedAdId}"]`)) : (selectedCardId && document.querySelector(`[data-provider="${selectedCardId}"]`));
     (card || $('#main')).focus({ preventScroll: true });
@@ -247,7 +253,6 @@ document.querySelectorAll('[data-category]').forEach((button) => button.addEvent
 document.querySelectorAll('.close-dialog').forEach((button) => button.addEventListener('click', () => button.closest('dialog').close()));
 const info = {
   signin: ['Account access is coming later.', 'Sign-in is not connected in this frontend prototype. No account information is collected here.'],
-  post: ['Your next plan, shared.', 'Listing creation is not connected yet. The ads in this preview are fictional examples.'],
   guidelines: ['Community Guidelines & Boundaries', 'The planned service is for paid platonic dates and social experiences. Respect personal boundaries and other people’s privacy. This is a prototype summary; the complete community guidelines and moderation tools are not implemented.'],
   privacy: ['Privacy · prototype notice', 'This preview does not request your device location or create accounts. Age confirmation is stored on this browser for 30 days when storage is available. Fictional demo filters stay in memory. This notice is not the final Privacy Policy.'],
   terms: ['Terms · prototype notice', 'This is a frontend demonstration using fictional profiles and ads. No purchases, subscriptions, bookings, or real service arrangements can be made. Final service terms will be provided before a live launch.'],
@@ -259,7 +264,7 @@ render();
 renderRoute();
 
 $('.desktop-nav a').addEventListener('click', (event) => {
-  if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && (new URL(location.href).searchParams.has('profile') || new URL(location.href).searchParams.has('ad') || new URL(location.href).searchParams.get('page') === 'how-it-works')) {
+  if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && (new URL(location.href).searchParams.has('profile') || new URL(location.href).searchParams.has('ad') || ['how-it-works', 'create-listing'].includes(new URL(location.href).searchParams.get('page')))) {
     event.preventDefault();
     backToDiscovery();
   }
@@ -273,6 +278,21 @@ for (const link of document.querySelectorAll('[data-how-link]')) {
     const url = new URL(location.href);
     for (const key of ['profile', 'ad', 'fromAd']) url.searchParams.delete(key);
     url.searchParams.set('page', 'how-it-works');
+    history.pushState(null, '', url);
+    renderRoute();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    $('#main').focus({ preventScroll: true });
+  });
+}
+
+for (const link of document.querySelectorAll('[data-editor-link]')) {
+  link.addEventListener('click', (event) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    if (!$('#discovery-view').hidden) discoveryScroll = window.scrollY;
+    const url = new URL(location.href);
+    for (const key of ['profile', 'ad', 'fromAd']) url.searchParams.delete(key);
+    url.searchParams.set('page', 'create-listing');
     history.pushState(null, '', url);
     renderRoute();
     window.scrollTo({ top: 0, behavior: 'instant' });

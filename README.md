@@ -18,7 +18,9 @@ The repository now includes a local frontend discovery prototype: a 30-day
 entrance age confirmation, portrait provider grid, compact ads view, working
 demo filters, public companion profiles with labelled locked-content previews,
 public Offering ad details linked to their companion profiles, and a How it works
-page with separate reference plans and FAQs. Profiles, generated photos, online statuses, and ads are fictional.
+page with separate reference plans and FAQs, plus an in-memory listing editor
+with Offering/Looking For draft previews. Nothing entered in the editor is saved
+or published. Profiles, generated photos, online statuses, and ads are fictional.
 Accounts, payments, bookings, communication, and production deployment are not
 connected. See [the roadmap](./docs/next_steps.md) for verification and limitations.
 

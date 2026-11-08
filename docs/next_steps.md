@@ -17,7 +17,7 @@ in their dedicated documents.
 Current phase: Phase 1 — Local frontend foundation, with the first Phase 2 discovery prototype.
 
 Current activity:
-Discovery, public companion profiles, and Offering ad details implemented. Routine visual choices are provisional under Robbie’s request to keep building and revise later.
+Discovery, profiles, Offering details, How it works, and the listing draft editor are implemented as frontend demos. Routine visual choices remain provisional under Robbie’s request to keep building and revise later.
 
 Known status:
 
@@ -543,7 +543,7 @@ If launch scope is reduced:
 
 ## 18. Current Work Snapshot
 
-- Objective: How it works and reference plans integrated with discovery/profile/Offering navigation.
+- Objective: Frontend Offering/Looking For listing composer and owner-style draft preview.
 - Completed: Pinned Node/npm/Vite workflow; age gate; default portrait grid with three columns on mobile; bottom people/ads switch; one-column ad cards; city, search, online, and interest filters; empty reset; limited public demo dialogs.
 - Visual direction: #121521 / #38476b / #b6192e, Agrandir preferred, bold headings and thin body text. Licensed font assets absent; system fallback currently used.
 - Gate: 30-day browser confirmation; external referrer exit with Google fallback. No role or account privileges are granted.
@@ -579,6 +579,15 @@ If launch scope is reduced:
 - Vite build and 40 Chromium checks passed; desktop/mobile screenshots inspected. Final navigation-active styling checked with the How it works suite.
 - GitHub source prepared for the existing Netlify-connected demo. Live Netlify verification remains blocked by environment network policy.
 
+### Listing Editor Increment
+
+- USR-05/COM-08 frontend composer at `/?page=create-listing`, available through the header on desktop/mobile and the footer.
+- Offering/Looking For selection, title/description validation, fictional examples, city/general area/activity, edit/preview/clear controls, and keyboard focus/error associations.
+- Preview uses text nodes, so entered markup is displayed rather than executed. No network submission, account privilege, saved listing, publication, boost, allowance, payment, or new discovery result.
+- Drafts remain in memory across in-app navigation and are lost on full refresh; the form states this explicitly. Author labels are demo personas, not role assignment.
+- Build and 50 Chromium checks passed (40 existing plus 10 editor checks) including five responsive widths. Desktop/mobile form and preview screenshots inspected.
+- Looking For draft preview does not resolve full-post public visibility. Publishing requires backend ownership/eligibility and confirmed policies in future work.
+
 ### Last Verified Result
 
 - Frozen-lockfile npm ci completed; Vite build passed.
@@ -598,7 +607,7 @@ Backend/access-policy choices remain prerequisites only for dependent real featu
 Agrandir font assets are not present. Browser referrer policy can omit the prior
 page or reduce its URL; Exit uses the available external source and falls back
 to Google. When storage is blocked, age confirmation applies only to the visit.
-Policy notices, sign-in, posting, subscription actions, and Looking For detail previews remain
+Policy notices, sign-in, actual publishing, subscription actions, and Looking For detail previews remain
 explicit prototype summaries rather than complete services or legal documents.
 The public profile is implemented with fictional data and labelled locked previews.
 

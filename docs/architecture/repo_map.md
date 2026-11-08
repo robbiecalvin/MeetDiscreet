@@ -139,6 +139,7 @@ conflict with approved MeetDiscreet decisions.
 - src/offering.js: public Offering detail, provider navigation, and related Offering ads.
 - src/how-it-works.js: user/companion journey explanation, reference plans, and FAQ disclosures.
 - src/pricing.js: centralized reference amounts in minor units; not a payment authority.
+- src/listing-editor.js: in-memory Offering/Looking For draft form, validation, and safe preview.
 - src/styles.css: shared tokens, portrait grid, single-column ads, responsive layout.
 - src/data.js: synthetic public profile and ad fixtures; no live presence.
 - public/images/demo-portraits.png: locally served AI-generated fictional portrait sheet.
