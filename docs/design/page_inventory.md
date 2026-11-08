@@ -62,7 +62,9 @@ PUB-01 discovery and SH-01 entrance gate are implemented as frontend prototypes
 in index.html and src/. PUB-02/PUB-03 are in-page demo ad categories. Profile/ad
 details and policy notices are limited dialogs, not completed standalone pages.
 See [discovery brief](./page_briefs/discovery.md). Visual review pending; no real
-integrations or production deployment. Other inventory surfaces remain planned.
+integrations or production deployment. PUB-06 now has a public frontend profile at `/?profile=<id>`, documented in
+[the profile brief](./page_briefs/companion-profile.md); member/subscriber sections
+are labels only. Other inventory surfaces remain planned.
 
 ## 4. Inventory Fields
 

@@ -464,3 +464,19 @@ not a decision about launch region or live location. Node/npm are development
 tools; no backend, payment, hosting, or future business-policy decision is implied.
 
 Details: [discovery brief](./design/page_briefs/discovery.md).
+
+## DEC-015 — Public Companion Profile Layout
+
+Status: Confirmed direction from Robbie’s profile-question answers.
+
+Discovery needs no visual changes. The public companion profile uses a full-width
+photo region above details, followed by introduction, interests, experiences,
+general rates, and availability. The main action is “Subscribe to connect”, fixed
+at the bottom on mobile. Locked content uses labelled preview sections.
+
+Existing visibility tiers remain unchanged: personal bio/interests are member-only,
+and detailed experiences/additional media are subscriber-only. Previews carry
+labels and access explanations without restricted content or asset URLs. No live
+subscriptions, payment, booking, messaging, reviews, or availability are implied.
+
+See [companion profile brief](./design/page_briefs/companion-profile.md).

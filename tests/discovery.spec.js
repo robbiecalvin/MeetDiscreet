@@ -53,7 +53,7 @@ test('Exit uses external referrer and agreed direct-visit fallback', async ({ pa
   }
 });
 
-test('provider filtering, empty reset, and profile dialog', async ({ page }) => {
+test('provider filtering, empty reset, and profile navigation', async ({ page }) => {
   await confirm(page);
   await expect(page.locator('.provider-card')).toHaveCount(10);
   await page.getByLabel('Online now').check();
@@ -69,8 +69,8 @@ test('provider filtering, empty reset, and profile dialog', async ({ page }) => 
   await expect(page.locator('.provider-card')).toHaveCount(10);
   await page.locator('.provider-card').first().click();
   await expect(page.getByRole('heading', { name: 'Alex, 29' })).toBeVisible();
-  await page.keyboard.press('Escape');
-  await expect(page.locator('#detail-dialog')).toBeHidden();
+  await page.getByRole('link', { name: 'Back to discovery' }).click();
+  await expect(page.locator('#profile-view')).toBeHidden();
   await expect(page.locator('.provider-card').first()).toBeFocused();
   await page.getByLabel('Explore a city').selectOption('Toronto');
   await expect(page.locator('.provider-card')).toHaveCount(1);

@@ -543,12 +543,23 @@ If launch scope is reduced:
 
 ## 18. Current Work Snapshot
 
-- Objective: First public discovery frontend from Robbie’s selected direction.
+- Objective: Public companion profile linked from the accepted discovery prototype.
 - Completed: Pinned Node/npm/Vite workflow; age gate; default portrait grid with three columns on mobile; bottom people/ads switch; one-column ad cards; city, search, online, and interest filters; empty reset; limited public demo dialogs.
 - Visual direction: #121521 / #38476b / #b6192e, Agrandir preferred, bold headings and thin body text. Licensed font assets absent; system fallback currently used.
 - Gate: 30-day browser confirmation; external referrer exit with Google fallback. No role or account privileges are granted.
 - Data: Fictional profile/online/ad fixtures and AI-generated portraits. No live location or backend integration.
-- Delivery: GitHub source delivery authorized on 2026-11-08; see Git history for committed revisions. Earlier documentation cleanup included. No production deployment.
+- Delivery: Discovery source was pushed to GitHub; Robbie supplied a Netlify Published screenshot for commit d6c121f at https://jade-chebakia-c21282.netlify.app/. Profile increment prepared for the same GitHub-connected demo deployment; no live financial services.
+
+### Public Profile Increment
+
+- Public profile route `/?profile=<id>` opens from provider cards and supports refresh and direct visits through the entrance gate.
+- Full-width photo region above details; section order matches DEC-015. Desktop uses the existing portrait with a softened photo backdrop to preserve the whole face; mobile fills the photo region.
+- Member/subscriber preview labels contain no protected profile data or media.
+- General rates and availability use honest empty states rather than invented prices/dates.
+- Subscribe action explains the $11.99/month reference model and pending terms; no charge, access, account, or booking is created.
+- Fixed subscription action on mobile; browser back/forward and explicit return preserve in-app discovery filters and focus.
+- Build and 20 Chromium checks pass, including all discovery regressions and nine profile/navigation/access-label/responsive checks. Desktop and mobile screenshots inspected.
+- Visual direction selected; rendered profile awaits Robbie’s review. Safari and Agrandir remain unverified.
 
 ### Last Verified Result
 
@@ -559,17 +570,18 @@ If launch scope is reduced:
 
 ### Next Action
 
-Review the implemented layout. Record Robbie’s revisions in the discovery brief
-and shared design system as appropriate. Add licensed Agrandir webfont files
-when supplied. Do not introduce unrelated business decisions as blockers.
+Review the new companion profile from a discovery card. Record revisions in
+the profile brief and shared design system as appropriate. Add licensed Agrandir
+webfont files when supplied. Do not introduce unrelated business decisions as blockers.
 
 ### Current Limitations
 
 Agrandir font assets are not present. Browser referrer policy can omit the prior
 page or reduce its URL; Exit uses the available external source and falls back
 to Google. When storage is blocked, age confirmation applies only to the visit.
-Policy notices, sign-in, posting, and profile/ad details are explicit prototype
-summaries rather than complete services or legal documents.
+Policy notices, sign-in, posting, subscription actions, and ad details remain
+explicit prototype summaries rather than complete services or legal documents.
+The public profile is implemented with fictional data and labelled locked previews.
 
 Earlier cloud configuration saves returned INVALID_ARGUMENT. Robbie subsequently
 reported publishing the environment, and the restored checkout contains the

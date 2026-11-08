@@ -15,8 +15,8 @@ This README describes the intended product. It does not establish that
 any feature, payment integration, or deployment is operational.
 
 The repository now includes a local frontend discovery prototype: a 30-day
-entrance age confirmation, portrait provider grid, compact ads view, and working
-demo filters. Profiles, generated photos, online statuses, and ads are fictional.
+entrance age confirmation, portrait provider grid, compact ads view, working
+demo filters, and public companion profiles with labelled locked-content previews. Profiles, generated photos, online statuses, and ads are fictional.
 Accounts, payments, bookings, communication, and production deployment are not
 connected. See [the roadmap](./docs/next_steps.md) for verification and limitations.
 

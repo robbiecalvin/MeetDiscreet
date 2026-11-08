@@ -134,12 +134,13 @@ conflict with approved MeetDiscreet decisions.
 ## Current Frontend Paths
 
 - index.html: discovery shell and native age/filter/detail dialogs.
-- src/main.js: age self-attestation, filtering, people/ads switching, public demo dialogs.
+- src/main.js: age self-attestation, filtering, people/ads switching, public demo dialogs, and query-based profile navigation.
+- src/profile.js: public companion profile, labelled restricted-content previews, and subscription explanation.
 - src/styles.css: shared tokens, portrait grid, single-column ads, responsive layout.
 - src/data.js: synthetic public profile and ad fixtures; no live presence.
 - public/images/demo-portraits.png: locally served AI-generated fictional portrait sheet.
 - package.json, package-lock.json, .nvmrc: pinned npm/Vite development workflow.
-- playwright.config.js, tests/discovery.spec.js: browser behaviour and layout checks.
+- playwright.config.js, tests/discovery.spec.js, tests/profile.spec.js: discovery/profile browser behaviour and layout checks.
 - .gitignore: local secrets, dependencies, generated artifacts, and private-media paths.
 - docs/design/page_briefs/discovery.md: current discovery/entrance brief.
 

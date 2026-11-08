@@ -29,6 +29,7 @@
       <div class="account-actions"><button class="sign-in" data-info="signin">Sign in</button><button class="button small outline" data-info="post">Post a listing <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 12 12 4M4 4h8v8"/></svg></button></div>
     </header>
     <main id="main" tabindex="-1">
+      <div id="discovery-view">
       <div class="page-intro"><div><p class="eyebrow">A SHARED MOMENT STARTS HERE</p><h1>Your city. <span>Your company.</span></h1><p class="intro-copy">A coffee, a night out, or something a little less ordinary.</p></div></div>
       <section class="discovery" aria-labelledby="results-title">
         <div class="toolbar">
@@ -42,6 +43,8 @@
         <div id="empty" class="empty-state" hidden><span aria-hidden="true">⌕</span><h3>No company found just yet.</h3><p>Try a different city, interest, or filter.</p><button id="reset" class="button outline">Clear filters</button></div>
         <div class="demo-note"><span class="demo-pill">PREVIEW</span><p>Fictional profiles, photos, ads, and online statuses. Location is a demo selection, not your live location.</p></div>
       </section>
+      </div>
+      <section id="profile-view" hidden aria-label="Companion profile"></section>
       <footer><span class="footer-brand">A little time. A good connection.</span><div><button data-info="guidelines">Guidelines &amp; boundaries</button><button data-info="privacy">Privacy</button><button data-info="terms">Terms</button></div><span>© <span id="year"></span> MeetDiscreet</span></footer>
     </main>
     <div class="view-dock"><span class="dock-caption">A different way to discover</span><button id="switch-view" class="button primary"><span id="view-icon" aria-hidden="true">☷</span><span id="view-label">Explore the ads</span><svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 12 12 4M4 4h8v8"/></svg></button></div>

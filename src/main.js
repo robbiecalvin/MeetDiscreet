@@ -1,5 +1,6 @@
 import './styles.css';
 import { providers, ads } from './data.js';
+import { renderProfile } from './profile.js';
 
 const $ = (selector) => document.querySelector(selector);
 const gate = $('#age-gate');
@@ -60,9 +61,53 @@ function openDetail(title, copy, provider) {
   content.append(heading, text('p', copy, 'detail-copy'));
   detail.showModal();
 }
-function showProfile(provider) {
-  openDetail(`${provider.name}, ${provider.age}`, `${provider.area}, ${provider.city} · ${provider.interest}. ${provider.bio} This is a fictional public profile preview. Accounts, subscriptions, messaging, and bookings are not connected.`, provider);
+let discoveryScroll = 0;
+let selectedCardId = null;
+function profileRoute() {
+  const id = new URL(location.href).searchParams.get('profile');
+  const isProfile = id !== null;
+  $('#discovery-view').hidden = isProfile;
+  $('#profile-view').hidden = !isProfile;
+  $('.view-dock').hidden = isProfile;
+  const discoverLink = $('.desktop-nav a');
+  discoverLink.href = './';
+  if (isProfile) discoverLink.removeAttribute('aria-current');
+  else discoverLink.setAttribute('aria-current', 'page');
+  if (isProfile) {
+    const provider = providers.find((item) => item.id === id);
+    renderProfile($('#profile-view'), provider, backToDiscovery, (person) => {
+      openDetail(`Connect with ${person.name}`, `The reference subscription is $11.99/month for this companion. It unlocks subscriber media, detailed experiences, messages, calls, and booking requests. Booked companionship time is priced separately. Currency, renewal, and cancellation terms still need confirmation. This is a preview: no payment is taken and no access is granted.`);
+    });
+    document.title = `${provider ? provider.name : 'Profile unavailable'} · MeetDiscreet`;
+  } else document.title = 'Discover · MeetDiscreet';
 }
+function backToDiscovery() {
+  const url = new URL(location.href);
+  url.searchParams.delete('profile');
+  history.pushState(null, '', url);
+  profileRoute();
+  window.scrollTo({ top: discoveryScroll, behavior: 'instant' });
+  const card = selectedCardId && document.querySelector(`[data-provider="${selectedCardId}"]`);
+  (card || $('#main')).focus({ preventScroll: true });
+}
+function showProfile(provider) {
+  discoveryScroll = window.scrollY;
+  selectedCardId = provider.id;
+  const url = new URL(location.href);
+  url.searchParams.set('profile', provider.id);
+  history.pushState(null, '', url);
+  profileRoute();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  $('#main').focus({ preventScroll: true });
+}
+window.addEventListener('popstate', () => {
+  profileRoute();
+  if (!new URL(location.href).searchParams.has('profile')) {
+    window.scrollTo({ top: discoveryScroll, behavior: 'instant' });
+    const card = selectedCardId && document.querySelector(`[data-provider="${selectedCardId}"]`);
+    (card || $('#main')).focus({ preventScroll: true });
+  } else $('#main').focus({ preventScroll: true });
+});
 function matches(provider, additional = '') {
   return (state.city === 'all' || provider.city === state.city)
     && (!state.online || provider.online)
@@ -82,6 +127,7 @@ function render() {
     providers.filter((p) => matches(p)).forEach((provider) => {
       const button = document.createElement('button');
       button.className = 'provider-card';
+      button.dataset.provider = provider.id;
       button.setAttribute('aria-label', `${provider.name}, ${provider.age}, ${provider.area}, ${provider.city}, ${provider.online ? 'online' : 'offline'}. Open demo profile`);
       const photo = portrait(provider);
       const status = text('span', provider.online ? 'Online' : 'Offline', `status ${provider.online ? 'is-online' : ''}`);
@@ -147,3 +193,12 @@ const info = {
 document.querySelectorAll('[data-info]').forEach((button) => button.addEventListener('click', () => openDetail(...info[button.dataset.info])));
 $('#year').textContent = new Date().getFullYear();
 render();
+
+profileRoute();
+
+$('.desktop-nav a').addEventListener('click', (event) => {
+  if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && new URL(location.href).searchParams.has('profile')) {
+    event.preventDefault();
+    backToDiscovery();
+  }
+});
