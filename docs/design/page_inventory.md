@@ -64,7 +64,8 @@ details and policy notices are limited dialogs, not completed standalone pages.
 See [discovery brief](./page_briefs/discovery.md). Visual review pending; no real
 integrations or production deployment. PUB-06 now has a public frontend profile at `/?profile=<id>`, documented in
 [the profile brief](./page_briefs/companion-profile.md); member/subscriber sections
-are labels only. Other inventory surfaces remain planned.
+are labels only. PUB-05 now has an Offering detail route at `/?ad=<id>`; see
+[Offering brief](./page_briefs/offering-ad.md). Other inventory surfaces remain planned.
 
 ## 4. Inventory Fields
 

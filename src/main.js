@@ -1,6 +1,7 @@
 import './styles.css';
 import { providers, ads } from './data.js';
 import { renderProfile } from './profile.js';
+import { renderOffering } from './offering.js';
 
 const $ = (selector) => document.querySelector(selector);
 const gate = $('#age-gate');
@@ -63,48 +64,85 @@ function openDetail(title, copy, provider) {
 }
 let discoveryScroll = 0;
 let selectedCardId = null;
-function profileRoute() {
-  const id = new URL(location.href).searchParams.get('profile');
+let selectedAdId = null;
+function renderRoute() {
+  const params = new URL(location.href).searchParams;
+  const id = params.get('profile');
+  const adId = params.get('ad');
   const isProfile = id !== null;
-  $('#discovery-view').hidden = isProfile;
+  const isOffering = !isProfile && adId !== null;
+  $('#discovery-view').hidden = isProfile || isOffering;
   $('#profile-view').hidden = !isProfile;
-  $('.view-dock').hidden = isProfile;
+  $('#offering-view').hidden = !isOffering;
+  $('.view-dock').hidden = isProfile || isOffering;
   const discoverLink = $('.desktop-nav a');
   discoverLink.href = './';
-  if (isProfile) discoverLink.removeAttribute('aria-current');
+  if (isProfile || isOffering) discoverLink.removeAttribute('aria-current');
   else discoverLink.setAttribute('aria-current', 'page');
   if (isProfile) {
     const provider = providers.find((item) => item.id === id);
-    renderProfile($('#profile-view'), provider, backToDiscovery, (person) => {
+    const sourceAd = ads.find((item) => item.id === params.get('fromAd') && item.category === 'offering' && item.provider === id);
+    renderProfile($('#profile-view'), provider, sourceAd ? () => showOffering(sourceAd) : backToDiscovery, (person) => {
       openDetail(`Connect with ${person.name}`, `The reference subscription is $11.99/month for this companion. It unlocks subscriber media, detailed experiences, messages, calls, and booking requests. Booked companionship time is priced separately. Currency, renewal, and cancellation terms still need confirmation. This is a preview: no payment is taken and no access is granted.`);
-    });
+    }, sourceAd ? '← Back to ad' : '← Back to discovery');
     document.title = `${provider ? provider.name : 'Profile unavailable'} · MeetDiscreet`;
+  } else if (isOffering) {
+    const ad = ads.find((item) => item.id === adId && item.category === 'offering');
+    const provider = ad && providers.find((item) => item.id === ad.provider);
+    const related = provider ? ads.filter((item) => item.category === 'offering' && item.id !== ad.id)
+      .map((item) => ({ ad: item, provider: providers.find((person) => person.id === item.provider) }))
+      .filter((item) => item.provider?.city === provider.city).slice(0, 3) : [];
+    renderOffering($('#offering-view'), ad, provider, related, backToAds, showProfile, showOffering);
+    document.title = `${ad ? ad.title : 'Ad unavailable'} · MeetDiscreet`;
   } else document.title = 'Discover · MeetDiscreet';
 }
 function backToDiscovery() {
   const url = new URL(location.href);
   url.searchParams.delete('profile');
+  url.searchParams.delete('ad');
+  url.searchParams.delete('fromAd');
   history.pushState(null, '', url);
-  profileRoute();
+  renderRoute();
   window.scrollTo({ top: discoveryScroll, behavior: 'instant' });
-  const card = selectedCardId && document.querySelector(`[data-provider="${selectedCardId}"]`);
+  const card = state.view === 'ads' ? (selectedAdId && document.querySelector(`[data-ad="${selectedAdId}"]`)) : (selectedCardId && document.querySelector(`[data-provider="${selectedCardId}"]`));
   (card || $('#main')).focus({ preventScroll: true });
 }
-function showProfile(provider) {
-  discoveryScroll = window.scrollY;
-  selectedCardId = provider.id;
+function showProfile(provider, sourceAd) {
+  if (!sourceAd) { discoveryScroll = window.scrollY; selectedCardId = provider.id; }
   const url = new URL(location.href);
   url.searchParams.set('profile', provider.id);
+  url.searchParams.delete('ad');
+  if (sourceAd) url.searchParams.set('fromAd', sourceAd.id);
+  else url.searchParams.delete('fromAd');
   history.pushState(null, '', url);
-  profileRoute();
+  renderRoute();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  $('#main').focus({ preventScroll: true });
+}
+function backToAds() {
+  state.view = 'ads';
+  state.category = 'offering';
+  render();
+  backToDiscovery();
+}
+function showOffering(ad) {
+  const params = new URL(location.href).searchParams;
+  if (!params.has('profile') && !params.has('ad')) discoveryScroll = window.scrollY;
+  selectedAdId = ad.id;
+  const url = new URL(location.href);
+  url.searchParams.delete('profile');
+  url.searchParams.delete('fromAd');
+  url.searchParams.set('ad', ad.id);
+  history.pushState(null, '', url);
+  renderRoute();
   window.scrollTo({ top: 0, behavior: 'instant' });
   $('#main').focus({ preventScroll: true });
 }
 window.addEventListener('popstate', () => {
-  profileRoute();
-  if (!new URL(location.href).searchParams.has('profile')) {
+  renderRoute();
+  if (!new URL(location.href).searchParams.has('profile') && !new URL(location.href).searchParams.has('ad')) {
     window.scrollTo({ top: discoveryScroll, behavior: 'instant' });
-    const card = selectedCardId && document.querySelector(`[data-provider="${selectedCardId}"]`);
+    const card = state.view === 'ads' ? (selectedAdId && document.querySelector(`[data-ad="${selectedAdId}"]`)) : (selectedCardId && document.querySelector(`[data-provider="${selectedCardId}"]`));
     (card || $('#main')).focus({ preventScroll: true });
   } else $('#main').focus({ preventScroll: true });
 });
@@ -152,7 +190,18 @@ function render() {
       const meta = text('p', `${provider.name}, ${provider.age} · ${provider.area}, ${provider.city}`, 'ad-meta');
       body.append(text('span', provider.interest, 'ad-interest'), text('h3', ad.title), text('p', ad.description, 'ad-copy'), meta);
       const button = text('button', 'View ad', 'ad-action');
-      button.addEventListener('click', () => openDetail(ad.title, `${ad.description} Fictional ${state.category === 'offering' ? 'Offering' : 'Looking For'} ad. Contact, pricing, and booking are not connected.`, provider));
+      button.dataset.ad = ad.id;
+      button.addEventListener('click', () => ad.category === 'offering' ? showOffering(ad) : openDetail(ad.title, `${ad.description} Fictional Looking For preview. Contact, pricing, and booking are not connected.`, provider));
+      if (ad.category === 'offering') {
+        const title = body.querySelector('h3');
+        const link = text('a', ad.title);
+        link.href = `?ad=${encodeURIComponent(ad.id)}`;
+        link.addEventListener('click', (event) => {
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+          event.preventDefault(); showOffering(ad);
+        });
+        title.replaceChildren(link);
+      }
       article.append(portrait(provider, 'ad-portrait'), body, button);
       results.append(article);
       count++;
@@ -194,10 +243,10 @@ document.querySelectorAll('[data-info]').forEach((button) => button.addEventList
 $('#year').textContent = new Date().getFullYear();
 render();
 
-profileRoute();
+renderRoute();
 
 $('.desktop-nav a').addEventListener('click', (event) => {
-  if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && new URL(location.href).searchParams.has('profile')) {
+  if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && (new URL(location.href).searchParams.has('profile') || new URL(location.href).searchParams.has('ad'))) {
     event.preventDefault();
     backToDiscovery();
   }

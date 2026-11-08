@@ -17,7 +17,7 @@ in their dedicated documents.
 Current phase: Phase 1 — Local frontend foundation, with the first Phase 2 discovery prototype.
 
 Current activity:
-Initial public discovery prototype implemented from Robbie’s selected direction; rendered version awaits visual review.
+Discovery, public companion profiles, and Offering ad details implemented. Routine visual choices are provisional under Robbie’s request to keep building and revise later.
 
 Known status:
 
@@ -543,7 +543,7 @@ If launch scope is reduced:
 
 ## 18. Current Work Snapshot
 
-- Objective: Public companion profile linked from the accepted discovery prototype.
+- Objective: Offering ad details linked from discovery and public companion profiles.
 - Completed: Pinned Node/npm/Vite workflow; age gate; default portrait grid with three columns on mobile; bottom people/ads switch; one-column ad cards; city, search, online, and interest filters; empty reset; limited public demo dialogs.
 - Visual direction: #121521 / #38476b / #b6192e, Agrandir preferred, bold headings and thin body text. Licensed font assets absent; system fallback currently used.
 - Gate: 30-day browser confirmation; external referrer exit with Google fallback. No role or account privileges are granted.
@@ -561,6 +561,15 @@ If launch scope is reduced:
 - Build and 20 Chromium checks pass, including all discovery regressions and nine profile/navigation/access-label/responsive checks. Desktop and mobile screenshots inspected.
 - Visual direction selected; rendered profile awaits Robbie’s review. Safari and Agrandir remain unverified.
 
+### Offering Detail Increment
+
+- PUB-05 at `/?ad=<offering-id>`: compact provider header, title, public description, general location, rate/availability empty states, and companion-profile action fixed on mobile.
+- Offering titles and View ad navigate to details; same-city related ads navigate correctly. Profile links include a return-to-ad path.
+- Direct/refresh/age-gated URLs, filtered-list return, keyboard focus, browser history, wrong-category and missing-ad recovery covered.
+- No changes to member/subscriber access or financial rules. Looking For remains a limited preview pending full-post visibility policy.
+- Build and 31 Chromium tests passed (20 discovery/profile regressions plus 11 Offering tests). Desktop/mobile screenshots inspected.
+- GitHub source update prepared for the existing Netlify-connected demo site. No live deployment verification; environment policy blocks Netlify access.
+
 ### Last Verified Result
 
 - Frozen-lockfile npm ci completed; Vite build passed.
@@ -570,16 +579,17 @@ If launch scope is reduced:
 
 ### Next Action
 
-Review the new companion profile from a discovery card. Record revisions in
-the profile brief and shared design system as appropriate. Add licensed Agrandir
-webfont files when supplied. Do not introduce unrelated business decisions as blockers.
+Continue frontend increments using the approved direction and provisional routine
+visual choices; record meaningful decisions in page briefs. Revisit visuals as
+Robbie requests edits. Add licensed Agrandir webfont files when supplied.
+Backend/access-policy choices remain prerequisites only for dependent real features.
 
 ### Current Limitations
 
 Agrandir font assets are not present. Browser referrer policy can omit the prior
 page or reduce its URL; Exit uses the available external source and falls back
 to Google. When storage is blocked, age confirmation applies only to the visit.
-Policy notices, sign-in, posting, subscription actions, and ad details remain
+Policy notices, sign-in, posting, subscription actions, and Looking For detail previews remain
 explicit prototype summaries rather than complete services or legal documents.
 The public profile is implemented with fictional data and labelled locked previews.
 

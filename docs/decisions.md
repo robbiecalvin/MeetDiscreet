@@ -480,3 +480,17 @@ labels and access explanations without restricted content or asset URLs. No live
 subscriptions, payment, booking, messaging, reviews, or availability are implied.
 
 See [companion profile brief](./design/page_briefs/companion-profile.md).
+
+## DEC-016 — Offering Detail and Provisional Design Delegation
+
+Robbie approved the Offering-detail recommendations and asked to keep building
+with edits to follow. Routine visual decisions may be made provisionally within
+the established design direction without repeating per-page questionnaires. This
+does not resolve pending financial/access policies, authorize paid services, or
+enable live transactions.
+
+Offering detail uses a compact provider header, title/description/location/rate/
+availability order, and “View companion profile” as its primary action, fixed
+on mobile. Up to three same-city related Offering ads are a provisional choice.
+See [Offering brief](./design/page_briefs/offering-ad.md). Existing prices and
+visibility rules remain unchanged; Looking For full-post visibility is still pending.

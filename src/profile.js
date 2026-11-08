@@ -35,9 +35,9 @@ function heroPortrait(provider) {
   return svg;
 }
 
-export function renderProfile(container, provider, onBack, onSubscribe) {
+export function renderProfile(container, provider, onBack, onSubscribe, backLabel = '← Back to discovery') {
   container.replaceChildren();
-  const back = element('a', '← Back to discovery', 'profile-back');
+  const back = element('a', backLabel, 'profile-back');
   back.href = './';
   back.addEventListener('click', (event) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
