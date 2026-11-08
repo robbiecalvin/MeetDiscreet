@@ -543,7 +543,7 @@ If launch scope is reduced:
 
 ## 18. Current Work Snapshot
 
-- Objective: Offering ad details linked from discovery and public companion profiles.
+- Objective: How it works and reference plans integrated with discovery/profile/Offering navigation.
 - Completed: Pinned Node/npm/Vite workflow; age gate; default portrait grid with three columns on mobile; bottom people/ads switch; one-column ad cards; city, search, online, and interest filters; empty reset; limited public demo dialogs.
 - Visual direction: #121521 / #38476b / #b6192e, Agrandir preferred, bold headings and thin body text. Licensed font assets absent; system fallback currently used.
 - Gate: 30-day browser confirmation; external referrer exit with Google fallback. No role or account privileges are granted.
@@ -569,6 +569,15 @@ If launch scope is reduced:
 - No changes to member/subscriber access or financial rules. Looking For remains a limited preview pending full-post visibility policy.
 - Build and 31 Chromium tests passed (20 discovery/profile regressions plus 11 Offering tests). Desktop/mobile screenshots inspected.
 - GitHub source update prepared for the existing Netlify-connected demo site. No live deployment verification; environment policy blocks Netlify access.
+
+### How It Works Increment
+
+- PUB-08 at `/?page=how-it-works`, available in desktop navigation and mobile footer.
+- Working user/companion journey switch, distinct reference-plan cards, native keyboard-operable FAQs, and discovery return links.
+- Reference prices centralized in src/pricing.js and reused by profile and explanation: subscription $11.99/month, Premium $5.99/month, publishing $19.99/month or $59.99/twelve months. No currency, renewal, cancellation, or tax decision inferred.
+- No purchase actions or fake account/booking functionality. Pending deposit and allowance interpretations remain unconfirmed.
+- Vite build and 40 Chromium checks passed; desktop/mobile screenshots inspected. Final navigation-active styling checked with the How it works suite.
+- GitHub source prepared for the existing Netlify-connected demo. Live Netlify verification remains blocked by environment network policy.
 
 ### Last Verified Result
 

@@ -65,7 +65,8 @@ See [discovery brief](./page_briefs/discovery.md). Visual review pending; no rea
 integrations or production deployment. PUB-06 now has a public frontend profile at `/?profile=<id>`, documented in
 [the profile brief](./page_briefs/companion-profile.md); member/subscriber sections
 are labels only. PUB-05 now has an Offering detail route at `/?ad=<id>`; see
-[Offering brief](./page_briefs/offering-ad.md). Other inventory surfaces remain planned.
+[Offering brief](./page_briefs/offering-ad.md). PUB-08 now has How it works/reference plans at `/?page=how-it-works`; see
+[How it works brief](./page_briefs/how-it-works.md). Other inventory surfaces remain planned.
 
 ## 4. Inventory Fields
 

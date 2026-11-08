@@ -1,3 +1,4 @@
+import { referencePrices, formatReferencePrice } from './pricing.js';
 // Public-only profile rendering. Locked sections never receive private content.
 const svgNamespace = 'http://www.w3.org/2000/svg';
 
@@ -91,7 +92,7 @@ export function renderProfile(container, provider, onBack, onSubscribe, backLabe
   const aside = element('aside', null, 'subscription-card');
   aside.setAttribute('aria-label', `Connect with ${provider.name}`);
   aside.append(element('p', 'A CONNECTION OF YOUR OWN', 'eyebrow'), element('h2', `Get to know ${provider.name}.`), element('p', 'Subscriber media, detailed experiences, messages, calls, and booking requests.', 'profile-copy'));
-  aside.append(element('p', '$11.99 / month', 'subscription-price'), element('p', 'Per companion · reference price', 'profile-small'));
+  aside.append(element('p', `${formatReferencePrice(referencePrices.companionSubscriptionMonthly)} / month`, 'subscription-price'), element('p', 'Per companion · reference price', 'profile-small'));
   const button = element('button', 'Subscribe to connect', 'button primary profile-subscribe');
   button.addEventListener('click', () => onSubscribe(provider));
   aside.append(button, element('p', 'Currency and renewal terms remain pending. Subscriptions and payments are not connected in this demo.', 'profile-small'));

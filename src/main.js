@@ -2,6 +2,8 @@ import './styles.css';
 import { providers, ads } from './data.js';
 import { renderProfile } from './profile.js';
 import { renderOffering } from './offering.js';
+import { renderHowItWorks } from './how-it-works.js';
+import { referencePrices, formatReferencePrice } from './pricing.js';
 
 const $ = (selector) => document.querySelector(selector);
 const gate = $('#age-gate');
@@ -71,19 +73,25 @@ function renderRoute() {
   const adId = params.get('ad');
   const isProfile = id !== null;
   const isOffering = !isProfile && adId !== null;
-  $('#discovery-view').hidden = isProfile || isOffering;
+  const isHow = !isProfile && !isOffering && params.get('page') === 'how-it-works';
+  $('#discovery-view').hidden = isProfile || isOffering || isHow;
+  $('#how-view').hidden = !isHow;
   $('#profile-view').hidden = !isProfile;
   $('#offering-view').hidden = !isOffering;
-  $('.view-dock').hidden = isProfile || isOffering;
+  $('.view-dock').hidden = isProfile || isOffering || isHow;
   const discoverLink = $('.desktop-nav a');
   discoverLink.href = './';
-  if (isProfile || isOffering) discoverLink.removeAttribute('aria-current');
+  if (isProfile || isOffering || isHow) discoverLink.removeAttribute('aria-current');
   else discoverLink.setAttribute('aria-current', 'page');
+  document.querySelectorAll('[data-how-link]').forEach((link) => {
+    if (isHow) link.setAttribute('aria-current', 'page');
+    else link.removeAttribute('aria-current');
+  });
   if (isProfile) {
     const provider = providers.find((item) => item.id === id);
     const sourceAd = ads.find((item) => item.id === params.get('fromAd') && item.category === 'offering' && item.provider === id);
     renderProfile($('#profile-view'), provider, sourceAd ? () => showOffering(sourceAd) : backToDiscovery, (person) => {
-      openDetail(`Connect with ${person.name}`, `The reference subscription is $11.99/month for this companion. It unlocks subscriber media, detailed experiences, messages, calls, and booking requests. Booked companionship time is priced separately. Currency, renewal, and cancellation terms still need confirmation. This is a preview: no payment is taken and no access is granted.`);
+      openDetail(`Connect with ${person.name}`, `The reference subscription is ${formatReferencePrice(referencePrices.companionSubscriptionMonthly)}/month for this companion. It unlocks subscriber media, detailed experiences, messages, calls, and booking requests. Booked companionship time is priced separately. Currency, renewal, and cancellation terms still need confirmation. This is a preview: no payment is taken and no access is granted.`);
     }, sourceAd ? '← Back to ad' : '← Back to discovery');
     document.title = `${provider ? provider.name : 'Profile unavailable'} · MeetDiscreet`;
   } else if (isOffering) {
@@ -94,6 +102,9 @@ function renderRoute() {
       .filter((item) => item.provider?.city === provider.city).slice(0, 3) : [];
     renderOffering($('#offering-view'), ad, provider, related, backToAds, showProfile, showOffering);
     document.title = `${ad ? ad.title : 'Ad unavailable'} · MeetDiscreet`;
+  } else if (isHow) {
+    renderHowItWorks($('#how-view'), backToDiscovery);
+    document.title = 'How it works · MeetDiscreet';
   } else document.title = 'Discover · MeetDiscreet';
 }
 function backToDiscovery() {
@@ -101,6 +112,7 @@ function backToDiscovery() {
   url.searchParams.delete('profile');
   url.searchParams.delete('ad');
   url.searchParams.delete('fromAd');
+  url.searchParams.delete('page');
   history.pushState(null, '', url);
   renderRoute();
   window.scrollTo({ top: discoveryScroll, behavior: 'instant' });
@@ -111,6 +123,7 @@ function showProfile(provider, sourceAd) {
   if (!sourceAd) { discoveryScroll = window.scrollY; selectedCardId = provider.id; }
   const url = new URL(location.href);
   url.searchParams.set('profile', provider.id);
+  url.searchParams.delete('page');
   url.searchParams.delete('ad');
   if (sourceAd) url.searchParams.set('fromAd', sourceAd.id);
   else url.searchParams.delete('fromAd');
@@ -132,6 +145,7 @@ function showOffering(ad) {
   const url = new URL(location.href);
   url.searchParams.delete('profile');
   url.searchParams.delete('fromAd');
+  url.searchParams.delete('page');
   url.searchParams.set('ad', ad.id);
   history.pushState(null, '', url);
   renderRoute();
@@ -140,7 +154,7 @@ function showOffering(ad) {
 }
 window.addEventListener('popstate', () => {
   renderRoute();
-  if (!new URL(location.href).searchParams.has('profile') && !new URL(location.href).searchParams.has('ad')) {
+  if (!new URL(location.href).searchParams.has('profile') && !new URL(location.href).searchParams.has('ad') && new URL(location.href).searchParams.get('page') !== 'how-it-works') {
     window.scrollTo({ top: discoveryScroll, behavior: 'instant' });
     const card = state.view === 'ads' ? (selectedAdId && document.querySelector(`[data-ad="${selectedAdId}"]`)) : (selectedCardId && document.querySelector(`[data-provider="${selectedCardId}"]`));
     (card || $('#main')).focus({ preventScroll: true });
@@ -232,7 +246,6 @@ $('#reset').addEventListener('click', () => {
 document.querySelectorAll('[data-category]').forEach((button) => button.addEventListener('click', () => { state.category = button.dataset.category; render(); }));
 document.querySelectorAll('.close-dialog').forEach((button) => button.addEventListener('click', () => button.closest('dialog').close()));
 const info = {
-  how: ['A shared moment starts here.', 'Explore public profiles or browse Offering and Looking For ads. This frontend preview uses fictional people and content. Account access, subscriptions, communication, and bookings will be developed separately.'],
   signin: ['Account access is coming later.', 'Sign-in is not connected in this frontend prototype. No account information is collected here.'],
   post: ['Your next plan, shared.', 'Listing creation is not connected yet. The ads in this preview are fictional examples.'],
   guidelines: ['Community Guidelines & Boundaries', 'The planned service is for paid platonic dates and social experiences. Respect personal boundaries and other people’s privacy. This is a prototype summary; the complete community guidelines and moderation tools are not implemented.'],
@@ -246,8 +259,23 @@ render();
 renderRoute();
 
 $('.desktop-nav a').addEventListener('click', (event) => {
-  if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && (new URL(location.href).searchParams.has('profile') || new URL(location.href).searchParams.has('ad'))) {
+  if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && (new URL(location.href).searchParams.has('profile') || new URL(location.href).searchParams.has('ad') || new URL(location.href).searchParams.get('page') === 'how-it-works')) {
     event.preventDefault();
     backToDiscovery();
   }
 });
+
+for (const link of document.querySelectorAll('[data-how-link]')) {
+  link.addEventListener('click', (event) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    if (!$('#discovery-view').hidden) discoveryScroll = window.scrollY;
+    const url = new URL(location.href);
+    for (const key of ['profile', 'ad', 'fromAd']) url.searchParams.delete(key);
+    url.searchParams.set('page', 'how-it-works');
+    history.pushState(null, '', url);
+    renderRoute();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    $('#main').focus({ preventScroll: true });
+  });
+}
