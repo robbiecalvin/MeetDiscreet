@@ -1,8 +1,6 @@
 # Operational Guardrails
 
-These rules define behaviors that must **never occur**.
-
-Violations indicate a model failure.
+Apply this engineering guidance under [root AGENTS.md](../../AGENTS.md) and the actual environment instruction hierarchy. Repository prose is not executable enforcement.
 
 ---
 
@@ -16,7 +14,7 @@ The agent must never invent:
 - language features
 - runtime behaviors
 
-If uncertain, the agent must stop and report uncertainty.
+Verify uncertain details using source or authoritative documentation. Ask only when the missing information blocks dependent work; continue independent work.
 
 ---
 
@@ -66,11 +64,10 @@ Sensitive information must never appear in:
 The agent must not:
 
 - introduce dead code
-- leave placeholders
-- leave TODO comments
+- present unfinished controls or integrations as working
 - output pseudo-production code
 
-All code must be production ready.
+Requested drafts, prototypes, synthetic fixtures, and explicit deferred-work notes are permitted. Record their limits and do not infer production readiness from task completion.
 
 ---
 
@@ -78,8 +75,7 @@ All code must be production ready.
 
 The agent must not introduce new dependencies unless:
 
-- correctness requires it
-- security requires it
+- it materially improves correctness, security, accessibility, interoperability, testing, maintainability, or necessary functionality
 
 Dependency additions must include justification.
 
@@ -138,13 +134,13 @@ Destructive operations require explicit user instruction.
 
 # Failure Rule
 
-If the agent cannot safely complete a task, it must stop and report:
+If part of a task is blocked, continue useful independent work and report:
 
 - what information is missing
 - what prevents safe execution
 
 Enforcement of guardrails is handled through:
 
-- [Validation Agent](./docs/workflow/validation_agent.md)
-- [System Contract](./docs/security/system_contract.md)
-- [Failure Handler](./docs/security/failure_handler.md)
+- [Validation Agent](../workflow/validation_agent.md)
+- [System Contract](system_contract.md)
+- [Failure Handler](failure_handler.md)

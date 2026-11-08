@@ -6,25 +6,25 @@ This framework follows a **clarity-first architecture philosophy**. Code must re
 3. Prefer explicit behavior over implicit behavior.
 4. Prefer small modules with clear responsibilities.
 ### System Architecture Layers
-In addition to code-level architecture, the system operates across defined execution layers. These layers ensure that the system is: predictable, enforceable and scalable
+In addition to code-level architecture, the system operates across defined execution layers. These layers describe responsibilities and do not establish executable enforcement or separate agents. Apply them proportionally under root AGENTS.md.
 1. Input Layer
-   - [Task Router](./docs/workflow/task_router.md)
+   - [Task Router](../workflow/task_router.md)
 2. Context Layer
-   - [Context Resolver](./docs/development/context_resolver.md)
-   - [State Manager](./docs/workflow/state_manager.md)
+   - [Context Resolver](../development/context_resolver.md)
+   - [State Manager](../workflow/state_manager.md)
 3. Execution Layer
-   - [Workflow Engine](./docs/workflow/workflow_engine.md)
-   - [AGENTS] (./docs/AGENTS.md)
+   - [Workflow Engine](../workflow/workflow_engine.md)
+   - [AGENTS](../../AGENTS.md)
 4. Validation Layer
-   - [Validation Agent](./docs/workflow/validation_agent.md)
-   - [Metrics] (./docs/strategy/metrics.md)
+   - [Validation Agent](../workflow/validation_agent.md)
+   - [Metrics](../strategy/metrics.md)
 5. Optimization Layer
-   - [Prompt Optimizer](./docs/strategy/prompt_optimizer.md)
+   - [Prompt Optimizer](../strategy/prompt_optimizer.md)
 6. Recovery Layer
-   - [Failure Handler](./docs/security/failure_handler.md)
+   - [Failure Handler](../security/failure_handler.md)
 7. Governance Layer
-   - [System Contract](./docs/security/system_contract.md)
-   - [Guardrails](./docs/security/guardrails.md)
+   - [System Contract](../security/system_contract.md)
+   - [Guardrails](../security/guardrails.md)
 ###  Separation of Concerns
 When designing systems, maintain clear boundaries between:
 1. Domain Logic:
@@ -66,13 +66,13 @@ Avoid hidden state. Prefer:
 - explicit outputs
 - immutable data where practical
 State handling must align with:
-- [State Manager](./docs/workflow/state_manager.md) for persistence and lifecycle
-- [Context Resolver](./docs/development/context_resolver.md) for context prioritization
+- [State Manager](../workflow/state_manager.md) for persistence and lifecycle
+- [Context Resolver](../development/context_resolver.md) for context prioritization
 Implicit state creates unpredictable behavior and difficult debugging.
 ### Error Handling Architecture
 Error handling must be explicit and consistent. Failures must be handled through:
-- [Failure Handler](./docs/security/failure_handler.md) for classification and recovery
-- [Debugging Playbook](./docs/security/debugging_playbook.md) for root cause resolution
+- [Failure Handler](../security/failure_handler.md) for classification and recovery
+- [Debugging Playbook](../security/debugging_playbook.md) for root cause resolution
 Prefer returning structured errors rather than relying on implicit failure modes. Do not swallow errors. Failures should:
 - propagate clearly
 - include useful diagnostic context
@@ -102,14 +102,14 @@ Refactoring must not change behavior unless explicitly required. Refactoring is 
 - safety
 ### Execution Alignment
 Architecture is not only structural; it must support system execution and reliability. All architecture must support:
-- [Workflow Engine](./docs/workflow/workflow_engine.md) for enforced execution order
-- [Task Router](./docs/workflow/task_router.md) for correct task classification
-- [Validation Agent](./docs/workflow/validation_agent.md) for correctness verification
-- [Metrics] (./docs/strategy/metrics.md) for measurable quality
+- [Workflow Engine](../workflow/workflow_engine.md) for proportional execution guidance
+- [Task Router](../workflow/task_router.md) for correct task classification
+- [Validation Agent](../workflow/validation_agent.md) for correctness verification
+- [Metrics](../strategy/metrics.md) for measurable quality
 ### Visual Design Expecations
-The system includes a Design Layer responsible for enforcing visual differentiation and identity:
-- [Design System](./docs/design/design_system.md)
-- [Design Memory](./docs/design/design_memory.md)
-- [Design Variation Engine](./docs/design/design_variation_engine.md)
+Visual work follows Robbie’s approved references and decisions, with no forced novelty:
+- [Design System](../design/design_system.md)
+- [Design Memory](../design/design_memory.md)
+- [Design Variation Engine](../design/design_variation_engine.md)
 ## Final Principle
 Good architecture is not just clean code. **It is a system that behaves: consistently, predictably and correctly under pressure**

@@ -44,8 +44,8 @@ Complete this register when selections are made.
 
 | Item | Current status |
 |---|---|
-| Application repository | Not verified |
-| Default branch | Not verified |
+| Application repository | robbiecalvin/MeetDiscreet on GitHub; checkout verified |
+| Default branch | main; verified with git ls-remote --symref origin HEAD |
 | Frontend host | Pending |
 | Backend host/runtime | Pending |
 | Database | Pending |
@@ -54,10 +54,10 @@ Complete this register when selections are made.
 | Payment provider | Pending |
 | Realtime/calling services | Pending |
 | Production domain | Pending |
-| Local preview command | Not established |
-| Build command | Not established |
-| Build output directory | Not established |
-| Test commands | Not established |
+| Local preview command | npm run dev; synthetic frontend only |
+| Build command | npm run build |
+| Build output directory | dist/ (ignored) |
+| Test commands | npm test (Playwright Chromium) |
 | Preview URL | Not established |
 | Production URL | Not established |
 

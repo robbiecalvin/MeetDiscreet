@@ -6,8 +6,8 @@ The goal is to ensure multi-file edits remain consistent and safe.
 
 Planning must align with:
 
-- [System Contract](./docs/security/system_contract.md)
-- [Workflow Engine](./docs/workflow/workflow_engine.md)
+- [System Contract](../security/system_contract.md)
+- [Workflow Engine](../workflow/workflow_engine.md)
 
 ---
 
@@ -73,7 +73,7 @@ Large-scale rewrites should only occur when explicitly requested.
 
 If the change is based on a failure, the agent must first reference:
 
-- [Failure Handler](./docs/security/failure_handler.md)
+- [Failure Handler](../security/failure_handler.md)
 
 The plan must include:
 
@@ -92,14 +92,14 @@ Repeated failures must trigger:
 
 When improving or refining behavior, the agent must use:
 
-- [Metrics] (./docs/strategy/metrics.md)
+- [Metrics](metrics.md)
 
 The plan should identify:
 
-- which metric failed or underperformed
-- how the change improves that metric
+- which observable acceptance criterion is unmet
+- what evidence will demonstrate the correction
 
-Planning without measurable improvement is not sufficient.
+Use checks relevant to the task, without self-awarded quality scores.
 
 ---
 
@@ -111,8 +111,8 @@ After applying changes:
 2. confirm interfaces remain compatible
 3. run tests to verify system integrity
 4. validate output using:
-   - [Validation Agent](./docs/workflow/validation_agent.md)
-   - [Metrics] (./docs/strategy/metrics.md)
+   - [Validation Agent](../workflow/validation_agent.md)
+   - [Metrics](metrics.md)
 
 ---
 
@@ -120,9 +120,9 @@ After applying changes:
 
 All plans must:
 
-- respect `[Guardrails](./docs/security/guardrails.md)
-- comply with `[System Contract](./docs/security/system_contract.md)
-- align with `[Architecture](./docs/architecture/architecture.md)`
+- respect [Guardrails](../security/guardrails.md)
+- comply with [System Contract](../security/system_contract.md)
+- align with [Architecture](../architecture/architecture.md)
 
 ---
 
@@ -131,10 +131,10 @@ All plans must:
 For UI-related changes:
 
 - Identify affected layout patterns
-- Determine if [Design System](./docs/design/design_system.md) rules are violated
-- Ensure variation is preserved ([Design Variation Engine](./docs/design/design_variation_engine.md))
+- Determine if [Design System](../design/design_system.md) rules are violated
+- Preserve approved page briefs and shared patterns
 
-Do not introduce generic structures during changes.
+Do not redesign familiar structures merely for novelty.
 
 ---
 

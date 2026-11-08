@@ -167,7 +167,8 @@ An “I am 18 or older” confirmation with an exit action,
 including direct-link coverage and destination preservation.
 
 Still pending:
-Retention period and account-level verification process.
+Account-level verification process. Entrance confirmation is now remembered for
+30 days on the current browser; see DEC-014.
 
 ## 6. Development Direction
 
@@ -316,8 +317,8 @@ Final entitlement implementation for presentations.
 | OPEN-002 | Currency | Explicit charge and payout currency | Live pricing and checkout |
 | OPEN-003 | Domain | Domain selection and ownership | Domain configuration |
 | OPEN-004 | Brand assets | Logo and approved references | Relevant visual implementation |
-| OPEN-005 | Initial visual direction | Colours, typography, navigation, density | First styled page |
-| OPEN-006 | Frontend tooling | Static workflow or justified build tooling | Final local setup |
+| OPEN-005 | Initial visual direction | Initial direction selected; rendered prototype awaits review (DEC-014) | Further visual refinement |
+| OPEN-006 | Frontend tooling | Vanilla ES modules, npm, Vite selected (DEC-014); local checks recorded in roadmap | macOS verification remains |
 | OPEN-007 | Backend and database | Services and runtime | Data integration |
 | OPEN-008 | Authentication | Provider and supported methods | Account implementation |
 | OPEN-009 | Storage | Public/private media infrastructure | Uploaded media |
@@ -342,7 +343,7 @@ on unrelated provider decisions.
 | OPEN-020 | Blocking | Effects across discovery, communication, and bookings |
 | OPEN-021 | Reviews | Eligibility, timing, responses, and editing |
 | OPEN-022 | Verification | Age/identity checks and displayed claims |
-| OPEN-023 | Gate retention | How long entrance confirmation is remembered |
+| OPEN-023 | Gate retention | Resolved: 30 days on this browser (DEC-014) |
 | OPEN-024 | Notifications | Channels, preferences, and private-content limits |
 | OPEN-025 | Media rules | Types, limits, processing, retention, and deletion |
 
@@ -440,3 +441,26 @@ Keep confirmed choices, proposals, constraints, and open questions distinct.
 
 Use decisions to unblock work—not to manufacture approval
 or create unnecessary permission checkpoints.
+
+## DEC-014 — Initial Discovery and Local Development Direction
+
+Status: Confirmed direction from Robbie’s answers on 2026-11-08.
+
+- Local development platform: macOS, VS Code.
+- Vanilla HTML/CSS/JavaScript with npm and Vite for serving/building; no frontend framework.
+- Runtime implementation selection: Node 24 LTS, pinned to 24.22.1; Vite 8.3.6.
+- First page: public discovery after the entrance gate.
+- Dark and elegant palette: #121521, #38476b, #b6192e.
+- Agrandir preferred; bold headings/subheadings, thin regular text. Webfont files are pending.
+- Default people grid: three portrait rectangles per mobile row, main picture, username, age, general location, online status.
+- Fixed bottom control switches to compact ads, one per row.
+- Recommended public navigation and filter drawer accepted alongside the grid requirements.
+- Age confirmation remembered for 30 days on this browser.
+- Exit returns to the external referrer when available; Google is the confirmed fallback.
+
+The exact spacing, fallback typeface, and rendered implementation are provisional
+until visual review. Vancouver and all profiles/presence/ads are synthetic fixtures,
+not a decision about launch region or live location. Node/npm are development
+tools; no backend, payment, hosting, or future business-policy decision is implied.
+
+Details: [discovery brief](./design/page_briefs/discovery.md).

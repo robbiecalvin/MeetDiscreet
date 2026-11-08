@@ -131,6 +131,21 @@ locations.
 Follow applicable project instructions when older framework defaults
 conflict with approved MeetDiscreet decisions.
 
+## Current Frontend Paths
+
+- index.html: discovery shell and native age/filter/detail dialogs.
+- src/main.js: age self-attestation, filtering, people/ads switching, public demo dialogs.
+- src/styles.css: shared tokens, portrait grid, single-column ads, responsive layout.
+- src/data.js: synthetic public profile and ad fixtures; no live presence.
+- public/images/demo-portraits.png: locally served AI-generated fictional portrait sheet.
+- package.json, package-lock.json, .nvmrc: pinned npm/Vite development workflow.
+- playwright.config.js, tests/discovery.spec.js: browser behaviour and layout checks.
+- .gitignore: local secrets, dependencies, generated artifacts, and private-media paths.
+- docs/design/page_briefs/discovery.md: current discovery/entrance brief.
+
+This is a frontend prototype. Authentication, production authorization, payments,
+bookings, messaging, private storage, and deployment are not implemented.
+
 ## 4. Proposed Application Layout
 
 Use the following as an orientation target, subject to the approved

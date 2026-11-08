@@ -17,9 +17,9 @@ It ensures that prompting evolves based on performance data, not guesswork.
 
 Prompts must align with system execution:
 
-- [Task Router](./docs/workflow/task_router.md)
-- [Workflow Engine](./docs/workflow/workflow_engine.md)
-- system_memory.md
+- [Task Router](../workflow/task_router.md)
+- [Workflow Engine](../workflow/workflow_engine.md)
+- [Project context](../project_context.md), [roadmap](../next_steps.md), and [decisions](../decisions.md)
 
 ## Responsibilities
 
@@ -36,7 +36,7 @@ The Prompt Optimizer must:
 
 Prompt optimization must occur when:
 
-- metrics score `< 10`
+- Concrete acceptance criteria are unmet
 - Validation fails
 - Output contains ambiguity
 - Repeated corrections are required
@@ -55,7 +55,7 @@ BAD:
 
 GOOD:
 
-> "Improve clarity, reduce redundancy, and ensure production-ready output"
+> "Improve clarity, reduce redundancy, and meet the stated acceptance criteria and report verification limits"
 
 ### 2. Structure
 
@@ -79,7 +79,7 @@ Example:
 Example:
 
 - "No placeholders"
-- "Production-ready code only"
+- "Implement the agreed scope and distinguish prototypes from live integrations"
 
 ### 4. Scope Control
 
@@ -168,14 +168,14 @@ Prompt optimization must use:
 
 No optimization without evidence.
 
-Previously successful prompt patterns may be stored and reused via system_memory.md
+Keep reusable task structure in [the task template](../workflow/task_template.md). Record progress in [the roadmap](../next_steps.md), material decisions in [the decision register](../decisions.md), and supported visual lessons in design memory. Do not create a competing memory file.
 
 ## Design improvements must consider:
 
-- successful patterns from [Design Memory](./docs/design/design_memory.md)
-- variation gaps from [Design Variation Engine](./docs/design/design_variation_engine.md)
+- successful patterns from [Design Memory](../design/design_memory.md)
+- approved page briefs and the [design system](../design/design_system.md)
 
-Avoid reinforcing generic layouts even if they perform adequately.
+Preserve useful familiar layouts and approved references. Do not optimize for novelty.
 
 ## Anti-Patterns
 
@@ -188,13 +188,13 @@ Avoid reinforcing generic layouts even if they perform adequately.
 
 Works with:
 
-- [Metrics] (./docs/strategy/metrics.md)
-- [Validation Agent](./docs/workflow/validation_agent.md)
+- [Metrics](metrics.md)
+- [Validation Agent](../workflow/validation_agent.md)
 - task_template.md
 
 Feeds into:
 
-- [Agent Workflow](./docs/workflow/agent_workflow.md)
+- [Agent Workflow](../workflow/agent_workflow.md)
 - ProjectTemplates`
 
 ## Versioning

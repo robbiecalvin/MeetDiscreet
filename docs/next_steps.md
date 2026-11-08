@@ -14,77 +14,73 @@ in their dedicated documents.
 
 ## 2. Current Position
 
-Current phase: Phase 0 — Project definition and documentation.
+Current phase: Phase 1 — Local frontend foundation, with the first Phase 2 discovery prototype.
 
 Current activity:
-Preparing MeetDiscreet-specific instructions and project documents.
+Initial public discovery prototype implemented from Robbie’s selected direction; rendered version awaits visual review.
 
 Known status:
 
 - Product name selected: MeetDiscreet.
 - Current release defined as a platonic social companion marketplace.
 - Page-by-page visual collaboration established.
-- Initial architecture documentation drafted in conversation.
-- Repository saving and implementation status not yet verified.
-- No working application or live integration verified in this record.
+- All 49 existing Markdown documents verified present; task-relevant contents reviewed selectively.
+- Relative documentation links and inherited framework conflicts corrected.
+- .gitignore added before tooling.
+- Vanilla frontend, npm/Vite workflow, package lockfile, runtime pin, and Playwright tests added.
+- Initial dark/elegant visual direction and discovery grid recorded in DEC-014.
+- Synthetic profiles, generated portraits, online statuses, city filters, and ads only.
+- No backend, accounts, messages, bookings, payments, or deployment connected.
 
 Do not mark documents as installed merely because their contents
 were supplied in chat.
 
 ## 3. Immediate Next Action
 
-Continue preparing the requested project documents one at a time.
+Review the first discovery prototype against [the page brief](./design/page_briefs/discovery.md).
+Refine the visual layout from Robbie’s feedback and provide licensed Agrandir
+webfont assets when available. macOS Safari validation remains outstanding.
 
-Next document:
-
-docs/product/product_spec.md
-
-After the documentation set is prepared:
-
-1. Verify which files are actually present in the app repository.
-2. Check links and resolve conflicting framework instructions.
-3. Confirm the foundational decisions required for setup.
-4. Establish the development environment.
-5. Begin the shared design and first-page questionnaire.
-
-Do not begin generating the entire application automatically.
+Backend, live currency, payment policy, and hosting choices remain open until
+their dependent work is needed. Do not expand the prototype into the entire
+application or introduce live transactions or production deployment.
 
 ## 4. Documentation Preparation
 
 Status definitions:
 
-- Draft supplied: content provided in conversation.
-- Not yet supplied: content still to be prepared.
-- Repository verified: file existence and contents inspected.
+- Present: file or directory exists in the checkout.
+- Contents reviewed: relevant sections inspected for the current task.
+- Repository verified: actual files checked rather than inferred from chat.
 - Approved: explicitly accepted by Robbie.
 
 These statuses are independent.
 
-### Requested New Documents
+### Existing Project Documents
 
-| Path | Draft status | Repository status |
+| Path | Approval status | Repository status |
 |---|---|---|
-| docs/architecture/application_architecture.md | Draft supplied | Not verified |
-| docs/architecture/application_diagram.md | Draft supplied | Not verified |
-| docs/project_context.md | Draft supplied | Not verified |
-| docs/next_steps.md | Current draft supplied | Not verified |
-| docs/product/product_spec.md | Not yet supplied | Not verified |
-| docs/product/access_matrix.md | Not yet supplied | Not verified |
-| docs/product/pricing_and_payments.md | Not yet supplied | Not verified |
-| docs/product/booking_lifecycle.md | Not yet supplied | Not verified |
-| docs/product/content_and_boundaries.md | Not yet supplied | Not verified |
-| docs/design/page_inventory.md | Not yet supplied | Not verified |
-| docs/design/page_briefs/ | Structure/template not yet supplied | Not verified |
-| docs/decisions.md | Not yet supplied | Not verified |
-| docs/architecture/data_model.md | Not yet supplied | Not verified |
-| docs/security/application_security.md | Not yet supplied | Not verified |
-| docs/development/deployment.md | Not yet supplied | Not verified |
-| docs/development/launch_acceptance.md | Not yet supplied | Not verified |
+| docs/architecture/application_architecture.md | Unchanged by cleanup | Presence verified |
+| docs/architecture/application_diagram.md | Unchanged by cleanup | Presence verified |
+| docs/project_context.md | Unchanged by cleanup | Presence verified |
+| docs/next_steps.md | Unchanged by cleanup | Presence verified |
+| docs/product/product_spec.md | Unchanged by cleanup | Presence verified |
+| docs/product/access_matrix.md | Unchanged by cleanup | Presence verified |
+| docs/product/pricing_and_payments.md | Unchanged by cleanup | Presence verified |
+| docs/product/booking_lifecycle.md | Unchanged by cleanup | Presence verified |
+| docs/product/content_and_boundaries.md | Unchanged by cleanup | Presence verified |
+| docs/design/page_inventory.md | Unchanged by cleanup | Presence verified |
+| docs/design/page_briefs/ | Unchanged by cleanup | Presence verified |
+| docs/decisions.md | Unchanged by cleanup | Presence verified |
+| docs/architecture/data_model.md | Unchanged by cleanup | Presence verified |
+| docs/security/application_security.md | Unchanged by cleanup | Presence verified |
+| docs/development/deployment.md | Unchanged by cleanup | Presence verified |
+| docs/development/launch_acceptance.md | Unchanged by cleanup | Presence verified |
 
 Create individual page briefs when their pages enter design.
 A directory alone is not a completed deliverable.
 
-### Framework Adaptations Already Drafted
+### Existing Project Guidance
 
 - Root README.md.
 - Root AGENTS.md.
@@ -97,9 +93,9 @@ A directory alone is not a completed deliverable.
 - docs/workflow/task_template.md.
 - docs/development/code_style.md.
 
-Their installation in the app repository remains unverified.
+These files are present in the checkout. Existence and consistency review do not imply approval, implementation, testing, or deployment.
 
-Update this section after checking actual files.
+Refresh this inventory when the repository structure changes.
 
 ## 5. Status Tracking
 
@@ -159,9 +155,10 @@ Status: In progress.
 
 ### Required Work
 
-- Finish the requested documentation set.
-- Verify root instructions and relative links.
-- Identify conflicting inherited framework rules.
+- Documentation set verified present; relative links corrected.
+- Inherited framework guidance aligned with root instructions.
+- Local workflow and initial page-design decisions recorded in DEC-014.
+- Continue resolving remaining foundational decisions only before dependent work.
 - Confirm launch region and currency.
 - Confirm initial account and companion model.
 - Select a suitable development and hosting direction.
@@ -188,9 +185,9 @@ No production functionality implied.
 
 ## 7. Phase 1 — Repository and Design Foundation
 
-Status: Not started.
+Status: Frontend foundation implemented and validated in Linux Chromium; visual review and macOS verification pending.
 
-Dependencies: Relevant Phase 0 decisions.
+Dependencies: Only decisions needed for the chosen local workflow and first page. Backend and production-provider choices do not gate this frontend foundation.
 
 ### Deliverables
 
@@ -230,7 +227,7 @@ No real accounts or payments unless separately implemented.
 
 ## 8. Phase 2 — Entrance and Public Discovery
 
-Status: Not started.
+Status: Initial entrance/discovery prototype implemented. Remaining public pages are not started; legal/profile/ad details are limited demo dialogs.
 
 Dependencies: Shared foundation and relevant page briefs.
 
@@ -546,28 +543,38 @@ If launch scope is reduced:
 
 ## 18. Current Work Snapshot
 
-- Objective: Prepare the MeetDiscreet documentation set.
-- Active document: docs/next_steps.md.
-- Implementation status: No application implementation verified.
-- Visual review: Global visual direction remains undecided.
-- Integration status: No integration verified.
-- Delivery status: Draft supplied in conversation; repository status unknown.
+- Objective: First public discovery frontend from Robbie’s selected direction.
+- Completed: Pinned Node/npm/Vite workflow; age gate; default portrait grid with three columns on mobile; bottom people/ads switch; one-column ad cards; city, search, online, and interest filters; empty reset; limited public demo dialogs.
+- Visual direction: #121521 / #38476b / #b6192e, Agrandir preferred, bold headings and thin body text. Licensed font assets absent; system fallback currently used.
+- Gate: 30-day browser confirmation; external referrer exit with Google fallback. No role or account privileges are granted.
+- Data: Fictional profile/online/ad fixtures and AI-generated portraits. No live location or backend integration.
+- Delivery: GitHub source delivery authorized on 2026-11-08; see Git history for committed revisions. Earlier documentation cleanup included. No production deployment.
 
 ### Last Verified Result
 
-No application tests, local preview, or deployment checks have been
-recorded for the MeetDiscreet build.
+- Frozen-lockfile npm ci completed; Vite build passed.
+- 11 Playwright Chromium checks passed: age persistence/expiry, blocking Escape, policy access, blocked storage, exit routing, filters/empty state, profile dialog, ads/category switching, and responsive layout at 320/390/700/1024/1440px.
+- Desktop and mobile screenshots inspected. Initial hover movement affecting alignment checks removed; final rerun passed.
+- macOS Safari, actual Agrandir rendering, real geolocation, and all backend behaviour remain unverified/unimplemented.
 
 ### Next Action
 
-Prepare docs/product/product_spec.md.
+Review the implemented layout. Record Robbie’s revisions in the discovery brief
+and shared design system as appropriate. Add licensed Agrandir webfont files
+when supplied. Do not introduce unrelated business decisions as blockers.
 
-### Current Blockers
+### Current Limitations
 
-No blocker prevents continuing the documentation drafts.
+Agrandir font assets are not present. Browser referrer policy can omit the prior
+page or reduce its URL; Exit uses the available external source and falls back
+to Google. When storage is blocked, age confirmation applies only to the visit.
+Policy notices, sign-in, posting, and profile/ad details are explicit prototype
+summaries rather than complete services or legal documents.
 
-Provider and business-rule decisions block dependent implementation,
-not the preparation of unrelated documents.
+Earlier cloud configuration saves returned INVALID_ARGUMENT. Robbie subsequently
+reported publishing the environment, and the restored checkout contains the
+prototype and dependencies. Repository setup instructions remain in README.md
+and the environment guide; publication does not deploy the application.
 
 ## 19. Updating This Roadmap
 

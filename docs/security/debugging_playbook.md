@@ -18,7 +18,7 @@ Every fix must be based on **evidence from the codebase or runtime behavior**.
 
 Debugging must begin with structured failure classification using:
 
-- [Failure Handler](./docs/security/failure_handler.md)
+- [Failure Handler](failure_handler.md)
 
 ---
 
@@ -26,7 +26,7 @@ Debugging must begin with structured failure classification using:
 
 The agent must follow this sequence:
 
-1. classify failure (`[Failure Handler](./docs/security/failure_handler.md))
+1. classify failure ([Failure Handler](failure_handler.md))
 2. reproduce the failure
 3. examine error messages and stack traces
 4. identify the failing component
@@ -35,10 +35,10 @@ The agent must follow this sequence:
 7. implement the smallest possible fix
 8. verify the fix with tests
 9. validate results using:
-   - [Validation Agent](./docs/workflow/validation_agent.md)
-   - [Metrics] (./docs/strategy/metrics.md)
+   - [Validation Agent](../workflow/validation_agent.md)
+   - [Metrics](../strategy/metrics.md)
 
-Skipping steps is prohibited.
+Apply these responsibilities proportionally under root AGENTS.md. Do not repeat irrelevant steps or checks.
 
 ---
 
@@ -50,7 +50,7 @@ Before modifying code, the agent must:
 - reproduce the failure deterministically
 - confirm the failure occurs before making changes
 
-If the failure cannot be reproduced, the agent must stop and report uncertainty.
+If reproduction is unavailable, continue useful investigation and report the evidence limits. Do not invent a confirmed cause.
 
 ---
 
@@ -103,8 +103,8 @@ After implementing a fix:
 2. run related tests
 3. confirm no regressions occur
 4. validate output using:
-   - [Validation Agent](./docs/workflow/validation_agent.md)
-   - [Metrics] (./docs/strategy/metrics.md)
+   - [Validation Agent](../workflow/validation_agent.md)
+   - [Metrics](../strategy/metrics.md)
 
 If tests do not exist for the bug scenario, the agent should:
 
@@ -126,7 +126,7 @@ This ensures the bug does not reappear later.
 
 ## Uncertain Diagnoses
 
-If the root cause cannot be determined with confidence, the agent must stop and report:
+If the root cause remains uncertain, continue useful independent investigation and report:
 
 - the observed symptoms
 - possible causes
@@ -139,13 +139,13 @@ If the root cause cannot be determined with confidence, the agent must stop and 
 All debugging outcomes must inform:
 
 - change_planning.md (future planning improvements)
-- [Prompt Optimizer] (./docs/strategy/prompt_optimizer.md) (input refinement if applicable)
-- [Metrics] (./docs/strategy/metrics.md) (performance tracking)
+- [Prompt Optimizer](../strategy/prompt_optimizer.md) (input refinement if applicable)
+- [Metrics](../strategy/metrics.md) (performance tracking)
 
 Repeated failure patterns must trigger:
 
 - deeper system review
-- potential escalation via `[Failure Handler](./docs/security/failure_handler.md)
+- potential escalation via [Failure Handler](failure_handler.md)
 
 ---
 

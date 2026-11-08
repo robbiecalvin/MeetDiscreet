@@ -56,6 +56,14 @@ For compact tracking, use these labels:
 Keep verification, integration, and deployment information separate
 when those distinctions matter.
 
+## Current Implemented Surfaces
+
+PUB-01 discovery and SH-01 entrance gate are implemented as frontend prototypes
+in index.html and src/. PUB-02/PUB-03 are in-page demo ad categories. Profile/ad
+details and policy notices are limited dialogs, not completed standalone pages.
+See [discovery brief](./page_briefs/discovery.md). Visual review pending; no real
+integrations or production deployment. Other inventory surfaces remain planned.
+
 ## 4. Inventory Fields
 
 Each implemented page or substantial interface surface should have:

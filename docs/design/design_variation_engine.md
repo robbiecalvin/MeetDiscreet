@@ -1,107 +1,21 @@
-# Design Variation Engine
+# MeetDiscreet — Design Options
 
-## Purpose
+This inherited filename is retained for existing references. It is an optional
+aid for discussing design choices, not a variation engine or acceptance gate.
 
-Forces structural and visual diversity across generated websites.
+Follow [root instructions](../../AGENTS.md), the
+[design system](./design_system.md), and the current approved page brief.
+Robbie directs the design; approved references and decisions take precedence.
 
-Prevents repetition of layout, style, and interaction patterns.
+For an undesigned page, ask a focused batch of questions about layout,
+density, imagery, typography, navigation, primary actions, and mobile behaviour.
+Recommend concrete options in the context of the page’s purpose.
 
----
+Familiar marketplace layouts, cards, centred headings, and repeated shared
+components are valid choices. Do not require uniqueness across projects,
+randomize styles, track unrelated designs to avoid repetition, or regenerate
+an approved layout merely because it resembles a common pattern.
 
-## Core Rule
-
-No two projects may share the same combination of:
-
-- layout strategy
-- visual identity
-- interaction style
-
----
-
-## Variation Axes
-
-Each project MUST randomly or intentionally select:
-
-### 1. Layout Mode (Required)
-
-Choose ONE:
-
-- asymmetrical
-- split-screen
-- editorial
-- brutalist grid
-- minimal narrative
-- experimental flow
-
-Repeat usage must be avoided across recent projects.
-
----
-
-### 2. Density
-
-Choose ONE:
-
-- dense (information-heavy)
-- balanced
-- minimal (large spacing, few elements)
-
----
-
-### 3. Visual Tone
-
-Choose ONE:
-
-- corporate / structured
-- playful / expressive
-- dark / cinematic
-- raw / brutalist
-- futuristic / high-tech
-
----
-
-### 4. Typography Style
-
-Choose ONE:
-
-- bold display-heavy
-- editorial serif
-- mono / technical
-- clean sans with hierarchy emphasis
-
----
-
-### 5. Interaction Level
-
-Choose ONE:
-
-- static
-- micro-interactions
-- high-motion
-
----
-
-## Combination Rule
-
-Each project must produce a UNIQUE combination of the above.
-
-Example:
-
-- asymmetrical + minimal + dark + serif + micro-interactions
-
----
-
-## Repetition Guard
-
-The system must:
-
-- track last 3–5 generated designs
-- avoid reusing the same combination
-- avoid reusing dominant layout patterns
-
----
-
-## Enforcement
-
-If similarity is detected:
-
-- force regeneration with different parameters
+Validate against the agreed brief, responsive behaviour, accessibility, and
+working interactions. Record supported feedback in [design memory](./design_memory.md).
+Novelty and subjective scores are not acceptance evidence.

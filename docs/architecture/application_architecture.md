@@ -61,7 +61,7 @@ Deferred functionality remains recorded in the roadmap.
 
 ### Decisions Still Required
 
-- Frontend build tooling.
+- Further tooling only when justified; npm/Vite frontend workflow is now established (DEC-014).
 - Backend provider and runtime.
 - Database.
 - Authentication provider.

@@ -391,9 +391,8 @@ Use repository history for detailed historical versions.
 
 ## 11. Initial State
 
-No page-specific design has been established by this directory guide.
-
-Create the first page brief when the relevant design discussion begins.
+The first active page brief is [public discovery](./discovery.md), based on
+Robbie’s initial visual answers. This directory guide remains a reusable template.
 
 Do not mark pages approved merely because their requirements exist.
 

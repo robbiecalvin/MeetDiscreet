@@ -45,7 +45,7 @@ Use the following locations when present or created.
 | Actual environment and commands | docs/architecture/environment.md |
 | Actual source-file locations | docs/architecture/repo_map.md |
 
-Do not introduce system_memory.md as another competing source of truth.
+Use the established documentation locations above; do not introduce a competing memory file.
 
 If a listed document is absent, do not claim to have read it.
 Create it only when relevant and sufficient information is available.

@@ -252,21 +252,22 @@ Do not choose values merely to fill this document.
 
 ## 10. Current Decision Register
 
-Initial status: visual choices remain undecided unless Robbie has
-explicitly selected them or supplied an approved reference.
+Initial shared direction selected by Robbie on 2026-11-08. The rendered
+prototype remains subject to visual review. Unselected details stay provisional.
 
 | Area | Current decision | Status |
 |---|---|---|
 | Brand name | MeetDiscreet | Approved |
-| Colour palette | Not yet selected | Undecided |
-| Typography | Not yet selected | Undecided |
-| Navigation | Not yet selected | Undecided |
+| Colour palette | Dark and elegant: #121521 background, #38476b surfaces/accents, #b6192e primary actions | Approved direction |
+| Typography | Agrandir: bold headings/subheadings, thin regular text; licensed files pending, system fallback used | Approved direction; fallback provisional |
+| Navigation | Public desktop navigation with search/location, sign-in, posting entry point | Approved direction |
 | Content width and spacing | Not yet selected | Undecided |
-| Cards and listing treatment | Not yet selected | Undecided |
-| Buttons and form styling | Not yet selected | Undecided |
-| Motion | Not yet selected | Undecided |
-| Mobile navigation | Not yet selected | Undecided |
+| Cards and listing treatment | People grid by default; mobile three portrait cards per row; bottom switch to single-column compact ads | Approved direction |
+| Buttons and form styling | Burgundy primary actions, muted blue filters, restrained corners | Provisional implementation |
+| Motion | Restrained feedback; respect reduced-motion preferences | Provisional |
+| Mobile navigation | Compact header, filter drawer, fixed people/ads switch | Approved direction |
 
+Page-specific behaviour is recorded in [the discovery brief](./page_briefs/discovery.md).
 Update this register as actual decisions are made.
 
 Do not infer approval from an earlier example, an unreviewed mockup,

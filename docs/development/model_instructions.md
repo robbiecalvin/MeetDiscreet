@@ -31,11 +31,11 @@ Execution must occur within system constraints.
 
 All actions must follow:
 
-- [Task Router](./docs/workflow/task_router.md)
-- [Context Resolver](./docs/development/context_resolver.md)
-- [Workflow Engine](./docs/workflow/workflow_engine.md)
+- [Task Router](../workflow/task_router.md)
+- [Context Resolver](context_resolver.md)
+- [Workflow Engine](../workflow/workflow_engine.md)
 
-The model does not independently determine execution flow.
+Apply these workflow responsibilities proportionally under root AGENTS.md; they do not require separate agents.
 
 If a task can be executed safely, perform the work instead of describing it.
 
@@ -55,11 +55,11 @@ When solving engineering tasks:
 
 All problem solving must align with:
 
-- [System Contract](./docs/security/system_contract.md) (execution boundaries)
-- [Validation Agent](./docs/workflow/validation_agent.md) (correctness enforcement)
-- [Metrics] (./docs/strategy/metrics.md) (performance evaluation)
+- [System Contract](../security/system_contract.md) (execution boundaries)
+- [Validation Agent](../workflow/validation_agent.md) (correctness enforcement)
+- [Metrics](../strategy/metrics.md) (performance evaluation)
 
-A solution is not complete until it passes system validation and meets defined quality thresholds.
+Validate concrete acceptance criteria and report actual results and limitations; do not use numerical quality gates or automatic release declarations.
 
 Avoid unnecessary architectural changes.
 
@@ -123,7 +123,7 @@ Avoid shotgun fixes that modify multiple unrelated areas.
 
 Debugging must begin with failure classification using:
 
-- [Failure Handler](./docs/security/failure_handler.md)
+- [Failure Handler](../security/failure_handler.md)
 
 All fixes must address:
 
@@ -185,9 +185,9 @@ Focus on actionable engineering information.
 
 If required information is missing:
 
-- stop execution
-- state the unknowns
-- request clarification
+- identify which dependent work is blocked
+- ask only for necessary missing information
+- continue useful independent work
 
 Incorrect confidence is worse than admitting uncertainty.
 
@@ -195,19 +195,19 @@ The agent does not operate through free-form reasoning.
 
 All decisions must align with:
 
-- [Task Router](./docs/workflow/task_router.md) (task classification)
-- [Context Resolver](./docs/development/context_resolver.md) (context prioritization)
-- [Workflow Engine](./docs/workflow/workflow_engine.md) (execution order)
+- [Task Router](../workflow/task_router.md) (task classification)
+- [Context Resolver](context_resolver.md) (context prioritization)
+- [Workflow Engine](../workflow/workflow_engine.md) (execution order)
 
 Reasoning must follow system structure, not improvisation.
 
-The model operates within a controlled system, not as an independent decision-maker.
+Repository guidance supports engineering judgment within the authorized scope; it does not install a controlled runtime.
 
 All outputs must:
 
 - follow defined workflows
 - pass validation
-- meet quality thresholds
+- meet observable acceptance criteria within the agreed scope
 - comply with system constraints
 
-Correct execution is determined by the system, not by internal reasoning alone.
+Assess results using actual evidence and the authorized acceptance criteria, not claims of framework enforcement.

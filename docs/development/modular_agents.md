@@ -4,7 +4,7 @@
 
 This document defines how agents are designed, structured, and integrated as modular, reusable components within the framework.
 
-The goal is to enable scalable, flexible, and maintainable multi-agent workflows.
+These are optional responsibility descriptions under [root AGENTS.md](../../AGENTS.md), not a requirement to spawn agents or proof of installed orchestration. Use additional agents only when authorized and beneficial; one agent may perform all responsibilities.
 
 ---
 
@@ -49,7 +49,7 @@ Integration Points:
 
 ### 1. Core Agents
 
-Always active in most workflows:
+Optional responsibility names; one agent may perform all of them. No agents are automatically active or required:
 
 - Architect
 - Critic
@@ -149,7 +149,7 @@ No silent overrides allowed.
 - Agents doing multiple unrelated tasks
 - Hidden logic inside agents
 - Agents modifying global rules
-- Skipping agent stages for speed
+- Claiming separate agents or review stages ran without evidence
 - Overlapping responsibilities
 
 ## Scalability Rules
@@ -162,10 +162,10 @@ No silent overrides allowed.
 
 Works with:
 
-- [Agent Workflow](./docs/workflow/agent_workflow.md)
+- [Agent Workflow](../workflow/agent_workflow.md)
 - task_template.md
-- [State Manager](./docs/workflow/state_manager.md)
-- [Validation Agent](./docs/workflow/validation_agent.md)
+- [State Manager](../workflow/state_manager.md)
+- [Validation Agent](../workflow/validation_agent.md)
 
 Must align with:
 

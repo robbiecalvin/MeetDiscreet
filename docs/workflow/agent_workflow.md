@@ -24,7 +24,7 @@ This framework operates as a **closed-loop system**:
 Route -> Resolve -> Execute -> Validate -> Measure -> Improve -> Recover
 ```
 
-Each stage is enforced through dedicated system components.
+Stages describe responsibilities that one agent may perform. They do not prove installed orchestration or require separate agents. Apply them proportionally under root AGENTS.md.
 
 ## Framework Layers
 
@@ -32,24 +32,24 @@ Each stage is enforced through dedicated system components.
 
 Defines system boundaries, behavior, and authority.
 
-- [Guardrails](./docs/security/guardrails.md)
+- [Guardrails](../security/guardrails.md)
 - instruction_priority.md
 - model_instructions.md
-- [System Contract](./docs/security/system_contract.md)
+- [System Contract](../security/system_contract.md)
 
 ### 2. Input & Context Layer
 
 Determines what the system should do and what information is relevant.
 
-- [Task Router](./docs/workflow/task_router.md)
-- [Context Resolver](./docs/development/context_resolver.md)
-- [State Manager](./docs/workflow/state_manager.md)
+- [Task Router](task_router.md)
+- [Context Resolver](../development/context_resolver.md)
+- [State Manager](state_manager.md)
 
 ### 3. Execution Layer
 
 Controls how tasks are performed.
 
-- [Workflow Engine](./docs/workflow/workflow_engine.md)
+- [Workflow Engine](workflow_engine.md)
 - task_template.md
 - change_planning.md
 
@@ -57,32 +57,32 @@ Controls how tasks are performed.
 
 Ensures correctness and completeness.
 
-- [Validation Agent](./docs/workflow/validation_agent.md)
-- [Metrics] (./docs/strategy/metrics.md)
+- [Validation Agent](validation_agent.md)
+- [Metrics](../strategy/metrics.md)
 
 ### 5. Recovery Layer
 
 Handles failures and ensures system resilience.
 
-- [Failure Handler](./docs/security/failure_handler.md)
-- [Debugging Playbook](./docs/security/debugging_playbook.md)
+- [Failure Handler](../security/failure_handler.md)
+- [Debugging Playbook](../security/debugging_playbook.md)
 
 ### 6. Optimization Layer
 
 Improves system performance over time.
 
-- [Prompt Optimizer] (./docs/strategy/prompt_optimizer.md)
+- [Prompt Optimizer](../strategy/prompt_optimizer.md)
 
 ### 7. Engineering Standards Layer
 
 Ensures code quality and maintainability.
 
-- [Code Style] (./docs/development/code_style.md)
+- [Code Style](../development/code_style.md)
 - anti_overengineering.md
 
 ## System Behavior
 
-The system operates under the following guarantees:
+The following are engineering expectations, not enforced guarantees:
 
 - all tasks are routed before execution
 - context is resolved before decisions are made
@@ -96,7 +96,7 @@ The system operates under the following guarantees:
 
 This framework enables:
 
-### Deterministic Execution
+### Proportional Execution
 
 Tasks follow consistent workflows instead of ad-hoc reasoning.
 
@@ -137,6 +137,6 @@ Human developers remain responsible for:
 
 This framework is not a prompt system.
 
-It is a controlled AI development environment.
+It is repository guidance for engineering work, not an installed runtime or a guarantee of behaviour.
 
 Reliability, clarity, and correctness take priority over creativity or speed.

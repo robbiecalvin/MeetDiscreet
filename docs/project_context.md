@@ -249,7 +249,7 @@ Requirements include:
 - Accessible interaction.
 - Direct-link coverage.
 - Preservation of the intended destination.
-- A retention period still to be selected.
+- Confirmation remembered for 30 days on the current browser (DEC-014).
 
 Entrance confirmation is self-attestation.
 
@@ -350,7 +350,7 @@ Current unresolved areas include:
 
 - Launch region and currency.
 - Domain and brand assets.
-- Global visual direction.
+- Further visual refinement after review of the initial dark/elegant discovery prototype.
 - Backend and hosting providers.
 - Payment and payout provider suitability.
 - Single-deposit interpretation.
@@ -363,7 +363,7 @@ Current unresolved areas include:
 - Historical message access after subscription expiry.
 - Free-post allowance interpretation.
 - Unspecified advertising-upgrade durations.
-- Age-confirmation retention.
+- Account eligibility verification beyond the 30-day entrance self-attestation.
 - Verification approach.
 
 Resolve decisions when they affect the next implementation step.

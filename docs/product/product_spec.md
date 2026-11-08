@@ -117,7 +117,9 @@ Apply the gate to direct visits, not only the homepage.
 
 Preserve the intended destination after confirmation.
 
-The retention period remains pending.
+Remember entrance confirmation for 30 days on the current browser, as selected
+in DEC-014. Exit returns to the external referrer when available, with Google
+as the agreed fallback when no prior source is available.
 
 Entrance confirmation is self-attestation.
 It does not replace account eligibility or identity verification.

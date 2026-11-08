@@ -22,9 +22,9 @@ It ensures failures are handled systematically, not reactively or inconsistently
 
 - Output fails correctness or completeness checks
 
-### 2. metrics Failure
+### 2. Acceptance Failure
 
-- Output passes validation but scores below threshold
+- A concrete acceptance criterion is unmet or supporting evidence is missing
 
 ### 3. Context Failure
 
@@ -116,8 +116,8 @@ Used for:
 
 Action:
 
-- Trigger Auditor
-- Perform full system review
+- Investigate the affected system more deeply
+- Use a separate agent only when authorized and useful; do not imply an auditor ran
 
 ## Failure Workflow
 
@@ -137,11 +137,7 @@ Validate Again
 
 ## Retry Limits
 
-Maximum retries per task: `3`
-
-If exceeded:
-
-- Escalate to Systemic Failure
+Retry only after a meaningful correction or new diagnosis. Avoid unchanged retry loops. Report concrete external blockers after finishing independent work.
 
 ## Failure Logging
 
@@ -167,34 +163,35 @@ Outcome:
 
 ## Design failures include:
 
-- generic layout detection
-- repeated design patterns
-- weak visual identity
+- mismatch with an approved page brief or reference
+- broken responsive behaviour or keyboard interaction
+- concrete usability or accessibility defects
 
-These must be logged to [Design Memory](./docs/design/design_memory.md) under [ANTI-PATTERN]
+Record supported observations and their scope in [Design Memory](../design/design_memory.md). Familiar layouts and repeated shared components are not failures.
 
 ## Integration Points
 
 Works with:
 
-- [Validation Agent](./docs/workflow/validation_agent.md)
-- [Metrics] (./docs/strategy/metrics.md)
-- [Task Router](./docs/workflow/task_router.md)
-- [Context Resolver](./docs/development/context_resolver.md)
+- [Validation Agent](../workflow/validation_agent.md)
+- [Metrics](../strategy/metrics.md)
+- [Task Router](../workflow/task_router.md)
+- [Context Resolver](../development/context_resolver.md)
 
 Feeds into:
 
-- [Debugging Playbook](./docs/security/debugging_playbook.md)
-- ChangePlanner.md
+- [Debugging Playbook](debugging_playbook.md)
+- change_planning.md
 
 ## Learning Loop
 
 Failures must inform:
 
-- [Prompt Optimizer] (./docs/strategy/prompt_optimizer.md)
-- [Metrics] (./docs/strategy/metrics.md)
+- [Prompt Optimizer](../strategy/prompt_optimizer.md)
+- [Metrics](../strategy/metrics.md)
 - change_planning.md
-- system_memory.md (for recurring or systemic issues)
+- [Roadmap](../next_steps.md) for unfinished work and handoffs
+- [Decisions](../decisions.md) for material choices; design feedback belongs in design memory
 
 No failure should repeat without improvement.
 

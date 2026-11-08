@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#121521" />
+  <meta name="description" content="Discover companions for coffee, culture, and shared experiences. MeetDiscreet frontend demo." />
+  <title>Discover · MeetDiscreet</title>
+</head>
+<body>
+  <noscript><p class="noscript-note">Enable JavaScript to use the entrance age confirmation and discovery preview.</p></noscript>
+  <dialog id="age-gate" aria-labelledby="gate-title" aria-describedby="gate-copy">
+    <div class="gate-mark" aria-hidden="true">m<span>d</span></div>
+    <p class="eyebrow">A LITTLE INTRODUCTION</p>
+    <h1 id="gate-title">Good company.<br />Your kind of connection.</h1>
+    <p id="gate-copy">Please confirm you are 18 or older to explore MeetDiscreet.</p>
+    <button id="confirm-age" class="button primary">I am 18 or older <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 12 12 4M4 4h8v8"/></svg></button>
+    <button id="exit" class="button quiet">Exit</button>
+    <p class="gate-note">We’ll remember your confirmation for 30 days on this browser.</p>
+    <p id="storage-note" role="status"></p>
+    <div class="gate-links"><button data-info="guidelines">Guidelines &amp; boundaries</button><button data-info="privacy">Privacy</button><button data-info="terms">Terms</button></div>
+  </dialog>
+
+  <div id="app" hidden inert>
+    <a class="skip-link" href="#main">Skip to discovery</a>
+    <header class="site-header">
+      <a class="wordmark" href="./" aria-label="MeetDiscreet home">meet<span>discreet</span><i aria-hidden="true">.</i></a>
+      <nav class="desktop-nav" aria-label="Main navigation"><a class="active" href="#main" aria-current="page">Discover</a><button data-info="how">How it works</button></nav>
+      <div class="account-actions"><button class="sign-in" data-info="signin">Sign in</button><button class="button small outline" data-info="post">Post a listing <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 12 12 4M4 4h8v8"/></svg></button></div>
+    </header>
+    <main id="main" tabindex="-1">
+      <div class="page-intro"><div><p class="eyebrow">A SHARED MOMENT STARTS HERE</p><h1>Your city. <span>Your company.</span></h1><p class="intro-copy">A coffee, a night out, or something a little less ordinary.</p></div></div>
+      <section class="discovery" aria-labelledby="results-title">
+        <div class="toolbar">
+          <label class="location-field"><span class="field-caption">EXPLORE</span><select id="location" aria-label="Explore a city"><option>Vancouver</option><option>Toronto</option><option>Montréal</option><option value="all">All demo cities</option></select><span class="location-dot" aria-hidden="true">⌖</span></label>
+          <label class="search-field"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="A name, an interest, a little inspiration…" aria-label="Search names, interests, or ads" /></label>
+          <button id="open-filters" class="filter-button"><span aria-hidden="true">☷</span> Filters <span id="filter-count" hidden></span></button>
+        </div>
+        <div class="results-top"><div class="results-heading"><h2 id="results-title">In good company</h2><span id="result-count" aria-live="polite"></span></div><label class="online-filter"><input type="checkbox" id="online" /><span class="online-dot" aria-hidden="true"></span> Online now</label></div>
+        <div id="ad-tabs" class="ad-tabs" hidden aria-label="Ad category"><button data-category="offering" aria-pressed="true">Offering</button><button data-category="looking" aria-pressed="false">Looking For</button><span>Newest first</span></div>
+        <div id="results" class="provider-grid"></div>
+        <div id="empty" class="empty-state" hidden><span aria-hidden="true">⌕</span><h3>No company found just yet.</h3><p>Try a different city, interest, or filter.</p><button id="reset" class="button outline">Clear filters</button></div>
+        <div class="demo-note"><span class="demo-pill">PREVIEW</span><p>Fictional profiles, photos, ads, and online statuses. Location is a demo selection, not your live location.</p></div>
+      </section>
+      <footer><span class="footer-brand">A little time. A good connection.</span><div><button data-info="guidelines">Guidelines &amp; boundaries</button><button data-info="privacy">Privacy</button><button data-info="terms">Terms</button></div><span>© <span id="year"></span> MeetDiscreet</span></footer>
+    </main>
+    <div class="view-dock"><span class="dock-caption">A different way to discover</span><button id="switch-view" class="button primary"><span id="view-icon" aria-hidden="true">☷</span><span id="view-label">Explore the ads</span><svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 12 12 4M4 4h8v8"/></svg></button></div>
+  </div>
+
+  <dialog id="filters-dialog" class="panel-dialog" aria-labelledby="filters-title"><div class="dialog-top"><p class="eyebrow">MAKE IT YOUR KIND OF DAY</p><button class="icon-button close-dialog" aria-label="Close filters">×</button></div><h2 id="filters-title">Find your company.</h2><form id="filters-form"><label class="form-label" for="activity">Shared interest</label><select id="activity"><option value="all">Any interest</option><option>Coffee</option><option>Dining</option><option>Culture</option><option>Outdoors</option></select><p class="form-hint">Filters work with fictional demo profiles only.</p><button class="button primary" type="submit">Show results <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 12 12 4M4 4h8v8"/></svg></button></form></dialog>
+  <dialog id="detail-dialog" class="panel-dialog" aria-labelledby="detail-title"><div class="dialog-top"><p class="eyebrow">MEETDISCREET PREVIEW</p><button class="icon-button close-dialog" aria-label="Close details">×</button></div><div id="detail-content"></div></dialog>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

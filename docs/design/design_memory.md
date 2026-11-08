@@ -400,7 +400,8 @@ Avoid logging sensitive screenshots or personal profile content.
 
 ## 17. Initial Entries
 
-No project-specific visual outcomes are recorded yet.
+The first discovery prototype is implemented and awaits Robbie’s visual review.
+No preference inferred from that implementation should be treated as new approval.
 
 Add entries as actual page production, review, and testing occur.
 

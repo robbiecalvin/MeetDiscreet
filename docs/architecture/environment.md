@@ -30,8 +30,7 @@ permissions, subscriptions, bookings, private media, and communication.
 
 The following remain unselected until recorded as approved decisions:
 
-- Build tool.
-- Node.js version.
+
 - Backend provider and runtime.
 - Database provider.
 - Authentication provider.
@@ -44,6 +43,39 @@ The following remain unselected until recorded as approved decisions:
 
 Do not describe these services as configured or operational before
 they have been implemented and verified.
+
+## Verified Frontend Workflow
+
+Robbie’s local platform is macOS. The cloud validation machine is Linux.
+Use Node.js 24.22.1 (`.nvmrc`) and npm with the committed package-lock.json.
+Vite 8.3.6 supplies the development server and build; Playwright 1.65.0 supplies
+meaningful browser checks. No frontend framework or backend service is installed.
+
+From the repository root:
+
+```sh
+npm ci
+npm run dev
+npm run build
+npx playwright install chromium
+npm test
+```
+
+On macOS, use `nvm install` and `nvm use` if nvm is already installed, or install
+the pinned Node release with an equivalent trusted method. The browser-install
+command prepares Chromium on a fresh Mac. Cloud tests reuse /usr/bin/chromium
+when present; tests use downloaded Playwright Chromium elsewhere.
+
+`npm run preview` serves the generated dist directory after a build.
+The app uses synthetic fixtures and locally stored generated portraits; no
+credentials, production services, or geolocation permission are required.
+Agrandir is preferred but licensed webfont files are absent; system fonts are
+a temporary fallback. Do not source font files from an unlicensed mirror.
+
+In cloud commands, use `npm --cache /workspace/.npm-cache ci` if the inherited
+user cache is not writable. This is an environment override, not a project
+requirement. Live server processes must be restarted in new cloud tasks; use
+the existing checkout and do not create a worktree unless explicitly requested.
 
 ## 3. Languages and Runtimes
 

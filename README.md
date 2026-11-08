@@ -14,7 +14,11 @@ MeetDiscreet is in planning and development.
 This README describes the intended product. It does not establish that
 any feature, payment integration, or deployment is operational.
 
-Implementation progress is tracked in `docs/next_steps.md` once created.
+The repository now includes a local frontend discovery prototype: a 30-day
+entrance age confirmation, portrait provider grid, compact ads view, and working
+demo filters. Profiles, generated photos, online statuses, and ads are fictional.
+Accounts, payments, bookings, communication, and production deployment are not
+connected. See [the roadmap](./docs/next_steps.md) for verification and limitations.
 
 ## Product Overview
 
@@ -294,9 +298,9 @@ Never commit secrets, private media, or real user data.
 ### Entry Point
 
 - [AGENTS.md](./AGENTS.md): project-wide instructions.
-  Planned at the repository root.
+  Present at the repository root.
 
-### Product Documents — Planned
+### Product Documents — Present
 
 - `docs/project_context.md`: project overview and constraints.
 - `docs/product/product_spec.md`: complete product requirements.
@@ -311,26 +315,26 @@ Never commit secrets, private media, or real user data.
 
 - [Design System](./docs/design/design_system.md)
 - [Design Memory](./docs/design/design_memory.md)
-- `docs/design/page_inventory.md` — planned.
-- `docs/design/page_briefs/` — planned; create briefs as pages are designed.
+- `docs/design/page_inventory.md`.
+- `docs/design/page_briefs/` — contains the brief template; individual page briefs will be added as pages are designed.
 
 ### Architecture Documents
 
 - [Architecture Guidelines](./docs/architecture/architecture.md)
 - [Environment](./docs/architecture/environment.md)
 - [Repository Map](./docs/architecture/repo_map.md)
-- `docs/architecture/application_architecture.md` — planned.
-- `docs/architecture/application_diagram.md` — planned.
-- `docs/architecture/data_model.md` — planned.
+- `docs/architecture/application_architecture.md`.
+- `docs/architecture/application_diagram.md`.
+- `docs/architecture/data_model.md`.
 
 ### Development and Security
 
 - [Developer Workflow](./docs/development/developer_workflow.md)
 - [Code Style](./docs/development/code_style.md)
 - [Guardrails](./docs/security/guardrails.md)
-- `docs/security/application_security.md` — planned.
-- `docs/development/deployment.md` — planned.
-- `docs/development/launch_acceptance.md` — planned.
+- `docs/security/application_security.md`.
+- `docs/development/deployment.md`.
+- `docs/development/launch_acceptance.md`.
 
 Existing framework documents must be adapted where they conflict with
 approved MeetDiscreet requirements.
@@ -356,7 +360,7 @@ orchestration are running.
 
 ## Implementation Phases
 
-1. Confirm product decisions, operating region, currency, and providers.
+1. Verify documentation and resolve decisions when required by dependent work; region, currency, and providers need not block independent frontend work.
 2. Establish the repository, development setup, and design foundation.
 3. Build the entrance gate and public discovery pages.
 4. Implement accounts, onboarding, and access tiers.
@@ -431,11 +435,22 @@ Do not fabricate integrations, verification, test results, or deployment status.
 
 ## Local Setup
 
-Setup commands will be documented after the frontend tooling and backend
-services have been selected and verified.
+Use Node.js 24.22.1 and npm on macOS or the cloud environment.
+From the repository root:
 
-Do not assume that installation scripts, test commands, or deployment
-pipelines already exist.
+```sh
+npm ci
+npm run dev
+```
+
+Build with `npm run build`; serve that output with `npm run preview`.
+For browser checks on a fresh Mac, run `npx playwright install chromium`, then
+`npm test`. Cloud tests reuse system Chromium when available.
+See [environment instructions](./docs/architecture/environment.md) for details.
+
+No credentials or backend are needed for this prototype. Agrandir is the preferred
+font; licensed webfont assets are pending, so a system fallback is used.
+Backend, currency, payment policies, and hosting remain decisions for dependent work.
 
 ## Project Ownership
 
