@@ -66,7 +66,7 @@ async function mockBackend(page, options = {}) {
     }
     if (url.pathname === '/rest/v1/listing_drafts') {
       if (method === 'HEAD') return route.fulfill({ status: 200, headers: { 'content-range': `0-0/${state.listings.length}`, 'Access-Control-Allow-Origin': '*', 'Access-Control-Expose-Headers': 'content-range' } });
-      if (method === 'POST') { state.listings.push({ ...body, id: listingId }); return respond({ id: listingId }, 201); }
+      if (method === 'POST') { const id = state.listings.some(row => row.id === listingId) ? `dddddddd-dddd-4ddd-8ddd-${String(state.listings.length + 1).padStart(12, '0')}` : listingId; state.listings.push({ ...body, id }); return respond({ id }, 201); }
       if (method === 'DELETE') {
         if (options.failDelete) return respond({ message: 'Denied' }, 403);
         state.listings = []; return respond({ id: listingId });
@@ -671,3 +671,34 @@ test('User profile migration errors allow retry without claiming storage success
   await expect(page.locator('.private-draft-controls [role=status]')).toContainText('Unable to complete');
   await expect(page.getByRole('button', { name: 'Load my User profile draft' })).toBeEnabled();
 });
+
+for (const [path, action, kind, newAction] of [
+  ['user-setup', 'Open my listing drafts', 'looking', 'Start a Looking For draft'],
+  ['provider-setup', 'Draft an Offering', 'offering', 'Start an Offering draft'],
+]) {
+  test(`${path} selects the matching listing type and returns to its filtered library`, async ({ page }) => {
+    const state = await mockBackend(page);
+    state.listings = [
+      { id: listingId, owner_id: userId, kind: 'offering', title: 'Offering coffee plan', description: 'An existing private companion offering.', city: 'Vancouver', area: '', activity: 'Coffee' },
+      { id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', owner_id: userId, kind: 'looking', title: 'Looking for gallery company', description: 'An existing private Looking For plan.', city: 'Vancouver', area: '', activity: 'Culture' },
+    ];
+    await signIn(page);
+    await enter(page, `/?page=${path}`);
+    await page.getByRole('link', { name: action, exact: true }).click();
+    await expect(page.locator('#library-type:visible, #listing-category:visible')).toHaveValue(kind);
+    await expect(page.locator('.library-card')).toHaveCount(1);
+    await page.reload();
+    await expect(page.locator('#library-type:visible, #listing-category:visible')).toHaveValue(kind);
+    await page.getByRole('link', { name: newAction, exact: true }).click();
+    await expect(page.locator('#library-type:visible, #listing-category:visible')).toHaveValue(kind);
+    await page.getByRole('button', { name: 'Use a fictional example' }).click();
+    await page.getByRole('button', { name: 'Save private draft', exact: true }).click();
+    await expect(page.locator('.private-draft-controls [role=status]')).toContainText('Private listing draft saved');
+    expect(state.listings[2].kind).toBe(kind);
+    await page.getByRole('link', { name: 'Back to my listings', exact: false }).click();
+    await expect(page.locator('#library-type:visible, #listing-category:visible')).toHaveValue(kind);
+    await expect(page.locator('.library-card')).toHaveCount(2);
+    await page.getByRole('button', { name: 'Clear filters' }).click();
+    await expect(page.locator('.library-card')).toHaveCount(3);
+  });
+}

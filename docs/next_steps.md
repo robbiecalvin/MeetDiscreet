@@ -822,6 +822,19 @@ If launch scope is reduced:
 - Added `202611090003_user_profile_drafts.sql` for later hosted setup. Optional
   photo/orientation/accessibility fields remain planned, not removed from scope.
 
+### User / Provider Listing Paths
+
+- User setup opens Looking For-filtered private drafts; Provider setup opens
+  Offering-filtered drafts. Matching create actions preselect the listing type.
+- Library filter context survives refresh and editor return links. New-draft
+  query flags are consumed once, while category context persists. Clearing filters
+  restores the full owner library; editor field choices remain editable.
+- Source context is limited to internal library routes and whitelisted kinds.
+  It never grants posting permissions, roles, public visibility or paid access.
+- Build, all 35 backend UI checks and 24 account/listing regressions passed,
+  including direct category links, new-draft creation, save and filtered return.
+- No additional database migration is required for this navigation increment.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

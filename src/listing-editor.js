@@ -9,7 +9,7 @@ let savedId = null;
 let identityEpoch = 0;
 const changes = trackDraft('listing', () => draft, backendEnabled);
 export function detachSavedListing(id) { if (savedId === id) { savedId = null; changes.saved(defaults()); } }
-export function clearListingDraftState() { draft = defaults(); savedId = null; changes.saved(); identityEpoch++; }
+export function clearListingDraftState(category = 'offering') { draft = { ...defaults(), category: category === 'looking' ? 'looking' : 'offering' }; savedId = null; changes.saved(); identityEpoch++; }
 const examples = {
   offering: { title: 'A coffee, a city walk, and good conversation', description: 'Enjoy an unhurried coffee and a walk around the neighbourhood. A simple plan with time to chat and discover somewhere new.', area: 'Kitsilano' },
   looking: { title: 'Company for a gallery afternoon?', description: 'Looking for someone to explore a local gallery and share a coffee afterwards. A relaxed afternoon with no rush and plenty to talk about.', area: 'Mount Pleasant' },
@@ -21,7 +21,14 @@ function element(tag, content, className) {
   return node;
 }
 
-export function renderListingEditor(container, onBack, requestedId = null, duplicate = false) {
+export function renderListingEditor(container, onBack, requestedId = null, duplicate = false, context = {}) {
+  const preferredCategory = context.kind === 'looking' ? 'looking' : 'offering';
+  if (context.fresh) {
+    clearListingDraftState(preferredCategory);
+    const url = new URL(location.href); url.searchParams.delete('new'); history.replaceState(history.state, '', url);
+  } else if (!requestedId && !savedId && !draft.title && !draft.description && !draft.area && ['looking', 'offering'].includes(context.kind)) {
+    draft.category = preferredCategory; changes.saved();
+  }
   const shouldLoad = backendEnabled && requestedId && (duplicate || requestedId !== savedId || !changes.isDirty());
   if (shouldLoad) { draft = defaults(); savedId = null; changes.saved(); }
   container.replaceChildren();
@@ -32,8 +39,8 @@ export function renderListingEditor(container, onBack, requestedId = null, dupli
     if (id) url.searchParams.set('draft', id); else url.searchParams.delete('draft');
     history.replaceState(history.state, '', url);
   }
-  const back = element('a', '← Back to discovery', 'profile-back');
-  back.href = './';
+  const back = element('a', context.fromLibrary ? '← Back to my listings' : '← Back to discovery', 'profile-back');
+  back.href = context.fromLibrary ? `?page=my-listings&kind=${['looking', 'offering'].includes(context.kind) ? context.kind : 'all'}` : './';
   back.addEventListener('click', (event) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault(); onBack();
@@ -116,7 +123,7 @@ export function renderListingEditor(container, onBack, requestedId = null, dupli
     fields.get('title').control.focus();
   });
   clear.addEventListener('click', () => {
-    draft = defaults();
+    draft = { ...defaults(), category: context.kind === 'looking' ? 'looking' : 'offering' };
     savedId = null;
     updateDraftUrl(null);
     changes.saved();

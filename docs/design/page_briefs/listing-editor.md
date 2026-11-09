@@ -64,3 +64,15 @@ clears its saved association and source URL, and inserts a separate record only
 when Save is pressed. The source title/content remain unchanged. Library deletion
 keeps failed cards with retry feedback; successful deletion detaches any retained
 editor snapshot from the deleted record without erasing local text.
+
+
+## Starting-path context
+
+User setup opens `/?page=my-listings&kind=looking`; Provider setup uses
+`kind=offering`. These are owner-library UI filters, not role restrictions.
+Create actions clearly name Looking For or Offering and preselect the matching
+category. An explicit `new=1` starts a fresh draft once and is removed from the
+address bar. `from=library` enables a same-origin return link that restores the
+kind filter; no arbitrary return URLs are accepted. Invalid kinds fall back to
+normal defaults. Existing saved records retain their actual category; context
+must not rewrite them. Account library navigation can show both kinds.

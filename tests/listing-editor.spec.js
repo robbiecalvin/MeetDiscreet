@@ -88,3 +88,17 @@ for (const width of [320, 390, 700, 1024, 1440]) {
     expect(errors).toEqual([]);
   });
 }
+
+test('direct new Looking For links preserve category and return to the same library context', async ({ page }) => {
+  await page.goto('/?page=create-listing&kind=looking&new=1&from=library');
+  await page.getByRole('button', { name: 'I am 18 or older' }).click();
+  await expect(page.getByLabel('Listing type', { exact: true })).toHaveValue('looking');
+  expect(new URL(page.url()).searchParams.has('new')).toBe(false);
+  await page.reload();
+  await expect(page.getByLabel('Listing type', { exact: true })).toHaveValue('looking');
+  await page.getByRole('link', { name: 'Back to my listings', exact: false }).click();
+  await expect(page).toHaveURL(/page=my-listings/);
+  await expect(page).toHaveURL(/kind=looking/);
+  await page.getByRole('link', { name: 'Start a Looking For draft', exact: true }).click();
+  await expect(page.getByLabel('Listing type', { exact: true })).toHaveValue('looking');
+});

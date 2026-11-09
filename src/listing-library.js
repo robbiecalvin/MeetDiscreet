@@ -1,6 +1,6 @@
 import { backendEnabled } from './backend/client.js';
 import { listListingDrafts, deleteListingDraft } from './backend/drafts.js';
-import { clearListingDraftState, detachSavedListing } from './listing-editor.js';
+import { detachSavedListing } from './listing-editor.js';
 
 function node(tag, text, className) {
   const value = document.createElement(tag);
@@ -8,15 +8,26 @@ function node(tag, text, className) {
   if (className) value.className = className;
   return value;
 }
-export function renderListingLibrary(container, navigate) {
+export function renderListingLibrary(container, navigate, initialKind = 'all') {
   container.replaceChildren();
   const root = node('section', null, 'listing-library');
+  let filterKind = ['looking', 'offering'].includes(initialKind) ? initialKind : 'all';
+  function paramsFor(page, draft, copy = false) {
+    const params = new URLSearchParams({ page });
+    if (page === 'create-listing') {
+      params.set('from', 'library'); params.set('kind', filterKind);
+      if (draft) params.set('draft', draft); else params.set('new', '1');
+      if (copy) params.set('copy', '1');
+    }
+    return params;
+  }
   const link = (page, label, draft, copy = false) => {
     const value = node('a', label, 'button outline');
-    value.href = `?page=${page}${draft ? `&draft=${encodeURIComponent(draft)}` : ''}${copy ? '&copy=1' : ''}`;
+    value.href = `?${paramsFor(page, draft, copy)}`;
     value.addEventListener('click', event => {
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      event.preventDefault(); navigate(page, draft ? { draft, copy } : {});
+      event.preventDefault();
+      navigate(page, page === 'create-listing' ? { kind: filterKind, fromLibrary: true, fresh: !draft, ...(draft ? { draft, copy } : {}) } : {});
     });
     return value;
   };
@@ -24,9 +35,11 @@ export function renderListingLibrary(container, navigate) {
   root.append(back, node('p', 'YOUR PRIVATE PLANS', 'eyebrow'), node('h1', 'Saved listing drafts.'), node('p', 'Find a plan and continue editing. These drafts are private and unpublished.', 'offering-lead'));
   const actions = node('div', null, 'editor-actions');
   const create = link('create-listing', 'Start a new listing');
-  create.addEventListener('click', event => {
-    if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) clearListingDraftState();
-  }, { capture: true });
+  function updateCreate() {
+    create.textContent = filterKind === 'looking' ? 'Start a Looking For draft' : filterKind === 'offering' ? 'Start an Offering draft' : 'Start a new listing';
+    create.href = `?${paramsFor('create-listing')}`;
+  }
+  updateCreate();
   const refresh = node('button', 'Refresh drafts', 'button quiet'); refresh.type = 'button';
   actions.append(create, refresh);
   const status = node('p', '', 'profile-small'); status.setAttribute('role', 'status');
@@ -41,6 +54,7 @@ export function renderListingLibrary(container, navigate) {
   for (const [value, label] of [['all', 'All types'], ['offering', 'Offering'], ['looking', 'Looking For']]) {
     const option = node('option', label); option.value = value; type.append(option);
   }
+  type.value = filterKind;
   const sortLabel = node('label', 'Sort drafts');
   const sort = node('select'); sort.id = 'library-sort'; sortLabel.htmlFor = sort.id;
   for (const [value, label] of [['recent', 'Recently updated'], ['oldest', 'Oldest updated'], ['title', 'Title A–Z']]) {
@@ -58,6 +72,7 @@ export function renderListingLibrary(container, navigate) {
   let deleting = false;
   const current = () => root.parentNode === container;
   function paint() {
+    updateCreate();
     if (!loaded) return;
     const query = search.value.trim().toLocaleLowerCase();
     const matches = rows.filter(row => (type.value === 'all' || row.kind === type.value) && [row.title, row.city, row.area, row.activity].join(' ').toLocaleLowerCase().includes(query));
@@ -109,8 +124,14 @@ export function renderListingLibrary(container, navigate) {
       list.append(link('sign-in', 'Sign in'));
     } finally { refresh.disabled = false; }
   }
-  search.addEventListener('input', paint); type.addEventListener('change', paint); sort.addEventListener('change', paint);
-  reset.addEventListener('click', () => { search.value = ''; type.value = 'all'; sort.value = 'recent'; paint(); search.focus(); });
+  search.addEventListener('input', paint); type.addEventListener('change', () => {
+    filterKind = type.value;
+    const url = new URL(location.href);
+    if (url.searchParams.get('page') === 'my-listings') { url.searchParams.set('kind', filterKind); history.replaceState(history.state, '', url); }
+    paint();
+  }); sort.addEventListener('change', paint);
+  reset.addEventListener('click', () => { search.value = ''; type.value = 'all'; filterKind = 'all'; sort.value = 'recent';
+    const url = new URL(location.href); url.searchParams.delete('kind'); history.replaceState(history.state, '', url); paint(); search.focus(); });
   refresh.addEventListener('click', load);
   load();
 }

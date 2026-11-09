@@ -9,10 +9,10 @@ export function renderUserSetup(container, navigate, onDiscover) {
   container.replaceChildren();
   const root = node('section', null, 'user-setup');
   const link = (page, label, className = 'button outline') => {
-    const value = node('a', label, className); value.href = page ? `?page=${page}` : './';
+    const value = node('a', label, className); value.href = page ? `?page=${page}${page === 'my-listings' ? '&kind=looking' : ''}` : './';
     value.addEventListener('click', event => {
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      event.preventDefault(); if (page) navigate(page); else onDiscover();
+      event.preventDefault(); if (page) navigate(page, page === 'my-listings' ? { kind: 'looking' } : {}); else onDiscover();
     });
     return value;
   };
@@ -25,7 +25,7 @@ export function renderUserSetup(container, navigate, onDiscover) {
     for (const [page, title, copy, action] of [
       ['edit-user-profile', 'Introduce yourself', 'Prepare a private User profile with your interests and the company you’re looking for.', 'Edit User profile draft'],
       [null, 'Discover providers', 'Browse the provider grid or compact ads view. Current profiles and online statuses are fictional.', 'Explore discovery'],
-      ['my-listings', 'Plan an outing', 'Manage private listing drafts. Choose Looking For in the editor to describe a plan you want company for.', 'Open my listing drafts'],
+      ['my-listings', 'Plan an outing', 'Manage your private Looking For drafts and describe a plan you want company for.', 'Open my listing drafts'],
       ['provider-setup', 'Interested in providing?', 'Explore the separate provider setup using the same login. This does not grant publishing access.', 'Explore provider setup'],
     ]) {
       const card = node('section', null, 'account-tool-card'); card.append(node('h2', title), node('p', copy), link(page, action)); grid.append(card);

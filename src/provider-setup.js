@@ -10,11 +10,11 @@ export function renderProviderSetup(container, navigate) {
   container.replaceChildren();
   const root = node('section', null, 'provider-setup');
   const link = (page, text, className = 'button outline') => {
-    const item = node('a', text, className); item.href = `?page=${page}`;
+    const item = node('a', text, className); item.href = `?page=${page}${page === 'my-listings' ? '&kind=offering' : ''}`;
     item.addEventListener('click', event => {
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
-      navigate(page);
+      navigate(page, page === 'my-listings' ? { kind: 'offering' } : {});
     });
     return item;
   };

@@ -25,3 +25,7 @@ visits require sign-in; backend-disabled visits show a labelled preview.
 Full account role combinations, provider eligibility/approval, public publishing,
 and commercial access remain separate backend/product work. This increment does
 not claim those policies were resolved by choosing an onboarding preference.
+
+User setup opens the Looking For library context and Provider setup opens Offering.
+New listing actions preselect that type; the shared owner library remains able to
+show both. This navigation does not grant posting access or assign account roles.
