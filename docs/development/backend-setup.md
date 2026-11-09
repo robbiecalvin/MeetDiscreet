@@ -42,7 +42,8 @@ catalogue persistence:
 It creates owner-only `experience_catalogue_drafts`, with a validated JSON array
 snapshot, private grants/RLS, and server-maintained update timestamps. The 200 KB
 snapshot ceiling is an operational payload limit, not a commercial allowance.
-Only added/updated catalogue items are saved; the unfinished item composer is not.
+Catalogue controls also support confirmed deletion of the saved snapshot while
+retaining editor items and the account. Only added/updated catalogue items are saved; the unfinished item composer is not.
 Amounts retain their exact minor-unit draft format without selecting currency or
 creating live prices. Nothing is published. Missing migration errors allow retry;
 existing profile/listing drafts remain separate. This migration has been tested

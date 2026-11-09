@@ -41,3 +41,8 @@ Connected mode adds explicit save/load controls below the catalogue. Save only
 added/updated items as an owner-only snapshot; unfinished composer edits are
 excluded. Loading replaces local catalogue state and resets the composer.
 Migration availability and hosted verification remain tracked in backend setup.
+
+Saved catalogue deletion requires confirmation, preserves the current local items,
+and shares the save/load busy state. A missing record is reported separately from
+a failed request. No account or public data is deleted; saving again recreates
+the owner’s private snapshot.

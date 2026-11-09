@@ -693,6 +693,15 @@ If launch scope is reduced:
 - Build, all 110 default tests, and 12 mocked-provider browser checks passed.
   Hosted catalogue schema and storage remain unverified until migration setup.
 
+### Saved Catalogue Deletion
+
+- Added confirmed owner-filtered deletion of a saved private catalogue, preserving
+  local editor items and the authentication account. Explicit no-record and
+  retry states prevent false success. Items can be saved again after deletion.
+- Build, 14 backend UI checks, and 18 catalogue/policy checks passed.
+- Reuses the existing catalogue migration; no additional database setup is needed.
+  Hosted catalogue operations still require applying that pending migration.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

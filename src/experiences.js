@@ -1,6 +1,6 @@
 import { parseDraftAmount } from './draft-amount.js';
 import { backendEnabled } from './backend/client.js';
-import { saveExperienceDraft, loadExperienceDraft } from './backend/drafts.js';
+import { saveExperienceDraft, loadExperienceDraft, deleteExperienceDraft } from './backend/drafts.js';
 import { privateDraftControls } from './backend/draft-controls.js';
 import { draftToolNavigation } from './draft-tools.js';
 let items = [];
@@ -197,6 +197,14 @@ export function renderExperiences(container, onBack, onTool) {
   previewButton.addEventListener('click', () => { editor.hidden = true; preview.hidden = false; paintPreview(false); previewTitle.focus(); preview.scrollIntoView({ block: 'start', behavior: 'instant' }); });
   const storage = privateDraftControls({
     loadLabel: 'Load my experience catalogue',
+    deleteLabel: 'Delete saved experience catalogue',
+    deleteConfirmation: 'Delete your saved private experience catalogue? This cannot be undone. Your account and current editor items will remain.',
+    onDelete: async () => {
+      const epoch = identityEpoch;
+      const removed = await deleteExperienceDraft();
+      if (epoch !== identityEpoch) throw new Error('Account changed.');
+      return removed ? 'Saved private experience catalogue deleted. Editor items are unsaved; your account is unchanged.' : 'No saved private experience catalogue found to delete. Your account is unchanged.';
+    },
     onSave: async () => {
       const epoch = identityEpoch;
       await saveExperienceDraft(items.map(item => ({ ...item })));

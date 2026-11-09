@@ -60,3 +60,10 @@ export async function loadExperienceDraft() {
   failure(error);
   return data?.items ?? null;
 }
+
+export async function deleteExperienceDraft() {
+  const user = await requireUser();
+  const { data, error } = await backendClient().from('experience_catalogue_drafts').delete().eq('owner_id', user.id).select('owner_id').maybeSingle();
+  failure(error);
+  return Boolean(data);
+}

@@ -28,6 +28,11 @@ async function mockBackend(page, options = {}) {
     if (url.pathname === '/auth/v1/logout') return respond({});
     if (url.pathname === '/rest/v1/experience_catalogue_drafts') {
       if (options.missingCatalogueMigration) return respond({ message: 'Table missing' }, 404);
+      if (method === 'DELETE') {
+        if (options.failDelete) return respond({ message: 'Denied' }, 403);
+        const exists = state.catalogue !== null; state.catalogue = null;
+        return respond(exists ? [{ owner_id: userId }] : []);
+      }
       if (method === 'POST') { state.catalogue = body.items; return respond(null, 201); }
       return respond(state.catalogue === null ? [] : [{ items: state.catalogue }]);
     }
@@ -273,3 +278,39 @@ test('missing catalogue migration reports a recoverable error', async ({ page })
   await expect(page.locator('.private-draft-controls [role=status]')).toContainText('Unable to complete');
   await expect(page.getByRole('button', { name: 'Load my experience catalogue' })).toBeEnabled();
 });
+
+for (const failDelete of [false, true]) {
+  test(`catalogue deletion ${failDelete ? 'failure keeps stored items' : 'preserves local items and supports saving again'}`, async ({ page }) => {
+    const state = await mockBackend(page, { failDelete });
+    await signIn(page);
+    await enter(page, '/?page=experiences');
+    await page.getByRole('button', { name: 'Add fictional examples' }).click();
+    await page.getByRole('button', { name: 'Save private draft', exact: true }).click();
+    const status = page.locator('.private-draft-controls [role=status]');
+    await expect(status).toContainText('catalogue saved');
+    const remove = page.getByRole('button', { name: 'Delete saved experience catalogue', exact: true });
+    page.once('dialog', dialog => dialog.dismiss());
+    await remove.click();
+    expect(state.requests.filter(r => r.method === 'DELETE')).toHaveLength(0);
+    page.once('dialog', dialog => dialog.accept());
+    await remove.click();
+    if (failDelete) {
+      await expect(status).toContainText('Unable to complete');
+      expect(state.catalogue).toHaveLength(2);
+      await expect(remove).toBeEnabled();
+    } else {
+      await expect(status).toContainText('catalogue deleted');
+      expect(state.catalogue).toBeNull();
+      await page.getByRole('button', { name: 'Load my experience catalogue' }).click();
+      await expect(status).toContainText('No private experience catalogue found');
+      await expect(page.locator('.catalogue-owner')).toContainText('Coffee and conversation');
+      page.once('dialog', dialog => dialog.accept());
+      await remove.click();
+      await expect(status).toContainText('No saved private experience catalogue found to delete');
+      await page.getByRole('button', { name: 'Save private draft', exact: true }).click();
+      await expect(status).toContainText('catalogue saved');
+      expect(state.catalogue).toHaveLength(2);
+    }
+    await expect(page.getByRole('button', { name: 'Sign out', exact: true })).toBeVisible();
+  });
+}

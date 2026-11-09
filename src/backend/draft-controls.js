@@ -1,5 +1,5 @@
 import { backendEnabled } from './client.js';
-export function privateDraftControls({ onSave, onLoad, onDelete, multiple = false, loadLabel = '' }) {
+export function privateDraftControls({ onSave, onLoad, onDelete, multiple = false, loadLabel = '', deleteLabel = 'Delete saved profile draft', deleteConfirmation = 'Delete your saved private profile draft? This cannot be undone. Your account and current editor text will remain.' }) {
   if (!backendEnabled) return null;
   const section = document.createElement('section');
   section.className = 'private-draft-controls';
@@ -13,9 +13,9 @@ export function privateDraftControls({ onSave, onLoad, onDelete, multiple = fals
   const remove = onDelete ? document.createElement('button') : null;
   if (remove) {
     remove.type = 'button'; remove.className = 'button quiet';
-    remove.textContent = 'Delete saved profile draft';
+    remove.textContent = deleteLabel;
     remove.addEventListener('click', () => {
-      if (busy || !window.confirm('Delete your saved private profile draft? This cannot be undone. Your account and current editor text will remain.')) return;
+      if (busy || !window.confirm(deleteConfirmation)) return;
       run(onDelete);
     });
   }
