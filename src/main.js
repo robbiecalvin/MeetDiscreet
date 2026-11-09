@@ -1,6 +1,6 @@
 import { renderProviderReview } from './provider-review.js';
 import { renderProviderApplication, clearProviderApplicationState } from './provider-application.js';
-import { backendEnabled, backendClient, processAuthCallback } from './backend/client.js';
+import { backendEnabled, backendClient, processAuthCallback, signOutCurrentSession } from './backend/client.js';
 import './styles.css';
 import { renderBookingDraft, clearBookingDraftState } from './booking-draft.js';
 import { renderUserProfileEditor, clearUserProfileState } from './user-profile-editor.js';
@@ -512,14 +512,23 @@ if (backendEnabled) {
   status.setAttribute('role', 'status');
   const signOut = document.createElement('button');
   signOut.textContent = 'Sign out';
+  signOut.title = 'Sign out of this session';
+  const notice = document.createElement('p'); notice.className = 'session-notice'; notice.setAttribute('role', 'status'); notice.hidden = true;
+  $('.site-header').after(notice);
   signOut.hidden = true;
   signOut.addEventListener('click', async () => {
-    signOut.disabled = true;
+    signOut.disabled = true; notice.hidden = true;
+    const previousUser = currentUserId;
     try {
-      const { error } = await backendClient().auth.signOut();
-      if (error) status.textContent = 'Sign-out could not complete. Retry.';
-    } catch { status.textContent = 'Sign-out could not complete. Retry.'; }
-    finally { signOut.disabled = false; }
+      const result = await signOutCurrentSession();
+      if (currentUserId && currentUserId !== previousUser) return;
+      notice.textContent = result.localCleared
+        ? result.revocationUnconfirmed ? 'Signed out here. The server could not confirm revocation; existing sign-in tokens may remain valid until expiry.' : 'Signed out of this session.'
+        : 'Unable to confirm sign-out. Check your connection and retry.';
+      notice.hidden = false;
+    } catch {
+      if (!currentUserId || currentUserId === previousUser) { notice.textContent = 'Unable to confirm sign-out. Check your connection and retry.'; notice.hidden = false; }
+    } finally { signOut.disabled = false; }
   });
   actions.append(status, signOut);
   $('.account-actions').append(actions);
@@ -527,6 +536,7 @@ if (backendEnabled) {
   backendClient().auth.onAuthStateChange((_event, session) => {
     const nextUserId = session?.user?.id || null;
     const changed = currentUserId !== nextUserId;
+    if (nextUserId) { notice.hidden = true; notice.textContent = ''; }
     currentUserId = nextUserId;
     if (changed) {
       clearProfileDraftState(); clearListingDraftState(); clearExperienceDraftState(); clearAvailabilityState(); clearUserProfileState(); clearBookingDraftState(); clearProviderApplicationState();

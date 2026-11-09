@@ -33,6 +33,7 @@ async function mockBackend(page, options = {}) {
       return respond(state.user);
     }
     if (url.pathname === '/auth/v1/logout') {
+      if (url.searchParams.get('scope') === 'local' && options.failLocalLogout) return respond({message:'Unavailable'},500);
       if (url.searchParams.get('scope') === 'others' && options.failOtherSessionLogout) return respond({message:'Unavailable'},options.otherSessionFailureStatus || 500);
       return respond({});
     }
@@ -1283,4 +1284,40 @@ test('other-session revocation locks password changes during reauthentication an
   release();
   await expect(page.locator('#other-sessions-status')).toContainText('Other sessions can no longer renew');
   await expect(page.getByRole('button',{name:'Change password',exact:true})).toBeEnabled();
+});
+
+
+for (const failure of [false,true]) {
+  test(`current-session sign-out clears private drafts with server revocation ${failure ? 'unavailable' : 'confirmed'}`, async ({ page }) => {
+    const state = await mockBackend(page,{failLocalLogout:failure});
+    await signIn(page); await enter(page,'/?page=booking-draft');
+    await page.getByLabel('Requests or notes (optional)',{exact:true}).fill('Private local plan to clear');
+    await page.getByRole('button',{name:'Sign out',exact:true}).click();
+    await expect(page.getByRole('button',{name:'Sign out',exact:true})).toBeHidden();
+    await expect(page.getByLabel('Requests or notes (optional)',{exact:true})).toHaveValue('');
+    await expect(page.locator('.session-notice')).toContainText(failure ? 'server could not confirm revocation' : 'Signed out of this session.');
+    const logout = state.requests.filter(row=>row.path==='/auth/v1/logout');
+    expect(logout).toHaveLength(1); expect(logout[0].query).toBe('scope=local');
+    await page.reload();
+    await expect(page.getByRole('button',{name:'Sign out',exact:true})).toBeHidden();
+    await expect(page.getByLabel('Requests or notes (optional)',{exact:true})).toHaveValue('');
+  });
+}
+
+
+test('local sign-out removes private content before a stalled revocation request finishes', async ({ page }) => {
+  await mockBackend(page,{failLocalLogout:true}); await signIn(page); await enter(page,'/?page=booking-draft');
+  await page.getByLabel('Requests or notes (optional)',{exact:true}).fill('Private pending plan');
+  let release; const gate = new Promise(resolve=>{release=resolve;});
+  let requested; const started = new Promise(resolve=>{requested=resolve;});
+  await page.route('**/auth/v1/logout*',async route=>{requested();await gate;await route.fallback();});
+  await page.getByRole('button',{name:'Sign out',exact:true}).click();
+  await started;
+  await expect(page.getByRole('button',{name:'Sign out',exact:true})).toBeHidden();
+  await expect(page.getByLabel('Requests or notes (optional)',{exact:true})).toHaveValue('');
+  release();
+  await expect(page.locator('.session-notice')).toContainText('server could not confirm revocation');
+  await page.setViewportSize({width:390,height:844});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+  await page.locator('.session-notice').screenshot({path:'/tmp/local-signout-notice-mobile.png'});
 });

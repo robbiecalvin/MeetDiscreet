@@ -732,3 +732,15 @@ policies remain separate; no immediate revocation guarantee, device list, audit 
 or count is claimed. Password fields are cleared before async operations; concurrent
 password/session operations are disabled, and identity/navigation guards reject
 stale UI results. Hosted behavior remains to be verified with isolated test sessions.
+
+
+## Current-session logout behavior
+
+Ordinary header logout uses local scope; other-session revocation remains separate.
+The installed SDK clears its local session before contacting the logout endpoint.
+Application auth-state handling clears private editor data/DOM; `getSession()` then
+checks local absence. Report local success separately from server revocation errors,
+and make no early invalidation claim for already-issued bearer tokens. A successful
+local removal remains useful when remote revocation cannot be confirmed. The scope
+is a shared browser SDK session, not a guarantee that only one tab is affected.
+No secret keys, session tokens or private draft content are logged by this flow.

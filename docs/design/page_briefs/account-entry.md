@@ -125,3 +125,20 @@ passwords before asynchronous work, reset password visibility and clear the othe
 security form's entered secrets when starting an operation. Account changes or
 navigation prevent stale responses updating another view. Keep recovery available.
 No new permission grants, service credentials, database schema or paid service.
+
+
+## Current-session sign-out
+
+The ordinary header Sign out action explicitly uses local scope. It clears this
+browser's session (including tabs sharing that SDK session), rather than revoking
+independent sessions. Other-session management stays a separate password-confirmed
+action. Use the supported SDK's local removal before awaiting the logout endpoint,
+then verify local session absence before claiming a local sign-out.
+
+Keep a separate wrapping status notice below the header. If the server cannot
+confirm revocation but local credentials were cleared, say signed out here and
+explain that existing tokens can remain valid until expiry. If local removal cannot
+be confirmed, show an error and allow retry. A nominal success claims only local
+sign-out, because the SDK normalizes some authentication response statuses. Never
+show success just because a request was started. Sign-in clears the old notice;
+responses from an earlier account must not overwrite another account's status.

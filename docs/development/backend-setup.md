@@ -350,3 +350,18 @@ expiry. Neither immediate remote logout nor a count of affected devices is claim
 This uses existing Supabase Auth with no migration. Automated tests mock Auth HTTP
 responses with the real SDK; actual hosted two-session refresh/revocation behavior
 has not been exercised. Use test sessions during the deferred hosted walkthrough.
+
+
+## Current-session sign-out
+
+Header Sign out calls `auth.signOut({scope: 'local'})`, keeping independent sessions
+separate from the explicit other-session action. The SDK removes local credentials
+before awaiting the server logout request. The app checks `getSession()` for local
+absence, while SDK auth-state callbacks purge private DOM and in-memory drafts.
+A failed revocation request cannot by itself imply local failure: the notice says
+signed out here when removal is confirmed and states server revocation is unconfirmed.
+Nominal success claims no remote or immediate JWT invalidation. No migration.
+
+Automated checks cover local scope, refresh staying signed out, private data clearing,
+and a pending/failed server logout. Actual remote token lifetime/revocation remains
+part of the deferred hosted walkthrough.

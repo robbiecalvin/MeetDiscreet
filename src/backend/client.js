@@ -40,3 +40,17 @@ export async function processAuthCallback() {
 export function authRedirect(recovery = false) {
   return `${location.origin}/?page=auth-callback${recovery ? '&type=recovery' : ''}`;
 }
+
+export async function signOutCurrentSession() {
+  const instance = backendClient();
+  if (!instance) return { localCleared: false, revocationUnconfirmed: true };
+  let revocationUnconfirmed = false;
+  try {
+    const { error } = await instance.auth.signOut({ scope: 'local' });
+    revocationUnconfirmed = Boolean(error);
+  } catch { revocationUnconfirmed = true; }
+  try {
+    const { data, error } = await instance.auth.getSession();
+    return { localCleared: !error && !data.session, revocationUnconfirmed };
+  } catch { return { localCleared: false, revocationUnconfirmed: true }; }
+}

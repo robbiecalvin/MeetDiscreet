@@ -1027,6 +1027,20 @@ If launch scope is reduced:
   current-session retention and operation locking/secret clearing. Mobile session
   control inspected. Hosted refresh/revocation behavior remains unverified.
 
+### Explicit Current-Session Sign-Out
+
+- Ordinary Sign out now uses local scope, complementing the separate password-verified
+  other-session action. Local credentials and private editor state clear before
+  awaiting a remote logout response; refresh does not restore the cleared session.
+- Notices distinguish local removal from an unconfirmed server revocation and never
+  promise immediate invalidation of issued tokens. Account changes clear old notices.
+- No database migration, role change or new service. Hosted token-revocation behavior
+  remains pending the deferred walkthrough.
+- Build, all 155 standard checks and 73 backend browser checks passed. New checks
+  verify local request scope, private clearing before a stalled response, failed
+  server revocation, and staying signed out after reload. Mobile notice inspected.
+  Hosted remote token/revocation behavior remains unverified.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine
