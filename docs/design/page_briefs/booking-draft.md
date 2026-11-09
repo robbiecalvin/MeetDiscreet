@@ -42,3 +42,18 @@ Cancellation keeps the original plan. Unknown IDs show a generic unavailable-con
 message without rendering query text. View fictional profile supports internal
 navigation back to the selected person's public preview while retaining draft text.
 Native modified clicks retain ordinary links; reload/new tabs still have no saved draft.
+
+
+## Source Offering continuity
+
+An Offering's secondary Preview a plan from this ad link carries only validated
+public fixture IDs. Confirm the source is an Offering and belongs to the selected
+provider. Looking For, unknown or mismatched sources are rejected with generic copy.
+An Offering-only deep link can derive its fixture provider. A new empty plan records
+the source title; an existing plan requires confirmed replacement to change source,
+even for the same person. Profile previews reached through an Offering retain that
+source when continuing to the plan. The public source title and return link appear
+beside the form; review includes the title without treating it as an agreed
+experience, catalogue selection, price or available date. Manually switching provider
+clears the prior source; the fictional sample and Clear controls also discard it.
+All source state stays in memory. Actual subscriber-only requests remain separate.

@@ -143,7 +143,7 @@ function renderRoute() {
     const sourceAd = ads.find((item) => item.id === params.get('fromAd') && item.category === 'offering' && item.provider === id);
     renderProfile($('#profile-view'), provider, sourceAd ? () => showOffering(sourceAd) : backToDiscovery, (person) => {
       openDetail(`Connect with ${person.name}`, `The reference subscription is ${formatReferencePrice(referencePrices.companionSubscriptionMonthly)}/month for this companion. It unlocks subscriber media, detailed experiences, messages, calls, and booking requests. Booked companionship time is priced separately. Currency, renewal, and cancellation terms still need confirmation. This is a preview: no payment is taken and no access is granted.`);
-    }, sourceAd ? '← Back to ad' : '← Back to discovery', person => navigateAccount('booking-draft', { provider: person.id }));
+    }, sourceAd ? '← Back to ad' : '← Back to discovery', person => navigateAccount('booking-draft', { provider: person.id, offering: sourceAd?.id }));
     document.title = `${provider ? provider.name : 'Profile unavailable'} · MeetDiscreet`;
   } else if (isOffering) {
     const ad = ads.find((item) => item.id === adId && item.category === 'offering');
@@ -151,7 +151,7 @@ function renderRoute() {
     const related = provider ? ads.filter((item) => item.category === 'offering' && item.id !== ad.id)
       .map((item) => ({ ad: item, provider: providers.find((person) => person.id === item.provider) }))
       .filter((item) => item.provider?.city === provider.city).slice(0, 3) : [];
-    renderOffering($('#offering-view'), ad, provider, related, backToAds, showProfile, showOffering);
+    renderOffering($('#offering-view'), ad, provider, related, backToAds, showProfile, showOffering, (person, source) => navigateAccount('booking-draft', { provider: person.id, offering: source.id }));
     document.title = `${ad ? ad.title : 'Ad unavailable'} · MeetDiscreet`;
   } else if (isHow) {
     renderHowItWorks($('#how-view'), backToDiscovery);
@@ -164,7 +164,7 @@ function renderRoute() {
     if (accountMode === 'account') renderAccountOverview($('#account-view'), navigateAccount, backToDiscovery);
     else if (accountMode === 'provider-review') renderProviderReview($('#account-view'), navigateAccount);
     else if (accountMode === 'provider-application') renderProviderApplication($('#account-view'), navigateAccount);
-    else if (accountMode === 'booking-draft') renderBookingDraft($('#account-view'), navigateAccount, params.get('provider'), showProfile);
+    else if (accountMode === 'booking-draft') renderBookingDraft($('#account-view'), navigateAccount, params.get('provider'), showProfile, { offeringId: params.get('offering'), onViewOffering: showOffering });
     else if (accountMode === 'edit-user-profile') renderUserProfileEditor($('#account-view'), navigateAccount);
     else if (accountMode === 'user-setup') renderUserSetup($('#account-view'), navigateAccount, backToDiscovery);
     else if (accountMode === 'provider-setup') renderProviderSetup($('#account-view'), navigateAccount);
@@ -197,6 +197,7 @@ function renderRoute() {
 function backToDiscovery() {
   const url = new URL(location.href);
   url.searchParams.delete('provider');
+  url.searchParams.delete('offering');
   url.searchParams.delete('profile');
   url.searchParams.delete('ad');
   url.searchParams.delete('fromAd');
@@ -214,6 +215,7 @@ function showProfile(provider, sourceAd) {
   const url = new URL(location.href);
   url.searchParams.set('profile', provider.id);
   url.searchParams.delete('provider');
+  url.searchParams.delete('offering');
   url.searchParams.delete('page');
   url.searchParams.delete('ad');
   if (sourceAd) url.searchParams.set('fromAd', sourceAd.id);
@@ -237,6 +239,8 @@ function showOffering(ad) {
   url.searchParams.delete('profile');
   url.searchParams.delete('fromAd');
   url.searchParams.delete('page');
+  url.searchParams.delete('provider');
+  url.searchParams.delete('offering');
   url.searchParams.set('ad', ad.id);
   history.pushState(null, '', url);
   renderRoute();
@@ -364,7 +368,7 @@ for (const link of document.querySelectorAll('[data-how-link]')) {
     event.preventDefault();
     if (!$('#discovery-view').hidden) discoveryScroll = window.scrollY;
     const url = new URL(location.href);
-    for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy', 'kind', 'from', 'new', 'provider']) url.searchParams.delete(key);
+    for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy', 'kind', 'from', 'new', 'provider', 'offering']) url.searchParams.delete(key);
     url.searchParams.set('page', 'how-it-works');
     history.pushState(null, '', url);
     renderRoute();
@@ -379,7 +383,7 @@ for (const link of document.querySelectorAll('[data-editor-link]')) {
     event.preventDefault();
     if (!$('#discovery-view').hidden) discoveryScroll = window.scrollY;
     const url = new URL(location.href);
-    for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy', 'kind', 'from', 'new', 'provider']) url.searchParams.delete(key);
+    for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy', 'kind', 'from', 'new', 'provider', 'offering']) url.searchParams.delete(key);
     url.searchParams.set('page', 'create-listing');
     history.pushState(null, '', url);
     renderRoute();
@@ -404,7 +408,7 @@ for (const link of document.querySelectorAll('[data-guidelines-link]')) {
     event.preventDefault();
     policyReturnUrl = location.href;
     const url = new URL(location.href);
-    for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy', 'kind', 'from', 'new', 'provider']) url.searchParams.delete(key);
+    for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy', 'kind', 'from', 'new', 'provider', 'offering']) url.searchParams.delete(key);
     url.searchParams.set('page', 'guidelines');
     url.hash = '';
     history.pushState({ policyReturnUrl }, '', url);
@@ -416,7 +420,7 @@ for (const link of document.querySelectorAll('[data-guidelines-link]')) {
 
 function navigateFromHelp(page) {
   const url = new URL(location.href);
-  for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy', 'kind', 'from', 'new', 'provider']) url.searchParams.delete(key);
+  for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy', 'kind', 'from', 'new', 'provider', 'offering']) url.searchParams.delete(key);
   if (page) url.searchParams.set('page', page);
   else url.searchParams.delete('page');
   url.hash = '';
@@ -433,7 +437,7 @@ for (const link of document.querySelectorAll('[data-help-link]')) {
     event.preventDefault();
     const source = location.href;
     const url = new URL(source);
-    for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy', 'kind', 'from', 'new', 'provider']) url.searchParams.delete(key);
+    for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy', 'kind', 'from', 'new', 'provider', 'offering']) url.searchParams.delete(key);
     url.searchParams.set('page', 'help');
     url.hash = '';
     helpReturnUrl = source;
@@ -457,11 +461,12 @@ function returnFromHelp() {
 function navigateAccount(page, extra = {}) {
   if (!$('#discovery-view').hidden) discoveryScroll = window.scrollY;
   const url = new URL(location.href);
-  for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy', 'kind', 'from', 'new', 'provider']) url.searchParams.delete(key);
+  for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy', 'kind', 'from', 'new', 'provider', 'offering']) url.searchParams.delete(key);
   url.searchParams.delete('draft');
   url.searchParams.delete('copy');
   url.searchParams.set('page', page);
   if (page === 'booking-draft' && providers.some(person => person.id === extra.provider)) url.searchParams.set('provider', extra.provider);
+  if (page === 'booking-draft' && ads.some(ad => ad.id === extra.offering && ad.category === 'offering' && ad.provider === extra.provider)) url.searchParams.set('offering', extra.offering);
   if (extra.draft) url.searchParams.set('draft', extra.draft);
   if (extra.copy) url.searchParams.set('copy', '1');
   if (['looking', 'offering', 'all'].includes(extra.kind)) url.searchParams.set('kind', extra.kind);

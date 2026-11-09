@@ -31,7 +31,7 @@ const descriptions = {
   montreal: 'Explore the streets, architecture, and local art around the Plateau. An unhurried afternoon with time to notice the details.',
 };
 
-export function renderOffering(container, ad, provider, related, onBack, onProfile, onAd) {
+export function renderOffering(container, ad, provider, related, onBack, onProfile, onAd, onPreviewPlan) {
   container.replaceChildren();
   container.append(link('← Back to ads', './', onBack, 'profile-back'));
   if (!ad || !provider) {
@@ -65,6 +65,14 @@ export function renderOffering(container, ad, provider, related, onBack, onProfi
   sidebar.append(element('p', 'MEET YOUR COMPANY', 'eyebrow'), element('h2', `Get to know ${provider.name}.`), element('p', 'Explore the public profile and see what a companion subscription unlocks.', 'profile-copy'));
   sidebar.append(link('View companion profile', profileHref, () => onProfile(provider, ad), 'button primary offering-profile-action'));
   sidebar.append(element('p', 'Subscription information stays on the companion profile.', 'profile-small'));
+  const plan = element('a', 'Preview a plan from this ad', 'button outline');
+  plan.href = `?page=booking-draft&provider=${encodeURIComponent(provider.id)}&offering=${encodeURIComponent(ad.id)}`;
+  plan.addEventListener('click', event => {
+    if (!onPreviewPlan || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault(); onPreviewPlan(provider, ad);
+  });
+  sidebar.append(plan, element('p', 'Try an unsent fictional plan. No dates, prices or booking access are confirmed.', 'profile-small'));
+
   layout.append(article, sidebar);
   container.append(layout);
 

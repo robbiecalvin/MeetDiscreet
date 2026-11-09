@@ -966,6 +966,20 @@ If launch scope is reduced:
   booking-preview checks passed again after context-message cleanup; mobile profile
   entry inspected. No migration or commercial-policy change is required.
 
+### Offering-to-Plan Preview Context
+
+- Offering ads link to the unsent composer with their validated public source title
+  and provider. Source context also survives passing through the related profile.
+- Existing plans require confirmed replacement before adopting another Offering.
+  Manual provider changes clear the old source; unknown, Looking For and mismatched
+  sources are rejected. Source links and the review summary retain the public title.
+- No activity, date, quote, reservation, entitlement or commercial agreement is
+  inferred. All plan/source state stays in memory; no migration is introduced.
+- Build, all 153 standard checks and 55 backend browser checks passed. All 11
+  booking-preview checks passed again after final source/cancellation coverage.
+  Mobile ad entry and source-context screenshots inspected. No hosted integration
+  or actual booking operation is claimed.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

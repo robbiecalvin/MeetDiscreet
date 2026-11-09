@@ -35,3 +35,13 @@ Vite build and all 31 Chromium tests passed: 20 existing discovery/profile
 checks plus 11 Offering checks. Desktop and 390px mobile screenshots inspected;
 automated overflow/action checks cover 320, 390, 700, 1024, and 1440px.
 No live Netlify verification is claimed because the environment blocks its domain.
+
+
+### Unsent plan preview entry
+
+Keep View companion profile as the primary action. Add a secondary Preview a plan
+from this ad link to the fictional unsent composer. Carry the known public Offering
+and provider IDs, with concise copy stating that no date, price or booking access is
+confirmed. No commercial terms, subscription controls or live requests are added.
+Existing plan replacement and source handling follow the
+[booking preview brief](./booking-draft.md#source-offering-continuity).

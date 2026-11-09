@@ -1,8 +1,8 @@
-import { providers } from './data.js';
+import { providers, ads } from './data.js';
 import { backendEnabled } from './backend/client.js';
 import { trackDraft } from './draft-changes.js';
 import { bookingActivities, bookingDraftErrors, durationLabel } from './booking-draft-rules.js';
-const defaults = () => ({ provider: '', activity: '', date: '', time: '', timeZone: '', duration: '', venue: '', expenses: '', notes: '' });
+const defaults = () => ({ sourceOffering: '', provider: '', activity: '', date: '', time: '', timeZone: '', duration: '', venue: '', expenses: '', notes: '' });
 let draft = defaults();
 const changes = trackDraft('booking', () => draft, backendEnabled);
 export function clearBookingDraftState() { draft = defaults(); changes.saved(); }
@@ -12,23 +12,25 @@ function node(tag, text, className) {
   if (className) value.className = className;
   return value;
 }
-export function renderBookingDraft(container, navigate, requestedProvider, onViewProfile) {
+export function renderBookingDraft(container, navigate, requestedProvider, onViewProfile, { offeringId, onViewOffering } = {}) {
   container.replaceChildren();
   const root = node('div', null, 'booking-draft');
   const back = node('a', '← Back to User setup', 'profile-back'); back.href = '?page=user-setup';
   back.addEventListener('click', event => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate('user-setup'); });
   root.append(back, node('p', 'A PLAN WORTH SHARING', 'eyebrow'), node('h1', 'Shape a booking request.'), node('p', 'Start with a person, a plan, and a little time together.', 'offering-lead'), node('p', 'Booking request preview. Use fictional plans. Nothing is saved or sent, no time is reserved, and no price or deposit is calculated.', 'editor-notice'));
-  const requested = providers.find(person => person.id === requestedProvider);
+  const source = ads.find(ad => ad.id === offeringId && ad.category === 'offering' && (!requestedProvider || ad.provider === requestedProvider));
+  const requested = providers.find(person => person.id === (requestedProvider || source?.provider));
   const hasDraft = Object.values(draft).some(Boolean);
-  if (requested && !hasDraft) draft.provider = requested.id;
+  if (requested && !hasDraft) { draft.provider = requested.id; draft.sourceOffering = source?.id || ''; }
   const context = node('div', null, 'booking-context');
   if (requestedProvider && !requested) context.append(node('p', 'That fictional provider is unavailable. Choose a provider below; your current draft has been kept.', 'editor-notice'));
-  if (requested && hasDraft && draft.provider !== requested.id) {
-    context.append(node('p', `You opened this preview from ${requested.name}'s profile. Your existing draft has been kept.`, 'profile-small'));
+  if (offeringId && !source) context.append(node('p', 'That Offering context is unavailable. Your current draft has been kept; no experience details have been applied.', 'editor-notice'));
+  if (requested && hasDraft && (draft.provider !== requested.id || (source && draft.sourceOffering !== source.id))) {
+    context.append(node('p', `You opened this preview from ${source ? 'an Offering by' : 'the profile of'} ${requested.name}. Your existing draft has been kept.`, 'profile-small'));
     const replace = node('button', `Start a new draft with ${requested.name}`, 'button outline'); replace.type = 'button';
     replace.addEventListener('click', () => {
       if (!window.confirm('Start a new booking draft? This will discard the current unsaved plan.')) return;
-      draft = { ...defaults(), provider: requested.id }; context.replaceChildren(); sync(); fields.get('activity').input.focus();
+      draft = { ...defaults(), provider: requested.id, sourceOffering: source?.id || '' }; context.replaceChildren(); sync(); fields.get('activity').input.focus();
     });
     context.append(replace);
   }
@@ -49,7 +51,7 @@ export function renderBookingDraft(container, navigate, requestedProvider, onVie
     input.required = ['provider', 'activity', 'date', 'time', 'timeZone', 'duration'].includes(key);
     const title = node('label', label); title.htmlFor = input.id;
     const message = node('p', '', 'editor-field-error'); message.id = `booking-${key}-error`; input.setAttribute('aria-describedby', message.id);
-    input.addEventListener('input', () => { draft[key] = input.value; input.removeAttribute('aria-invalid'); message.textContent = ''; error.textContent = ''; if (key === 'provider') { if (draft.provider === requested?.id) context.replaceChildren(); paintProvider(); } });
+    input.addEventListener('input', () => { draft[key] = input.value; input.removeAttribute('aria-invalid'); message.textContent = ''; error.textContent = ''; if (key === 'provider') { if (ads.find(ad => ad.id === draft.sourceOffering)?.provider !== draft.provider) draft.sourceOffering = ''; if (draft.provider === requested?.id) context.replaceChildren(); paintProvider(); } });
     wrapper.append(title, input, message); form.append(wrapper); fields.set(key, { input, message });
   }
   field('provider', 'Fictional provider', 'select', [['', 'Choose a provider'], ...providers.map(value => [value.id, `${value.name} · ${value.city}`])]);
@@ -79,7 +81,16 @@ export function renderBookingDraft(container, navigate, requestedProvider, onVie
       event.preventDefault(); onViewProfile(provider);
     });
     person.append(profileLink);
-
+    const offering = ads.find(ad => ad.id === draft.sourceOffering && ad.category === 'offering' && ad.provider === provider.id);
+    if (offering) {
+      person.append(node('h3', 'Source Offering'), node('p', offering.title), node('p', 'An idea from a fictional public ad, not an agreed experience or quote.', 'profile-small'));
+      const adLink = node('a', 'View source Offering', 'button outline'); adLink.href = `?ad=${encodeURIComponent(offering.id)}`;
+      adLink.addEventListener('click', event => {
+        if (!onViewOffering || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault(); onViewOffering(offering);
+      });
+      person.append(adLink);
+    }
   }
   const preview = node('section', null, 'booking-review'); preview.hidden = true;
   const heading = node('h2', 'Review your unsent draft'); heading.tabIndex = -1;
@@ -105,7 +116,7 @@ export function renderBookingDraft(container, navigate, requestedProvider, onVie
     }
     const provider = providers.find(value => value.id === draft.provider);
     summary.replaceChildren();
-    for (const [title, value] of [['Fictional provider', `${provider.name} · ${provider.city}`], ['Activity idea', draft.activity], ['Proposed date', draft.date], ['Local start', `${draft.time} · ${draft.timeZone}`], ['Requested duration', durationLabel(Number(draft.duration))], ['Proposed venue', draft.venue.trim() || 'To discuss'], ['Proposed expenses', draft.expenses.trim() || 'To discuss'], ['Requests or notes', draft.notes.trim() || 'None added'], ['Price estimate', 'Not calculated in this preview']]) {
+    for (const [title, value] of [['Fictional provider', `${provider.name} · ${provider.city}`], ['Source Offering', ads.find(ad => ad.id === draft.sourceOffering && ad.category === 'offering' && ad.provider === draft.provider)?.title || 'No Offering selected'], ['Activity idea', draft.activity], ['Proposed date', draft.date], ['Local start', `${draft.time} · ${draft.timeZone}`], ['Requested duration', durationLabel(Number(draft.duration))], ['Proposed venue', draft.venue.trim() || 'To discuss'], ['Proposed expenses', draft.expenses.trim() || 'To discuss'], ['Requests or notes', draft.notes.trim() || 'None added'], ['Price estimate', 'Not calculated in this preview']]) {
       summary.append(node('dt', title), node('dd', value));
     }
     layout.hidden = true; preview.hidden = false; heading.focus();
