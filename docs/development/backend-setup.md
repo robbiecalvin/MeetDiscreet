@@ -11,7 +11,9 @@ Check the dashboard's plan and usage limits before changing settings.
   and password changes after current-password reauthentication.
 - Private owner-only profile, listing, catalogue, and availability drafts, subject
   to the separately applied migrations below.
-- No public publishing, account roles, paid entitlements, payments, messaging,
+- Server-controlled membership-role foundation with basic User initialization;
+  Provider/operational role assignment and live eligibility workflows remain separate.
+- No public publishing, paid entitlements, payments, messaging,
   real discovery data, uploads, or completed eligibility verification.
 - Private experience catalogue snapshots require the additional migration below.
 
@@ -81,6 +83,44 @@ constraints. Username uniqueness, verified eligibility and field visibility are
 not determined here. Save/load/delete never modifies provider profile drafts,
 roles or the auth account. The agent has not applied this migration remotely.
 Only apply migrations not already run; do not rerun the original schema.
+
+## Add server-controlled account roles
+
+Run the following migration once for the permission foundation:
+
+[202611090004_account_roles.sql](../../supabase/migrations/202611090004_account_roles.sql)
+
+It creates owner-readable `account_roles`. Authenticated browser accounts have
+SELECT only; they cannot insert, update or delete roles, including their own.
+Only trusted database/server operations can manage assignments. The browser still
+uses only the publishable key; never configure a service-role key in Vite/Netlify
+browser variables or share it in chat.
+
+The migration backfills basic `user` membership for existing auth users and adds an
+Auth-user insert trigger assigning only `user` to future accounts. Signup metadata,
+including `onboarding_intent`, is never read by that trigger. This membership does
+not establish verified eligibility, provider status, posting allowances or any
+paid entitlement. Provider/moderator/admin roles are never automatically assigned.
+Structural support for several roles does not settle the pending combined-role
+product policy; this increment assigns no real Provider role.
+
+`has_account_role(text)` checks the current authenticated user using invoker
+security and owner RLS. It is a building block for future backend policies, not a
+replacement for subscription, publishing-plan, eligibility, block or ownership
+checks. Current private drafting continues under existing owner policies.
+
+Role insert/update/delete events are recorded by a protected trigger with old/new
+user IDs and roles, request user ID when present, database actor role and server
+time. Browser clients have no audit access. Service APIs can read but cannot
+rewrite events; a database administrator remains trusted. No passwords, tokens or
+profile content are logged. Audit retention/export and administrative approval
+operations remain launch dependencies. No production tamper-proof claim is made.
+
+Account and Provider setup show assigned role status independently of the editable
+starting preference. Missing schema/read failures show unknown permissions; no
+role is inferred from metadata. Applying the migration and testing new signup plus
+role checks against the hosted project remain pending. Do not rerun older files
+that have already been applied.
 
 ## Registration starting preference
 

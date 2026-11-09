@@ -1,3 +1,4 @@
+import { accountPermissions } from './account-permissions.js';
 import { loadPrivateDraftSummary } from './backend/drafts.js';
 import { backendEnabled, backendClient } from './backend/client.js';
 
@@ -69,7 +70,7 @@ export function renderAccountOverview(container, navigate, onBack) {
       buttons.push(button); options.append(button);
     }
     starting.append(options, link('user-setup', 'Explore user setup'), link('provider-setup', 'Explore provider setup'));
-    content.append(starting);
+    content.append(starting, accountPermissions(current));
 
     const grid = node('div', null, 'account-tool-grid');
     for (const [page, title, copy, action] of [

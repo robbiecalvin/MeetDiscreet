@@ -9,7 +9,7 @@ function session(profile = user) {
   return { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock_refresh_token', user: profile };
 }
 async function mockBackend(page, options = {}) {
-  const state = { user: { ...user, user_metadata: {} }, userProfile: null, availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
+  const state = { user: { ...user, user_metadata: {} }, userProfile: null, roles: ['user'], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
   await page.route('https://backend-test.supabase.co/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -33,6 +33,10 @@ async function mockBackend(page, options = {}) {
       return respond(state.user);
     }
     if (url.pathname === '/auth/v1/logout') return respond({});
+    if (url.pathname === '/rest/v1/account_roles') {
+      if (options.missingRoleMigration) return respond({ message: 'Table missing' }, 404);
+      return respond(state.roles.map(role => ({ role })));
+    }
     if (url.pathname === '/rest/v1/user_profile_drafts') {
       if (options.missingUserProfileMigration) return respond({ message: 'Table missing' }, 404);
       if (method === 'POST') { state.userProfile = body; return respond(null, 201); }
@@ -715,4 +719,32 @@ test('booking preview makes no backend writes and clears private plan fields on 
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await expect(page.getByLabel('Fictional provider', { exact: true })).toHaveValue('');
   await expect(page.getByLabel('Requests or notes (optional)', { exact: true })).toHaveValue('');
+});
+
+test('editable Provider preference does not grant Provider or administrative roles', async ({ page }) => {
+  const state = await mockBackend(page);
+  state.user.user_metadata = { onboarding_intent: 'provider', role: 'admin', roles: ['provider', 'admin'] };
+  await signIn(page);
+  await page.locator('[data-account-link]').click();
+  await expect(page.locator('[data-account-permissions]')).toHaveText('Assigned roles: User. Provider role: Not assigned.');
+  await expect(page.getByRole('button', { name: 'Use Provider starting point' })).toHaveAttribute('aria-pressed', 'true');
+  state.roles = ['user', 'provider'];
+  await page.getByRole('button', { name: 'Refresh account permissions' }).click();
+  await expect(page.locator('[data-account-permissions]')).toContainText('Provider role: Assigned');
+  const roleRequests = state.requests.filter(value => value.path === '/rest/v1/account_roles');
+  expect(roleRequests.length).toBeGreaterThan(0);
+  expect(roleRequests.every(value => value.method === 'GET')).toBe(true);
+  await page.setViewportSize({ width: 390, height: 1000 });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: '/tmp/account-permissions-mobile.png', fullPage: true });
+});
+test('missing role schema reports unavailable permissions without granting fallback access', async ({ page }) => {
+  await mockBackend(page, { missingRoleMigration: true });
+  await signIn(page);
+  await page.locator('[data-account-link]').click();
+  await expect(page.locator('[data-account-permissions]')).toContainText('Unable to verify account permissions');
+  await expect(page.locator('[data-account-permissions]')).not.toContainText('Assigned roles:');
+  await expect(page.getByRole('button', { name: 'Refresh account permissions' })).toBeEnabled();
+  await expect(page.getByRole('link', { name: 'Edit User profile draft', exact: true })).toBeVisible();
 });

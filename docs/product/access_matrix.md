@@ -44,6 +44,11 @@ Roles and paid entitlements are separate.
 A user may hold several entitlements without receiving additional
 administrative privileges.
 
+A server-controlled role foundation is implemented in the prepared account-role
+migration. It initializes only basic User membership, allows own-role reads, and
+denies client role assignment. This is separate from identity/eligibility
+verification and paid/public access. Hosted migration application remains pending.
+
 Whether one account may hold both authoritative user and companion roles remains
 pending. The implemented User/Provider onboarding choice is a revisitable
 user-metadata preference under one login, not an assigned role. It must not grant

@@ -850,6 +850,22 @@ If launch scope is reduced:
 - In-memory only with account-change clearing and connected unload protection.
   No new migration or payment capability. See [brief](./design/page_briefs/booking-draft.md).
 
+### Server-Controlled Role Foundation
+
+- Prepared `202611090004_account_roles.sql`: owner-readable, server-writable roles,
+  basic User bootstrap/backfill, and current-user role checks independent of metadata.
+- No automatic Provider/moderator/admin grant. Own-role mutation and anonymous reads
+  are denied; role preference does not imply eligibility, publishing or paid access.
+- Trusted assignment changes create protected audit events. Browser audit access
+  and service-API event rewriting are denied; audit retention/operations remain pending.
+- Account and Provider setup display actual assignment status with retry. Missing
+  schema reports unavailable permissions rather than assigning fallback roles.
+- Build, all 133 default checks and 38 backend UI checks passed. PostgreSQL
+  checks verify own-role reads, forbidden role/audit mutations, metadata-resistant
+  signup, trusted role evaluation and protected audit events. Mobile status inspected.
+- Hosted migration application, provider approval/eligibility, operational role
+  management and controlled publishing are still required for a usable pilot.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

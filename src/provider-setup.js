@@ -1,3 +1,4 @@
+import { accountPermissions } from './account-permissions.js';
 import { backendEnabled, backendClient } from './backend/client.js';
 import { loadPrivateDraftSummary } from './backend/drafts.js';
 function node(tag, text, className) {
@@ -50,6 +51,7 @@ export function renderProviderSetup(container, navigate) {
       return;
     }
     status.textContent = 'Your provider workspace. Choosing Provider is a starting preference, not verification or permission to publish.';
+    root.insertBefore(accountPermissions(current), grid);
     tools(true);
   }).catch(() => {
     if (current()) { status.textContent = 'Unable to verify your account. Check your connection or sign in again.'; root.append(link('sign-in', 'Sign in')); }

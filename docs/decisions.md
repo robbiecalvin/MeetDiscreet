@@ -524,3 +524,14 @@ that preference using the same login. Provider setup guides private draft creati
 The metadata is user editable and nonauthoritative. Authoritative role combinations,
 provider eligibility/approval and paid/public access remain unresolved; no role
 self-assignment, publishing approval or entitlement is implemented by this choice.
+
+
+## DEC-020 — Trusted Role Source Separate from Signup Intent
+
+Continue the non-payment pilot foundation with server-owned application-role rows.
+Basic User membership is initialized by a backend Auth trigger and backfill;
+Provider and operational roles require separate trusted assignments. Client-owned
+metadata never grants roles. Protected assignment-event records support future
+operations, with retention and administrative workflow still pending. This does
+not resolve combined-role policy, provider eligibility or publishing-plan rules,
+assign a real Provider role, enable public publishing, or grant paid access.

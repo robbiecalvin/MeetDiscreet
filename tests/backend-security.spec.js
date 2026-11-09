@@ -11,16 +11,17 @@ async function asUser(id, role = 'authenticated') {
 }
 test.beforeAll(async () => {
   db = new PGlite();
-  await db.exec(`create role anon; create role authenticated; create schema auth;
-    create table auth.users(id uuid primary key);
-    insert into auth.users values ('${alice}'), ('${bob}');
+  await db.exec(`create role anon; create role authenticated; create role service_role bypassrls; create schema auth;
+    create table auth.users(id uuid primary key, raw_user_meta_data jsonb not null default '{}'::jsonb);
+    insert into auth.users(id) values ('${alice}'), ('${bob}');
     create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
-    grant usage on schema auth, public to anon, authenticated;
-    grant execute on function auth.uid() to anon, authenticated;`);
+    grant usage on schema auth, public to anon, authenticated, service_role;
+    grant execute on function auth.uid() to anon, authenticated, service_role;`);
   await db.exec(await readFile(new URL('../supabase/migrations/202611080001_private_drafts.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611090001_experience_drafts.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611090002_availability_drafts.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611090003_user_profile_drafts.sql', import.meta.url), 'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/202611090004_account_roles.sql', import.meta.url), 'utf8'));
 });
 test.afterAll(async () => { await db.close(); });
 test.beforeEach(async () => {
@@ -151,4 +152,43 @@ test('User profile drafts are owner-only, validate declarations, and stay separa
   expect((await db.query('select display_name from public.user_profile_drafts')).rows[0].display_name).toBe('Updated User');
   await db.exec('delete from public.user_profile_drafts');
   expect((await db.query('select display_name from public.profile_drafts')).rows[0].display_name).toBe('Provider draft');
+});
+
+test('assigned account roles are owner-readable but cannot be self-granted, edited or removed', async () => {
+  expect((await db.query('select role from public.account_roles')).rows).toEqual([{ role: 'user' }]);
+  for (const sql of [
+    `insert into public.account_roles(user_id,role) values ('${alice}','provider')`,
+    `insert into public.account_roles(user_id,role) values ('${alice}','admin')`,
+    `insert into public.account_roles(user_id,role) values ('${bob}','provider')`,
+    "update public.account_roles set role='admin'",
+    'delete from public.account_roles',
+  ]) await expect(db.exec(sql)).rejects.toThrow(/permission denied/i);
+  expect((await db.query(`select * from public.account_roles where user_id='${bob}'`)).rows).toHaveLength(0);
+  await asUser('', 'anon');
+  await expect(db.query('select * from public.account_roles')).rejects.toThrow(/permission denied/i);
+  await expect(db.query("select public.has_account_role('user')")).rejects.toThrow(/permission denied/i);
+});
+test('server role checks use trusted rows for the current user rather than signup metadata', async () => {
+  await asUser('', 'service_role');
+  await db.query("insert into public.account_roles(user_id,role) values ($1,'provider')", [bob]);
+  const audit = await db.query("select action,new_role,actor_database_role from public.account_role_events where new_user_id=$1 and new_role='provider' order by event_id desc limit 1", [bob]);
+  expect(audit.rows).toEqual([{ action: 'INSERT', new_role: 'provider', actor_database_role: 'service_role' }]);
+  await expect(db.exec('delete from public.account_role_events')).rejects.toThrow(/permission denied/i);
+  await asUser(alice);
+  await expect(db.query('select * from public.account_role_events')).rejects.toThrow(/permission denied/i);
+  expect((await db.query("select public.has_account_role('user') as value")).rows[0].value).toBe(true);
+  expect((await db.query("select public.has_account_role('provider') as value")).rows[0].value).toBe(false);
+  expect((await db.query("select public.has_account_role('admin') as value")).rows[0].value).toBe(false);
+  await asUser(bob);
+  expect((await db.query("select public.has_account_role('provider') as value")).rows[0].value).toBe(true);
+  await db.exec('reset role');
+  await db.query("delete from public.account_roles where user_id=$1 and role='provider'", [bob]);
+});
+test('signup initializes only the basic User role even when metadata requests privileged roles', async () => {
+  const charlie = '33333333-3333-4333-8333-333333333333';
+  await db.exec('reset role');
+  await db.query('insert into auth.users(id,raw_user_meta_data) values ($1,$2::jsonb)', [charlie, JSON.stringify({ onboarding_intent: 'provider', role: 'admin', roles: ['provider', 'admin'], publishing: true })]);
+  await asUser(charlie);
+  expect((await db.query('select role from public.account_roles')).rows).toEqual([{ role: 'user' }]);
+  await db.exec('reset role'); await db.query('delete from auth.users where id=$1', [charlie]);
 });

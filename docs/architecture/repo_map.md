@@ -724,3 +724,8 @@ underlying feature is operational.
 - `src/booking-draft.js`: in-memory fictional request composer/review with no writes.
 - `src/booking-draft-rules.js`: UI calendar/time/zone/duration-format validation,
   separate from future authoritative scheduling and pricing services.
+
+- `src/backend/permissions.js`: verified current-user role reads from trusted rows.
+- `src/account-permissions.js`: assigned-role status and retry, separate from intent.
+- `supabase/migrations/202611090004_account_roles.sql`: protected roles, basic-user
+  initialization, invoker role checks and restricted role-change event storage.

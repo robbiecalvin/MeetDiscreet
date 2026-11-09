@@ -1126,3 +1126,20 @@ An explicit non-disclosure flag requires empty gender description when selected;
 self-description is required otherwise. Username/age can be absent in partial
 private drafts. Neither declarations nor database constraints establish eligibility,
 username uniqueness/allocation, public visibility or authoritative account roles.
+
+
+## Server-controlled account roles
+
+[Account role migration](../../supabase/migrations/202611090004_account_roles.sql)
+adds `account_roles` keyed by auth user and application-role name. Signup/backfill
+assign basic User membership only, independently of user-editable metadata. Browser
+roles are owner-readable and never browser-writable. The invoker helper checks
+only the authenticated current user; no arbitrary target-user parameter is exposed.
+
+Protected role-event records preserve old/new assignment identifiers and roles,
+request actor ID when available, database actor role and server timestamp. No
+profile content or credentials are logged. Browser audit access is denied; service
+APIs are read-only on the audit table. Retention/export and an authorized operational
+role-management workflow remain future requirements. These records do not claim
+a complete immutable/compliance audit system. Roles remain distinct from eligibility,
+subscriptions, publishing plans, ownership and permissions for individual resources.
