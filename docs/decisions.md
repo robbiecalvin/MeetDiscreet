@@ -504,3 +504,11 @@ owner-only profile/listing drafts. It grants no marketplace role, public publish
 paid entitlement, or eligibility verification. Experiences remain in memory.
 The deployment flag defaults off until project configuration and live checks are
 completed. See [backend setup](./development/backend-setup.md).
+
+
+## DEC-018 — Continue Building Before Full Manual Walkthrough
+
+Robbie requested continued implementation and a combined manual walkthrough later.
+Run relevant automated checks during each increment; keep hosted verification gaps
+explicit. Saved listing management extends private draft ownership only, without
+public publishing or changes to unresolved commercial rules.

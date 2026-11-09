@@ -33,3 +33,13 @@ Tested age-gated navigation, required/whitespace input, safe markup rendering,
 no network submission, both categories, edit/focus behaviour, memory retention,
 clear/refresh, and five responsive widths. Desktop/mobile form and preview
 screenshots inspected. No real posting or live deployment validation claimed.
+
+
+## Saved private draft management
+
+When the development backend is enabled, show whether saving creates a new draft
+or updates the selected saved draft. “Start a new draft” clears editor selection
+without deleting server data. Loaded draft choices show listing type and city.
+Each saved draft has a labelled delete action with confirmation and retry feedback.
+Deleting the selected saved record preserves editor text as a new unsaved draft.
+This does not publish, change posting allowances, or alter public discovery.

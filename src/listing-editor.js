@@ -1,7 +1,7 @@
 import { backendEnabled } from './backend/client.js';
-import { listListingDrafts, saveListingDraft } from './backend/drafts.js';
+import { listListingDrafts, saveListingDraft, deleteListingDraft } from './backend/drafts.js';
 import { privateDraftControls } from './backend/draft-controls.js';
-// A frontend-only draft. Never persist this as a real listing or account state.
+// Unsaved editor state is separate from owner-only storage and public listings.
 const defaults = () => ({ category: 'offering', title: '', description: '', city: 'Vancouver', area: '', activity: 'Coffee' });
 let draft = defaults();
 let savedId = null;
@@ -30,6 +30,13 @@ export function renderListingEditor(container, onBack) {
   intro.append(element('p', 'A LITTLE PLAN STARTS HERE', 'eyebrow'), element('h1', 'Put a plan into words.'), element('p', 'Offer your company or describe an experience you’d like to share.', 'offering-lead'));
   const notice = element('p', backendEnabled ? 'Development listing drafts. Use test data. Unsaved edits clear on refresh; sign in to save/load private drafts. Saving does not publish or grant posting access.' : 'Demo editor. Use fictional details. Nothing is saved or published; a full refresh clears this draft.', 'editor-notice');
   container.append(back, intro, notice);
+  const selection = element('p', '', 'editor-notice');
+  selection.setAttribute('role', 'status');
+  function updateSelection() {
+    selection.textContent = savedId ? 'Editing a saved private draft. Saving updates this draft.' : 'New private draft. Saving creates a separate draft.';
+  }
+  updateSelection();
+  if (backendEnabled) container.append(selection);
   const form = element('form', null, 'listing-form');
   form.noValidate = true;
   const fields = new Map();
@@ -89,7 +96,7 @@ export function renderListingEditor(container, onBack) {
   sample.type = 'button';
   const submit = element('button', 'Preview draft', 'button primary');
   submit.type = 'submit';
-  const clear = element('button', 'Clear draft', 'button quiet');
+  const clear = element('button', backendEnabled ? 'Start a new draft' : 'Clear draft', 'button quiet');
   clear.type = 'button';
   sample.addEventListener('click', () => {
     Object.assign(draft, examples[draft.category]);
@@ -110,6 +117,7 @@ export function renderListingEditor(container, onBack) {
     }
     summary.textContent = '';
     updateAuthor();
+    updateSelection();
   }
   actions.append(sample, submit, clear);
   form.append(actions);
@@ -164,6 +172,7 @@ export function renderListingEditor(container, onBack) {
     heading.focus();
     preview.scrollIntoView({ block: 'start', behavior: 'instant' });
   });
+  let choicesContainer;
   const storage = privateDraftControls({
     multiple: true,
     onSave: async () => {
@@ -172,15 +181,44 @@ export function renderListingEditor(container, onBack) {
       const nextId = await saveListingDraft({ ...draft }, savedId);
       if (epoch !== identityEpoch) throw new Error('Account changed.');
       savedId = nextId;
+      updateSelection();
+      choicesContainer?.replaceChildren();
       return 'Private listing draft saved. It has not been published.';
     },
     onLoad: async (choices) => {
+      choicesContainer = choices;
       const epoch = identityEpoch;
       const rows = await listListingDrafts();
       if (epoch !== identityEpoch) throw new Error('Account changed.');
       choices.replaceChildren();
       for (const row of rows) {
+        const item = element('article', null, 'saved-draft-item');
         const button = element('button', row.title, 'button outline');
+        const metadata = element('p', `${row.kind === 'offering' ? 'Offering' : 'Looking For'} · ${row.city} · Private draft`, 'profile-small');
+        const remove = element('button', 'Delete draft', 'button quiet');
+        remove.type = 'button';
+        remove.setAttribute('aria-label', `Delete draft: ${row.title}`);
+        const result = element('p', '', 'profile-small');
+        result.setAttribute('role', 'status');
+        remove.addEventListener('click', async () => {
+          if (epoch !== identityEpoch || !window.confirm(`Delete the saved private draft “${row.title}”? This cannot be undone.`)) return;
+          button.disabled = true; remove.disabled = true;
+          result.textContent = 'Deleting…';
+          try {
+            await deleteListingDraft(row.id);
+            if (epoch !== identityEpoch) return;
+            const wasSelected = savedId === row.id;
+            if (wasSelected) {
+              savedId = null;
+              updateSelection();
+            }
+            item.replaceChildren(element('p', wasSelected ? 'Private draft deleted. Any text in the editor is now unsaved.' : 'Private draft deleted.', 'profile-small'));
+          } catch {
+            if (epoch !== identityEpoch) return;
+            result.textContent = 'Unable to delete this draft. Check your connection and sign-in, then retry.';
+            button.disabled = false; remove.disabled = false;
+          }
+        });
         button.type = 'button';
         button.addEventListener('click', () => {
           if (epoch !== identityEpoch) return;
@@ -189,7 +227,8 @@ export function renderListingEditor(container, onBack) {
           syncFields(); preview.hidden = true; form.hidden = false;
           fields.get('title').control.focus();
         });
-        choices.append(button);
+        item.append(button, metadata, remove, result);
+        choices.append(item);
       }
       return rows.length ? 'Choose one of your private drafts to load.' : 'No private listing drafts found for this account.';
     },

@@ -33,3 +33,10 @@ export async function saveListingDraft(draft, id) {
   failure(error);
   return data.id;
 }
+
+export async function deleteListingDraft(id) {
+  const user = await requireUser();
+  const { data, error } = await backendClient().from('listing_drafts').delete().eq('id', id).eq('owner_id', user.id).select('id').single();
+  failure(error);
+  return data.id;
+}

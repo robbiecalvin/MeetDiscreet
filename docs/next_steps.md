@@ -645,12 +645,18 @@ If launch scope is reduced:
 - Build passed; all 109 default tests (including six PostgreSQL/configuration
   checks) and five mocked-provider browser integration tests passed. Policy
   checks exercise owner, cross-owner, anonymous, and invalid writes.
-- Running cloud still denies the project domain after the reported settings edit;
-  current observed custom allowlist is empty. No live authentication, email,
-  schema, or Netlify integration verification is claimed.
-- Default backend flag remains false. Configure Supabase redirects and Netlify
-  build variables, then validate with two test accounts before enabling real use.
-  See [setup](./development/backend-setup.md). No payments or public publishing.
+- Cloud access to Supabase now works. Hosted auth settings confirm email sign-in
+  and required email confirmation. Both hosted draft tables deny anonymous reads.
+- Robbie reports redeploying with backend variables, loading a saved private profile,
+  and receiving no-draft feedback in the subsequent account check. Full hosted
+  account separation, recovery, email and session lifecycle verification is pending.
+- Saved listing management now includes type/city metadata, explicit new-versus-saved
+  editing state, starting a separate draft, and confirmed owner-filtered deletion.
+  Failed deletion preserves the saved selection and offers retry; deleting the
+  selected draft keeps editor text as unsaved input. No public publishing.
+- Build and seven mocked-provider browser tests passed for this increment.
+- Robbie requested continued implementation, deferring the full manual walkthrough.
+  Continue automated checks during development. See [setup](./development/backend-setup.md).
 
 ### Next Action
 

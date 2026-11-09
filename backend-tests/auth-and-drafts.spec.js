@@ -32,6 +32,10 @@ async function mockBackend(page, options = {}) {
     }
     if (url.pathname === '/rest/v1/listing_drafts') {
       if (method === 'POST') { state.listings.push({ ...body, id: listingId }); return respond({ id: listingId }, 201); }
+      if (method === 'DELETE') {
+        if (options.failDelete) return respond({ message: 'Denied' }, 403);
+        state.listings = []; return respond({ id: listingId });
+      }
       if (method === 'PATCH') { state.listings = [{ ...body, id: listingId }]; return respond({ id: listingId }); }
       return respond(state.listings);
     }
@@ -83,9 +87,9 @@ test('listing drafts are saved and loaded without becoming discovery ads', async
   await expect(page.locator('.private-draft-controls [role=status]')).toContainText('Private listing draft saved');
   expect(state.listings[0].owner_id).toBe(userId);
   expect(state.listings[0]).not.toHaveProperty('published_at');
-  await page.getByRole('button', { name: 'Clear draft', exact: true }).click();
+  await page.getByRole('button', { name: 'Start a new draft', exact: true }).click();
   await page.getByRole('button', { name: 'Load my listing drafts', exact: true }).click();
-  await page.locator('.saved-draft-choices button').click();
+  await page.locator('.saved-draft-choices article > button').first().click();
   await expect(page.getByLabel('Ad title', { exact: true })).toHaveValue(state.listings[0].title);
   await page.getByRole('link', { name: 'Back to discovery', exact: false }).click();
   await expect(page.locator('.provider-card')).toHaveCount(10);
@@ -139,3 +143,34 @@ test('recovery uses same-origin callback and PKCE flow identifier survives URL s
   await page.getByRole('button', { name: 'Update password', exact: true }).click();
   await expect(page.locator('.account-preview-result')).toContainText('password was updated');
 });
+
+for (const failDelete of [false, true]) {
+  test(`saved listing deletion ${failDelete ? 'failure preserves the draft' : 'requires confirmation and resets selection'}`, async ({ page }) => {
+    const state = await mockBackend(page, { failDelete });
+    await signIn(page);
+    await page.locator('header [data-editor-link]').click();
+    await page.getByRole('button', { name: 'Use a fictional example' }).click();
+    await page.getByRole('button', { name: 'Save private draft', exact: true }).click();
+    await expect(page.locator('.private-draft-controls [role=status]').first()).toContainText('Private listing draft saved');
+    await page.getByRole('button', { name: 'Load my listing drafts', exact: true }).click();
+    const remove = page.getByRole('button', { name: 'Delete draft:', exact: false });
+    await expect(remove).toBeVisible();
+    page.once('dialog', dialog => dialog.dismiss());
+    await remove.click();
+    expect(state.requests.filter(r => r.method === 'DELETE')).toHaveLength(0);
+    page.once('dialog', dialog => dialog.accept());
+    await remove.click();
+    if (failDelete) {
+      await expect(page.locator('.saved-draft-item [role=status]')).toContainText('Unable to delete');
+      await expect(remove).toBeEnabled();
+      expect(state.listings).toHaveLength(1);
+    } else {
+      await expect(page.locator('.saved-draft-item')).toContainText('Private draft deleted');
+      await expect(page.locator('.editor-notice[role=status]')).toContainText('New private draft');
+      expect(state.listings).toHaveLength(0);
+      const request = state.requests.find(r => r.method === 'DELETE');
+      expect(request.path).toBe('/rest/v1/listing_drafts');
+      await expect(page.getByLabel('Ad title', { exact: true })).not.toHaveValue('');
+    }
+  });
+}
