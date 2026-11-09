@@ -1092,5 +1092,6 @@ test('application activity shows bounded private state history and clears on fai
   await page.getByRole('button',{name:'Refresh application activity',exact:true}).click();
   await expect(page.locator('.application-activity li')).toHaveCount(1);
   await page.getByRole('button',{name:'Sign out',exact:true}).click();
-  await expect(page.locator('.application-activity')).toHaveCount(0);
+  await expect(page.locator('.application-activity li')).toHaveCount(0);
+  await expect(page.locator('.application-activity [role=status]')).toHaveText('');
 });
