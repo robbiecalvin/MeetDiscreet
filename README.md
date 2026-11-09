@@ -26,7 +26,9 @@ explains the demo and links to existing features; live support/report submission
 is not connected. Sign-in, registration, and recovery screens support fictional
 form validation only; they do not create accounts or send emails. The companion
 profile editor provides an in-memory draft and labelled audience previews without
-saving a profile or changing access. Profiles, generated photos, online statuses, and ads are fictional.
+saving a profile or changing access. Its companion draft tools include an experience
+catalogue with included/extra options and currency-pending draft amounts; no
+charges or booking quotes are calculated. Profiles, generated photos, online statuses, and ads are fictional.
 Accounts, payments, bookings, communication, and production deployment are not
 connected. See [the roadmap](./docs/next_steps.md) for verification and limitations.
 

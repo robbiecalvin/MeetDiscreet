@@ -543,7 +543,7 @@ If launch scope is reduced:
 
 ## 18. Current Work Snapshot
 
-- Objective: Companion profile draft editing with clearly labelled audience previews.
+- Objective: Companion experience catalogue draft with included/extra controls and labelled previews.
 - Completed: Pinned Node/npm/Vite workflow; age gate; default portrait grid with three columns on mobile; bottom people/ads switch; one-column ad cards; city, search, online, and interest filters; empty reset; limited public demo dialogs.
 - Visual direction: #121521 / #38476b / #b6192e, Agrandir preferred, bold headings and thin body text. Licensed font assets absent; system fallback currently used.
 - Gate: 30-day browser confirmation; external referrer exit with Google fallback. No role or account privileges are granted.
@@ -621,12 +621,20 @@ If launch scope is reduced:
 - Visitor preview replaces biography/interests with labels. Subscriber preview contains no actual media/experience assets and grants no access. This is an owner-style synthetic draft, not backend authorization.
 - No saved/published profile, real uploads, payments, account roles, entitlements, or discovery mutations. Full reload clears the draft; only the existing age timestamp is stored.
 
+### Experience Catalogue Increment
+
+- Partial COM-05 at `/?page=experiences`, linked from the profile editor through shared companion draft-tool navigation.
+- Add/edit/remove experiences, descriptions/restrictions, offered status, included-in-hourly-rate status, and one-time/hourly extra drafts. Included clears/disables extra controls.
+- Draft extra amounts use exact decimal-to-integer-minor-unit parsing, rejecting overprecision/negative/unsafe input without rounding. Currency and real billing policies remain pending; no quote or charge is calculated.
+- Visitor preview shows only labels. Subscriber-layout preview includes offered synthetic items only; no account access is granted. Not-offered entries remain in the owner list.
+- Catalogue/composer are in memory until full refresh. No save, publication, backend request, entitlement, or public profile/discovery change.
+
 ### Last Verified Result
 
-- Vite build and all 92 Chromium tests passed: 82 existing checks plus ten profile-editor validation, audience, navigation, clearing, no-write, and responsive checks.
-- Desktop editor and mobile member-preview screenshots inspected. Responsive checks cover 320/390/700/1024/1440px.
-- Documentation links and diff whitespace checked. Prices, access rules, and pending eligibility/financial policies preserved.
-- Safari, actual Agrandir, real ownership/authentication/storage, and current Netlify deployment remain unverified/unimplemented as applicable.
+- Vite build and all 103 tests passed: 92 regressions plus 11 catalogue/parser/navigation/preview/responsive checks.
+- Desktop editor and mobile subscriber-layout screenshots inspected; widths 320/390/700/1024/1440px checked.
+- Documentation links and diff whitespace checked. Established platform prices and pending commercial/access policies preserved.
+- Safari, Agrandir, real authentication/ownership/storage, and live Netlify verification remain unverified/unimplemented as applicable.
 
 ### Next Action
 

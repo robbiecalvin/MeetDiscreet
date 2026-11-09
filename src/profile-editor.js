@@ -1,3 +1,4 @@
+import { draftToolNavigation } from './draft-tools.js';
 import { providers } from './data.js';
 const defaults = () => ({ name: '', username: '', age: '', tagline: '', city: 'Vancouver', area: '', photo: '2', bio: '', interests: '' });
 let draft = defaults();
@@ -7,7 +8,7 @@ function element(tag, text, className) {
   if (className) node.className = className;
   return node;
 }
-export function renderProfileEditor(container, onBack) {
+export function renderProfileEditor(container, onBack, onTool) {
   container.replaceChildren();
   const back = element('a', '← Back to discovery', 'profile-back');
   back.href = './';
@@ -17,7 +18,7 @@ export function renderProfileEditor(container, onBack) {
   });
   const intro = element('div', null, 'editor-intro');
   intro.append(element('p', 'A LITTLE MORE ABOUT YOU', 'eyebrow'), element('h1', 'Make an introduction.'), element('p', 'Try out a companion profile and see what each audience would see.', 'offering-lead'));
-  container.append(back, intro, element('p', 'Demo profile editor. Use fictional details only. Nothing is saved or published; a full refresh clears the draft. Audience previews do not grant account access.', 'editor-notice'));
+  container.append(back, draftToolNavigation('edit-profile', onTool), intro, element('p', 'Demo profile editor. Use fictional details only. Nothing is saved or published; a full refresh clears the draft. Audience previews do not grant account access.', 'editor-notice'));
   const form = element('form', null, 'listing-form profile-draft-form');
   form.noValidate = true;
   form.autocomplete = 'off';

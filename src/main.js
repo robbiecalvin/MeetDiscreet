@@ -8,6 +8,7 @@ import { renderGuidelines } from './guidelines.js';
 import { renderHelp } from './help.js';
 import { renderAccount } from './account.js';
 import { renderProfileEditor } from './profile-editor.js';
+import { renderExperiences } from './experiences.js';
 import { referencePrices, formatReferencePrice } from './pricing.js';
 
 const $ = (selector) => document.querySelector(selector);
@@ -106,16 +107,18 @@ function renderRoute() {
   const isHow = !isProfile && !isOffering && params.get('page') === 'how-it-works';
   const isEditor = !isProfile && !isOffering && params.get('page') === 'create-listing';
   const isProfileEditor = !isProfile && !isOffering && params.get('page') === 'edit-profile';
+  const isExperiences = !isProfile && !isOffering && params.get('page') === 'experiences';
+  $('#experiences-view').hidden = !isExperiences;
   $('#profile-editor-view').hidden = !isProfileEditor;
   $('#editor-view').hidden = !isEditor;
-  $('#discovery-view').hidden = isProfile || isOffering || isHow || isEditor || isAccount || isProfileEditor;
+  $('#discovery-view').hidden = isProfile || isOffering || isHow || isEditor || isAccount || isProfileEditor || isExperiences;
   $('#how-view').hidden = !isHow;
   $('#profile-view').hidden = !isProfile;
   $('#offering-view').hidden = !isOffering;
-  $('.view-dock').hidden = isProfile || isOffering || isHow || isEditor || isAccount || isProfileEditor;
+  $('.view-dock').hidden = isProfile || isOffering || isHow || isEditor || isAccount || isProfileEditor || isExperiences;
   const discoverLink = $('.desktop-nav a');
   discoverLink.href = './';
-  if (isProfile || isOffering || isHow || isEditor || isAccount || isProfileEditor) discoverLink.removeAttribute('aria-current');
+  if (isProfile || isOffering || isHow || isEditor || isAccount || isProfileEditor || isExperiences) discoverLink.removeAttribute('aria-current');
   else discoverLink.setAttribute('aria-current', 'page');
   document.querySelectorAll('[data-how-link]').forEach((link) => {
     if (isHow) link.setAttribute('aria-current', 'page');
@@ -146,8 +149,11 @@ function renderRoute() {
     renderAccount($('#account-view'), accountMode, navigateAccount, backToDiscovery);
     document.title = `${accountMode === 'register' ? 'Create account' : accountMode === 'recover-account' ? 'Account recovery' : 'Sign in'} · MeetDiscreet`;
   } else if (isProfileEditor) {
-    renderProfileEditor($('#profile-editor-view'), backToDiscovery);
+    renderProfileEditor($('#profile-editor-view'), backToDiscovery, navigateAccount);
     document.title = 'Profile editor · MeetDiscreet';
+  } else if (isExperiences) {
+    renderExperiences($('#experiences-view'), backToDiscovery, navigateAccount);
+    document.title = 'Experience catalogue · MeetDiscreet';
   } else document.title = 'Discover · MeetDiscreet';
 }
 function backToDiscovery() {
@@ -202,7 +208,7 @@ window.addEventListener('popstate', () => {
     (document.getElementById(location.hash.slice(1)) || main).focus({ preventScroll: true });
     return;
   }
-  if (!new URL(location.href).searchParams.has('profile') && !new URL(location.href).searchParams.has('ad') && !['how-it-works', 'create-listing', 'sign-in', 'register', 'recover-account', 'edit-profile'].includes(new URL(location.href).searchParams.get('page'))) {
+  if (!new URL(location.href).searchParams.has('profile') && !new URL(location.href).searchParams.has('ad') && !['how-it-works', 'create-listing', 'sign-in', 'register', 'recover-account', 'edit-profile', 'experiences'].includes(new URL(location.href).searchParams.get('page'))) {
     window.scrollTo({ top: discoveryScroll, behavior: 'instant' });
     const card = state.view === 'ads' ? (selectedAdId && document.querySelector(`[data-ad="${selectedAdId}"]`)) : (selectedCardId && document.querySelector(`[data-provider="${selectedCardId}"]`));
     (card || $('#main')).focus({ preventScroll: true });
@@ -304,7 +310,7 @@ render();
 renderRoute();
 
 $('.desktop-nav a').addEventListener('click', (event) => {
-  if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && (new URL(location.href).searchParams.has('profile') || new URL(location.href).searchParams.has('ad') || ['how-it-works', 'create-listing', 'sign-in', 'register', 'recover-account', 'edit-profile'].includes(new URL(location.href).searchParams.get('page')))) {
+  if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && (new URL(location.href).searchParams.has('profile') || new URL(location.href).searchParams.has('ad') || ['how-it-works', 'create-listing', 'sign-in', 'register', 'recover-account', 'edit-profile', 'experiences'].includes(new URL(location.href).searchParams.get('page')))) {
     event.preventDefault();
     backToDiscovery();
   }

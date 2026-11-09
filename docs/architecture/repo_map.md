@@ -144,6 +144,8 @@ conflict with approved MeetDiscreet decisions.
 - src/help.js: public searchable FAQ, topic filtering, help navigation, and accurate support integration limits.
 - src/account.js: sign-in/registration/recovery layout validation using fictional data; no authentication or credential persistence.
 - src/profile-editor.js: in-memory companion draft, validation, and owner-style audience previews; no persisted profile or access grant.
+- src/draft-tools.js: shared navigation between implemented companion draft tools.
+- src/experiences.js: in-memory experience catalogue, exact draft-amount parsing, and labelled audience previews; no billing authority.
 - src/styles.css: shared tokens, portrait grid, single-column ads, responsive layout.
 - src/data.js: synthetic public profile and ad fixtures; no live presence.
 - public/images/demo-portraits.png: locally served AI-generated fictional portrait sheet.
