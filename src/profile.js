@@ -36,7 +36,7 @@ function heroPortrait(provider) {
   return svg;
 }
 
-export function renderProfile(container, provider, onBack, onSubscribe, backLabel = '← Back to discovery') {
+export function renderProfile(container, provider, onBack, onSubscribe, backLabel = '← Back to discovery', onPreviewPlan) {
   container.replaceChildren();
   const back = element('a', backLabel, 'profile-back');
   back.href = './';
@@ -96,6 +96,14 @@ export function renderProfile(container, provider, onBack, onSubscribe, backLabe
   const button = element('button', 'Subscribe to connect', 'button primary profile-subscribe');
   button.addEventListener('click', () => onSubscribe(provider));
   aside.append(button, element('p', 'Currency and renewal terms remain pending. Subscriptions and payments are not connected in this demo.', 'profile-small'));
+  const plan = element('a', 'Preview a booking plan', 'button outline');
+  plan.href = `?page=booking-draft&provider=${encodeURIComponent(provider.id)}`;
+  plan.addEventListener('click', event => {
+    if (!onPreviewPlan || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault(); onPreviewPlan(provider);
+  });
+  aside.append(plan, element('p', 'Try an unsent fictional plan. This preview does not reserve time or grant booking access.', 'profile-small'));
+
   layout.append(content, aside);
   container.append(layout, element('p', 'Fictional profile and online status. Labelled previews contain no private content. These fictional profiles are not connected to subscriptions, messaging, or bookings.', 'profile-demo-note'));
 }

@@ -42,3 +42,13 @@ checks), including 320/390/700/1024/1440px profiles. Desktop and mobile screensh
 inspected. The photo region preserves the existing fictional portrait with a
 softened full-width backdrop on desktop and a filled photo on mobile.
 macOS Safari and licensed Agrandir rendering remain unverified.
+
+
+### Unsent booking-plan preview entry
+
+Keep Subscribe to connect as the existing primary action. A separate secondary
+Preview a booking plan link opens the fictional unsent composer with the current
+public fixture selected. Concise copy identifies it as a preview granting no booking
+access or reservation. Actual subscriber-only requests remain unimplemented.
+Existing drafts are protected on provider changes; see the
+[booking preview brief](./booking-draft.md#public-profile-to-plan-preview-continuity).

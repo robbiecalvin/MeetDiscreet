@@ -28,3 +28,17 @@ paired with an explicit Vancouver zone, not a real provider’s availability.
 Drafts survive internal navigation only; refresh, explicit clear, and account
 identity changes clear them. Connected-mode unload warnings apply. No backend
 writes, browser draft persistence, media permission or new migration is needed.
+
+
+## Public profile-to-plan preview continuity
+
+Public fictional profiles offer a secondary Preview a booking plan link alongside
+the existing subscription explanation. The link opens the age-gated unsent preview
+with a validated fictional provider ID. This grants no subscriber booking access.
+An empty plan adopts the selected person; revisiting the same person preserves edits.
+Opening another profile preserves the current draft and offers Start a new draft
+with that person, requiring confirmation before clearing all old plan fields.
+Cancellation keeps the original plan. Unknown IDs show a generic unavailable-context
+message without rendering query text. View fictional profile supports internal
+navigation back to the selected person's public preview while retaining draft text.
+Native modified clicks retain ordinary links; reload/new tabs still have no saved draft.

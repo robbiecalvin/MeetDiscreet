@@ -65,3 +65,52 @@ for (const width of [390, 1440]) {
     await page.screenshot({ path: `/tmp/booking-review-${width}.png`, fullPage: true });
   });
 }
+
+
+test('profile preview carries the selected fictional provider into an unsent plan and back', async ({ page }) => {
+  const writes = [];
+  page.on('request',request => {if (['POST','PUT','PATCH','DELETE'].includes(request.method())) writes.push(request.url());});
+  await page.setViewportSize({width:390,height:844});
+  await page.goto('/?profile=alex');
+  await page.getByRole('button',{name:'I am 18 or older'}).click();
+  await page.locator('.subscription-card').screenshot({path:'/tmp/profile-plan-entry-mobile.png'});
+  await page.getByRole('link',{name:'Preview a booking plan',exact:true}).click();
+  await expect(page.getByLabel('Fictional provider',{exact:true})).toHaveValue('alex');
+  await page.getByLabel('Requests or notes (optional)',{exact:true}).fill('Keep this plan while browsing.');
+  await page.getByRole('link',{name:'View fictional profile',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Alex, 29',exact:true})).toBeVisible();
+  await page.getByRole('link',{name:'Preview a booking plan',exact:true}).click();
+  await expect(page.getByLabel('Requests or notes (optional)',{exact:true})).toHaveValue('Keep this plan while browsing.');
+  expect(writes).toEqual([]);
+});
+
+test('another profile keeps the current plan until an explicit confirmed replacement', async ({ page }) => {
+  await open(page);
+  await page.getByRole('button',{name:'Use a fictional booking plan'}).click();
+  await page.getByLabel('Fictional provider',{exact:true}).selectOption('alex');
+  await page.getByRole('link',{name:'View fictional profile',exact:true}).click();
+  await page.getByRole('link',{name:'Back to discovery',exact:false}).click();
+  await page.locator('[data-provider="maya"]').click();
+  await page.getByRole('link',{name:'Preview a booking plan',exact:true}).click();
+  await expect(page.getByLabel('Fictional provider',{exact:true})).toHaveValue('alex');
+  await expect(page.getByLabel('Activity idea',{exact:true})).toHaveValue('Culture');
+  page.once('dialog',dialog=>dialog.dismiss());
+  await page.getByRole('button',{name:'Start a new draft with Maya',exact:true}).click();
+  await expect(page.getByLabel('Fictional provider',{exact:true})).toHaveValue('alex');
+  page.once('dialog',dialog=>dialog.accept());
+  await page.getByRole('button',{name:'Start a new draft with Maya',exact:true}).click();
+  await expect(page.getByLabel('Fictional provider',{exact:true})).toHaveValue('maya');
+  await expect(page.getByLabel('Activity idea',{exact:true})).toHaveValue('');
+  await expect(page.getByLabel('Requests or notes (optional)',{exact:true})).toHaveValue('');
+});
+
+test('direct provider plan links stay gated and unknown provider context is rejected', async ({ page }) => {
+  await page.goto('/?page=booking-draft&provider=maya');
+  await expect(page.locator('#app')).toBeHidden();
+  await page.getByRole('button',{name:'I am 18 or older'}).click();
+  await expect(page.getByLabel('Fictional provider',{exact:true})).toHaveValue('maya');
+  await page.goto('/?page=booking-draft&provider=%3Cimg%20src=x%3E');
+  await expect(page.getByLabel('Fictional provider',{exact:true})).toHaveValue('');
+  await expect(page.locator('.booking-context')).toContainText('fictional provider is unavailable');
+  await expect(page.locator('.booking-context img')).toHaveCount(0);
+});

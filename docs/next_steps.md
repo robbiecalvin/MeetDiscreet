@@ -954,6 +954,18 @@ If launch scope is reduced:
   clearing after saves/sign-out. Mobile activity layout inspected. Hosted migration
   validation remains pending as documented in backend setup.
 
+### Profile-to-Booking Preview Continuity
+
+- Public fictional profiles link to the unsent booking-plan preview with the
+  selected person. The plan links back to that person's public profile.
+- Existing drafts survive internal browsing. Switching from another profile
+  preserves the old plan until an explicit confirmed replacement clears its fields.
+- Direct links remain age-gated; unknown provider context is rejected. No backend
+  write, entitlement, reservation, quote, payment or actual booking action is added.
+- Build, all 150 standard checks and 55 backend browser checks passed. All eight
+  booking-preview checks passed again after context-message cleanup; mobile profile
+  entry inspected. No migration or commercial-policy change is required.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

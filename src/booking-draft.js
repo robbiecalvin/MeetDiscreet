@@ -12,12 +12,27 @@ function node(tag, text, className) {
   if (className) value.className = className;
   return value;
 }
-export function renderBookingDraft(container, navigate) {
+export function renderBookingDraft(container, navigate, requestedProvider, onViewProfile) {
   container.replaceChildren();
   const root = node('div', null, 'booking-draft');
   const back = node('a', '← Back to User setup', 'profile-back'); back.href = '?page=user-setup';
   back.addEventListener('click', event => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate('user-setup'); });
   root.append(back, node('p', 'A PLAN WORTH SHARING', 'eyebrow'), node('h1', 'Shape a booking request.'), node('p', 'Start with a person, a plan, and a little time together.', 'offering-lead'), node('p', 'Booking request preview. Use fictional plans. Nothing is saved or sent, no time is reserved, and no price or deposit is calculated.', 'editor-notice'));
+  const requested = providers.find(person => person.id === requestedProvider);
+  const hasDraft = Object.values(draft).some(Boolean);
+  if (requested && !hasDraft) draft.provider = requested.id;
+  const context = node('div', null, 'booking-context');
+  if (requestedProvider && !requested) context.append(node('p', 'That fictional provider is unavailable. Choose a provider below; your current draft has been kept.', 'editor-notice'));
+  if (requested && hasDraft && draft.provider !== requested.id) {
+    context.append(node('p', `You opened this preview from ${requested.name}'s profile. Your existing draft has been kept.`, 'profile-small'));
+    const replace = node('button', `Start a new draft with ${requested.name}`, 'button outline'); replace.type = 'button';
+    replace.addEventListener('click', () => {
+      if (!window.confirm('Start a new booking draft? This will discard the current unsaved plan.')) return;
+      draft = { ...defaults(), provider: requested.id }; context.replaceChildren(); sync(); fields.get('activity').input.focus();
+    });
+    context.append(replace);
+  }
+  root.append(context);
   const layout = node('div', null, 'booking-layout');
   const form = node('form', null, 'booking-form'); form.noValidate = true;
   const error = node('p', '', 'editor-errors'); error.setAttribute('role', 'alert'); form.append(error);
@@ -34,7 +49,7 @@ export function renderBookingDraft(container, navigate) {
     input.required = ['provider', 'activity', 'date', 'time', 'timeZone', 'duration'].includes(key);
     const title = node('label', label); title.htmlFor = input.id;
     const message = node('p', '', 'editor-field-error'); message.id = `booking-${key}-error`; input.setAttribute('aria-describedby', message.id);
-    input.addEventListener('input', () => { draft[key] = input.value; input.removeAttribute('aria-invalid'); message.textContent = ''; error.textContent = ''; if (key === 'provider') paintProvider(); });
+    input.addEventListener('input', () => { draft[key] = input.value; input.removeAttribute('aria-invalid'); message.textContent = ''; error.textContent = ''; if (key === 'provider') { if (draft.provider === requested?.id) context.replaceChildren(); paintProvider(); } });
     wrapper.append(title, input, message); form.append(wrapper); fields.set(key, { input, message });
   }
   field('provider', 'Fictional provider', 'select', [['', 'Choose a provider'], ...providers.map(value => [value.id, `${value.name} · ${value.city}`])]);
@@ -58,6 +73,13 @@ export function renderBookingDraft(container, navigate) {
     if (!provider) { person.append(node('h2', 'Who would you like to meet?'), node('p', 'Choose a fictional provider to start this layout preview.')); return; }
     const photo = node('div', null, `portrait portrait-${provider.photo} booking-provider-photo`); photo.setAttribute('role', 'img'); photo.setAttribute('aria-label', `Fictional portrait of ${provider.name}`);
     person.append(photo, node('h2', `${provider.name}, ${provider.age}`), node('p', `${provider.area}, ${provider.city}`), node('p', 'Live booking requests require a subscription to the selected provider and eligibility checks. This preview does not grant access.', 'profile-small'));
+    const profileLink = node('a', 'View fictional profile', 'button outline'); profileLink.href = `?profile=${encodeURIComponent(provider.id)}`;
+    profileLink.addEventListener('click', event => {
+      if (!onViewProfile || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault(); onViewProfile(provider);
+    });
+    person.append(profileLink);
+
   }
   const preview = node('section', null, 'booking-review'); preview.hidden = true;
   const heading = node('h2', 'Review your unsent draft'); heading.tabIndex = -1;
@@ -70,9 +92,9 @@ export function renderBookingDraft(container, navigate) {
     const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Vancouver', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date()).map(value => [value.type, value.value]));
     const nextWeek = new Date(`${parts.year}-${parts.month}-${parts.day}T12:00:00Z`); nextWeek.setUTCDate(nextWeek.getUTCDate() + 7);
     draft = { provider: 'maya', activity: 'Culture', date: nextWeek.toISOString().slice(0, 10), time: '14:00', timeZone: 'America/Vancouver', duration: '120', venue: 'A gallery and nearby café in Vancouver', expenses: 'Discuss admission and café expenses with the provider.', notes: 'A fictional gallery afternoon with time for conversation.' };
-    sync(); fields.get('provider').input.focus();
+    context.replaceChildren(); sync(); fields.get('provider').input.focus();
   });
-  clear.addEventListener('click', () => { clearBookingDraftState(); sync(); fields.get('provider').input.focus(); });
+  clear.addEventListener('click', () => { clearBookingDraftState(); context.replaceChildren(); sync(); fields.get('provider').input.focus(); });
   form.addEventListener('submit', event => {
     event.preventDefault();
     for (const [key, { input, message }] of fields) { draft[key] = input.value; input.removeAttribute('aria-invalid'); message.textContent = ''; }
