@@ -710,3 +710,9 @@ underlying feature is operational.
 
 - `supabase/migrations/202611090002_availability_drafts.sql`: owner-only weekly
   sketch storage with zone/window/overlap validation; requires later hosted setup.
+
+- `src/provider-setup.js`: guided private provider-draft onboarding; User/Provider
+  intent is stored in Auth user metadata, separate from authoritative roles.
+
+- `src/user-setup.js`: separate User starting page linking discovery and private
+  Looking For draft tools, with same-login provider setup navigation.

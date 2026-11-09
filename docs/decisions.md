@@ -514,3 +514,13 @@ Robbie requested continued implementation and a combined manual walkthrough late
 Run relevant automated checks during each increment; keep hosted verification gaps
 explicit. Saved listing management extends private draft ownership only, without
 public publishing or changes to unresolved commercial rules.
+
+
+## DEC-019 — Explicit User / Provider Onboarding Intent
+
+Robbie identified the missing signup choice and instructed continuation. Registration
+now collects User or Provider as the starting path; existing accounts can revisit
+that preference using the same login. Provider setup guides private draft creation.
+The metadata is user editable and nonauthoritative. Authoritative role combinations,
+provider eligibility/approval and paid/public access remain unresolved; no role
+self-assignment, publishing approval or entitlement is implemented by this choice.

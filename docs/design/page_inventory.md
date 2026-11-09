@@ -441,3 +441,8 @@ see [listing editor brief](./page_briefs/listing-editor.md).
 Partial COM-06 has an in-memory weekly availability editor at `/?page=availability`.
 See [availability brief](./page_briefs/availability.md). It does not reserve times
 or expose real booking availability.
+
+Registration includes explicit User/Provider starting choices. `/?page=user-setup`
+provides discovery/Looking For guidance; `/?page=provider-setup`
+guides provider draft preparation. See [provider setup brief](./page_briefs/provider-setup.md).
+This does not implement provider-role assignment or publishing approval.

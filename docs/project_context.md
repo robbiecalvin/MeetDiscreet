@@ -73,8 +73,9 @@ manage availability, communicate, and respond to booking requests.
 
 Perform specifically authorized review and operational functions.
 
-Whether one account may act as both user and companion remains
-to be confirmed.
+Whether one account may hold both authoritative user and companion roles remains
+to be confirmed. Registration now records a revisitable User/Provider onboarding
+preference under one login; this choice does not assign production roles.
 
 ## 5. Core Product Structure
 

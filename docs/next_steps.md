@@ -792,6 +792,22 @@ If launch scope is reduced:
 - Hosted migration application remains pending, alongside catalogue setup.
   No bookable availability, reservations, publication, or payment is introduced.
 
+### User / Provider Onboarding Choice
+
+- Registration requires User/Provider intent, stored as whitelisted user metadata
+  with requested username. It never grants a role, paid access or verification.
+- Account overview supports existing accounts choosing/revisiting a starting point.
+  User choice opens discovery/Looking For guidance; Provider opens a separate
+  guided setup page with independent saved-draft summaries
+  and links to profile, catalogue, availability and listing management.
+- Signed-out provider setup requests sign-in; demo mode stays a labelled preview.
+  Metadata update failures retain existing state. No new migration is required.
+- Build, all 119 default checks and 31 backend UI checks passed. The 23 account/
+  profile checks were repeated after the chooser/layout updates. Registration and
+  provider setup mobile screenshots inspected; no horizontal overflow.
+- Authoritative dual-role policy, provider eligibility, approval and publishing
+  remain dependent work; untrusted intent metadata must never enforce access.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

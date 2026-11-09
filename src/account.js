@@ -94,7 +94,22 @@ export function renderAccount(container, mode, onMode, onBack) {
   if (mode !== 'reset-password') addField('email', 'Email', 'email');
   if (mode !== 'recover-account') addField('password', 'Password', 'password');
   if (mode === 'register' || mode === 'reset-password') addField('confirm-password', 'Confirm password', 'password');
+  const intentInputs = [];
+  const intentError = element('p', '', 'account-field-error');
+  intentError.id = 'account-intent-error';
   if (mode === 'register') {
+    const group = element('fieldset', null, 'account-intent');
+    group.append(element('legend', 'How would you like to get started?'));
+    for (const [value, title, description] of [['user', 'User', 'Discover providers and plan shared experiences.'], ['provider', 'Provider', 'Build a provider profile, experiences, and availability.']]) {
+      const label = element('label', null, 'account-intent-option');
+      const input = element('input'); input.type = 'radio'; input.name = 'onboarding-intent'; input.value = value;
+      input.required = true; input.setAttribute('aria-label', title); input.setAttribute('aria-describedby', `${intentError.id} account-intent-${value}-description`);
+      const copy = element('span'); const descriptionNode = element('span', description); descriptionNode.id = `account-intent-${value}-description`; copy.append(element('strong', title), descriptionNode);
+      label.append(input, copy); group.append(label); intentInputs.push(input);
+      input.addEventListener('change', () => { intentError.textContent = ''; summary.textContent = ''; result.textContent = ''; });
+    }
+    group.append(element('p', 'Choose a starting point. You can revisit it from your account. Provider setup does not publish a profile or grant paid access.', 'profile-small'), intentError);
+    form.insertBefore(group, summary.nextSibling);
     const label = element('label', null, 'account-adult');
     const input = element('input');
     input.id = 'account-adult';
@@ -123,11 +138,16 @@ export function renderAccount(container, mode, onMode, onBack) {
     fields.get('email').input.value = 'guest@example.invalid';
     if (fields.has('password')) fields.get('password').input.value = 'fictional-demo-only';
     if (fields.has('confirm-password')) fields.get('confirm-password').input.value = 'fictional-demo-only';
+    if (intentInputs.length) intentInputs[0].checked = true;
+    intentError.textContent = '';
     // Adult confirmation remains unchecked; a sample must not accept it for you.
     summary.textContent = '';
     result.textContent = '';
     fields.get('email').input.focus();
   });
+  const continueAccount = modeLink('account', 'Open your account');
+  continueAccount.className = 'button outline';
+  continueAccount.hidden = true;
   let busy = false;
   form.addEventListener('submit', async (event) => {
     if (busy) { event.preventDefault(); return; }
@@ -144,6 +164,12 @@ export function renderAccount(container, mode, onMode, onBack) {
       else if (key === 'confirm-password' && input.value !== fields.get('password').input.value) error.textContent = 'Passwords must match in the preview.';
       if (error.textContent) { input.setAttribute('aria-invalid', 'true'); errors.push(input); }
     }
+    const intent = intentInputs.find(input => input.checked)?.value;
+    intentError.textContent = '';
+    if (mode === 'register' && !['user', 'provider'].includes(intent)) {
+      intentError.textContent = 'Choose User or Provider to get started.';
+      errors.push(intentInputs[0]);
+    }
     result.textContent = '';
     if (errors.length) {
       summary.textContent = 'Please check the highlighted fields.';
@@ -151,7 +177,7 @@ export function renderAccount(container, mode, onMode, onBack) {
       return;
     }
     summary.textContent = '';
-    const credentials = { email: fields.get('email')?.input.value.trim(), password: fields.get('password')?.input.value, username: fields.get('username')?.input.value.trim() };
+    const credentials = { email: fields.get('email')?.input.value.trim(), password: fields.get('password')?.input.value, username: fields.get('username')?.input.value.trim(), intent };
     for (const field of fields.values()) {
       if (!field.error) continue;
       if (field.input.type === 'checkbox') field.input.checked = false;
@@ -163,6 +189,7 @@ export function renderAccount(container, mode, onMode, onBack) {
       field.toggle.textContent = field.input.id === 'account-password' ? 'Show password' : 'Show confirm password';
       field.toggle.setAttribute('aria-pressed', 'false');
     }
+    for (const input of intentInputs) input.checked = false;
     if (backendEnabled) {
       busy = true;
       submit.disabled = true;
@@ -171,11 +198,12 @@ export function renderAccount(container, mode, onMode, onBack) {
         const auth = backendClient().auth;
         let response;
         if (mode === 'sign-in') response = await auth.signInWithPassword({ email: credentials.email, password: credentials.password });
-        else if (mode === 'register') response = await auth.signUp({ email: credentials.email, password: credentials.password, options: { emailRedirectTo: authRedirect(), data: { requested_username: credentials.username } } });
+        else if (mode === 'register') response = await auth.signUp({ email: credentials.email, password: credentials.password, options: { emailRedirectTo: authRedirect(), data: { requested_username: credentials.username, onboarding_intent: credentials.intent } } });
         else if (mode === 'recover-account') response = await auth.resetPasswordForEmail(credentials.email, { redirectTo: authRedirect(true) });
         else response = await auth.updateUser({ password: credentials.password });
         if (response.error) throw response.error;
         if (!result.isConnected) return;
+        continueAccount.hidden = !(mode === 'sign-in' || (mode === 'register' && response.data.session));
         result.textContent = mode === 'sign-in'
           ? 'Signed in to the development backend. You can save your own private drafts. No publishing, subscription, or administrative access is granted.'
           : mode === 'register'
@@ -202,14 +230,14 @@ export function renderAccount(container, mode, onMode, onBack) {
   });
   form.append(submit);
   if (!backendEnabled) form.append(example);
-  form.append(result);
+  form.append(result, continueAccount);
   panel.append(tabs, form);
   if (!['recover-account', 'reset-password'].includes(mode)) {
     const recovery = modeLink('recover-account', 'Forgot your password?');
     recovery.className = 'account-recovery-link';
     panel.append(recovery);
   } else panel.append(modeLink('sign-in', 'Back to sign in'));
-  if (mode === 'register') panel.append(modeLink('edit-profile', 'Try the companion profile editor'));
+  if (mode === 'register') panel.append(modeLink('provider-setup', 'Explore provider setup'));
   layout.append(intro, panel);
   container.append(layout);
 }

@@ -3,13 +3,13 @@ import { test, expect } from '@playwright/test';
 const userId = '11111111-1111-4111-8111-111111111111';
 const listingId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const user = { id: userId, aud: 'authenticated', role: 'authenticated', email: 'test@example.invalid', app_metadata: { provider: 'email', providers: ['email'] }, user_metadata: {}, identities: [], created_at: '2026-11-08T00:00:00Z' };
-function session() {
+function session(profile = user) {
   const encode = (value) => Buffer.from(JSON.stringify(value)).toString('base64url');
   const token = `${encode({ alg: 'HS256', typ: 'JWT' })}.${encode({ sub: userId, aud: 'authenticated', role: 'authenticated', exp: Math.floor(Date.now() / 1000) + 3600, iat: Math.floor(Date.now() / 1000) })}.mock_signature`;
-  return { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock_refresh_token', user };
+  return { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock_refresh_token', user: profile };
 }
 async function mockBackend(page, options = {}) {
-  const state = { availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
+  const state = { user: { ...user, user_metadata: {} }, availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
   await page.route('https://backend-test.supabase.co/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -20,11 +20,18 @@ async function mockBackend(page, options = {}) {
     if (method === 'OPTIONS') return respond({});
     if (url.pathname === '/auth/v1/token') {
       if (options.failSignIn || (options.failReauthentication && state.requests.filter(r => r.path === '/auth/v1/token').length > 1)) return respond({ code: 'invalid_credentials', msg: 'Invalid credentials' }, 400);
-      return respond(session());
+      return respond(session(state.user));
     }
-    if (url.pathname === '/auth/v1/signup') return respond({ ...user, identities: [{ id: userId, user_id: userId }] });
+    if (url.pathname === '/auth/v1/signup') { state.user = { ...state.user, user_metadata: body.data }; return respond({ ...state.user, identities: [{ id: userId, user_id: userId }] }); }
     if (url.pathname === '/auth/v1/recover') { state.recoveryRedirect = url.searchParams.get('redirect_to'); return respond({}); }
-    if (url.pathname === '/auth/v1/user') return options.failPasswordUpdate && method === 'PUT' ? respond({ message: 'Password rejected' }, 422) : respond(user);
+    if (url.pathname === '/auth/v1/user') {
+      if (options.failPasswordUpdate && method === 'PUT') return respond({ message: 'Password rejected' }, 422);
+      if (method === 'PUT' && body?.data) {
+        if (options.failIntentUpdate) return respond({ message: 'Rejected' }, 403);
+        state.user = { ...state.user, user_metadata: { ...state.user.user_metadata, ...body.data } };
+      }
+      return respond(state.user);
+    }
     if (url.pathname === '/auth/v1/logout') return respond({});
     if (url.pathname === '/rest/v1/availability_drafts') {
       if (options.missingAvailabilityMigration) return respond({ message: 'Table missing' }, 404);
@@ -118,11 +125,13 @@ test('listing drafts are saved and loaded without becoming discovery ads', async
   await expect(page.locator('.provider-card')).toHaveCount(10);
 });
 
-test('registration sends no role metadata and requires provider confirmation', async ({ page }) => {
+for (const intent of ['user', 'provider']) {
+test(`registration stores ${intent} intent without role grants and requires email confirmation`, async ({ page }) => {
   const state = await mockBackend(page);
   await enter(page, '/?page=register');
   await expect(page.getByRole('button', { name: 'Use fictional example' })).toHaveCount(0);
   await page.getByLabel('Username', { exact: true }).fill('TestUser');
+  await page.getByRole('radio', { name: intent === 'user' ? 'User' : 'Provider', exact: true }).check();
   await page.getByLabel('Email', { exact: true }).fill('test@example.invalid');
   await page.getByLabel('Password', { exact: true }).fill('test-password-not-real');
   await page.getByLabel('Confirm password', { exact: true }).fill('test-password-not-real');
@@ -130,9 +139,11 @@ test('registration sends no role metadata and requires provider confirmation', a
   await page.getByRole('button', { name: 'Create account', exact: true }).click();
   await expect(page.locator('.account-preview-result')).toContainText('check your email for confirmation');
   const request = state.requests.find((item) => item.path === '/auth/v1/signup');
-  expect(request.body.data).toEqual({ requested_username: 'TestUser' });
+  expect(request.body.data).toEqual({ requested_username: 'TestUser', onboarding_intent: intent });
   await expect(page.getByLabel('Password', { exact: true })).toHaveValue('');
 });
+
+}
 
 test('failed sign-in never claims success and credentials clear', async ({ page }) => {
   await mockBackend(page, { failSignIn: true });
@@ -574,4 +585,45 @@ test('availability handles a missing migration without claiming save success', a
   await page.getByRole('button', { name: 'Load my availability draft' }).click();
   await expect(page.locator('.private-draft-controls [role=status]')).toContainText('Unable to complete');
   await expect(page.getByRole('button', { name: 'Load my availability draft' })).toBeEnabled();
+});
+
+test('existing account can choose provider onboarding and revisit a user starting point', async ({ page }) => {
+  const state = await mockBackend(page);
+  await signIn(page);
+  await page.getByRole('link', { name: 'Open your account', exact: true }).click();
+  await page.getByRole('button', { name: 'Use Provider starting point' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Build your provider introduction.');
+  await expect(page.locator('.provider-setup .account-tool-card')).toHaveCount(4);
+  expect(state.user.user_metadata).toEqual({ onboarding_intent: 'provider' });
+  const update = state.requests.find(value => value.method === 'PUT' && value.body?.data);
+  expect(update.body.data).toEqual({ onboarding_intent: 'provider' });
+  expect(update.body).not.toHaveProperty('app_metadata');
+  expect(update.body).not.toHaveProperty('role');
+  await page.setViewportSize({ width: 390, height: 1000 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: '/tmp/provider-setup-mobile.png', fullPage: true });
+  await page.getByRole('link', { name: 'Back to account', exact: false }).click();
+  await expect(page.getByRole('button', { name: 'Use Provider starting point' })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'Use User starting point' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Find your next shared moment.');
+  await expect(page.getByRole('link', { name: 'Open my listing drafts' })).toBeVisible();
+  await page.getByRole('link', { name: 'Back to account', exact: false }).click();
+  await expect(page.locator('.account-starting-point [role=status]')).toHaveText('Getting started as User.');
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Use User starting point' })).toHaveAttribute('aria-pressed', 'true');
+  expect(state.user.app_metadata).toEqual(user.app_metadata);
+  await page.getByRole('link', { name: 'Explore provider setup', exact: true }).click();
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await expect(page.locator('.provider-setup .account-tool-card')).toHaveCount(0);
+  await expect(page.locator('.provider-setup > [role=status]')).toContainText('Sign in to start');
+});
+test('failed starting-point update does not report provider setup as selected', async ({ page }) => {
+  await mockBackend(page, { failIntentUpdate: true });
+  await signIn(page);
+  await page.locator('[data-account-link]').click();
+  await page.getByRole('button', { name: 'Use Provider starting point' }).click();
+  await expect(page.locator('.account-starting-point [role=status]')).toContainText('Unable to save');
+  await expect(page.getByRole('button', { name: 'Use Provider starting point' })).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.getByRole('button', { name: 'Use Provider starting point' })).toBeEnabled();
 });

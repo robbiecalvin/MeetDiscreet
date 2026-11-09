@@ -40,6 +40,37 @@ export function renderAccountOverview(container, navigate, onBack) {
       return;
     }
     status.textContent = data.user.email ? `Signed in as ${data.user.email}` : 'Signed in.';
+    const starting = node('section', null, 'account-starting-point');
+    const intentStatus = node('p', '', 'profile-small'); intentStatus.setAttribute('role', 'status');
+    const selected = ['user', 'provider'].includes(data.user.user_metadata?.onboarding_intent) ? data.user.user_metadata.onboarding_intent : null;
+    intentStatus.textContent = selected ? `Getting started as ${selected === 'provider' ? 'Provider' : 'User'}.` : 'Choose User or Provider as your starting point.';
+    starting.append(node('h2', 'Your starting point'), node('p', 'Use one login and revisit your starting point here. Provider tools prepare private drafts; this choice does not grant publishing access.', 'profile-small'), intentStatus);
+    const options = node('div', null, 'editor-actions');
+    const buttons = [];
+    for (const intent of ['user', 'provider']) {
+      const button = node('button', `Use ${intent === 'provider' ? 'Provider' : 'User'} starting point`, 'button outline'); button.type = 'button';
+      button.setAttribute('aria-pressed', String(intent === selected));
+      button.addEventListener('click', async () => {
+        for (const option of buttons) option.disabled = true;
+        intentStatus.textContent = 'Saving your starting point…';
+        try {
+          const { data: verified, error: verifyError } = await backendClient().auth.getUser();
+          if (!current()) return;
+          if (verifyError || verified.user?.id !== data.user.id) throw new Error('Account changed.');
+          const { error } = await backendClient().auth.updateUser({ data: { onboarding_intent: intent } });
+          if (error) throw error;
+          if (!current()) return;
+          buttons.forEach((option, index) => option.setAttribute('aria-pressed', String(index === (intent === 'user' ? 0 : 1))));
+          intentStatus.textContent = `Getting started as ${intent === 'provider' ? 'Provider' : 'User'}.`;
+          navigate(intent === 'provider' ? 'provider-setup' : 'user-setup');
+        } catch { if (current()) intentStatus.textContent = 'Unable to save your starting point. Check sign-in and connection, then retry.'; }
+        finally { for (const option of buttons) option.disabled = false; }
+      });
+      buttons.push(button); options.append(button);
+    }
+    starting.append(options, link('user-setup', 'Explore user setup'), link('provider-setup', 'Explore provider setup'));
+    content.append(starting);
+
     const grid = node('div', null, 'account-tool-grid');
     for (const [page, title, copy, action] of [
       ['availability', 'Availability draft', 'Sketch weekly time windows in an explicit time zone. Connected mode supports private draft saving.', 'Edit availability draft'],

@@ -68,6 +68,16 @@ No date-specific availability, appointments, conflicts with bookings, DST date
 resolution, reservations, public publishing, or scheduling policy is implemented.
 The agent has tested this migration locally but has not applied it remotely.
 
+## Registration starting preference
+
+Signup requires User or Provider and stores `onboarding_intent` with
+`requested_username` in Auth user metadata. Existing accounts can update the
+whitelisted preference from Account; Provider opens guided private draft setup.
+This requires no migration. User metadata is editable and must never authorize
+roles, publication, verification or paid access. Non-recovery auth callbacks now
+land on Account rather than assuming a companion profile flow. Provider eligibility
+and authoritative role assignment are not implemented by this preference.
+
 ## Authentication settings
 
 Keep email confirmation enabled. In Authentication → URL Configuration:

@@ -44,7 +44,10 @@ Roles and paid entitlements are separate.
 A user may hold several entitlements without receiving additional
 administrative privileges.
 
-Whether one account may hold both user and companion roles remains pending.
+Whether one account may hold both authoritative user and companion roles remains
+pending. The implemented User/Provider onboarding choice is a revisitable
+user-metadata preference under one login, not an assigned role. It must not grant
+publishing, subscriber access, verification, or administrative permissions.
 
 ## 3. Matrix Legend
 

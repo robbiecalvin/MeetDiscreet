@@ -70,3 +70,12 @@ reads, with independent loading/error and refresh controls. Empty catalogue reco
 show zero saved items; absent records show no saved catalogue. A failed read must
 not be presented as zero or prevent other cards from loading. No public publishing
 or commercial status is inferred from private saved records.
+
+
+## User / Provider registration choice
+
+Registration now requires an explicit User or Provider starting choice. The choice
+is persisted as untrusted onboarding preference metadata only, with no role or
+entitlement assignment. Existing accounts can revisit it from Account. Provider
+setup has its own guided workspace; see [provider setup brief](./provider-setup.md).
+No database migration is required for this preference.

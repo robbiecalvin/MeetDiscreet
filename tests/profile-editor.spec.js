@@ -70,10 +70,11 @@ test('profile draft survives in-app navigation and clear never changes public fi
   await expect(page.getByRole('heading', { name: 'Maya, 28' })).toBeVisible();
 });
 
-test('registration links to demo editor without creating an account', async ({ page }) => {
+test('registration links through provider setup to the demo editor without creating an account', async ({ page }) => {
   await page.goto('/?page=register');
   await page.getByRole('button', { name: 'I am 18 or older' }).click();
-  await page.getByRole('link', { name: 'Try the companion profile editor', exact: true }).click();
+  await page.getByRole('link', { name: 'Explore provider setup', exact: true }).click();
+  await page.getByRole('link', { name: 'Introduce yourself', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Make an introduction.' })).toBeVisible();
   await expect(page.locator('#account-view input')).toHaveCount(0);
   expect(await page.evaluate(() => Object.keys(localStorage))).toEqual(['meetdiscreet.age-confirmed.v1']);

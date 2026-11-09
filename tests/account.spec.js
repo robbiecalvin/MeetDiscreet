@@ -94,3 +94,21 @@ for (const width of [320, 390, 700, 1024, 1440]) {
     expect(errors).toEqual([]);
   });
 }
+
+test('registration requires an explicit User or Provider starting choice', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 1000 });
+  await open(page, 'register');
+  await expect(page.getByRole('radio', { name: 'User', exact: true })).not.toBeChecked();
+  await expect(page.getByRole('radio', { name: 'Provider', exact: true })).not.toBeChecked();
+  await page.screenshot({ path: '/tmp/signup-choice-mobile.png', fullPage: true });
+  await page.getByLabel('Username', { exact: true }).fill('FictionalUser');
+  await page.getByLabel('Email', { exact: true }).fill('test@example.invalid');
+  await page.getByLabel('Password', { exact: true }).fill('fictional-password');
+  await page.getByLabel('Confirm password', { exact: true }).fill('fictional-password');
+  await page.getByLabel('I confirm I am 18 or older.').check();
+  await page.getByRole('button', { name: 'Check registration preview' }).click();
+  await expect(page.locator('#account-intent-error')).toHaveText('Choose User or Provider to get started.');
+  await page.getByRole('radio', { name: 'Provider', exact: true }).check();
+  await page.getByRole('button', { name: 'Check registration preview' }).click();
+  await expect(page.locator('.account-preview-result')).toContainText('No account, role, session');
+});
