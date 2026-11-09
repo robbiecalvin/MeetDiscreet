@@ -24,3 +24,18 @@ export async function loadProviderReviewDetail(reviewerId, ownerId) {
   if (error) throw new Error('Review detail unavailable.');
   return data;
 }
+
+export async function loadProviderFeedbackAccess(reviewerId) {
+  await verifyActor(reviewerId);
+  const { data, error } = await backendClient().rpc('can_request_provider_application_changes');
+  if (error || typeof data !== 'boolean') throw new Error('Feedback access unavailable.');
+  return data;
+}
+export async function requestProviderChanges(reviewerId, ownerId, submissionId, note) {
+  await verifyActor(reviewerId);
+  const { data, error } = await backendClient().rpc('request_provider_application_changes', {
+    p_expected_reviewer: reviewerId, p_owner: ownerId, p_submission: submissionId, p_note: note.trim(),
+  }).single();
+  if (error || !data || data.owner_id !== ownerId || data.state !== 'changes_requested') throw new Error('Change request failed.');
+  return data;
+}

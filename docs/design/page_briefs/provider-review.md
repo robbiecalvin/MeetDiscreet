@@ -26,9 +26,20 @@ Read access is recorded using reviewer ID, operation, target owner where relevan
 and server time; application text is not copied into logs. Capability assignments
 have protected change events. Operational audit retention/export remains pending.
 
-This queue is read-only for applications/roles: no approval, rejection, financial
-operation, provider permission grant or publication is implemented. Decisions need
-a separate capability, approved eligibility/conflict rules and version checks.
+Inspection is extended by a separately scoped request-changes form after migration 007.
+No approval, rejection, financial operation, provider permission grant or publication
+is implemented. Approval authority and eligibility rules remain unresolved.
 Backend-disabled mode shows no private fixtures; missing schema/permissions give
 explicit unavailable/denied states and retry. Hosted migration and actual staff
 provisioning remain later setup tasks, not completed production operations.
+
+
+### Version-bound feedback increment
+
+Inspect an immutable submission before requesting changes. Show the feedback form
+only with the separate feedback capability and never for the reviewer's own intake.
+Require a nonblank note and explicit confirmation. On success refresh the queue;
+on failure preserve the note without claiming success. The server rejects stale
+versions and repeated requests. Applicants see the escaped note on their own intake,
+can save revisions and resubmit; the previous note is hidden during a new submission.
+No reviewer identity or feedback is exposed publicly.

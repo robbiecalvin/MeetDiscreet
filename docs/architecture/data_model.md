@@ -1149,10 +1149,10 @@ subscriptions, publishing plans, ownership and permissions for individual resour
 
 [Provider intake migration](../../supabase/migrations/202611090005_provider_applications.sql)
 adds one current private intake record per account and owner-readable status events.
-States are draft/submitted/withdrawn only; there is no approval or publishing state.
+States are draft/submitted/withdrawn, extended by migration 007 with changes_requested; there is no approval or publishing state.
 Authenticated owners mutate through actor-bound RPCs, not direct table writes.
-Submitted text is locked until withdrawal. Role grants and review decisions are
-separate future operations. Status history does not preserve prior content versions
+Submitted text is locked until withdrawal or a request for changes. Role grants and review decisions are
+separate future operations. Status history alone does not preserve prior content versions
 or establish identity eligibility; it stores only state/owner/time. Auth-account
 deletion cascades to these intake records/events, unlike protected role-event
 storage whose retention remains a separate operational requirement.
@@ -1162,7 +1162,7 @@ storage whose retention remains a separate operational requirement.
 
 [Review migration](../../supabase/migrations/202611090006_provider_review_queue.sql)
 adds owner-readable, server-controlled staff capabilities and protected capability/
-read-access events. The only current capability is `provider_application_review`;
+read-access events. The inspection capability is `provider_application_review`;
 it additionally requires an assigned Moderator or Administrator role. Submitted
 application reads use actor-bound, reauthorizing RPCs returning a minimal list or
 explicit introduction detail. No global staff SELECT policy is added to applications.
@@ -1171,3 +1171,18 @@ Read/capability event tables are service-readable but not service-rewritable thr
 API grants; browser access is denied. They retain security identifiers independently
 of application state/content and need a defined retention/export process before
 live operations. They do not store application text or implement approval decisions.
+
+
+## Submission snapshots and feedback
+
+[Migration 007](../../supabase/migrations/202611090007_provider_submission_feedback.sql)
+adds `provider_application_submissions` and `provider_application_feedback` with
+owner-only reads and no direct browser/service API mutations. Feedback browser
+column grants exclude reviewer identity. Current intake references its submitted
+snapshot; edits after withdrawal/feedback clear that pointer, preserving old versions.
+Snapshot and feedback retention follows account deletion; operational policy remains pending.
+
+`request_provider_application_changes` requires review access plus the separate
+`provider_application_feedback` capability, rejects self-review and atomically checks
+the exact current submission under a row lock before storing the note and changing
+state. Resubmission creates a new snapshot. No Provider role is granted.

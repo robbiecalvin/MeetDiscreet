@@ -24,10 +24,17 @@ test.beforeAll(async () => {
   await db.exec(await readFile(new URL('../supabase/migrations/202611090004_account_roles.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611090005_provider_applications.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611090006_provider_review_queue.sql', import.meta.url), 'utf8'));
+  await asUser(alice);
+  await db.query('select * from public.save_provider_application($1,$2,$3,$4)', [alice,'Legacy introduction','Vancouver','Submitted before the versioning upgrade.']);
+  await db.query('select * from public.submit_provider_application($1)', [alice]);
+  await db.exec('reset role');
+  await db.exec(await readFile(new URL('../supabase/migrations/202611090007_provider_submission_feedback.sql', import.meta.url), 'utf8'));
+  expect((await db.query('select submission_id from public.provider_applications where owner_id=$1', [alice])).rows[0].submission_id).toBeTruthy();
+  expect((await db.query('select introduction from public.provider_application_submissions')).rows[0].introduction).toBe('Submitted before the versioning upgrade.');
 });
 test.afterAll(async () => { await db.close(); });
 test.beforeEach(async () => {
-  await db.exec('reset role; truncate public.listing_drafts, public.profile_drafts, public.experience_catalogue_drafts, public.availability_drafts, public.user_profile_drafts, public.provider_applications, public.provider_application_events, public.staff_capabilities, public.staff_capability_events, public.provider_review_access_events;');
+  await db.exec('reset role; truncate public.listing_drafts, public.profile_drafts, public.experience_catalogue_drafts, public.availability_drafts, public.user_profile_drafts, public.provider_applications, public.provider_application_events, public.provider_application_submissions, public.provider_application_feedback, public.staff_capabilities, public.staff_capability_events, public.provider_review_access_events;');
   await asUser(alice);
 });
 
@@ -301,4 +308,39 @@ test('Administrator role alone has no review access and revocation takes effect 
   await asUser('', 'anon');
   await expect(db.query('select * from public.list_provider_applications_for_review($1)', [alice])).rejects.toThrow(/permission denied/i);
   await db.exec('reset role'); await db.query("delete from public.account_roles where user_id=$1 and role='admin'", [alice]);
+});
+
+test('version-bound staff feedback unlocks a new draft and preserves the submitted text without role grants', async () => {
+  await asUser(bob);
+  await db.query('select * from public.save_provider_application($1,$2,$3,$4)', [bob,'Bob provider','Toronto','Original submitted text']);
+  const original = (await db.query('select * from public.submit_provider_application($1)', [bob])).rows[0];
+  await db.exec('reset role');
+  await db.query("insert into public.account_roles(user_id,role) values ($1,'moderator')", [alice]);
+  await db.query("insert into public.staff_capabilities(user_id,capability) values ($1,'provider_application_review'),($1,'provider_application_feedback')", [alice]);
+  await asUser(alice);
+  await db.query('select * from public.request_provider_application_changes($1,$2,$3,$4)', [alice,bob,original.submission_id,'Please clarify the experiences you plan to offer.']);
+  await expect(db.query('select * from public.request_provider_application_changes($1,$2,$3,$4)', [alice,bob,original.submission_id,'Duplicate decision'])).rejects.toThrow(/changed or no longer pending/i);
+  await asUser(bob);
+  expect((await db.query('select state from public.provider_applications')).rows[0].state).toBe('changes_requested');
+  expect((await db.query('select note from public.provider_application_feedback')).rows[0].note).toContain('clarify');
+  await expect(db.query('select reviewer_id from public.provider_application_feedback')).rejects.toThrow(/permission denied/i);
+  await expect(db.exec("update public.provider_application_submissions set introduction='Altered'")).rejects.toThrow(/permission denied/i);
+  await db.query('select * from public.save_provider_application($1,$2,$3,$4)', [bob,'Bob provider','Toronto','Revised submitted text']);
+  const next = (await db.query('select * from public.submit_provider_application($1)', [bob])).rows[0];
+  expect(next.submission_id).not.toBe(original.submission_id);
+  expect((await db.query('select introduction from public.provider_application_submissions order by submitted_at,id')).rows.map(row => row.introduction)).toContain('Original submitted text');
+  expect((await db.query("select public.has_account_role('provider') as value")).rows[0].value).toBe(false);
+  await asUser(alice);
+  await expect(db.query('select * from public.request_provider_application_changes($1,$2,$3,$4)', [alice,bob,original.submission_id,'Stale decision'])).rejects.toThrow(/changed or no longer pending/i);
+  await db.exec('reset role'); await db.query("delete from public.account_roles where user_id=$1 and role='moderator'", [alice]);
+});
+test('inspection capability alone cannot request changes or rewrite feedback history', async () => {
+  await db.exec('reset role');
+  await db.query("insert into public.account_roles(user_id,role) values ($1,'moderator')", [alice]);
+  await db.query("insert into public.staff_capabilities(user_id,capability) values ($1,'provider_application_review')", [alice]);
+  await asUser(alice);
+  expect((await db.query('select public.can_request_provider_application_changes() as value')).rows[0].value).toBe(false);
+  await expect(db.query('select * from public.request_provider_application_changes($1,$2,$3,$4)', [alice,bob,listing,'Request changes'])).rejects.toThrow(/feedback access/i);
+  await expect(db.exec('delete from public.provider_application_feedback')).rejects.toThrow(/permission denied/i);
+  await db.exec('reset role'); await db.query("delete from public.account_roles where user_id=$1 and role='moderator'", [alice]);
 });

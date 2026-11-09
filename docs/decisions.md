@@ -545,3 +545,12 @@ Moderator/Administrator access. This increment authorizes submitted-introduction
 inspection only and records read metadata. Decision authority, role granting,
 financial duties and public publishing are separate future capabilities/workflows;
 no real staff assignment or hosted migration is performed by the code increment.
+
+
+## DEC-022 — Bind Intake Feedback to Submitted Versions
+
+Routine security implementation: preserve a text snapshot for each submission and
+require its exact ID for a separately scoped request for changes. Reject self-feedback,
+stale decisions and replay; expose owner feedback without reviewer identity. This
+implements revision handling only. Approval authority, eligibility and combined-role
+policy remain pending user decisions; no Provider grant is implied.

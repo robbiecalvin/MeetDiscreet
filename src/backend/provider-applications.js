@@ -8,7 +8,12 @@ export async function loadProviderApplication() {
   const user = await requireUser();
   const { data, error } = await backendClient().from('provider_applications').select('*').eq('owner_id', user.id).maybeSingle();
   if (error) throw new Error('Application unavailable.');
-  return { ownerId: user.id, application: data };
+  let feedback = null;
+  if (data && ['draft', 'changes_requested'].includes(data.state)) {
+    const result = await backendClient().from('provider_application_feedback').select('note,created_at').eq('owner_id', user.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
+    if (!result.error) feedback = result.data;
+  }
+  return { ownerId: user.id, application: data, feedback };
 }
 async function change(expectedOwner, name, fields = {}) {
   await actor(expectedOwner);

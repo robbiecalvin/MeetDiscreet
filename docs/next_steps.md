@@ -903,6 +903,18 @@ If launch scope is reduced:
   rejection, eligibility/conflict rules and publication remain separate work.
   See [brief](./design/page_briefs/provider-review.md).
 
+### Version-bound Application Feedback
+
+- Migration 007 captures submission snapshots and backfills existing submitted intake.
+  Staff need a separate feedback capability to request changes against the exact
+  inspected version. Self-feedback, stale decisions and replay are rejected.
+- Applicants can read private notes, save revisions and resubmit a new version.
+  Browser reads exclude reviewer identity; feedback never grants Provider access.
+- All 146 default checks (including 20 database/config/security cases) and 50
+  backend UI checks passed. Hosted migration application remains pending.
+- Approval authority and combined User/Provider role policy await Robbie's answers.
+  No approval, eligibility verification, role grant or public publishing is added.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

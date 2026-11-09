@@ -9,7 +9,7 @@ function session(profile = user) {
   return { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock_refresh_token', user: profile };
 }
 async function mockBackend(page, options = {}) {
-  const state = { user: { ...user, user_metadata: {} }, providerApplication: null, userProfile: null, roles: ['user'], capabilities: [], reviewApplications: [], reviewAccessEvents: [], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
+  const state = { user: { ...user, user_metadata: {} }, providerApplication: null, applicationFeedback: [], applicationSubmissionCounter: 0, userProfile: null, roles: ['user'], capabilities: [], reviewApplications: [], reviewAccessEvents: [], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
   await page.route('https://backend-test.supabase.co/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -33,6 +33,16 @@ async function mockBackend(page, options = {}) {
       return respond(state.user);
     }
     if (url.pathname === '/auth/v1/logout') return respond({});
+    if (url.pathname === '/rest/v1/provider_application_feedback') return respond(state.applicationFeedback.filter(row => row.owner_id === state.user.id).slice(-1).map(({note,created_at}) => ({note,created_at})));
+    if (url.pathname === '/rest/v1/rpc/can_request_provider_application_changes') return respond(state.roles.some(role => ['moderator','admin'].includes(role)) && state.capabilities.includes('provider_application_review') && state.capabilities.includes('provider_application_feedback'));
+    if (url.pathname === '/rest/v1/rpc/request_provider_application_changes') {
+      const allowed = state.roles.some(role => ['moderator','admin'].includes(role)) && state.capabilities.includes('provider_application_review') && state.capabilities.includes('provider_application_feedback');
+      const row = state.reviewApplications.find(value => value.owner_id === body.p_owner);
+      if (!allowed || body.p_expected_reviewer !== state.user.id || body.p_owner === state.user.id || row?.state !== 'submitted' || row.submission_id !== body.p_submission) return respond({message:'Denied or stale submission'},409);
+      row.state = 'changes_requested';
+      state.applicationFeedback.push({owner_id:row.owner_id,submission_id:row.submission_id,note:body.p_note,created_at:'2026-11-09T00:00:00Z'});
+      return respond(row);
+    }
     if (url.pathname === '/rest/v1/rpc/can_review_provider_applications') {
       if (options.missingReviewMigration) return respond({ message: 'Unavailable' }, 404);
       return respond(state.roles.some(role => ['moderator','admin'].includes(role)) && state.capabilities.includes('provider_application_review'));
@@ -62,7 +72,7 @@ async function mockBackend(page, options = {}) {
         state.providerApplication = { owner_id: userId, display_name: body.p_display_name.trim(), city: body.p_city.trim(), introduction: body.p_introduction.trim(), state: 'draft', submitted_at: null, withdrawn_at: null };
       } else if (url.pathname.endsWith('/submit_provider_application')) {
         if (!state.roles.includes('user') || state.providerApplication?.state !== 'draft') return respond({ message: 'Denied' }, 403);
-        state.providerApplication = { ...state.providerApplication, state: 'submitted', submitted_at: '2026-11-09T00:00:00Z' };
+        state.providerApplication = { ...state.providerApplication, state: 'submitted', submitted_at: '2026-11-09T00:00:00Z', submission_id: `66666666-6666-4666-8666-${String(++state.applicationSubmissionCounter).padStart(12,'0')}` };
       } else {
         if (state.providerApplication?.state !== 'submitted') return respond({ message: 'Denied' }, 403);
         state.providerApplication = { ...state.providerApplication, state: 'withdrawn', withdrawn_at: '2026-11-09T01:00:00Z' };
@@ -923,4 +933,46 @@ test('missing staff review schema reports unavailable data without fallback reco
   await expect(page.locator('.review-status')).toContainText('Unable to verify review access');
   await expect(page.locator('.review-card')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Refresh review queue' })).toBeEnabled();
+});
+
+test('scoped staff can request changes to the inspected version but cannot decide on a replaced version', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});
+  const state = await mockBackend(page); state.roles = ['user','moderator']; state.capabilities = ['provider_application_review','provider_application_feedback'];
+  state.reviewApplications = reviewRows(1); state.reviewApplications[0].submission_id = '66666666-6666-4666-8666-000000000001';
+  await signIn(page); await enter(page, '/?page=provider-review');
+  await page.getByRole('button', { name: 'Inspect Applicant 01', exact: true }).click();
+  await page.getByLabel('Changes the applicant should make', { exact: true }).fill('Please clarify your offered experiences.');
+  await page.locator('.review-feedback-form').screenshot({path:'/tmp/provider-feedback-form.png'});
+  state.reviewApplications[0].submission_id = '66666666-6666-4666-8666-000000000002';
+  page.once('dialog', dialog => dialog.accept());
+  await page.getByRole('button', { name: 'Request changes', exact: true }).click();
+  await expect(page.locator('.review-feedback-form [role=status]')).toContainText('Unable to request changes');
+  expect(state.applicationFeedback).toHaveLength(0);
+  await page.getByRole('button', { name: 'Refresh review queue' }).click();
+  await page.getByRole('button', { name: 'Inspect Applicant 01', exact: true }).click();
+  await page.getByLabel('Changes the applicant should make', { exact: true }).fill('Please clarify your offered experiences.');
+  page.once('dialog', dialog => dialog.accept());
+  await page.getByRole('button', { name: 'Request changes', exact: true }).click();
+  await expect(page.locator('.review-card')).toHaveCount(0);
+  expect(state.applicationFeedback).toHaveLength(1);
+  expect(state.applicationFeedback[0].submission_id).toBe('66666666-6666-4666-8666-000000000002');
+  expect(state.roles).toEqual(['user','moderator']);
+});
+test('applicant sees escaped change notes, edits and resubmits without gaining Provider access', async ({ page }) => {
+  const state = await mockBackend(page);
+  state.providerApplication = {owner_id:userId,display_name:'Applicant',city:'Vancouver',introduction:'Original introduction',state:'changes_requested',submission_id:'66666666-6666-4666-8666-000000000099'};
+  state.applicationFeedback = [{owner_id:userId,note:'<img src=x onerror=alert(1)> Clarify your introduction.',created_at:'2026-11-09T00:00:00Z'}];
+  await signIn(page); await enter(page, '/?page=provider-application');
+  await expect(page.locator('.application-state')).toContainText('changes requested');
+  await expect(page.locator('.application-review-note')).toContainText('<img src=x onerror=alert(1)>');
+  await expect(page.locator('.application-review-note img')).toHaveCount(0);
+  await page.getByLabel('Provider application introduction', { exact: true }).fill('Revised introduction');
+  await page.getByRole('button', {name:'Save application draft',exact:true}).click();
+  await expect(page.locator('.application-state')).toContainText('draft');
+  page.once('dialog', dialog => dialog.accept());
+  await page.getByRole('button', {name:'Submit saved application',exact:true}).click();
+  await expect(page.locator('.application-state')).toContainText('submitted');
+  await expect(page.locator('.application-review-note')).toBeHidden();
+  expect(state.providerApplication.submission_id).not.toBe('66666666-6666-4666-8666-000000000099');
+  expect(state.roles).toEqual(['user']);
 });

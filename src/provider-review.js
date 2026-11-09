@@ -1,5 +1,5 @@
 import { backendEnabled } from './backend/client.js';
-import { loadProviderReviewAccess, listProviderReviewQueue, loadProviderReviewDetail } from './backend/provider-review.js';
+import { loadProviderReviewAccess, listProviderReviewQueue, loadProviderReviewDetail, loadProviderFeedbackAccess, requestProviderChanges } from './backend/provider-review.js';
 function node(tag, text, className) {
   const value = document.createElement(tag);
   if (text) value.textContent = text;
@@ -11,7 +11,7 @@ export function renderProviderReview(container, navigate) {
   const root = node('section', null, 'provider-review');
   const back = node('a', '← Back to account', 'profile-back'); back.href = '?page=account';
   back.addEventListener('click', event => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate('account'); });
-  root.append(back, node('p', 'STAFF WORKSPACE', 'eyebrow'), node('h1', 'Provider application queue.'), node('p', 'Inspect submitted introductions with explicitly assigned review access.', 'offering-lead'), node('p', 'Read-only review workspace. Approval, rejection, role changes and publishing actions are not available here.', 'editor-notice'));
+  root.append(back, node('p', 'STAFF WORKSPACE', 'eyebrow'), node('h1', 'Provider application queue.'), node('p', 'Inspect submitted introductions with explicitly assigned review access.', 'offering-lead'), node('p', 'Staff review workspace. Requesting changes requires separate permission. Approval, role changes and publishing are not available here.', 'editor-notice'));
   const status = node('p', '', 'review-status'); status.setAttribute('role', 'status');
   const refresh = node('button', 'Refresh review queue', 'button outline'); refresh.type = 'button';
   const list = node('div', null, 'review-queue'); list.setAttribute('aria-label', 'Submitted provider applications');
@@ -41,6 +41,32 @@ export function renderProviderReview(container, navigate) {
       const close = node('button', 'Close application details', 'button quiet'); close.type = 'button';
       close.addEventListener('click', () => { version++; detail.replaceChildren(); detail.hidden = true; status.textContent = `${rows.length} submitted applications on this page.`; refresh.focus(); });
       detail.append(heading, node('p', value.city, 'profile-small'), node('p', 'SUBMITTED INTRODUCTION', 'eyebrow'), node('p', value.introduction, 'review-introduction'), node('p', 'This view records access but does not make an approval decision.', 'profile-small'), close);
+      if (value.submission_id && value.owner_id !== reviewerId) {
+        let canGiveFeedback = false;
+        try { canGiveFeedback = await loadProviderFeedbackAccess(reviewerId); } catch { /* Keep scoped inspection usable without feedback setup. */ }
+        if (!current(request)) return;
+        if (canGiveFeedback) {
+          const form = node('form', null, 'review-feedback-form');
+          const label = node('label', 'Changes the applicant should make'); label.htmlFor = 'provider-change-note';
+          const note = node('textarea'); note.id = 'provider-change-note'; note.rows = 4; note.maxLength = 1000; note.required = true;
+          const send = node('button', 'Request changes', 'button primary'); send.type = 'submit';
+          const result = node('p', '', 'profile-small'); result.setAttribute('role', 'status');
+          form.append(label, note, send, result);
+          form.addEventListener('submit', async event => {
+            event.preventDefault();
+            if (!note.value.trim()) { result.textContent = 'Describe the requested changes.'; note.focus(); return; }
+            if (!window.confirm('Request changes to this submission? The applicant will be able to edit and resubmit. No Provider role is granted.')) return;
+            send.disabled = true; note.disabled = true;
+            try {
+              await requestProviderChanges(reviewerId, value.owner_id, value.submission_id, note.value);
+              if (!current(request)) return;
+              await load(true);
+            } catch { if (current(request)) result.textContent = 'Unable to request changes. Refresh the submission and check your access before retrying.'; }
+            finally { send.disabled = false; note.disabled = false; }
+          });
+          detail.append(form);
+        }
+      }
       detail.hidden = false; status.textContent = 'Submitted application loaded.'; heading.focus();
     } catch {
       if (current(request)) { clearData(); reviewerId = null; status.textContent = 'Review access or application data is unavailable. Refresh to verify access again.'; }

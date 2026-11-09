@@ -14,7 +14,7 @@ Check the dashboard's plan and usage limits before changing settings.
 - Server-controlled membership-role foundation with basic User initialization;
   Provider/operational role assignment and live eligibility workflows remain separate.
 - Private provider application intake (save/submit/withdraw) with owner-bound
-  transitions; review/approval tools and notifications remain unimplemented.
+  transitions; version-bound feedback is available after migration 007. Approval and notifications remain unimplemented.
 - No public publishing, paid entitlements, payments, messaging,
   real discovery data, uploads, or completed eligibility verification.
 - Private experience catalogue snapshots require the additional migration below.
@@ -134,7 +134,7 @@ It creates private owner-readable intake records and status events. Browser and
 service API clients have no direct row mutations. Authenticated owner-bound
 `save_provider_application`, `submit_provider_application`, and
 `withdraw_provider_application` RPCs implement draft/submitted/withdrawn transitions.
-Submitted applications cannot be edited without withdrawal. Submission requires
+Submitted applications cannot be edited without withdrawal or a staff request for changes. Submission requires
 assigned User membership and nonblank name/city/introduction; these are intake
 requirements, not approved provider eligibility criteria. No Provider role is granted.
 
@@ -143,9 +143,9 @@ server compares the expected owner with the actual JWT user and always writes
 using `auth.uid()`. This protects against changing accounts during asynchronous
 requests. Status events contain owner, state and server time rather than duplicated
 application content. They follow auth-account deletion; operational retention and
-content-version/approval records still need definition before a live review process.
+approval records and operational retention still need definition before a live approval process.
 
-A separately scoped read-only staff inspection workspace is implemented below.
+A separately scoped staff inspection workspace is implemented below; migration 007 adds feedback.
 No approval/denial or role-assignment RPC, notifications,
 response deadline or public publishing is implemented. A future review operation
 must verify assigned operational roles and current submitted state/version before
@@ -277,3 +277,23 @@ returned INVALID_ARGUMENT, so their persistence must not be assumed.
 
 Official billing/RLS source was also inspected in the supabase/supabase GitHub docs
 because this cloud environment blocks the supabase.com documentation host.
+
+
+## Add version-bound application feedback
+
+After migration 006, apply [202611090007_provider_submission_feedback.sql](../../supabase/migrations/202611090007_provider_submission_feedback.sql) once.
+It backfills current submissions and captures a new text snapshot on every submission.
+Application/API grants prevent snapshot rewriting; trusted database administration
+remains outside those restrictions. Snapshots follow account deletion.
+
+Requesting changes requires the existing review scope plus the separately assigned
+`provider_application_feedback` capability. No capability is granted automatically.
+The RPC checks the actual reviewer, denies self-feedback, locks the application and
+requires the exact inspected submission ID. Stale or repeated decisions fail.
+The resulting `changes_requested` state lets the applicant save revisions and
+explicitly resubmit a new version. Owners can read their feedback note/time, with
+no browser permission to read reviewer identity or rewrite feedback.
+
+This migration has not been applied to the hosted project by the agent. Approval,
+Provider-role grants and public publishing remain unavailable. Reviewer approval
+authority and whether an approved Provider retains User membership await answers.

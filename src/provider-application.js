@@ -6,10 +6,11 @@ const empty = () => ({ name: '', city: '', introduction: '' });
 let draft = empty();
 let saved = null;
 let ownerId = null;
+let reviewFeedback = null;
 let loaded = false;
 let identityEpoch = 0;
 const changes = trackDraft('provider-application', () => draft, backendEnabled);
-export function clearProviderApplicationState() { draft = empty(); saved = null; ownerId = null; loaded = false; identityEpoch++; changes.saved(); }
+export function clearProviderApplicationState() { draft = empty(); saved = null; ownerId = null; reviewFeedback = null; loaded = false; identityEpoch++; changes.saved(); }
 function node(tag, text, className) {
   const value = document.createElement(tag);
   if (text) value.textContent = text;
@@ -22,7 +23,7 @@ export function renderProviderApplication(container, navigate) {
   const root = node('section', null, 'provider-application');
   const back = node('a', '← Back to provider setup', 'profile-back'); back.href = '?page=provider-setup';
   back.addEventListener('click', event => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate('provider-setup'); });
-  root.append(back, node('p', 'YOUR NEXT STEP', 'eyebrow'), node('h1', 'Your provider application.'), node('p', 'Prepare an introduction and submit it to the private application queue.', 'offering-lead'), node('p', backendEnabled ? 'Development application intake. Staff inspection is separate; review decisions and notifications are not connected. Submission does not approve provider access or publish a profile.' : 'Application preview. Use fictional details; nothing is saved or submitted without the development backend.', 'editor-notice'));
+  root.append(back, node('p', 'YOUR NEXT STEP', 'eyebrow'), node('h1', 'Your provider application.'), node('p', 'Prepare an introduction and submit it to the private application queue.', 'offering-lead'), node('p', backendEnabled ? 'Development application intake. Staff can request changes with separate permission. Approval and notifications are not connected. Submission does not approve provider access or publish a profile.' : 'Application preview. Use fictional details; nothing is saved or submitted without the development backend.', 'editor-notice'));
   const state = node('p', '', 'application-state'); state.setAttribute('role', 'status');
   const feedback = node('p', '', 'profile-small'); feedback.setAttribute('role', 'status'); feedback.id = 'provider-application-feedback';
   const form = node('form', null, 'application-form'); form.noValidate = true;
@@ -34,7 +35,7 @@ export function renderProviderApplication(container, navigate) {
     input.addEventListener('input', () => { draft[key] = input.value; feedback.textContent = ''; paintState(); });
     group.append(title, input); form.append(group); fields.set(key, input);
   }
-  form.append(node('p', 'Save all three fields before submitting. A submitted application is read-only until withdrawal.', 'editor-hint'));
+  form.append(node('p', 'Save all three fields before submitting. Submitted text is locked until withdrawal or a staff request for changes.', 'editor-hint'));
   form.append(node('p', 'Use general details. Do not include identity documents, full birth dates, exact addresses or private contact details.', 'editor-hint'));
   const actions = node('div', null, 'editor-actions');
   const save = node('button', backendEnabled ? 'Save application draft' : 'Check application preview', 'button primary'); save.type = 'submit';
@@ -46,13 +47,16 @@ export function renderProviderApplication(container, navigate) {
   actions.append(save, submit, withdraw, refresh, copy); form.append(actions);
   const signIn = node('a', 'Sign in', 'account-recovery-link'); signIn.href = '?page=sign-in'; signIn.hidden = true;
   signIn.addEventListener('click', event => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate('sign-in'); });
-  root.append(state, form, feedback, signIn); container.append(root);
+  const reviewNote = node('section', null, 'application-review-note'); reviewNote.hidden = true;
+  root.append(state, reviewNote, form, feedback, signIn); container.append(root);
   let busy = false;
   const current = epoch => epoch === identityEpoch && root.parentNode === container;
   function sync() { for (const [key, input] of fields) input.value = draft[key]; }
   function paintState() {
     const locked = saved?.state === 'submitted';
-    state.textContent = !backendEnabled ? 'Application preview.' : !loaded ? 'Application status has not been loaded.' : saved ? `Application status: ${saved.state}.` : 'No saved application.';
+    reviewNote.replaceChildren(); reviewNote.hidden = !reviewFeedback || saved?.state === 'submitted';
+    if (!reviewNote.hidden) reviewNote.append(node('h2', 'Requested changes'), node('p', reviewFeedback.note));
+    state.textContent = !backendEnabled ? 'Application preview.' : !loaded ? 'Application status has not been loaded.' : saved ? `Application status: ${saved.state === 'changes_requested' ? 'changes requested' : saved.state}.` : 'No saved application.';
     for (const input of fields.values()) input.disabled = busy || locked || (backendEnabled && !ownerId);
     save.disabled = busy || locked || (backendEnabled && !ownerId);
     copy.disabled = busy || locked || !ownerId;
@@ -74,7 +78,7 @@ export function renderProviderApplication(container, navigate) {
   async function reload(epoch) {
     const context = await loadProviderApplication();
     if (!current(epoch)) return '';
-    ownerId = context.ownerId; saved = context.application; loaded = true; draft = saved ? fromRow(saved) : empty(); changes.saved(); signIn.hidden = true;
+    ownerId = context.ownerId; saved = context.application; reviewFeedback = context.feedback; loaded = true; draft = saved ? fromRow(saved) : empty(); changes.saved(); signIn.hidden = true;
     return saved ? 'Your saved application was loaded.' : 'No application saved yet. Start with a draft.';
   }
   form.addEventListener('submit', event => {
@@ -103,7 +107,7 @@ export function renderProviderApplication(container, navigate) {
     return 'Provider introduction copied into the application editor. Save to keep these changes.';
   }));
   sync(); paintState();
-  if (backendEnabled && !loaded) run(async epoch => {
+  if (backendEnabled && (!loaded || !changes.isDirty())) run(async epoch => {
     try { return await reload(epoch); }
     catch (error) { if (current(epoch)) signIn.hidden = false; throw error; }
   });

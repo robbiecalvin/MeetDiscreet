@@ -475,3 +475,12 @@ Keep roles, ownership, subscriptions, publishing, and premium benefits
 distinct.
 
 Enforce permissions at trusted boundaries and return only authorized data.
+
+## Implemented pilot intake feedback
+
+Requesting application changes requires assigned Moderator/Administrator membership,
+`provider_application_review` and a separate `provider_application_feedback` capability.
+Self-feedback is denied. Each mutation rechecks actor, scope, submitted state and the
+inspected version. Applicants read only their own notes without reviewer identity.
+These controls grant no Provider, publishing, subscription or financial privileges.
+Approval authority and combined User/Provider membership remain unresolved.

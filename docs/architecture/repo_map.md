@@ -735,7 +735,9 @@ underlying feature is operational.
 - `supabase/migrations/202611090005_provider_applications.sql`: owner-only intake,
   protected transitions and status history, with no automatic role assignment.
 
-- `src/provider-review.js`: scoped read-only intake queue and introduction inspection.
+- `src/provider-review.js`: scoped intake queue, introduction inspection and version-bound request-changes form.
 - `src/backend/provider-review.js`: reviewer binding and reauthorized review RPCs.
 - `supabase/migrations/202611090006_provider_review_queue.sql`: explicit review
   capabilities, bounded submitted-intake reads and protected access audit metadata.
+
+- `supabase/migrations/202611090007_provider_submission_feedback.sql`: submission snapshots, private feedback and separately scoped version-bound changes requests.
