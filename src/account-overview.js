@@ -73,6 +73,7 @@ export function renderAccountOverview(container, navigate, onBack) {
 
     const grid = node('div', null, 'account-tool-grid');
     for (const [page, title, copy, action] of [
+      ['booking-draft', 'Booking request preview', 'Prepare and review a fictional plan without sending, reserving or paying.', 'Build a booking draft'],
       ['edit-user-profile', 'User profile draft', 'Prepare your personal introduction separately from provider profile drafts.', 'Edit User profile draft'],
       ['availability', 'Availability draft', 'Sketch weekly time windows in an explicit time zone. Connected mode supports private draft saving.', 'Edit availability draft'],
       ['account-security', 'Account security', 'Verify your current password and choose a new one.', 'Change password'],

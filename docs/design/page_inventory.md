@@ -450,3 +450,7 @@ This does not implement provider-role assignment or publishing approval.
 Partial USR-02 now has a distinct private User profile editor at
 `/?page=edit-user-profile`; see [User profile brief](./page_briefs/user-profile.md).
 It does not decide public field visibility or replace provider profile drafts.
+
+Partial USR-09 has an unsent booking-request layout at `/?page=booking-draft`.
+See [booking draft brief](./page_briefs/booking-draft.md). It contains only public
+fictional fixtures and sends no request, reserves no time, and calculates no price.

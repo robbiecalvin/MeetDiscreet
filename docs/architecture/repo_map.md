@@ -720,3 +720,7 @@ underlying feature is operational.
 - `src/user-profile-editor.js`: separate private User introduction/editor/preview.
 - `supabase/migrations/202611090003_user_profile_drafts.sql`: owner-only User draft
   schema and declaration/non-disclosure constraints; later hosted setup required.
+
+- `src/booking-draft.js`: in-memory fictional request composer/review with no writes.
+- `src/booking-draft-rules.js`: UI calendar/time/zone/duration-format validation,
+  separate from future authoritative scheduling and pricing services.

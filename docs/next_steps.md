@@ -835,6 +835,21 @@ If launch scope is reduced:
   including direct category links, new-draft creation, save and filtered return.
 - No additional database migration is required for this navigation increment.
 
+### Booking Request Preview
+
+- Added partial USR-09 at `/?page=booking-draft`, linked from User setup and Account.
+- Fictional public provider/activity, calendar date, local time, explicit IANA zone,
+  whole-minute duration, optional venue, unpriced expenses and notes; safe review
+  with edit/clear and no send, reservation, quote or payment action.
+- Format checks reject impossible dates and unsafe/fractional durations. Actual
+  booking eligibility, subscriptions, availability, DST resolution, presentation/
+  add-on selection and authoritative pricing remain unimplemented dependencies.
+- Build, all 130 default checks and 36 backend UI checks passed. Help checks
+  passed after the FAQ update; mobile editor and desktop review screenshots inspected.
+  All five booking checks were repeated after the notes typography correction.
+- In-memory only with account-change clearing and connected unload protection.
+  No new migration or payment capability. See [brief](./design/page_briefs/booking-draft.md).
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

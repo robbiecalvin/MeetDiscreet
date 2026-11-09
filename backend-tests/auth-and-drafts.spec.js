@@ -702,3 +702,17 @@ for (const [path, action, kind, newAction] of [
     await expect(page.locator('.library-card')).toHaveCount(3);
   });
 }
+
+test('booking preview makes no backend writes and clears private plan fields on sign-out', async ({ page }) => {
+  const state = await mockBackend(page);
+  await signIn(page);
+  await page.locator('[data-account-link]').click();
+  await page.getByRole('link', { name: 'Build a booking draft', exact: true }).click();
+  await page.getByRole('button', { name: 'Use a fictional booking plan' }).click();
+  await page.getByRole('button', { name: 'Review booking draft' }).click();
+  await expect(page.locator('.booking-review')).toContainText('Maya');
+  expect(state.requests.filter(value => value.path.startsWith('/rest/v1/') && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(value.method))).toHaveLength(0);
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await expect(page.getByLabel('Fictional provider', { exact: true })).toHaveValue('');
+  await expect(page.getByLabel('Requests or notes (optional)', { exact: true })).toHaveValue('');
+});
