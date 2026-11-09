@@ -43,3 +43,16 @@ without deleting server data. Loaded draft choices show listing type and city.
 Each saved draft has a labelled delete action with confirmation and retry feedback.
 Deleting the selected saved record preserves editor text as a new unsaved draft.
 This does not publish, change posting allowances, or alter public discovery.
+
+
+## Saved listing library
+
+`/?page=my-listings` is an age-gated, owner-only development workspace linked from
+Account. Show saved titles, draft types, city/area, and activities. Search these
+fields locally and combine with Offering/Looking For filtering; provide clear
+filters, refresh, empty, no-match, loading, retry/sign-in states. Cards link to
+`/?page=create-listing&draft=<id>`; direct loading must query by authenticated
+owner and record ID. Missing records leave blank fields with unavailable feedback,
+never an unrelated previous draft. Start-new clears editor selection without
+deleting saved data. Use stacked cards/labelled controls on mobile. No public
+listing detail, publishing, eligibility, or entitlement rule is added.

@@ -88,3 +88,10 @@ export async function loadPrivateDraftSummary(kind) {
   }
   throw new Error('Unknown draft type.');
 }
+
+export async function loadListingDraft(id) {
+  const user = await requireUser();
+  const { data, error } = await backendClient().from('listing_drafts').select('*').eq('owner_id', user.id).eq('id', id).maybeSingle();
+  failure(error);
+  return data;
+}

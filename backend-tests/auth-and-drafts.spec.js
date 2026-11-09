@@ -53,7 +53,8 @@ async function mockBackend(page, options = {}) {
         state.listings = []; return respond({ id: listingId });
       }
       if (method === 'PATCH') { state.listings = [{ ...body, id: listingId }]; return respond({ id: listingId }); }
-      return respond(state.listings);
+      const idFilter = url.searchParams.get('id');
+      return respond(idFilter ? state.listings.filter(row => `eq.${row.id}` === idFilter) : state.listings);
     }
     return respond({ message: 'Unexpected mocked endpoint' }, 404);
   });
@@ -408,4 +409,50 @@ test('private profile refresh warns for unsaved edits but not after saving or si
   await expect(page.getByLabel('Display name', { exact: true })).toHaveValue('');
   await page.reload();
   expect(warnings).toBe(1);
+});
+
+test('saved listing library filters drafts and opens the selected owner draft', async ({ page }) => {
+  const state = await mockBackend(page);
+  state.listings = [
+    { id: listingId, owner_id: userId, kind: 'offering', title: 'Coffee in Vancouver', description: 'A private coffee outing draft for testing.', city: 'Vancouver', area: 'Kitsilano', activity: 'Coffee' },
+    { id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', owner_id: userId, kind: 'looking', title: 'Gallery afternoon', description: 'A private gallery outing draft for testing.', city: 'Toronto', area: '', activity: 'Culture' },
+  ];
+  await signIn(page);
+  await page.locator('[data-account-link]').click();
+  await page.getByRole('link', { name: 'Manage listing drafts' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Saved listing drafts.');
+  await expect(page.locator('.library-card')).toHaveCount(2);
+  await page.getByLabel('Listing type', { exact: true }).selectOption('looking');
+  await expect(page.locator('.library-card')).toHaveCount(1);
+  await page.getByLabel('Search saved drafts').fill('Vancouver');
+  await expect(page.locator('.library-list')).toContainText('No drafts match');
+  await page.getByRole('button', { name: 'Clear filters' }).click();
+  await expect(page.locator('.library-card')).toHaveCount(2);
+  await page.setViewportSize({ width: 390, height: 1000 });
+  await page.getByRole('heading', { level: 1 }).click();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: '/tmp/listing-library-mobile.png', fullPage: true });
+  await page.getByRole('link', { name: 'Edit Gallery afternoon' }).click();
+  await expect(page.getByLabel('Ad title', { exact: true })).toHaveValue('Gallery afternoon');
+  await expect(page.getByLabel('Listing type', { exact: true })).toHaveValue('looking');
+  await expect(page.locator('.editor-notice[role=status]')).toContainText('Editing a saved');
+  await page.reload();
+  await expect(page.getByLabel('Ad title', { exact: true })).toHaveValue('Gallery afternoon');
+  await page.goto('/?page=create-listing&draft=cccccccc-cccc-4ccc-8ccc-cccccccccccc');
+  await expect(page.locator('.editor-errors')).toContainText('unavailable for this account');
+  await expect(page.getByLabel('Ad title', { exact: true })).toHaveValue('');
+  await page.goto('/?page=my-listings');
+  await expect(page.locator('.library-card')).toHaveCount(2);
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await expect(page.locator('.library-card')).toHaveCount(0);
+  await expect(page.locator('.listing-library [role=status]')).toContainText('Unable to load saved drafts');
+});
+test('saved listing library shows empty state and starts a clean listing', async ({ page }) => {
+  await mockBackend(page);
+  await signIn(page);
+  await enter(page, '/?page=my-listings');
+  await expect(page.locator('.library-list')).toContainText('No saved listing drafts yet');
+  await page.getByRole('link', { name: 'Start a new listing' }).click();
+  await expect(page.getByLabel('Ad title', { exact: true })).toHaveValue('');
+  await expect(page.locator('.editor-notice[role=status]')).toContainText('New private draft');
 });

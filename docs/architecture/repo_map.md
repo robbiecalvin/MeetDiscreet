@@ -700,3 +700,6 @@ underlying feature is operational.
 
 - `src/draft-changes.js`: in-memory private draft snapshots and browser unload
   protection, with race-aware save baselines and identity reset handling.
+
+- `src/listing-library.js`: private saved-listing search/filter workspace and
+  owner-scoped editor links. Selected draft URLs load through `src/backend/drafts.js`.

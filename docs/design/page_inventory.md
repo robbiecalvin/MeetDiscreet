@@ -433,3 +433,6 @@ Keep the inventory aligned with the actual application.
 
 Plan broadly, design progressively, and record real implementation
 and review status without inventing completion.
+The private development listing library is available at `/?page=my-listings`,
+linked from Account. It manages saved drafts rather than public or published ads;
+see [listing editor brief](./page_briefs/listing-editor.md).

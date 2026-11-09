@@ -1,6 +1,6 @@
 import { trackDraft } from './draft-changes.js';
 import { backendEnabled } from './backend/client.js';
-import { listListingDrafts, saveListingDraft, deleteListingDraft } from './backend/drafts.js';
+import { listListingDrafts, saveListingDraft, deleteListingDraft, loadListingDraft } from './backend/drafts.js';
 import { privateDraftControls } from './backend/draft-controls.js';
 // Unsaved editor state is separate from owner-only storage and public listings.
 const defaults = () => ({ category: 'offering', title: '', description: '', city: 'Vancouver', area: '', activity: 'Coffee' });
@@ -20,8 +20,15 @@ function element(tag, content, className) {
   return node;
 }
 
-export function renderListingEditor(container, onBack) {
+export function renderListingEditor(container, onBack, requestedId = null) {
+  if (backendEnabled && requestedId) { draft = defaults(); savedId = null; changes.saved(); }
   container.replaceChildren();
+  function updateDraftUrl(id) {
+    const url = new URL(location.href);
+    if (url.searchParams.get('page') !== 'create-listing' || !container.contains(form)) return;
+    if (id) url.searchParams.set('draft', id); else url.searchParams.delete('draft');
+    history.replaceState(history.state, '', url);
+  }
   const back = element('a', '← Back to discovery', 'profile-back');
   back.href = './';
   back.addEventListener('click', (event) => {
@@ -108,6 +115,7 @@ export function renderListingEditor(container, onBack) {
   clear.addEventListener('click', () => {
     draft = defaults();
     savedId = null;
+    updateDraftUrl(null);
     changes.saved();
     syncFields();
     fields.get('title').control.focus();
@@ -185,6 +193,7 @@ export function renderListingEditor(container, onBack) {
       const nextId = await saveListingDraft(snapshot, savedId);
       if (epoch !== identityEpoch) throw new Error('Account changed.');
       savedId = nextId;
+      updateDraftUrl(nextId);
       changes.saved(snapshot);
       updateSelection();
       choicesContainer?.replaceChildren();
@@ -215,6 +224,7 @@ export function renderListingEditor(container, onBack) {
             const wasSelected = savedId === row.id;
             if (wasSelected) {
               savedId = null;
+              updateDraftUrl(null);
               changes.saved(defaults());
               updateSelection();
             }
@@ -229,6 +239,7 @@ export function renderListingEditor(container, onBack) {
         button.addEventListener('click', () => {
           if (epoch !== identityEpoch) return;
           savedId = row.id;
+          updateDraftUrl(row.id);
           draft = { category: row.kind, title: row.title, description: row.description, city: row.city, area: row.area, activity: row.activity };
           changes.saved();
           syncFields(); preview.hidden = true; form.hidden = false;
@@ -242,4 +253,22 @@ export function renderListingEditor(container, onBack) {
   });
   container.append(form, preview);
   if (storage) container.append(storage);
+  if (backendEnabled && requestedId) {
+    const epoch = identityEpoch;
+    form.inert = true; if (storage) storage.inert = true;
+    for (const { control } of fields.values()) control.disabled = true;
+    summary.textContent = 'Loading the selected private draft…';
+    loadListingDraft(requestedId).then(row => {
+      if (epoch !== identityEpoch || !container.contains(form) || new URL(location.href).searchParams.get('page') !== 'create-listing') return;
+      if (!row) { summary.textContent = 'This private draft is unavailable for this account.'; return; }
+      savedId = row.id;
+      draft = { category: row.kind, title: row.title, description: row.description, city: row.city, area: row.area, activity: row.activity };
+      changes.saved(); syncFields();
+    }).catch(() => {
+      if (epoch === identityEpoch && container.contains(form)) summary.textContent = 'Unable to load this private draft. Check sign-in and connection, then retry.';
+    }).finally(() => {
+      form.inert = false; if (storage) storage.inert = false;
+      for (const { control } of fields.values()) control.disabled = false;
+    });
+  }
 }

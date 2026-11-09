@@ -738,6 +738,18 @@ If launch scope is reduced:
 - This is a browser unload warning, not autosave or guaranteed mobile recovery;
   internal navigation retains existing module drafts without prompting.
 
+### Saved Listing Library
+
+- Added account-linked `/?page=my-listings` with combined text/type filters,
+  clear/reset, refresh, empty/no-match/loading/error states, and a new-listing action.
+- Build, 112 default checks, and 22 backend UI checks passed. Ten listing-editor
+  regressions were repeated after final URL handling; mobile screenshot inspected.
+- Private cards open owner-filtered draft deep links; refresh reloads the selected
+  record. Missing/inaccessible records show blank fields and unavailable feedback.
+- Saving/selecting a draft updates its refresh-safe URL; clear/new and deletion
+  of the selected draft remove that selection. Draft-ID query state clears when navigating elsewhere. Account changes clear
+  library content and discard detached reads. No additional migration is needed.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine
