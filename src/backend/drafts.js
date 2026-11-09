@@ -67,3 +67,24 @@ export async function deleteExperienceDraft() {
   failure(error);
   return Boolean(data);
 }
+
+export async function loadPrivateDraftSummary(kind) {
+  const user = await requireUser();
+  if (kind === 'profile') {
+    const { data, error } = await backendClient().from('profile_drafts').select('owner_id').eq('owner_id', user.id).maybeSingle();
+    failure(error);
+    return data ? 'Private profile draft saved' : 'No saved profile draft';
+  }
+  if (kind === 'listings') {
+    const { count, error } = await backendClient().from('listing_drafts').select('id', { count: 'exact', head: true }).eq('owner_id', user.id);
+    failure(error);
+    if (count === null) throw new Error('Draft count unavailable.');
+    return `${count} saved private listing ${count === 1 ? 'draft' : 'drafts'}`;
+  }
+  if (kind === 'experiences') {
+    const { data, error } = await backendClient().from('experience_catalogue_drafts').select('items').eq('owner_id', user.id).maybeSingle();
+    failure(error);
+    return data ? `${data.items.length} saved catalogue ${data.items.length === 1 ? 'item' : 'items'}` : 'No saved experience catalogue';
+  }
+  throw new Error('Unknown draft type.');
+}

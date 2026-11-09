@@ -9,7 +9,7 @@ function session() {
   return { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock_refresh_token', user };
 }
 async function mockBackend(page, options = {}) {
-  const state = { profile: null, catalogue: null, listings: [], requests: [], recoveryRedirect: null };
+  const state = { profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
   await page.route('https://backend-test.supabase.co/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -46,6 +46,7 @@ async function mockBackend(page, options = {}) {
       return respond(state.profile ? [state.profile] : []);
     }
     if (url.pathname === '/rest/v1/listing_drafts') {
+      if (method === 'HEAD') return route.fulfill({ status: 200, headers: { 'content-range': `0-0/${state.listings.length}`, 'Access-Control-Allow-Origin': '*', 'Access-Control-Expose-Headers': 'content-range' } });
       if (method === 'POST') { state.listings.push({ ...body, id: listingId }); return respond({ id: listingId }, 201); }
       if (method === 'DELETE') {
         if (options.failDelete) return respond({ message: 'Denied' }, 403);
@@ -195,7 +196,7 @@ for (const failDelete of [false, true]) {
   await signIn(page);
   await page.locator('[data-account-link]').click();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Your account.');
-  await expect(page.locator('.account-overview [role=status]')).toContainText('test@example.invalid');
+  await expect(page.locator('.account-overview > [role=status]')).toContainText('test@example.invalid');
   await expect(page.getByRole('link', { name: 'Manage listing drafts' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Open experience tools' })).toBeVisible();
   for (const width of [390, 1440]) {
@@ -208,7 +209,7 @@ for (const failDelete of [false, true]) {
   await expect(page).toHaveURL(/page=edit-profile/);
   await page.locator('[data-account-link]').click();
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
-  await expect(page.locator('.account-overview [role=status]')).toContainText('Sign in to manage');
+  await expect(page.locator('.account-overview > [role=status]')).toContainText('Sign in to manage');
   await expect(page.locator('.account-overview')).not.toContainText('test@example.invalid');
   await expect(page.getByRole('link', { name: 'Manage listing drafts' })).toHaveCount(0);
  });
@@ -350,3 +351,34 @@ for (const scenario of ['success', 'reauthentication', 'update']) {
     await expect(page.locator('#account-view [role=status]')).toContainText('Sign in with your email');
   });
 }
+
+test('account draft summaries show real saved/empty states and refresh independently', async ({ page }) => {
+  const state = await mockBackend(page, { savedSummaries: true });
+  await signIn(page);
+  await page.locator('[data-account-link]').click();
+  await expect(page.locator('[data-draft-summary=profile]')).toHaveText('Private profile draft saved');
+  await expect(page.locator('[data-draft-summary=listings]')).toHaveText('1 saved private listing draft');
+  await expect(page.locator('[data-draft-summary=experiences]')).toHaveText('1 saved catalogue item');
+  state.profile = null; state.listings = []; state.catalogue = [];
+  await page.getByRole('button', { name: 'Refresh profile draft status' }).click();
+  await page.getByRole('button', { name: 'Refresh listing drafts status' }).click();
+  await page.getByRole('button', { name: 'Refresh experience catalogue status' }).click();
+  await expect(page.locator('[data-draft-summary=profile]')).toHaveText('No saved profile draft');
+  await expect(page.locator('[data-draft-summary=listings]')).toHaveText('0 saved private listing drafts');
+  await expect(page.locator('[data-draft-summary=experiences]')).toHaveText('0 saved catalogue items');
+  await page.setViewportSize({ width: 390, height: 1000 });
+  await page.getByRole('heading', { level: 1 }).click();
+  await page.evaluate(() => window.scrollTo(0, 0));
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: '/tmp/account-summaries-mobile.png', fullPage: true });
+});
+test('missing catalogue setup does not block profile or listing summaries', async ({ page }) => {
+  await mockBackend(page, { missingCatalogueMigration: true });
+  await signIn(page);
+  await page.locator('[data-account-link]').click();
+  await expect(page.locator('[data-draft-summary=experiences]')).toContainText('Saved status unavailable');
+  await expect(page.locator('[data-draft-summary=profile]')).toHaveText('No saved profile draft');
+  await expect(page.locator('[data-draft-summary=listings]')).toHaveText('0 saved private listing drafts');
+  await expect(page.getByRole('button', { name: 'Refresh experience catalogue status' })).toBeEnabled();
+  await expect(page.getByRole('link', { name: 'Edit profile draft' })).toBeVisible();
+});

@@ -1,3 +1,4 @@
+import { loadPrivateDraftSummary } from './backend/drafts.js';
 import { backendEnabled, backendClient } from './backend/client.js';
 
 function node(tag, text, className) {
@@ -47,7 +48,30 @@ export function renderAccountOverview(container, navigate, onBack) {
       ['experiences', 'Experience catalogue', 'Explore included experiences and optional extras. Save or load a private catalogue. Unadded edits are not saved.', 'Open experience tools'],
     ]) {
       const card = node('section', null, 'account-tool-card');
-      card.append(node('h2', title), node('p', copy), link(page, action));
+      card.append(node('h2', title), node('p', copy));
+      const kind = { 'edit-profile': 'profile', 'create-listing': 'listings', experiences: 'experiences' }[page];
+      if (kind) {
+        const summary = node('p', 'Checking saved drafts…', 'account-draft-summary');
+        summary.setAttribute('role', 'status');
+        summary.dataset.draftSummary = kind;
+        const refresh = node('button', 'Refresh saved status', 'button quiet');
+        refresh.type = 'button';
+        refresh.setAttribute('aria-label', `Refresh ${title.toLowerCase()} status`);
+        const check = async () => {
+          refresh.disabled = true;
+          summary.textContent = 'Checking saved drafts…';
+          try {
+            const value = await loadPrivateDraftSummary(kind);
+            if (current()) summary.textContent = value;
+          } catch {
+            if (current()) summary.textContent = 'Saved status unavailable. Check sign-in, connection, and database setup, then retry.';
+          } finally { refresh.disabled = false; }
+        };
+        refresh.addEventListener('click', check);
+        card.append(summary, refresh);
+        check();
+      }
+      card.append(link(page, action));
       grid.append(card);
     }
     content.append(grid, node('p', 'Development workspace. Saved drafts are private. Public publishing, subscriptions, bookings, and payments are not connected.', 'account-preview-note'));

@@ -714,6 +714,17 @@ If launch scope is reduced:
   mobile screenshot inspected without horizontal overflow. Hosted password
   lifecycle testing remains deferred with the full walkthrough.
 
+### Account Saved-Draft Summaries
+
+- Account overview now independently loads profile saved state, exact listing
+  count, and saved catalogue item count with per-card refresh controls.
+- Empty records differ from unavailable status; catalogue migration failure does
+  not block other cards or navigation. Detached account results are discarded.
+- Build and all 19 backend UI checks passed; refreshed mobile summary layout
+  inspected with no horizontal overflow. Hosted summary checks remain deferred.
+- Listing counts use owner-filtered HEAD requests without loading listing bodies;
+  profile checks select only owner ID. Catalogue reads remain private/owner-filtered.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

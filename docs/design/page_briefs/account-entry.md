@@ -63,3 +63,10 @@ clear the form on navigation/sign-out/account changes. Busy controls and generic
 errors support retry without logging or storing passwords. Backend-disabled builds
 show an explicit preview; signed-out visits show a sign-in link. No email changes,
 account deletion, MFA configuration, or session-revocation guarantees are implied.
+
+
+Account overview tool cards show saved-state summaries from owner-filtered backend
+reads, with independent loading/error and refresh controls. Empty catalogue records
+show zero saved items; absent records show no saved catalogue. A failed read must
+not be presented as zero or prevent other cards from loading. No public publishing
+or commercial status is inferred from private saved records.
