@@ -729,3 +729,8 @@ underlying feature is operational.
 - `src/account-permissions.js`: assigned-role status and retry, separate from intent.
 - `supabase/migrations/202611090004_account_roles.sql`: protected roles, basic-user
   initialization, invoker role checks and restricted role-change event storage.
+
+- `src/provider-application.js`: private intake form and stateful save/submit/withdraw.
+- `src/backend/provider-applications.js`: verified actor-bound application reads/RPCs.
+- `supabase/migrations/202611090005_provider_applications.sql`: owner-only intake,
+  protected transitions and status history, with no automatic role assignment.

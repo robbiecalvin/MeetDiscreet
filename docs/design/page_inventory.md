@@ -454,3 +454,8 @@ It does not decide public field visibility or replace provider profile drafts.
 Partial USR-09 has an unsent booking-request layout at `/?page=booking-draft`.
 See [booking draft brief](./page_briefs/booking-draft.md). It contains only public
 fictional fixtures and sends no request, reserves no time, and calculates no price.
+
+Provider onboarding now includes private application intake at
+`/?page=provider-application`; see [application brief](./page_briefs/provider-application.md).
+Save/submission/withdrawal require the prepared migration. Review and approval
+operations, notifications and role assignment remain separate future work.

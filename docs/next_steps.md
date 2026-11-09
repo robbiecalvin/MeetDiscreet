@@ -41,9 +41,10 @@ were supplied in chat.
 
 ## 3. Immediate Next Action
 
-Continue focused frontend increments using approved visual direction and automatic
-checks. Defer the combined manual walkthrough as requested. Apply the prepared
-catalogue migration during later setup; no need to block independent frontend work.
+Build the non-payment pilot foundation: trusted provider intake, review and
+controlled publishing, alongside independent frontend work. Defer the combined
+manual walkthrough as requested. Apply missing prepared migrations during later
+backend setup and verify hosted ownership/role checks before live access.
 Preserve unresolved commercial/scheduling rules. Agrandir assets and macOS Safari
 validation remain outstanding; no live transactions are enabled.
 
@@ -865,6 +866,25 @@ If launch scope is reduced:
   signup, trusted role evaluation and protected audit events. Mobile status inspected.
 - Hosted migration application, provider approval/eligibility, operational role
   management and controlled publishing are still required for a usable pilot.
+
+### Private Provider Application Intake
+
+- Added `/?page=provider-application` with save, explicit submit/withdraw, reload,
+  and optional copy from the owner’s saved provider introduction.
+- Prepared `202611090005_provider_applications.sql`: owner reads, RPC-only mutations,
+  atomic draft/submitted/withdrawn transitions, status history and assigned-User
+  submission checks. Direct client self-approval/status edits are denied.
+- Actor binding is checked in the client and again against the actual server UID;
+  changing accounts cannot transfer a pending form mutation into a new owner.
+- Submitted applications lock editing until withdrawal. Failure preserves prior
+  state; missing schema remains unavailable, not a fake empty/success state.
+- Build and 140 default checks passed; 42 backend UI cases passed across the
+  full run and added failure checks. Final SQL validation was rechecked with all
+  15 database/security cases, and final layout/account checks passed. Mobile
+  intake layout inspected; submitted editing, withdrawal and retry verified.
+- Hosted application remains pending. Staff review, provider eligibility/approval,
+  notifications, role grants and controlled publishing are still future work.
+  See [brief](./design/page_briefs/provider-application.md).
 
 ### Next Action
 

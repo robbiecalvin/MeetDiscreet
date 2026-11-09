@@ -22,10 +22,11 @@ test.beforeAll(async () => {
   await db.exec(await readFile(new URL('../supabase/migrations/202611090002_availability_drafts.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611090003_user_profile_drafts.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611090004_account_roles.sql', import.meta.url), 'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/202611090005_provider_applications.sql', import.meta.url), 'utf8'));
 });
 test.afterAll(async () => { await db.close(); });
 test.beforeEach(async () => {
-  await db.exec('reset role; truncate public.listing_drafts, public.profile_drafts, public.experience_catalogue_drafts, public.availability_drafts, public.user_profile_drafts;');
+  await db.exec('reset role; truncate public.listing_drafts, public.profile_drafts, public.experience_catalogue_drafts, public.availability_drafts, public.user_profile_drafts, public.provider_applications, public.provider_application_events;');
   await asUser(alice);
 });
 
@@ -191,4 +192,45 @@ test('signup initializes only the basic User role even when metadata requests pr
   await asUser(charlie);
   expect((await db.query('select role from public.account_roles')).rows).toEqual([{ role: 'user' }]);
   await db.exec('reset role'); await db.query('delete from auth.users where id=$1', [charlie]);
+});
+
+test('provider applications save, submit, lock editing, withdraw and record status history without role grants', async () => {
+  const save = (name, city, intro) => db.query('select * from public.save_provider_application($1,$2,$3,$4)', [alice, name, city, intro]);
+  await save('', '', '');
+  await expect(db.query('select * from public.submit_provider_application($1)', [alice])).rejects.toThrow(/complete application/i);
+  await save('\t', '\n', ' \n\t ');
+  await expect(db.query('select * from public.submit_provider_application($1)', [alice])).rejects.toThrow(/complete application/i);
+  await save('Provider introduction', 'Vancouver', 'A private introduction for the development intake queue.');
+  expect((await db.query('select * from public.submit_provider_application($1)', [alice])).rows[0].state).toBe('submitted');
+  await expect(save('Changed', 'Toronto', 'Cannot edit a submitted request.')).rejects.toThrow(/withdraw/i);
+  await expect(db.query('select * from public.submit_provider_application($1)', [alice])).rejects.toThrow(/complete application/i);
+  expect((await db.query('select * from public.withdraw_provider_application($1)', [alice])).rows[0].state).toBe('withdrawn');
+  await save('Revised provider', 'Vancouver', 'A revised introduction.');
+  expect((await db.query('select state from public.provider_application_events order by event_id')).rows.map(row => row.state)).toEqual(['draft','draft','draft','submitted','withdrawn','draft']);
+  expect((await db.query("select public.has_account_role('provider') as value")).rows[0].value).toBe(false);
+});
+test('provider application RPCs bind the actor and deny cross-account access and direct status mutation', async () => {
+  await db.query('select * from public.save_provider_application($1,$2,$3,$4)', [alice, 'Alice', 'Vancouver', 'Private intro']);
+  await asUser(bob);
+  expect((await db.query('select * from public.provider_applications')).rows).toHaveLength(0);
+  expect((await db.query('select * from public.provider_application_events')).rows).toHaveLength(0);
+  await expect(db.query('select * from public.save_provider_application($1,$2,$3,$4)', [alice, 'Spoofed', 'Toronto', 'Not owned'])).rejects.toThrow(/account changed/i);
+  await expect(db.query('select * from public.submit_provider_application($1)', [alice])).rejects.toThrow(/account changed/i);
+  await expect(db.query('select * from public.withdraw_provider_application($1)', [alice])).rejects.toThrow(/account changed/i);
+  await asUser(alice);
+  for (const sql of ["update public.provider_applications set state='submitted'", 'delete from public.provider_applications', "insert into public.provider_applications(owner_id) values ('" + bob + "')", 'delete from public.provider_application_events']) await expect(db.exec(sql)).rejects.toThrow(/permission denied/i);
+  await asUser('', 'anon');
+  await expect(db.query('select * from public.provider_applications')).rejects.toThrow(/permission denied/i);
+  await expect(db.query('select * from public.submit_provider_application($1)', [alice])).rejects.toThrow(/permission denied/i);
+  await asUser('');
+  await expect(db.query('select * from public.save_provider_application($1,$2,$3,$4)', [alice, 'Invalid', 'City', 'Intro'])).rejects.toThrow(/not authenticated/i);
+});
+test('application submission checks assigned basic membership and rejects oversized data', async () => {
+  await expect(db.query('select * from public.save_provider_application($1,$2,$3,$4)', [alice, 'x'.repeat(81), 'City', 'Intro'])).rejects.toThrow(/check constraint/i);
+  await db.exec('reset role');
+  await db.query("delete from public.account_roles where user_id=$1 and role='user'", [alice]);
+  await asUser(alice);
+  await db.query('select * from public.save_provider_application($1,$2,$3,$4)', [alice, 'Alice', 'City', 'Intro']);
+  await expect(db.query('select * from public.submit_provider_application($1)', [alice])).rejects.toThrow(/membership required/i);
+  await db.exec('reset role'); await db.query("insert into public.account_roles(user_id,role) values ($1,'user')", [alice]);
 });

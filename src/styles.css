@@ -84,3 +84,7 @@ main.help-main{max-width:1300px;padding-bottom:70px}.help-controls{display:grid;
 .booking-form textarea{font:inherit;line-height:1.7}
 
 .account-permissions{padding:24px;margin:24px 0;border:1px solid #38476b;border-radius:7px;background:var(--surface)}.account-permissions h2{font-size:22px;margin-bottom:16px}.account-permissions p{margin-bottom:14px}.account-permissions [data-account-permissions]{color:var(--text);font-weight:700}.account-permissions>.quiet{padding-left:0;text-align:left}
+
+.provider-application{padding:20px 0 40px}.provider-application>.eyebrow{margin-top:28px}.provider-application h1{font-size:clamp(32px,5vw,48px);margin:18px 0}.application-state{margin:24px 0;font-size:14px;font-weight:700}.application-form{max-width:800px}.application-form .editor-field{margin-bottom:20px}.application-form input,.application-form textarea{font:inherit;width:100%;min-height:48px;padding:12px;color:var(--text);background:var(--surface);border:1px solid #536383;border-radius:4px}.application-form textarea{line-height:1.7}.provider-application>[role=status]:last-of-type{margin-top:24px}.application-form .editor-actions{margin-top:24px}@media(max-width:700px){.application-form input,.application-form textarea{font-size:16px}}
+
+.application-form button:disabled{opacity:.5}

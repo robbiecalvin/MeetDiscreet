@@ -13,6 +13,8 @@ Check the dashboard's plan and usage limits before changing settings.
   to the separately applied migrations below.
 - Server-controlled membership-role foundation with basic User initialization;
   Provider/operational role assignment and live eligibility workflows remain separate.
+- Private provider application intake (save/submit/withdraw) with owner-bound
+  transitions; review/approval tools and notifications remain unimplemented.
 - No public publishing, paid entitlements, payments, messaging,
   real discovery data, uploads, or completed eligibility verification.
 - Private experience catalogue snapshots require the additional migration below.
@@ -121,6 +123,33 @@ starting preference. Missing schema/read failures show unknown permissions; no
 role is inferred from metadata. Applying the migration and testing new signup plus
 role checks against the hosted project remain pending. Do not rerun older files
 that have already been applied.
+
+## Add private provider application intake
+
+Apply this migration after the initial draft helpers and account-role migration:
+
+[202611090005_provider_applications.sql](../../supabase/migrations/202611090005_provider_applications.sql)
+
+It creates private owner-readable intake records and status events. Browser and
+service API clients have no direct row mutations. Authenticated owner-bound
+`save_provider_application`, `submit_provider_application`, and
+`withdraw_provider_application` RPCs implement draft/submitted/withdrawn transitions.
+Submitted applications cannot be edited without withdrawal. Submission requires
+assigned User membership and nonblank name/city/introduction; these are intake
+requirements, not approved provider eligibility criteria. No Provider role is granted.
+
+The browser binds mutations to the verified account that loaded the editor; the
+server compares the expected owner with the actual JWT user and always writes
+using `auth.uid()`. This protects against changing accounts during asynchronous
+requests. Status events contain owner, state and server time rather than duplicated
+application content. They follow auth-account deletion; operational retention and
+content-version/approval records still need definition before a live review process.
+
+No approval/denial or role-assignment RPC, staff review interface, notifications,
+response deadline or public publishing is implemented. A future review operation
+must verify assigned operational roles and current submitted state/version before
+an authorized audited decision. This migration has not been applied remotely by
+the agent. Run only missing migrations; keep the existing schema intact.
 
 ## Registration starting preference
 

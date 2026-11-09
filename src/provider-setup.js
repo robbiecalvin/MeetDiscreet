@@ -25,6 +25,7 @@ export function renderProviderSetup(container, navigate) {
   const grid = node('div', null, 'account-tool-grid'); root.append(grid); container.append(root);
   const current = () => root.parentNode === container;
   function tools(connected) {
+    root.insertBefore(link('provider-application', 'Prepare provider application'), grid);
     for (const [page, title, copy, kind] of [
       ['edit-profile', '1. Introduce yourself', 'Prepare your profile draft and audience previews.', 'profile'],
       ['experiences', '2. Shape your experiences', 'Describe included experiences and optional draft extras.', 'experiences'],

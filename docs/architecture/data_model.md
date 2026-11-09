@@ -1143,3 +1143,16 @@ APIs are read-only on the audit table. Retention/export and an authorized operat
 role-management workflow remain future requirements. These records do not claim
 a complete immutable/compliance audit system. Roles remain distinct from eligibility,
 subscriptions, publishing plans, ownership and permissions for individual resources.
+
+
+## Provider application intake
+
+[Provider intake migration](../../supabase/migrations/202611090005_provider_applications.sql)
+adds one current private intake record per account and owner-readable status events.
+States are draft/submitted/withdrawn only; there is no approval or publishing state.
+Authenticated owners mutate through actor-bound RPCs, not direct table writes.
+Submitted text is locked until withdrawal. Role grants and review decisions are
+separate future operations. Status history does not preserve prior content versions
+or establish identity eligibility; it stores only state/owner/time. Auth-account
+deletion cascades to these intake records/events, unlike protected role-event
+storage whose retention remains a separate operational requirement.

@@ -9,7 +9,7 @@ function session(profile = user) {
   return { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock_refresh_token', user: profile };
 }
 async function mockBackend(page, options = {}) {
-  const state = { user: { ...user, user_metadata: {} }, userProfile: null, roles: ['user'], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
+  const state = { user: { ...user, user_metadata: {} }, providerApplication: null, userProfile: null, roles: ['user'], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
   await page.route('https://backend-test.supabase.co/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -33,6 +33,25 @@ async function mockBackend(page, options = {}) {
       return respond(state.user);
     }
     if (url.pathname === '/auth/v1/logout') return respond({});
+    if (url.pathname === '/rest/v1/provider_applications') {
+      if (options.missingApplicationMigration) return respond({ message: 'Table missing' }, 404);
+      return respond(state.providerApplication ? [state.providerApplication] : []);
+    }
+    if (url.pathname.startsWith('/rest/v1/rpc/') && url.pathname.includes('provider_application')) {
+      if (options.missingApplicationMigration || options.failApplicationMutation) return respond({ message: 'Unavailable' }, 400);
+      if (body.p_expected_owner !== state.user.id) return respond({ message: 'Account changed' }, 403);
+      if (url.pathname.endsWith('/save_provider_application')) {
+        if (state.providerApplication?.state === 'submitted') return respond({ message: 'Locked' }, 409);
+        state.providerApplication = { owner_id: userId, display_name: body.p_display_name.trim(), city: body.p_city.trim(), introduction: body.p_introduction.trim(), state: 'draft', submitted_at: null, withdrawn_at: null };
+      } else if (url.pathname.endsWith('/submit_provider_application')) {
+        if (!state.roles.includes('user') || state.providerApplication?.state !== 'draft') return respond({ message: 'Denied' }, 403);
+        state.providerApplication = { ...state.providerApplication, state: 'submitted', submitted_at: '2026-11-09T00:00:00Z' };
+      } else {
+        if (state.providerApplication?.state !== 'submitted') return respond({ message: 'Denied' }, 403);
+        state.providerApplication = { ...state.providerApplication, state: 'withdrawn', withdrawn_at: '2026-11-09T01:00:00Z' };
+      }
+      return respond(state.providerApplication);
+    }
     if (url.pathname === '/rest/v1/account_roles') {
       if (options.missingRoleMigration) return respond({ message: 'Table missing' }, 404);
       return respond(state.roles.map(role => ({ role })));
@@ -748,3 +767,75 @@ test('missing role schema reports unavailable permissions without granting fallb
   await expect(page.getByRole('button', { name: 'Refresh account permissions' })).toBeEnabled();
   await expect(page.getByRole('link', { name: 'Edit User profile draft', exact: true })).toBeVisible();
 });
+
+test('provider application saves, submits, locks, withdraws and preserves roles', async ({ page }) => {
+  const state = await mockBackend(page);
+  await signIn(page);
+  await enter(page, '/?page=provider-setup');
+  await page.getByRole('link', { name: 'Prepare provider application', exact: true }).click();
+  await expect(page.locator('.application-state')).toHaveText('No saved application.');
+  await page.getByLabel('Provider display name', { exact: true }).fill('  Test Provider  ');
+  await page.getByLabel('General city', { exact: true }).fill('Vancouver');
+  await page.getByLabel('Provider application introduction', { exact: true }).fill('A private introduction for the development queue.');
+  await expect(page.getByRole('button', { name: 'Submit saved application' })).toBeDisabled();
+  await page.getByRole('button', { name: 'Save application draft', exact: true }).click();
+  await expect(page.locator('#provider-application-feedback')).toContainText('draft saved privately');
+  await expect(page.getByLabel('Provider display name', { exact: true })).toHaveValue('Test Provider');
+  await expect(page.getByRole('button', { name: 'Submit saved application' })).toBeEnabled();
+  page.once('dialog', dialog => dialog.dismiss());
+  await page.getByRole('button', { name: 'Submit saved application' }).click();
+  expect(state.providerApplication.state).toBe('draft');
+  page.once('dialog', dialog => dialog.accept());
+  await page.getByRole('button', { name: 'Submit saved application' }).click();
+  await expect(page.locator('.application-state')).toHaveText('Application status: submitted.');
+  await expect(page.getByLabel('Provider display name', { exact: true })).toBeDisabled();
+  expect(state.roles).toEqual(['user']);
+  await page.reload();
+  await expect(page.locator('.application-state')).toHaveText('Application status: submitted.');
+  page.once('dialog', dialog => dialog.accept());
+  await page.getByRole('button', { name: 'Withdraw application', exact: true }).click();
+  await expect(page.locator('.application-state')).toHaveText('Application status: withdrawn.');
+  await expect(page.getByLabel('Provider display name', { exact: true })).toBeEnabled();
+  await page.setViewportSize({ width: 390, height: 1000 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: '/tmp/provider-application-mobile.png', fullPage: true });
+  await page.getByRole('button', { name: 'Save application draft', exact: true }).click();
+  await expect(page.locator('.application-state')).toHaveText('Application status: draft.');
+  const writes = state.requests.filter(value => value.path.includes('/rpc/') && value.path.includes('provider_application'));
+  expect(writes.every(value => value.body.p_expected_owner === userId)).toBe(true);
+  expect(writes.some(value => Object.hasOwn(value.body, 'state') || Object.hasOwn(value.body, 'role'))).toBe(false);
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await expect(page.getByLabel('Provider display name', { exact: true })).toHaveValue('');
+});
+test('provider application storage failures remain retryable without false submission', async ({ page }) => {
+  await mockBackend(page, { missingApplicationMigration: true });
+  await signIn(page);
+  await enter(page, '/?page=provider-application');
+  await expect(page.locator('#provider-application-feedback')).toContainText('Unable to complete');
+  await expect(page.locator('.application-state')).toHaveText('Application status has not been loaded.');
+  await expect(page.getByRole('button', { name: 'Submit saved application' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Reload application' })).toBeEnabled();
+});
+
+for (const operation of ['save', 'withdraw']) {
+  test(`failed provider application ${operation} keeps its previous state and allows retry`, async ({ page }) => {
+    const state = await mockBackend(page, { failApplicationMutation: true });
+    if (operation === 'withdraw') state.providerApplication = { owner_id: userId, display_name: 'Submitted Provider', city: 'Vancouver', introduction: 'A saved private introduction.', state: 'submitted' };
+    await signIn(page);
+    await enter(page, '/?page=provider-application');
+    if (operation === 'save') {
+      await expect(page.locator('.application-state')).toHaveText('No saved application.');
+      await page.getByLabel('Provider display name', { exact: true }).fill('Unsaved Provider');
+      await page.getByRole('button', { name: 'Save application draft', exact: true }).click();
+    } else {
+      await expect(page.locator('.application-state')).toHaveText('Application status: submitted.');
+      page.once('dialog', dialog => dialog.accept());
+      await page.getByRole('button', { name: 'Withdraw application', exact: true }).click();
+    }
+    await expect(page.locator('#provider-application-feedback')).toContainText('Unable to complete');
+    await expect(page.getByRole('button', { name: operation === 'save' ? 'Save application draft' : 'Withdraw application', exact: true })).toBeEnabled();
+    await expect(page.locator('.application-state')).toHaveText(operation === 'save' ? 'No saved application.' : 'Application status: submitted.');
+    expect(state.roles).toEqual(['user']);
+  });
+}
