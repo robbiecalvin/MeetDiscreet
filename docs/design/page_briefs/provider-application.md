@@ -50,3 +50,15 @@ and mutations invalidate history; detached/changed-account responses are ignored
 No history is persisted in browser storage. Backend-disabled mode has no history
 control or synthetic private records. Earlier versions outside the latest 20 are
 not exposed by this first history view; retention policy remains unresolved.
+
+
+## Application activity
+
+A separate explicit loader shows up to 20 owner status events in newest event-ID
+order, using the server-recorded timestamp. Display Draft saved, Application
+submitted, Application withdrawn, and Changes requested in a semantic ordered list
+with time elements. This is status history, not approval, identity verification,
+notification delivery or a complete retained audit export. It does not expose staff
+identity or private introduction text. Empty activity and unavailable reads have
+different messages. Refresh errors and application operations clear old entries;
+sign-out/account changes discard the view. No browser history cache or new schema.

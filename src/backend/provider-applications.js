@@ -48,3 +48,12 @@ export async function loadProviderApplicationStatus(ownerId) {
   if (error || (data && (data.owner_id !== ownerId || !['draft','submitted','withdrawn','changes_requested'].includes(data.state)))) throw new Error('Application status unavailable.');
   return data?.state || null;
 }
+
+export async function loadProviderApplicationActivity(ownerId) {
+  await actor(ownerId);
+  const { data, error } = await backendClient().from('provider_application_events')
+    .select('event_id,owner_id,state,occurred_at').eq('owner_id', ownerId)
+    .order('event_id', { ascending: false }).limit(20);
+  if (error || !Array.isArray(data) || data.some(row => row.owner_id !== ownerId || !['draft','submitted','withdrawn','changes_requested'].includes(row.state))) throw new Error('Activity unavailable.');
+  return data;
+}

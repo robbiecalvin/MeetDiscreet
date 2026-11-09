@@ -303,3 +303,9 @@ The applicant's submission-history control uses the same migration 007 snapshot
 and feedback tables, with no additional migration. It reads at most 20 recent
 owner snapshots and only matching feedback using the allowed browser columns.
 Missing schema/read failures display unavailable; they do not claim an empty history.
+
+
+Application activity uses owner-readable `provider_application_events` from migration
+005 (extended for changes-requested state by 007). Its explicit loader requests at
+most 20 events, newest event ID first, without application text or reviewer identity.
+No additional migration or capability provisioning is needed for this owner view.

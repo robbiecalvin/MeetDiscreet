@@ -9,7 +9,7 @@ function session(profile = user) {
   return { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock_refresh_token', user: profile };
 }
 async function mockBackend(page, options = {}) {
-  const state = { user: { ...user, user_metadata: {} }, providerApplication: null, applicationFeedback: [], applicationSubmissions: [], historyFailure: false, applicationSubmissionCounter: 0, userProfile: null, roles: ['user'], capabilities: [], reviewApplications: [], reviewAccessEvents: [], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
+  const state = { user: { ...user, user_metadata: {} }, providerApplication: null, applicationFeedback: [], applicationActivity: [], activityFailure: false, applicationSubmissions: [], historyFailure: false, applicationSubmissionCounter: 0, userProfile: null, roles: ['user'], capabilities: [], reviewApplications: [], reviewAccessEvents: [], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
   await page.route('https://backend-test.supabase.co/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -33,6 +33,10 @@ async function mockBackend(page, options = {}) {
       return respond(state.user);
     }
     if (url.pathname === '/auth/v1/logout') return respond({});
+    if (url.pathname === '/rest/v1/provider_application_events') {
+      if (state.activityFailure) return respond({message:'Activity unavailable'},404);
+      return respond(state.applicationActivity.filter(row => `eq.${row.owner_id}` === url.searchParams.get('owner_id')).slice(0,Number(url.searchParams.get('limit'))));
+    }
     if (url.pathname === '/rest/v1/provider_application_submissions') {
       if (state.historyFailure) return respond({message:'History unavailable'},404);
       return respond(state.applicationSubmissions.filter(row => `eq.${row.owner_id}` === url.searchParams.get('owner_id')).slice(0,Number(url.searchParams.get('limit'))));
@@ -1057,4 +1061,36 @@ test('missing application schema does not block account tools or imply an empty 
   await expect(page.locator('[data-application-status]')).toContainText('Application status unavailable');
   await expect(page.locator('[data-draft-summary=profile]')).toHaveText('Private profile draft saved');
   await expect(page.getByRole('link',{name:'Open provider application',exact:true})).toBeVisible();
+});
+
+
+test('application activity shows bounded private state history and clears on failure, mutation and sign-out', async ({ page }) => {
+  const state = await mockBackend(page);
+  state.applicationActivity = Array.from({length:23},(_,index) => ({event_id:23-index,owner_id:userId,state:['draft','changes_requested','submitted','withdrawn'][index%4],occurred_at:'2026-11-09T12:00:00Z'}));
+  await signIn(page); await enter(page,'/?page=provider-application');
+  await expect(page.getByRole('button',{name:'Save application draft',exact:true})).toBeEnabled();
+  expect(state.requests.some(row => row.path.endsWith('/provider_application_events'))).toBe(false);
+  await page.getByRole('button',{name:'Load application activity',exact:true}).click();
+  await expect(page.locator('.application-activity li')).toHaveCount(20);
+  await expect(page.locator('.application-activity li').nth(1)).toContainText('Changes requested');
+  await page.setViewportSize({width:390,height:844});
+  await page.locator('.application-activity').screenshot({path:'/tmp/provider-application-activity-mobile.png'});
+  state.activityFailure = true;
+  await page.getByRole('button',{name:'Refresh application activity',exact:true}).click();
+  await expect(page.locator('.application-activity [role=status]')).toContainText('Application activity unavailable');
+  await expect(page.locator('.application-activity li')).toHaveCount(0);
+  state.activityFailure = false;
+  await page.getByRole('button',{name:'Refresh application activity',exact:true}).click();
+  await expect(page.locator('.application-activity li')).toHaveCount(20);
+  await page.getByRole('button',{name:'Save application draft',exact:true}).click();
+  await expect(page.locator('.application-activity li')).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Save application draft',exact:true})).toBeEnabled();
+  state.applicationActivity = [];
+  await page.getByRole('button',{name:'Load application activity',exact:true}).click();
+  await expect(page.locator('.application-activity [role=status]')).toHaveText('No application activity recorded yet.');
+  state.applicationActivity = [{event_id:1,owner_id:userId,state:'submitted',occurred_at:'2026-11-09T12:00:00Z'}];
+  await page.getByRole('button',{name:'Refresh application activity',exact:true}).click();
+  await expect(page.locator('.application-activity li')).toHaveCount(1);
+  await page.getByRole('button',{name:'Sign out',exact:true}).click();
+  await expect(page.locator('.application-activity')).toHaveCount(0);
 });

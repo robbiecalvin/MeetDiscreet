@@ -743,3 +743,5 @@ underlying feature is operational.
 - `supabase/migrations/202611090007_provider_submission_feedback.sql`: submission snapshots, private feedback and separately scoped version-bound changes requests.
 
 - `src/provider-application-history.js`: on-demand owner submission snapshots with version-matched feedback, bounded reads and stale-response clearing.
+
+- `src/provider-application-activity.js`: explicit owner-only recent status timeline using existing application event reads.

@@ -941,6 +941,19 @@ If launch scope is reduced:
 - Provider approval authority and combined-role policy remain pending; this card
   does not grant roles, notify applicants or enable publishing.
 
+### Private Application Activity Timeline
+
+- Applicants can explicitly load the latest 20 server-recorded status updates:
+  draft saves, submissions, withdrawals and requests for changes. Timestamps and
+  status history appear separately from submitted introduction snapshots.
+- Existing owner-only event RLS applies; no new migration, notifications, staff
+  identity exposure, approval or role-grant capability is introduced.
+- Errors clear displayed activity and distinguish unavailable from empty; application
+  operations and sign-out clear the view. Build and all 55 backend browser checks
+  passed, including bounded loading, unavailable/empty distinctions, retry and
+  clearing after saves/sign-out. Mobile activity layout inspected. Hosted migration
+  validation remains pending as documented in backend setup.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

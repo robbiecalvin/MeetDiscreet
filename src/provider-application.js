@@ -1,6 +1,7 @@
 import { backendEnabled } from './backend/client.js';
 import { loadProviderApplication, saveProviderApplication, submitProviderApplication, withdrawProviderApplication } from './backend/provider-applications.js';
 import { loadProfileDraft } from './backend/drafts.js';
+import { renderProviderApplicationActivity } from './provider-application-activity.js';
 import { renderProviderApplicationHistory } from './provider-application-history.js';
 import { trackDraft } from './draft-changes.js';
 const empty = () => ({ name: '', city: '', introduction: '' });
@@ -54,6 +55,7 @@ export function renderProviderApplication(container, navigate) {
   const current = epoch => epoch === identityEpoch && root.parentNode === container;
   const renderEpoch = identityEpoch;
   const history = backendEnabled ? renderProviderApplicationHistory(root, () => busy ? null : ownerId, () => current(renderEpoch)) : null;
+  const activity = backendEnabled ? renderProviderApplicationActivity(root, () => busy ? null : ownerId, () => current(renderEpoch)) : null;
   function sync() { for (const [key, input] of fields) input.value = draft[key]; }
   function paintState() {
     const locked = saved?.state === 'submitted';
@@ -70,7 +72,7 @@ export function renderProviderApplication(container, navigate) {
   }
   async function run(operation) {
     if (busy) return;
-    history?.clear();
+    history?.clear(); activity?.clear();
     const epoch = identityEpoch; busy = true; feedback.textContent = 'Working…'; paintState();
     try {
       const message = await operation(epoch);
