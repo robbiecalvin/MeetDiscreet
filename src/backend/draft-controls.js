@@ -1,5 +1,5 @@
 import { backendEnabled } from './client.js';
-export function privateDraftControls({ onSave, onLoad, onDelete, multiple = false }) {
+export function privateDraftControls({ onSave, onLoad, onDelete, multiple = false, loadLabel = '' }) {
   if (!backendEnabled) return null;
   const section = document.createElement('section');
   section.className = 'private-draft-controls';
@@ -7,7 +7,7 @@ export function privateDraftControls({ onSave, onLoad, onDelete, multiple = fals
   const copy = document.createElement('p'); copy.textContent = 'Sign in to save or load your own private drafts. Saving never publishes a profile or listing.';
   const actions = document.createElement('div'); actions.className = 'editor-actions';
   const save = document.createElement('button'); save.type = 'button'; save.className = 'button primary'; save.textContent = 'Save private draft';
-  const load = document.createElement('button'); load.type = 'button'; load.className = 'button outline'; load.textContent = multiple ? 'Load my listing drafts' : 'Load my profile draft';
+  const load = document.createElement('button'); load.type = 'button'; load.className = 'button outline'; load.textContent = loadLabel || (multiple ? 'Load my listing drafts' : 'Load my profile draft');
   const status = document.createElement('p'); status.className = 'profile-small'; status.setAttribute('role', 'status');
   const choices = document.createElement('div'); choices.className = 'saved-draft-choices';
   const remove = onDelete ? document.createElement('button') : null;

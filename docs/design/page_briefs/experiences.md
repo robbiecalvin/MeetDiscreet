@@ -33,3 +33,11 @@ edit/remove, safe text, previews, repeatable sample fill, in-memory navigation,
 reload clearing, no network writes, and five widths. Desktop/mobile screenshots
 inspected. Real billing, storage, permissions, Safari/Agrandir, and live Netlify
 deployment remain unverified/unimplemented as applicable.
+
+
+## Private catalogue saving
+
+Connected mode adds explicit save/load controls below the catalogue. Save only
+added/updated items as an owner-only snapshot; unfinished composer edits are
+excluded. Loading replaces local catalogue state and resets the composer.
+Migration availability and hosted verification remain tracked in backend setup.

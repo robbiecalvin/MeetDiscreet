@@ -690,3 +690,7 @@ underlying feature is operational.
 
 - `src/account-overview.js`: verified development-session workspace and draft-tool
   navigation, with signed-out and backend-disabled states.
+
+- `src/draft-amount.js`: pure exact decimal parser for currency-pending draft amounts.
+- `supabase/migrations/202611090001_experience_drafts.sql`: private catalogue snapshot
+  validation, grants and owner policies; apply separately after the first migration.

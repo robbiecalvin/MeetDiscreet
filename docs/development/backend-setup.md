@@ -11,7 +11,7 @@ Check the dashboard's plan and usage limits before changing settings.
 - Private owner-only profile and listing drafts.
 - No public publishing, account roles, paid entitlements, payments, messaging,
   real discovery data, uploads, or completed eligibility verification.
-- Experiences remain in-memory demo drafts.
+- Private experience catalogue snapshots require the additional migration below.
 
 Use test accounts/data until final eligibility, Privacy/Terms, support, moderation,
 and launch controls are established. The frontend flag is a deployment switch,
@@ -31,6 +31,22 @@ users or publish anything. Do not run it repeatedly over an existing schema.
 The code agent has the public project URL/key but no admin or database credential;
 those cannot apply migrations. Never share the database password, a secret key,
 or service_role key in chat or browser environment variables.
+
+## Add private catalogue storage
+
+After the initial migration, run this separate migration once when setting up
+catalogue persistence:
+
+[202611090001_experience_drafts.sql](../../supabase/migrations/202611090001_experience_drafts.sql)
+
+It creates owner-only `experience_catalogue_drafts`, with a validated JSON array
+snapshot, private grants/RLS, and server-maintained update timestamps. The 200 KB
+snapshot ceiling is an operational payload limit, not a commercial allowance.
+Only added/updated catalogue items are saved; the unfinished item composer is not.
+Amounts retain their exact minor-unit draft format without selecting currency or
+creating live prices. Nothing is published. Missing migration errors allow retry;
+existing profile/listing drafts remain separate. This migration has been tested
+locally but has not been applied to the hosted project by the agent.
 
 ## Authentication settings
 

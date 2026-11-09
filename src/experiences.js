@@ -1,18 +1,16 @@
+import { parseDraftAmount } from './draft-amount.js';
+import { backendEnabled } from './backend/client.js';
+import { saveExperienceDraft, loadExperienceDraft } from './backend/drafts.js';
+import { privateDraftControls } from './backend/draft-controls.js';
 import { draftToolNavigation } from './draft-tools.js';
 let items = [];
 let nextId = 1;
 const blank = () => ({ title: '', description: '', offered: true, included: true, amount: '', feeType: 'once' });
 let composer = blank();
 let editingId = null;
-export function clearExperienceDraftState() { items = []; nextId = 1; composer = blank(); editingId = null; }
+let identityEpoch = 0;
+export function clearExperienceDraftState() { identityEpoch++; items = []; nextId = 1; composer = blank(); editingId = null; }
 
-// Exact draft-format parsing only. No currency or live billing policy is selected.
-export function parseDraftAmount(value) {
-  if (!/^\d+(?:\.\d{1,2})?$/.test(value)) return null;
-  const [whole, decimals = ''] = value.split('.');
-  const minor = BigInt(whole) * 100n + BigInt(decimals.padEnd(2, '0'));
-  return minor <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(minor) : null;
-}
 function amountLabel(minor) {
   return `${Math.floor(minor / 100)}.${String(minor % 100).padStart(2, '0')}`;
 }
@@ -32,7 +30,7 @@ export function renderExperiences(container, onBack, onTool) {
   });
   const intro = element('div', null, 'editor-intro');
   intro.append(element('p', 'A LITTLE SOMETHING TO LOOK FORWARD TO', 'eyebrow'), element('h1', 'Shape your experiences.'), element('p', 'Describe what you offer and try the catalogue layout.', 'offering-lead'));
-  container.append(back, draftToolNavigation('experiences', onTool), intro, element('p', 'Demo catalogue. Use fictional details and amounts. Nothing is saved, published, or charged. Currency and payment policies remain pending; refresh clears all drafts.', 'editor-notice'));
+  container.append(back, draftToolNavigation('experiences', onTool), intro, element('p', backendEnabled ? 'Private development catalogue. Add or update items before saving the catalogue. Unsaved edits clear on refresh. Currency is pending; nothing is published or charged.' : 'Demo catalogue. Use fictional details and amounts. Nothing is saved, published, or charged. Currency and payment policies remain pending; refresh clears all drafts.', 'editor-notice'));
   const editor = element('div', null, 'experience-editor');
   const form = element('form', null, 'experience-form');
   form.noValidate = true;
@@ -195,9 +193,31 @@ export function renderExperiences(container, onBack, onTool) {
   audienceControls.append(visitor, subscriber);
   const backToEdit = element('button', 'Back to catalogue editing', 'button outline');
   backToEdit.addEventListener('click', () => { preview.hidden = true; editor.hidden = false; fields.title.focus(); });
-  preview.append(previewTitle, element('p', 'Fictional draft preview only. No subscription access, saved catalogue, charge, or booking quote is created.', 'profile-copy'), audienceControls, previewItems, backToEdit);
+  preview.append(previewTitle, element('p', 'Catalogue layout preview only. No subscription access, charge, or booking quote is created.', 'profile-copy'), audienceControls, previewItems, backToEdit);
   previewButton.addEventListener('click', () => { editor.hidden = true; preview.hidden = false; paintPreview(false); previewTitle.focus(); preview.scrollIntoView({ block: 'start', behavior: 'instant' }); });
+  const storage = privateDraftControls({
+    loadLabel: 'Load my experience catalogue',
+    onSave: async () => {
+      const epoch = identityEpoch;
+      await saveExperienceDraft(items.map(item => ({ ...item })));
+      if (epoch !== identityEpoch) throw new Error('Account changed.');
+      return 'Private experience catalogue saved. Unadded item edits are not included. Nothing is published or charged.';
+    },
+    onLoad: async () => {
+      const epoch = identityEpoch;
+      const saved = await loadExperienceDraft();
+      if (epoch !== identityEpoch) throw new Error('Account changed.');
+      if (saved === null) return 'No private experience catalogue found for this account.';
+      items = saved.map((item, index) => ({ ...item, id: index + 1 }));
+      nextId = items.length + 1;
+      composer = blank(); editingId = null;
+      sync(); paintList(); preview.hidden = true; editor.hidden = false;
+      fields.title.focus();
+      return 'Your private experience catalogue was loaded.';
+    },
+  });
   sync(); paintList();
   editor.append(form, owner);
   container.append(editor, preview);
+  if (storage) container.append(storage);
 }

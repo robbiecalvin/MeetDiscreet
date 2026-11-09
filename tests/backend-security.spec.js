@@ -18,10 +18,11 @@ test.beforeAll(async () => {
     grant usage on schema auth, public to anon, authenticated;
     grant execute on function auth.uid() to anon, authenticated;`);
   await db.exec(await readFile(new URL('../supabase/migrations/202611080001_private_drafts.sql', import.meta.url), 'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/202611090001_experience_drafts.sql', import.meta.url), 'utf8'));
 });
 test.afterAll(async () => { await db.close(); });
 test.beforeEach(async () => {
-  await db.exec('reset role; truncate public.listing_drafts, public.profile_drafts;');
+  await db.exec('reset role; truncate public.listing_drafts, public.profile_drafts, public.experience_catalogue_drafts;');
   await asUser(alice);
 });
 
@@ -84,4 +85,26 @@ test('browser configuration rejects privileged keys and arbitrary destinations',
   for (const url of ['http://example.supabase.co', 'https://example.com', 'https://example.supabase.co.evil.test', 'https://example.supabase.co/path', 'https://user:password@example.supabase.co']) {
     expect(() => validatePublicBackendConfig({ enabled: true, url, key: publicKey })).toThrow();
   }
+});
+
+test('private experience catalogues enforce ownership and validate nested draft values', async () => {
+  const item = { title: 'Coffee', description: '', included: false, offered: true, minor: 1500, feeType: 'once' };
+  const insert = value => db.query('insert into public.experience_catalogue_drafts(items) values ($1::jsonb)', [JSON.stringify(value)]);
+  await insert([item]);
+  expect((await db.query('select items from public.experience_catalogue_drafts')).rows[0].items).toEqual([item]);
+  await asUser(bob);
+  expect((await db.query('select * from public.experience_catalogue_drafts')).rows).toHaveLength(0);
+  expect((await db.query('delete from public.experience_catalogue_drafts returning *')).rows).toHaveLength(0);
+  expect((await db.query("update public.experience_catalogue_drafts set items='[]' returning *")).rows).toHaveLength(0);
+  await expect(db.query('insert into public.experience_catalogue_drafts(owner_id) values ($1)', [alice])).rejects.toThrow(/row-level security/i);
+  await asUser('', 'anon');
+  await expect(db.query('select * from public.experience_catalogue_drafts')).rejects.toThrow(/permission denied/i);
+  await asUser(alice);
+  await expect(db.query('update public.experience_catalogue_drafts set owner_id=$1', [bob])).rejects.toThrow(/row-level security/i);
+  await db.exec('delete from public.experience_catalogue_drafts');
+  for (const value of [null, {}, [null], [{ ...item, minor: -1 }], [{ ...item, minor: 1.5 }], [{ ...item, minor: 9007199254740992 }], [{ ...item, included: true }], [{ ...item, title: '' }], [{ ...item, offered: null }], [{ ...item, role: 'admin' }]]) {
+    await expect(insert(value)).rejects.toThrow(/check constraint/i);
+  }
+  await insert([]);
+  expect((await db.query('select items from public.experience_catalogue_drafts')).rows[0].items).toEqual([]);
 });

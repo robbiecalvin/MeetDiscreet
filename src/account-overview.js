@@ -43,7 +43,7 @@ export function renderAccountOverview(container, navigate, onBack) {
     for (const [page, title, copy, action] of [
       ['edit-profile', 'Profile draft', 'Edit your introduction and load or save your private profile draft.', 'Edit profile draft'],
       ['create-listing', 'Listing drafts', 'Create, load, update, or delete private Offering and Looking For drafts.', 'Manage listing drafts'],
-      ['experiences', 'Experience catalogue', 'Explore included experiences and optional extras. These edits stay in memory and clear on refresh.', 'Open experience tools'],
+      ['experiences', 'Experience catalogue', 'Explore included experiences and optional extras. Save or load a private catalogue. Unadded edits are not saved.', 'Open experience tools'],
     ]) {
       const card = node('section', null, 'account-tool-card');
       card.append(node('h2', title), node('p', copy), link(page, action));

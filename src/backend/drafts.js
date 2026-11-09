@@ -47,3 +47,16 @@ export async function deleteProfileDraft() {
   failure(error);
   return Boolean(data);
 }
+
+export async function saveExperienceDraft(items) {
+  const user = await requireUser();
+  const payload = items.map(({ title, description, offered, included, minor, feeType }) => ({ title, description, offered, included, minor, feeType }));
+  const { error } = await backendClient().from('experience_catalogue_drafts').upsert({ owner_id: user.id, items: payload }, { onConflict: 'owner_id' });
+  failure(error);
+}
+export async function loadExperienceDraft() {
+  const user = await requireUser();
+  const { data, error } = await backendClient().from('experience_catalogue_drafts').select('items').eq('owner_id', user.id).maybeSingle();
+  failure(error);
+  return data?.items ?? null;
+}

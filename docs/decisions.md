@@ -501,7 +501,9 @@ visibility rules remain unchanged; Looking For full-post visibility is still pen
 Robbie selected a new Supabase Free project for authentication and PostgreSQL.
 The first integration covers email/password development accounts and private
 owner-only profile/listing drafts. It grants no marketplace role, public publishing,
-paid entitlement, or eligibility verification. Experiences remain in memory.
+paid entitlement, or eligibility verification. Private experience catalogue
+persistence was subsequently added under the continued-build instruction, using
+a separate migration; its hosted application remains pending.
 The deployment flag defaults off until project configuration and live checks are
 completed. See [backend setup](./development/backend-setup.md).
 

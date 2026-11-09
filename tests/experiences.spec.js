@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { parseDraftAmount } from '../src/experiences.js';
+import { parseDraftAmount } from '../src/draft-amount.js';
 async function open(page) {
   await page.goto('/?page=experiences');
   await page.getByRole('button', { name: 'I am 18 or older' }).click();

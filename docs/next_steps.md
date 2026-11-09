@@ -678,6 +678,21 @@ If launch scope is reduced:
 - Build, ten mocked-provider browser checks, and 16 profile/policy regression
   checks passed. Full manual walkthrough remains deferred at Robbie’s request.
 
+### Private Experience Catalogue Persistence
+
+- Added explicit private catalogue save/load with identity-change protection,
+  refresh recovery, empty/missing records, and recoverable migration errors.
+- New migration `202611090001_experience_drafts.sql` is prepared, tested locally,
+  and must be applied after the original migration before hosted catalogue saves.
+  It has not been applied remotely by the agent. No manual setup requested yet.
+- One snapshot per owner; nested values and a technical 200 KB payload limit are
+  validated in PostgreSQL. Existing currency-pending integer draft amounts and
+  included/extra rules are preserved. No public pricing or subscription access.
+- Only items added/updated in the catalogue are saved, not unfinished composer text.
+- Extracted the pure amount parser so Node tests stay independent of browser config.
+- Build, all 110 default tests, and 12 mocked-provider browser checks passed.
+  Hosted catalogue schema and storage remain unverified until migration setup.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

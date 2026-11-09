@@ -5,7 +5,7 @@
 Describe the logical data model for MeetDiscreet.
 
 The marketplace entities below remain a design specification. The first implemented
-schema is limited to `profile_drafts` and `listing_drafts` in the versioned
+initial schema includes `profile_drafts` and `listing_drafts` in the versioned
 [private draft migration](../../supabase/migrations/202611080001_private_drafts.sql).
 Both are owner-only with RLS; neither is a public profile, listing, entitlement,
 or publication record. Supabase Auth supplies development identities. Hosted
@@ -1095,3 +1095,13 @@ Preserve history where required.
 Minimize sensitive data.
 Enforce important invariants.
 Keep the schema aligned with confirmed product rules and actual implementation.
+
+## Private experience catalogue snapshots
+
+[Catalogue migration](../../supabase/migrations/202611090001_experience_drafts.sql)
+adds one owner-only catalogue snapshot per auth user. Nested draft items have
+validated text, boolean availability/inclusion flags, safe integer minor values,
+and once/hourly draft fee types. Included items require zero extra. No currency,
+public publication, entitlement, or booking-price authority is introduced.
+Hosted application remains pending; migration tests cover ownership and invalid
+nested payloads in PostgreSQL.

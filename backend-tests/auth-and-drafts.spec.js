@@ -9,7 +9,7 @@ function session() {
   return { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock_refresh_token', user };
 }
 async function mockBackend(page, options = {}) {
-  const state = { profile: null, listings: [], requests: [], recoveryRedirect: null };
+  const state = { profile: null, catalogue: null, listings: [], requests: [], recoveryRedirect: null };
   await page.route('https://backend-test.supabase.co/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -26,6 +26,11 @@ async function mockBackend(page, options = {}) {
     if (url.pathname === '/auth/v1/recover') { state.recoveryRedirect = url.searchParams.get('redirect_to'); return respond({}); }
     if (url.pathname === '/auth/v1/user') return respond(user);
     if (url.pathname === '/auth/v1/logout') return respond({});
+    if (url.pathname === '/rest/v1/experience_catalogue_drafts') {
+      if (options.missingCatalogueMigration) return respond({ message: 'Table missing' }, 404);
+      if (method === 'POST') { state.catalogue = body.items; return respond(null, 201); }
+      return respond(state.catalogue === null ? [] : [{ items: state.catalogue }]);
+    }
     if (url.pathname === '/rest/v1/profile_drafts') {
       if (method === 'DELETE') {
         if (options.failDelete) return respond({ message: 'Denied' }, 403);
@@ -235,3 +240,36 @@ for (const failDelete of [false, true]) {
     }
   });
 }
+
+test('private experience catalogue saves and reloads with pending amounts intact', async ({ page }) => {
+  const state = await mockBackend(page);
+  await signIn(page);
+  await enter(page, '/?page=experiences');
+  await page.getByRole('button', { name: 'Add fictional examples' }).click();
+  await page.getByLabel('Experience title', { exact: true }).fill('Private extra');
+  await page.getByLabel('Included in hourly rate', { exact: true }).uncheck();
+  await page.getByLabel('Extra amount (currency pending)', { exact: true }).fill('12.50');
+  await page.getByLabel('Extra applies', { exact: true }).selectOption('hourly');
+  await page.getByRole('button', { name: 'Add to draft', exact: true }).click();
+  await page.getByRole('button', { name: 'Save private draft', exact: true }).click();
+  await expect(page.locator('.private-draft-controls [role=status]')).toContainText('Private experience catalogue saved');
+  expect(state.catalogue).toHaveLength(3);
+  expect(state.catalogue[2]).toMatchObject({ minor: 1250, included: false, feeType: 'hourly' });
+  expect(state.catalogue[0]).not.toHaveProperty('id');
+  expect(state.catalogue[0]).not.toHaveProperty('currency');
+  await page.reload();
+  await expect(page.locator('.catalogue-empty')).toContainText('No experiences');
+  await page.getByRole('button', { name: 'Load my experience catalogue' }).click();
+  await expect(page.locator('.private-draft-controls [role=status]')).toContainText('catalogue was loaded');
+  await expect(page.locator('.catalogue-owner')).toContainText('Coffee and conversation');
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await expect(page.locator('.catalogue-owner')).not.toContainText('Coffee and conversation');
+});
+test('missing catalogue migration reports a recoverable error', async ({ page }) => {
+  await mockBackend(page, { missingCatalogueMigration: true });
+  await signIn(page);
+  await enter(page, '/?page=experiences');
+  await page.getByRole('button', { name: 'Load my experience catalogue' }).click();
+  await expect(page.locator('.private-draft-controls [role=status]')).toContainText('Unable to complete');
+  await expect(page.getByRole('button', { name: 'Load my experience catalogue' })).toBeEnabled();
+});
