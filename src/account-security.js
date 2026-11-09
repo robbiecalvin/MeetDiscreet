@@ -1,3 +1,4 @@
+import { emailChangeControls } from './account-email.js';
 import { otherSessionControls } from './account-sessions.js';
 import { backendEnabled, backendClient } from './backend/client.js';
 
@@ -17,9 +18,9 @@ export function renderAccountSecurity(container, navigate) {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault(); navigate('account');
   });
-  intro.append(back, node('p', 'ACCOUNT SECURITY', 'eyebrow'), node('h1', 'Account security.'), node('p', 'Manage your password and other sign-ins.', 'offering-lead'));
+  intro.append(back, node('p', 'ACCOUNT SECURITY', 'eyebrow'), node('h1', 'Account security.'), node('p', 'Manage your email, password and other sign-ins.', 'offering-lead'));
   const panel = node('div', null, 'account-panel');
-  const status = node('p', backendEnabled ? 'Checking your account…' : 'Password changes require the development backend. This preview does not change an account.', 'account-preview-result');
+  const status = node('p', backendEnabled ? 'Checking your account…' : 'Account security changes require the development backend. This preview does not change an account.', 'account-preview-result');
   status.setAttribute('role', 'status');
   status.id = 'account-security-status';
   status.tabIndex = -1;
@@ -72,6 +73,19 @@ export function renderAccountSecurity(container, navigate) {
     form.append(submit);
     panel.prepend(form);
     let busy = false;
+    const securityControls = [];
+    function setSecurityBusy(value) {
+      busy = value; submit.disabled = value;
+      for (const [index, input] of inputs.entries()) {
+        input.disabled = value; toggles[index].disabled = value;
+        if (value) {
+          input.value = ''; input.type = 'password'; input.removeAttribute('aria-invalid');
+          toggles[index].setAttribute('aria-pressed','false'); toggles[index].textContent = `Show ${['current password', 'new password', 'confirm new password'][index]}`;
+        }
+      }
+      for (const controls of securityControls) controls.setDisabled(value);
+    }
+
     form.addEventListener('submit', async event => {
       event.preventDefault();
       if (busy) return;
@@ -82,13 +96,7 @@ export function renderAccountSecurity(container, navigate) {
       }
       const oldPassword = inputs[0].value;
       const newPassword = inputs[1].value;
-      for (const [index, field] of inputs.entries()) {
-        field.value = ''; field.type = 'password'; field.disabled = true; field.removeAttribute('aria-invalid');
-        toggles[index].setAttribute('aria-pressed', 'false');
-        toggles[index].textContent = `Show ${['current password', 'new password', 'confirm new password'][index]}`;
-        toggles[index].disabled = true;
-      }
-      busy = true; sessions.setDisabled(true); submit.disabled = true; status.textContent = 'Verifying and updating…';
+      setSecurityBusy(true); status.textContent = 'Verifying and updating…';
       try {
         const { data: verified, error: verifyError } = await backendClient().auth.signInWithPassword({ email: user.email, password: oldPassword });
         if (!current()) return;
@@ -102,9 +110,7 @@ export function renderAccountSecurity(container, navigate) {
       } catch {
         if (current()) status.textContent = 'Unable to change your password. Check your connection and try again.';
       } finally {
-        busy = false; sessions.setDisabled(false); submit.disabled = false;
-        for (const field of inputs) field.disabled = false;
-        for (const toggle of toggles) toggle.disabled = false;
+        setSecurityBusy(false);
         if (current()) status.focus();
       }
     });
@@ -115,13 +121,8 @@ export function renderAccountSecurity(container, navigate) {
       event.preventDefault(); navigate('recover-account');
     });
     panel.append(recover);
-    const sessions = otherSessionControls(panel, user, current, { isBusy: () => busy, setBusy: value => {
-      busy = value; submit.disabled = value;
-      for (const [index, input] of inputs.entries()) {
-        input.disabled = value; toggles[index].disabled = value;
-        if (value) { input.value = ''; input.type = 'password'; toggles[index].setAttribute('aria-pressed', 'false'); toggles[index].textContent = `Show ${['current password', 'new password', 'confirm new password'][index]}`; }
-      }
-    } });
+    const coordination = { isBusy: () => busy, setBusy: setSecurityBusy };
+    securityControls.push(emailChangeControls(panel, user, current, coordination), otherSessionControls(panel, user, current, coordination));
   }).catch(() => {
     if (!current()) return;
     status.textContent = 'Unable to verify your account. Check your connection or sign in again.';

@@ -25,7 +25,12 @@ async function mockBackend(page, options = {}) {
     if (url.pathname === '/auth/v1/signup') { state.user = { ...state.user, user_metadata: body.data }; return respond({ ...state.user, identities: [{ id: userId, user_id: userId }] }); }
     if (url.pathname === '/auth/v1/recover') { state.recoveryRedirect = url.searchParams.get('redirect_to'); return respond({}); }
     if (url.pathname === '/auth/v1/user') {
-      if (options.failPasswordUpdate && method === 'PUT') return respond({ message: 'Password rejected' }, 422);
+      if (method === 'PUT' && body?.email) {
+        if (options.failEmailChange) return respond({message:'Email unavailable'},422);
+        state.user = options.immediateEmailChange ? {...state.user,email:body.email,new_email:''} : {...state.user,new_email:body.email};
+      }
+
+      if (options.failPasswordUpdate && method === 'PUT' && body?.password) return respond({ message: 'Password rejected' }, 422);
       if (method === 'PUT' && body?.data) {
         if (options.failIntentUpdate) return respond({ message: 'Rejected' }, 403);
         state.user = { ...state.user, user_metadata: { ...state.user.user_metadata, ...body.data } };
@@ -1269,6 +1274,7 @@ test('cancelling other-session sign-out clears the password and makes no authent
 test('other-session revocation locks password changes during reauthentication and clears secret fields', async ({ page }) => {
   await mockBackend(page); await signIn(page); await enter(page,'/?page=account-security');
   await page.getByLabel('New password',{exact:true}).fill('unused-new-password');
+  await page.getByLabel('Current password for email change',{exact:true}).fill('unused-email-password');
   await page.getByRole('button',{name:'Show new password',exact:true}).click();
   let release; const gate = new Promise(resolve=>{release=resolve;});
   let requested; const started = new Promise(resolve=>{requested=resolve;});
@@ -1278,6 +1284,8 @@ test('other-session revocation locks password changes during reauthentication an
   await page.getByRole('button',{name:'Sign out other sessions',exact:true}).click();
   await started;
   await expect(page.getByRole('button',{name:'Change password',exact:true})).toBeDisabled();
+  await expect(page.getByRole('button',{name:'Request email change',exact:true})).toBeDisabled();
+  await expect(page.getByLabel('Current password for email change',{exact:true})).toHaveValue('');
   await expect(page.getByLabel('Current password to sign out other sessions',{exact:true})).toHaveValue('');
   await expect(page.getByLabel('New password',{exact:true})).toHaveValue('');
   await expect(page.getByLabel('New password',{exact:true})).toHaveAttribute('type','password');
@@ -1320,4 +1328,64 @@ test('local sign-out removes private content before a stalled revocation request
   await page.setViewportSize({width:390,height:844});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   await page.locator('.session-notice').screenshot({path:'/tmp/local-signout-notice-mobile.png'});
+});
+
+
+for (const mode of ['pending','immediate','reauthentication','update']) {
+  test(`email change ${mode} verifies the password and preserves provider confirmation state`, async ({ page }) => {
+    const state = await mockBackend(page,{failReauthentication:mode==='reauthentication',failEmailChange:mode==='update',immediateEmailChange:mode==='immediate'});
+    await signIn(page); await enter(page,'/?page=account-security');
+    await page.getByLabel('New email address',{exact:true}).fill('new-address@example.invalid');
+    await page.getByLabel('Confirm new email address',{exact:true}).fill('new-address@example.invalid');
+    const password = page.getByLabel('Current password for email change',{exact:true});
+    await password.fill('test-password-not-real');
+    page.once('dialog',dialog=>dialog.accept());
+    await page.getByRole('button',{name:'Request email change',exact:true}).click();
+    const text = mode==='pending' ? 'Email change awaiting confirmation' : mode==='immediate' ? 'Your account email was updated' : mode==='reauthentication' ? 'Unable to verify your current password' : 'Unable to request the email change';
+    await expect(page.locator('#email-change-status')).toContainText(text);
+    await expect(password).toHaveValue('');
+    await expect(password).toHaveAttribute('type','password');
+    const updates = state.requests.filter(row=>row.path==='/auth/v1/user' && row.method==='PUT' && row.body?.email);
+    expect(updates).toHaveLength(mode==='reauthentication' ? 0 : 1);
+    if (updates.length) {
+      expect(updates[0].body.email).toBe('new-address@example.invalid');
+      expect(new URLSearchParams(updates[0].query).get('redirect_to')).toBe('http://127.0.0.1:5175/?page=auth-callback');
+      expect(updates[0].body.data).toBeUndefined();
+    }
+    expect(state.roles).toEqual(['user']);
+    if (mode==='pending') {
+      await expect(page.locator('.email-current')).toContainText('test@example.invalid');
+      await expect(page.locator('.account-email')).toContainText('Pending email: new-address@example.invalid');
+      await page.setViewportSize({width:390,height:844});
+      await page.locator('.account-email').screenshot({path:'/tmp/account-email-change-mobile.png'});
+      await page.reload();
+      await expect(page.locator('.account-email')).toContainText('Pending email: new-address@example.invalid');
+      await expect(page.locator('.email-current')).toContainText('test@example.invalid');
+    }
+    if (mode==='immediate') {
+      await expect(page.locator('.email-current')).toContainText('new-address@example.invalid');
+      await page.getByLabel('Current password',{exact:true}).fill('test-password-not-real');
+      await page.getByLabel('New password',{exact:true}).fill('new-test-password');
+      await page.getByLabel('Confirm new password',{exact:true}).fill('new-test-password');
+      await page.getByRole('button',{name:'Change password',exact:true}).click();
+      await expect(page.locator('#account-security-status')).toContainText('Your password was changed');
+      expect(state.requests.filter(row=>row.path==='/auth/v1/token').at(-1).body.email).toBe('new-address@example.invalid');
+    }
+  });
+}
+test('email change validates matching addresses and cancellation clears the password without sending', async ({ page }) => {
+  const state = await mockBackend(page); await signIn(page); await enter(page,'/?page=account-security');
+  const button = page.getByRole('button',{name:'Request email change',exact:true});
+  await page.getByLabel('New email address',{exact:true}).fill('new-address@example.invalid');
+  await page.getByLabel('Confirm new email address',{exact:true}).fill('other-address@example.invalid');
+  await page.getByLabel('Current password for email change',{exact:true}).fill('test-password-not-real');
+  await button.click();
+  await expect(page.locator('#email-change-status')).toContainText('must match');
+  await page.getByLabel('Confirm new email address',{exact:true}).fill('new-address@example.invalid');
+  page.once('dialog',dialog=>dialog.dismiss());
+  await button.click();
+  await expect(page.locator('#email-change-status')).toHaveText('No email change was requested.');
+  await expect(page.getByLabel('Current password for email change',{exact:true})).toHaveValue('');
+  expect(state.requests.filter(row=>row.path==='/auth/v1/token')).toHaveLength(1);
+  expect(state.requests.filter(row=>row.path==='/auth/v1/user' && row.method==='PUT')).toHaveLength(0);
 });

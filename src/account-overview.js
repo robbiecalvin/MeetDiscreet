@@ -79,7 +79,7 @@ export function renderAccountOverview(container, navigate, onBack) {
       ['booking-draft', 'Booking request preview', 'Prepare, privately save and review a fictional plan without sending, reserving or paying.', 'Build a booking draft'],
       ['edit-user-profile', 'User profile draft', 'Prepare your personal introduction separately from provider profile drafts.', 'Edit User profile draft'],
       ['availability', 'Availability draft', 'Sketch weekly time windows in an explicit time zone. Connected mode supports private draft saving.', 'Edit availability draft'],
-      ['account-security', 'Account security', 'Change your password or sign out other sessions after verifying your current password.', 'Change password'],
+      ['account-security', 'Account security', 'Manage your email, password and other sessions with current-password verification.', 'Change password'],
       ['edit-profile', 'Provider profile draft', 'Edit your provider introduction and load or save your private provider profile draft.', 'Edit provider profile draft'],
       ['my-listings', 'Listing drafts', 'Create, load, update, or delete private Offering and Looking For drafts.', 'Manage listing drafts'],
       ['experiences', 'Experience catalogue', 'Explore included experiences and optional extras. Save or load a private catalogue. Unadded edits are not saved.', 'Open experience tools'],

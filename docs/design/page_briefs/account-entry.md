@@ -61,8 +61,9 @@ server authoritative. Offer recovery for forgotten current passwords.
 Clear password fields and reset visibility before the asynchronous operation;
 clear the form on navigation/sign-out/account changes. Busy controls and generic
 errors support retry without logging or storing passwords. Backend-disabled builds
-show an explicit preview; signed-out visits show a sign-in link. No email changes,
-account deletion, MFA configuration, or session-revocation guarantees are implied.
+show an explicit preview; signed-out visits show a sign-in link. No account deletion or MFA configuration is implemented. Email changes and scoped
+session revocation are described below; immediate access-token invalidation is not
+promised.
 
 
 Account overview tool cards show saved-state summaries from owner-filtered backend
@@ -142,3 +143,25 @@ be confirmed, show an error and allow retry. A nominal success claims only local
 sign-out, because the SDK normalizes some authentication response statuses. Never
 show success just because a request was started. Sign-in clears the old notice;
 responses from an earlier account must not overwrite another account's status.
+
+
+## Password-confirmed email changes
+
+Account security shows the verified current sign-in address and any provider-reported
+pending address. A separate form collects the new address twice and the current
+password. Validate native email format, matching values and a different address;
+require explicit confirmation before reauthentication and the provider update.
+Clear passwords before async work. Use the existing same-origin Auth callback.
+
+Show pending only when the provider returns the requested pending address while
+keeping the old current address. Do not call that address updated or email delivered.
+Show updated only when the provider returns it as the current account email. Unknown
+outcomes and rejected requests remain explicit; do not infer confirmation from a
+successful HTTP response alone. Existing pending state appears again on reopening.
+Keep sibling security forms using the returned current address for later password
+verification. The shared busy lock prevents concurrent email/password/session actions
+and clears entered password fields across forms. No roles or eligibility are granted.
+
+Email confirmation settings and delivery remain server authoritative and require
+hosted verification. No SMTP provider, service secret, paid plan, database migration,
+custom email sending or new final verification policy is introduced.

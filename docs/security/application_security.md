@@ -744,3 +744,20 @@ and make no early invalidation claim for already-issued bearer tokens. A success
 local removal remains useful when remote revocation cannot be confirmed. The scope
 is a shared browser SDK session, not a guarantee that only one tab is affected.
 No secret keys, session tokens or private draft content are logged by this flow.
+
+
+## Development account email changes
+
+The verified user can request an email change after explicit confirmation and fresh
+password authentication. Check the same actor and current address before the request,
+and use the provider's supported update method and same-origin PKCE Auth callback.
+Display the provider's current/pending state without converting a pending address
+into confirmed ownership, a role assignment or Provider eligibility. Authentication
+user ID remains the ownership key; no private draft ownership is transferred.
+
+Email, password and other-session forms share a busy lock and clear submitted secret
+fields before requests. Detached/changed-account responses cannot update another
+view. Server confirmation settings and email rate limits remain authoritative;
+no custom mail sender, service credential, untrusted redirect or email-address
+availability lookup is introduced. Hosted inbox confirmation and callback behavior
+remain unverified, despite mocked SDK coverage.

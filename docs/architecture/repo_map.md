@@ -750,3 +750,5 @@ underlying feature is operational.
 - `supabase/migrations/202611090008_booking_plan_drafts.sql`: bounded partial plan storage with owner CRUD RLS; no booking authority.
 
 - `src/account-sessions.js`: reauthenticated, confirmed revocation of other session refresh capability with error-preserving user-JWT logout.
+
+- `src/account-email.js`: password-confirmed current/pending email changes through the existing Auth callback and shared security-operation lock.

@@ -1041,6 +1041,23 @@ If launch scope is reduced:
   server revocation, and staying signed out after reload. Mobile notice inspected.
   Hosted remote token/revocation behavior remains unverified.
 
+### Password-Confirmed Account Email Changes
+
+- Account security shows current/pending addresses and lets owners request an email
+  change after entering the new address twice and verifying their current password.
+  A provider-reported pending address is distinct from an applied address change.
+- Same-origin Auth callback reused; no email delivery, role/eligibility, SMTP setup,
+  migration or paid service is implied. Hosted confirmation settings/delivery remain
+  to be verified during the deferred walkthrough.
+- Security forms share operation locking and password clearing; an applied address
+  is used for subsequent password verification. Failed, cancelled or unconfirmed
+  outcomes do not claim success. Pending state remains visible after reopening.
+- Build, all 155 standard checks and 78 backend browser checks passed. New cases
+  cover pending state after refresh, applied changes with later password verification,
+  rejected reauthentication/update, matching validation and cancellation. Existing
+  session checks also verify the shared lock and email-password clearing. Mobile
+  email form inspected. Hosted inbox/callback completion remains unverified.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

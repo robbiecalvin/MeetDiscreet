@@ -8,7 +8,7 @@ Check the dashboard's plan and usage limits before changing settings.
 ## Scope
 
 - Email/password development accounts, confirmation, recovery/reset, sign-out,
-  password changes after current-password reauthentication, and explicitly confirmed
+  password/email changes after current-password reauthentication, and explicitly confirmed
   revocation of other sessions after fresh password verification.
 - Private owner-only profile, listing, catalogue, availability and unsent booking-plan drafts, subject
   to the separately applied migrations below.
@@ -365,3 +365,23 @@ Nominal success claims no remote or immediate JWT invalidation. No migration.
 Automated checks cover local scope, refresh staying signed out, private data clearing,
 and a pending/failed server logout. Actual remote token lifetime/revocation remains
 part of the deferred hosted walkthrough.
+
+
+## Account email changes
+
+The separate email-change form uses current-password verification followed by
+`auth.updateUser({email}, {emailRedirectTo: authRedirect()})`. The callback is the
+existing same-origin `/?page=auth-callback`; keep it in the project redirect allowlist.
+Do not pass a user-controlled redirect. Browser configuration remains the public
+project URL/key; no privileged key or new database migration.
+
+The installed SDK documents Secure email change as requiring confirmation from both
+current and new inboxes by default. Actual project settings and delivery have not
+been checked here. Verify Secure email change, email confirmation and rate limits
+in the hosted test walkthrough; do not assume defaults or silently change them.
+The UI shows the provider's current address and `new_email` pending state, distinguishes
+pending from applied changes, and never claims email delivery or account eligibility.
+If the provider updates the address immediately, later security forms use that new
+current address. Failed verification/update and cancellation send no fake success.
+Automated checks use the real SDK with mocked HTTP; actual inbox and callback
+completion need hosted validation with test addresses later.
