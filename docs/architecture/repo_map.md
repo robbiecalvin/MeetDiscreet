@@ -741,3 +741,5 @@ underlying feature is operational.
   capabilities, bounded submitted-intake reads and protected access audit metadata.
 
 - `supabase/migrations/202611090007_provider_submission_feedback.sql`: submission snapshots, private feedback and separately scoped version-bound changes requests.
+
+- `src/provider-application-history.js`: on-demand owner submission snapshots with version-matched feedback, bounded reads and stale-response clearing.

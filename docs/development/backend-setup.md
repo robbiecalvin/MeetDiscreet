@@ -297,3 +297,9 @@ no browser permission to read reviewer identity or rewrite feedback.
 This migration has not been applied to the hosted project by the agent. Approval,
 Provider-role grants and public publishing remain unavailable. Reviewer approval
 authority and whether an approved Provider retains User membership await answers.
+
+
+The applicant's submission-history control uses the same migration 007 snapshot
+and feedback tables, with no additional migration. It reads at most 20 recent
+owner snapshots and only matching feedback using the allowed browser columns.
+Missing schema/read failures display unavailable; they do not claim an empty history.

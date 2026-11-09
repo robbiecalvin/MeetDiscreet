@@ -1,6 +1,7 @@
 import { backendEnabled } from './backend/client.js';
 import { loadProviderApplication, saveProviderApplication, submitProviderApplication, withdrawProviderApplication } from './backend/provider-applications.js';
 import { loadProfileDraft } from './backend/drafts.js';
+import { renderProviderApplicationHistory } from './provider-application-history.js';
 import { trackDraft } from './draft-changes.js';
 const empty = () => ({ name: '', city: '', introduction: '' });
 let draft = empty();
@@ -51,6 +52,8 @@ export function renderProviderApplication(container, navigate) {
   root.append(state, reviewNote, form, feedback, signIn); container.append(root);
   let busy = false;
   const current = epoch => epoch === identityEpoch && root.parentNode === container;
+  const renderEpoch = identityEpoch;
+  const history = backendEnabled ? renderProviderApplicationHistory(root, () => busy ? null : ownerId, () => current(renderEpoch)) : null;
   function sync() { for (const [key, input] of fields) input.value = draft[key]; }
   function paintState() {
     const locked = saved?.state === 'submitted';
@@ -67,6 +70,7 @@ export function renderProviderApplication(container, navigate) {
   }
   async function run(operation) {
     if (busy) return;
+    history?.clear();
     const epoch = identityEpoch; busy = true; feedback.textContent = 'Working…'; paintState();
     try {
       const message = await operation(epoch);
@@ -92,7 +96,7 @@ export function renderProviderApplication(container, navigate) {
     });
   });
   submit.addEventListener('click', () => {
-    if (!window.confirm('Submit this saved application? Editing is locked until withdrawal. This does not approve provider access.')) return;
+    if (!window.confirm('Submit this saved application? Editing is locked until withdrawal or a staff request for changes. This does not approve provider access.')) return;
     run(async epoch => { const row = await submitProviderApplication(ownerId); if (current(epoch)) saved = row; return 'Application submitted to the private development queue. No provider role or publishing access was granted.'; });
   });
   withdraw.addEventListener('click', () => {

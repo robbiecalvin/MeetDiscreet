@@ -915,6 +915,20 @@ If launch scope is reduced:
 - Approval authority and combined User/Provider role policy await Robbie's answers.
   No approval, eligibility verification, role grant or public publishing is added.
 
+### Private Applicant Submission History
+
+- Added an explicit history loader with up to 20 recent submitted introductions,
+  expandable version details and matching private feedback. An absent note never implies approval.
+- Owner-bound reads use existing migration 007 RLS and feedback column permissions;
+  no new database migration or staff privileges are introduced.
+- History clears on refresh errors, application operations and sign-out. Entered
+  markup is displayed as text; no private history is stored in browser storage.
+- Build and all 147 default checks passed, including the new ownership-isolation
+  test. The 50 existing backend UI cases passed; both new history cases passed
+  after correcting a mocked error to avoid SDK server-error retries. Mobile history
+  screenshot inspected. Hosted migration application and approval-policy answers
+  remain pending.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

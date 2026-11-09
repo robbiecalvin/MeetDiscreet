@@ -9,7 +9,7 @@ function session(profile = user) {
   return { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock_refresh_token', user: profile };
 }
 async function mockBackend(page, options = {}) {
-  const state = { user: { ...user, user_metadata: {} }, providerApplication: null, applicationFeedback: [], applicationSubmissionCounter: 0, userProfile: null, roles: ['user'], capabilities: [], reviewApplications: [], reviewAccessEvents: [], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
+  const state = { user: { ...user, user_metadata: {} }, providerApplication: null, applicationFeedback: [], applicationSubmissions: [], historyFailure: false, applicationSubmissionCounter: 0, userProfile: null, roles: ['user'], capabilities: [], reviewApplications: [], reviewAccessEvents: [], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
   await page.route('https://backend-test.supabase.co/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -33,7 +33,14 @@ async function mockBackend(page, options = {}) {
       return respond(state.user);
     }
     if (url.pathname === '/auth/v1/logout') return respond({});
-    if (url.pathname === '/rest/v1/provider_application_feedback') return respond(state.applicationFeedback.filter(row => row.owner_id === state.user.id).slice(-1).map(({note,created_at}) => ({note,created_at})));
+    if (url.pathname === '/rest/v1/provider_application_submissions') {
+      if (state.historyFailure) return respond({message:'History unavailable'},404);
+      return respond(state.applicationSubmissions.filter(row => `eq.${row.owner_id}` === url.searchParams.get('owner_id')).slice(0,Number(url.searchParams.get('limit'))));
+    }
+    if (url.pathname === '/rest/v1/provider_application_feedback') {
+      if (url.searchParams.has('submission_id')) return respond(state.applicationFeedback.filter(row => row.owner_id === state.user.id && url.searchParams.get('submission_id').includes(row.submission_id)));
+      return respond(state.applicationFeedback.filter(row => row.owner_id === state.user.id).slice(-1).map(({note,created_at}) => ({note,created_at})));
+    }
     if (url.pathname === '/rest/v1/rpc/can_request_provider_application_changes') return respond(state.roles.some(role => ['moderator','admin'].includes(role)) && state.capabilities.includes('provider_application_review') && state.capabilities.includes('provider_application_feedback'));
     if (url.pathname === '/rest/v1/rpc/request_provider_application_changes') {
       const allowed = state.roles.some(role => ['moderator','admin'].includes(role)) && state.capabilities.includes('provider_application_review') && state.capabilities.includes('provider_application_feedback');
@@ -975,4 +982,47 @@ test('applicant sees escaped change notes, edits and resubmits without gaining P
   await expect(page.locator('.application-review-note')).toBeHidden();
   expect(state.providerApplication.submission_id).not.toBe('66666666-6666-4666-8666-000000000099');
   expect(state.roles).toEqual(['user']);
+});
+
+
+test('private submission history is explicit, bounded and associates escaped feedback with its version', async ({ page }) => {
+  const state = await mockBackend(page);
+  state.applicationSubmissions = Array.from({length:22}, (_, index) => ({id:`version-${index}`,owner_id:userId,display_name:`Private introduction ${index}`,city:'Vancouver',introduction:'<img src=x onerror=alert(1)> Original text',submitted_at:'2026-11-09T12:00:00Z'}));
+  state.applicationFeedback = [{owner_id:userId,submission_id:'version-1',note:'<script>Clarify activities</script>',created_at:'2026-11-09T13:00:00Z'}];
+  await page.setViewportSize({width:390,height:844});
+  await signIn(page); await enter(page,'/?page=provider-application');
+  await expect(page.getByRole('button',{name:'Save application draft',exact:true})).toBeEnabled();
+  expect(state.requests.some(row => row.path.endsWith('/provider_application_submissions'))).toBe(false);
+  await page.getByRole('button',{name:'Load submission history',exact:true}).click();
+  await expect(page.locator('.application-history [role=status]')).toHaveText('20 recent submissions loaded.');
+  await expect(page.locator('.application-history details')).toHaveCount(20);
+  await page.locator('.application-history summary').nth(1).click();
+  await expect(page.locator('.application-history details').nth(1)).toContainText('<script>Clarify activities</script>');
+  await expect(page.locator('.application-history details').first()).not.toContainText('Clarify activities');
+  await expect(page.locator('.application-history img,.application-history script')).toHaveCount(0);
+  await page.locator('.application-history details').nth(1).screenshot({path:'/tmp/provider-submission-history-mobile.png'});
+  await page.getByRole('button',{name:'Save application draft',exact:true}).click();
+  await expect(page.locator('.application-history details')).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Save application draft',exact:true})).toBeEnabled();
+  await page.getByRole('button',{name:'Load submission history',exact:true}).click();
+  await expect(page.locator('.application-history details')).toHaveCount(20);
+  await page.getByRole('button',{name:'Sign out',exact:true}).click();
+  await expect(page.locator('.application-history details')).toHaveCount(0);
+  await expect(page.locator('body')).not.toContainText('Original text');
+});
+
+test('history errors clear previous private versions and allow retry without claiming an empty history', async ({ page }) => {
+  const state = await mockBackend(page);
+  state.applicationSubmissions = [{id:'version-1',owner_id:userId,display_name:'Private old text',city:'Vancouver',introduction:'Original text',submitted_at:'2026-11-09T12:00:00Z'}];
+  await signIn(page); await enter(page,'/?page=provider-application');
+  await expect(page.getByRole('button',{name:'Save application draft',exact:true})).toBeEnabled();
+  await page.getByRole('button',{name:'Load submission history',exact:true}).click();
+  await expect(page.locator('.application-history details')).toHaveCount(1);
+  state.historyFailure = true;
+  await page.getByRole('button',{name:'Refresh submission history',exact:true}).click();
+  await expect(page.locator('.application-history [role=status]')).toContainText('Submission history unavailable');
+  await expect(page.locator('.application-history details')).toHaveCount(0);
+  state.historyFailure = false; state.applicationSubmissions = [];
+  await page.getByRole('button',{name:'Refresh submission history',exact:true}).click();
+  await expect(page.locator('.application-history [role=status]')).toHaveText('No submitted introductions found.');
 });

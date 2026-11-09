@@ -344,3 +344,18 @@ test('inspection capability alone cannot request changes or rewrite feedback his
   await expect(db.exec('delete from public.provider_application_feedback')).rejects.toThrow(/permission denied/i);
   await db.exec('reset role'); await db.query("delete from public.account_roles where user_id=$1 and role='moderator'", [alice]);
 });
+
+test('submission history and feedback reads remain owner-only even with an explicit foreign owner filter', async () => {
+  await db.query('select * from public.save_provider_application($1,$2,$3,$4)', [alice,'Alice','Vancouver','Private original introduction']);
+  const original = (await db.query('select * from public.submit_provider_application($1)',[alice])).rows[0];
+  await db.exec('reset role');
+  await db.query('insert into public.provider_application_feedback(owner_id,submission_id,reviewer_id,note) values($1,$2,$3,$4)',[alice,original.submission_id,bob,'Clarify your activities']);
+  await asUser(alice);
+  expect((await db.query('select introduction from public.provider_application_submissions')).rows).toHaveLength(1);
+  expect((await db.query('select submission_id,note,created_at from public.provider_application_feedback')).rows[0].submission_id).toBe(original.submission_id);
+  await asUser(bob);
+  expect((await db.query('select introduction from public.provider_application_submissions where owner_id=$1',[alice])).rows).toEqual([]);
+  expect((await db.query('select note from public.provider_application_feedback where owner_id=$1',[alice])).rows).toEqual([]);
+  await asUser('', 'anon');
+  await expect(db.query('select introduction from public.provider_application_submissions')).rejects.toThrow(/permission denied/i);
+});

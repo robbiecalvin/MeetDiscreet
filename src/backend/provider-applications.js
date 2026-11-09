@@ -26,3 +26,17 @@ export function saveProviderApplication(ownerId, draft) {
 }
 export function submitProviderApplication(ownerId) { return change(ownerId, 'submit_provider_application'); }
 export function withdrawProviderApplication(ownerId) { return change(ownerId, 'withdraw_provider_application'); }
+
+export async function loadProviderApplicationHistory(ownerId) {
+  await actor(ownerId);
+  const client = backendClient();
+  const { data: rows, error } = await client.from('provider_application_submissions')
+    .select('id,owner_id,display_name,city,introduction,submitted_at').eq('owner_id', ownerId)
+    .order('submitted_at', { ascending: false }).order('id', { ascending: false }).limit(20);
+  if (error || !Array.isArray(rows) || rows.some(row => row.owner_id !== ownerId)) throw new Error('History unavailable.');
+  if (!rows.length) return [];
+  const { data: feedback, error: feedbackError } = await client.from('provider_application_feedback')
+    .select('owner_id,submission_id,note,created_at').eq('owner_id', ownerId).in('submission_id', rows.map(row => row.id));
+  if (feedbackError || !Array.isArray(feedback) || feedback.some(row => row.owner_id !== ownerId)) throw new Error('Feedback unavailable.');
+  return rows.map(row => ({ ...row, feedback: feedback.find(note => note.submission_id === row.id) || null }));
+}

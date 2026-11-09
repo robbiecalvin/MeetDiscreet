@@ -17,7 +17,7 @@ a new save returns it to draft before another submission. Reload warns before
 discarding unsaved local edits. In-app navigation preserves local text; account
 changes clear it, and existing connected-mode unload protection applies.
 
-Server state is authoritative: `draft`, `submitted`, `withdrawn`. Direct client
+Server state is authoritative: `draft`, `submitted`, `withdrawn`, `changes_requested`. Direct client
 writes to rows/events are denied. Owner-bound authenticated RPCs perform atomic
 state transitions. Submission additionally requires assigned basic User membership,
 not a signup preference. Expected-owner checks bind requests to the account that
@@ -25,7 +25,7 @@ loaded the form and reject mid-session actor changes. Status events are server
 recorded and owner-readable; they are not complete content-version history.
 
 This is development intake. Submitted records are privately stored for future
-trusted review. A separately scoped read-only inspection workspace is now prepared.
+trusted review. A separately scoped inspection workspace supports version-bound requests for changes after migration 007.
 Reviewer notifications, approval/denial decisions, Provider role grants, verification,
 publishing, paid plans and response deadlines remain unimplemented. An eventual approval process must define eligibility, confirm the
 current submitted state/version, and perform authorized audited role changes.
@@ -33,3 +33,20 @@ current submitted state/version, and perform authorized audited role changes.
 Missing schema, failed saves and failed withdrawals preserve reliable prior state
 and allow retry. Backend-disabled mode clearly checks a form preview without
 sending or storing anything. Hosted migration/setup validation remains pending.
+
+
+## Private submission history
+
+An explicit Load submission history button retrieves at most the latest 20 snapshots,
+newest first. Each expandable entry shows submitted name, city, introduction and
+feedback belonging to that version. No-note copy must not imply approval. Render
+all entered text as text, with keyboard-operable native details/summary controls.
+
+Use existing owner-only snapshot RLS and feedback column grants; never request
+reviewer identity. No extra schema migration is needed beyond 007. Loading is
+on demand, not part of the editor's initial load. History errors clear displayed
+entries, report unavailable rather than empty, and allow retry. Application reloads
+and mutations invalidate history; detached/changed-account responses are ignored.
+No history is persisted in browser storage. Backend-disabled mode has no history
+control or synthetic private records. Earlier versions outside the latest 20 are
+not exposed by this first history view; retention policy remains unresolved.
