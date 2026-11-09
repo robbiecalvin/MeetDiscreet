@@ -8,6 +8,7 @@ let draft = defaults();
 let savedId = null;
 let identityEpoch = 0;
 const changes = trackDraft('listing', () => draft, backendEnabled);
+export function detachSavedListing(id) { if (savedId === id) { savedId = null; changes.saved(defaults()); } }
 export function clearListingDraftState() { draft = defaults(); savedId = null; changes.saved(); identityEpoch++; }
 const examples = {
   offering: { title: 'A coffee, a city walk, and good conversation', description: 'Enjoy an unhurried coffee and a walk around the neighbourhood. A simple plan with time to chat and discover somewhere new.', area: 'Kitsilano' },
@@ -20,12 +21,14 @@ function element(tag, content, className) {
   return node;
 }
 
-export function renderListingEditor(container, onBack, requestedId = null) {
-  if (backendEnabled && requestedId) { draft = defaults(); savedId = null; changes.saved(); }
+export function renderListingEditor(container, onBack, requestedId = null, duplicate = false) {
+  const shouldLoad = backendEnabled && requestedId && (duplicate || requestedId !== savedId || !changes.isDirty());
+  if (shouldLoad) { draft = defaults(); savedId = null; changes.saved(); }
   container.replaceChildren();
   function updateDraftUrl(id) {
     const url = new URL(location.href);
     if (url.searchParams.get('page') !== 'create-listing' || !container.contains(form)) return;
+    url.searchParams.delete('copy');
     if (id) url.searchParams.set('draft', id); else url.searchParams.delete('draft');
     history.replaceState(history.state, '', url);
   }
@@ -253,7 +256,7 @@ export function renderListingEditor(container, onBack, requestedId = null) {
   });
   container.append(form, preview);
   if (storage) container.append(storage);
-  if (backendEnabled && requestedId) {
+  if (shouldLoad) {
     const epoch = identityEpoch;
     form.inert = true; if (storage) storage.inert = true;
     for (const { control } of fields.values()) control.disabled = true;
@@ -261,9 +264,11 @@ export function renderListingEditor(container, onBack, requestedId = null) {
     loadListingDraft(requestedId).then(row => {
       if (epoch !== identityEpoch || !container.contains(form) || new URL(location.href).searchParams.get('page') !== 'create-listing') return;
       if (!row) { summary.textContent = 'This private draft is unavailable for this account.'; return; }
-      savedId = row.id;
+      savedId = duplicate ? null : row.id;
       draft = { category: row.kind, title: row.title, description: row.description, city: row.city, area: row.area, activity: row.activity };
-      changes.saved(); syncFields();
+      if (duplicate) { changes.saved(defaults()); updateDraftUrl(null); } else changes.saved();
+      syncFields();
+      if (duplicate) summary.textContent = 'Unsaved copy loaded. Saving creates a separate private draft.';
     }).catch(() => {
       if (epoch === identityEpoch && container.contains(form)) summary.textContent = 'Unable to load this private draft. Check sign-in and connection, then retry.';
     }).finally(() => {

@@ -1,6 +1,6 @@
 import { backendEnabled } from './backend/client.js';
-import { listListingDrafts } from './backend/drafts.js';
-import { clearListingDraftState } from './listing-editor.js';
+import { listListingDrafts, deleteListingDraft } from './backend/drafts.js';
+import { clearListingDraftState, detachSavedListing } from './listing-editor.js';
 
 function node(tag, text, className) {
   const value = document.createElement(tag);
@@ -11,12 +11,12 @@ function node(tag, text, className) {
 export function renderListingLibrary(container, navigate) {
   container.replaceChildren();
   const root = node('section', null, 'listing-library');
-  const link = (page, label, draft) => {
+  const link = (page, label, draft, copy = false) => {
     const value = node('a', label, 'button outline');
-    value.href = `?page=${page}${draft ? `&draft=${encodeURIComponent(draft)}` : ''}`;
+    value.href = `?page=${page}${draft ? `&draft=${encodeURIComponent(draft)}` : ''}${copy ? '&copy=1' : ''}`;
     value.addEventListener('click', event => {
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      event.preventDefault(); navigate(page, draft ? { draft } : {});
+      event.preventDefault(); navigate(page, draft ? { draft, copy } : {});
     });
     return value;
   };
@@ -41,27 +41,62 @@ export function renderListingLibrary(container, navigate) {
   for (const [value, label] of [['all', 'All types'], ['offering', 'Offering'], ['looking', 'Looking For']]) {
     const option = node('option', label); option.value = value; type.append(option);
   }
+  const sortLabel = node('label', 'Sort drafts');
+  const sort = node('select'); sort.id = 'library-sort'; sortLabel.htmlFor = sort.id;
+  for (const [value, label] of [['recent', 'Recently updated'], ['oldest', 'Oldest updated'], ['title', 'Title A–Z']]) {
+    const option = node('option', label); option.value = value; sort.append(option);
+  }
   const reset = node('button', 'Clear filters', 'button quiet'); reset.type = 'button';
-  controls.append(searchLabel, search, typeLabel, type, reset);
+  for (const [label, input] of [[searchLabel, search], [typeLabel, type], [sortLabel, sort]]) {
+    const group = node('div'); group.append(label, input); controls.append(group);
+  }
+  controls.append(reset);
   const list = node('div', null, 'library-list');
   root.append(controls, list);
   let rows = [];
   let loaded = false;
+  let deleting = false;
   const current = () => root.parentNode === container;
   function paint() {
     if (!loaded) return;
     const query = search.value.trim().toLocaleLowerCase();
     const matches = rows.filter(row => (type.value === 'all' || row.kind === type.value) && [row.title, row.city, row.area, row.activity].join(' ').toLocaleLowerCase().includes(query));
+    if (sort.value === 'title') matches.sort((a, b) => a.title.localeCompare(b.title));
+    else if (sort.value === 'oldest') matches.reverse();
     list.replaceChildren();
     status.textContent = `${matches.length} of ${rows.length} saved drafts`;
     if (!matches.length) list.append(node('p', rows.length ? 'No drafts match these filters.' : 'No saved listing drafts yet. Start a new listing to create one.', 'catalogue-empty'));
     for (const row of matches) {
       const card = node('article', null, 'library-card');
-      card.append(node('p', `${row.kind === 'offering' ? 'OFFERING' : 'LOOKING FOR'} · PRIVATE DRAFT`, 'eyebrow'), node('h2', row.title), node('p', [row.area, row.city, row.activity].filter(Boolean).join(' · ')), link('create-listing', `Edit ${row.title}`, row.id));
+      card.append(node('p', `${row.kind === 'offering' ? 'OFFERING' : 'LOOKING FOR'} · PRIVATE DRAFT`, 'eyebrow'), node('h2', row.title), node('p', [row.area, row.city, row.activity].filter(Boolean).join(' · ')));
+      const cardActions = node('div', null, 'library-card-actions');
+      const remove = node('button', 'Delete draft', 'button quiet'); remove.type = 'button';
+      remove.setAttribute('aria-label', `Delete draft: ${row.title}`);
+      const result = node('p', '', 'profile-small'); result.setAttribute('role', 'status');
+      remove.addEventListener('click', async () => {
+        if (deleting || !window.confirm(`Delete the saved private draft “${row.title}”? This cannot be undone.`)) return;
+        deleting = true; refresh.disabled = true; controls.inert = true; cardActions.inert = true;
+        result.textContent = 'Deleting…';
+        try {
+          await deleteListingDraft(row.id);
+          if (!current()) return;
+          detachSavedListing(row.id);
+          rows = rows.filter(value => value.id !== row.id); paint();
+          status.textContent += ' · Private draft deleted.';
+          refresh.disabled = false; refresh.focus();
+        } catch {
+          if (current()) result.textContent = 'Unable to delete this draft. Check sign-in and connection, then retry.';
+        } finally {
+          deleting = false; refresh.disabled = false; controls.inert = false; cardActions.inert = false;
+        }
+      });
+      cardActions.append(link('create-listing', `Edit ${row.title}`, row.id), link('create-listing', `Duplicate ${row.title}`, row.id, true), remove);
+      card.append(cardActions, result);
       list.append(card);
     }
   }
   async function load() {
+    if (deleting) return;
     refresh.disabled = true; loaded = false; list.replaceChildren();
     status.textContent = 'Loading your saved drafts…';
     try {
@@ -74,8 +109,8 @@ export function renderListingLibrary(container, navigate) {
       list.append(link('sign-in', 'Sign in'));
     } finally { refresh.disabled = false; }
   }
-  search.addEventListener('input', paint); type.addEventListener('change', paint);
-  reset.addEventListener('click', () => { search.value = ''; type.value = 'all'; paint(); search.focus(); });
+  search.addEventListener('input', paint); type.addEventListener('change', paint); sort.addEventListener('change', paint);
+  reset.addEventListener('click', () => { search.value = ''; type.value = 'all'; sort.value = 'recent'; paint(); search.focus(); });
   refresh.addEventListener('click', load);
   load();
 }

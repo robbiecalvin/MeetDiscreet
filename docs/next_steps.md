@@ -750,6 +750,18 @@ If launch scope is reduced:
   of the selected draft remove that selection. Draft-ID query state clears when navigating elsewhere. Account changes clear
   library content and discard detached reads. No additional migration is needed.
 
+### Listing Library Management
+
+- Added title/recent/oldest sorting, owner-only unsaved duplication, and confirmed
+  deletion directly from private library cards. Failure keeps cards for retry.
+- Duplicates insert a separate record only on explicit Save; no source update or
+  automatic write occurs. Copy query state clears after loading and on navigation.
+- Build, 25 backend UI checks, and 12 listing/snapshot regressions passed.
+  Five library checks were repeated after the local-edit retention fix. Updated
+  mobile screenshot inspected without horizontal overflow.
+- Successful deletion detaches retained editor content from the deleted record.
+  Revisiting the same loaded draft preserves unsaved local edits within the app.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

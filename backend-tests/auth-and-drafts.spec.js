@@ -436,6 +436,12 @@ test('saved listing library filters drafts and opens the selected owner draft', 
   await expect(page.getByLabel('Ad title', { exact: true })).toHaveValue('Gallery afternoon');
   await expect(page.getByLabel('Listing type', { exact: true })).toHaveValue('looking');
   await expect(page.locator('.editor-notice[role=status]')).toContainText('Editing a saved');
+  await page.getByLabel('Ad title', { exact: true }).fill('Retained gallery edit');
+  await page.locator('[data-account-link]').click();
+  await page.getByRole('link', { name: 'Manage listing drafts' }).click();
+  await page.getByRole('link', { name: 'Edit Gallery afternoon' }).click();
+  await expect(page.getByLabel('Ad title', { exact: true })).toHaveValue('Retained gallery edit');
+  await page.getByLabel('Ad title', { exact: true }).fill('Gallery afternoon');
   await page.reload();
   await expect(page.getByLabel('Ad title', { exact: true })).toHaveValue('Gallery afternoon');
   await page.goto('/?page=create-listing&draft=cccccccc-cccc-4ccc-8ccc-cccccccccccc');
@@ -456,3 +462,50 @@ test('saved listing library shows empty state and starts a clean listing', async
   await expect(page.getByLabel('Ad title', { exact: true })).toHaveValue('');
   await expect(page.locator('.editor-notice[role=status]')).toContainText('New private draft');
 });
+
+test('listing library sorts and opens an unsaved duplicate without updating its source', async ({ page }) => {
+  const state = await mockBackend(page);
+  const original = { id: listingId, owner_id: userId, kind: 'offering', title: 'Zebra coffee plan', description: 'A fictional private coffee outing draft.', city: 'Vancouver', area: '', activity: 'Coffee' };
+  state.listings = [original, { ...original, id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', title: 'Art gallery plan' }];
+  await signIn(page);
+  await enter(page, '/?page=my-listings');
+  await expect(page.locator('.library-card h2').first()).toHaveText('Zebra coffee plan');
+  await page.getByLabel('Sort drafts').selectOption('title');
+  await expect(page.locator('.library-card h2').first()).toHaveText('Art gallery plan');
+  await page.getByRole('link', { name: 'Duplicate Zebra coffee plan', exact: true }).click();
+  await expect(page.getByLabel('Ad title', { exact: true })).toHaveValue('Zebra coffee plan');
+  await expect(page.locator('.editor-errors')).toContainText('Unsaved copy loaded');
+  await expect(page.locator('.editor-notice[role=status]')).toContainText('New private draft');
+  expect(page.url()).not.toContain('copy=');
+  expect(state.requests.filter(r => r.method === 'POST' && r.path === '/rest/v1/listing_drafts')).toHaveLength(0);
+  await page.getByLabel('Ad title', { exact: true }).fill('Copied coffee plan');
+  await page.getByRole('button', { name: 'Save private draft', exact: true }).click();
+  await expect(page.locator('.private-draft-controls [role=status]')).toContainText('Private listing draft saved');
+  expect(state.listings).toHaveLength(3);
+  expect(state.listings[0].title).toBe('Zebra coffee plan');
+  expect(state.requests.filter(r => r.method === 'PATCH')).toHaveLength(0);
+});
+for (const failDelete of [false, true]) {
+  test(`library deletion ${failDelete ? 'failure keeps the card' : 'requires confirmation and removes the card'}`, async ({ page }) => {
+    const state = await mockBackend(page, { failDelete });
+    state.listings = [{ id: listingId, owner_id: userId, kind: 'looking', title: 'Private library plan', description: 'An unpublished private library draft.', city: 'Vancouver', area: '', activity: 'Coffee' }];
+    await signIn(page);
+    await enter(page, '/?page=my-listings');
+    const remove = page.getByRole('button', { name: 'Delete draft: Private library plan' });
+    await expect(remove).toBeVisible();
+    page.once('dialog', dialog => dialog.dismiss());
+    await remove.click();
+    expect(state.requests.filter(r => r.method === 'DELETE')).toHaveLength(0);
+    page.once('dialog', dialog => dialog.accept());
+    await remove.click();
+    if (failDelete) {
+      await expect(page.locator('.library-card [role=status]')).toContainText('Unable to delete');
+      await expect(page.locator('.library-card')).toHaveCount(1);
+      await expect(remove).toBeEnabled();
+    } else {
+      await expect(page.locator('.library-card')).toHaveCount(0);
+      await expect(page.locator('.listing-library > [role=status]')).toContainText('Private draft deleted');
+      expect(state.listings).toHaveLength(0);
+    }
+  });
+}

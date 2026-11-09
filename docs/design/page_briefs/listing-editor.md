@@ -56,3 +56,11 @@ owner and record ID. Missing records leave blank fields with unavailable feedbac
 never an unrelated previous draft. Start-new clears editor selection without
 deleting saved data. Use stacked cards/labelled controls on mobile. No public
 listing detail, publishing, eligibility, or entitlement rule is added.
+
+
+Library management adds recently-updated/oldest/title sorting, unsaved duplication,
+and confirmed deletion. A duplicate loads only the authenticated owner’s source,
+clears its saved association and source URL, and inserts a separate record only
+when Save is pressed. The source title/content remain unchanged. Library deletion
+keeps failed cards with retry feedback; successful deletion detaches any retained
+editor snapshot from the deleted record without erasing local text.

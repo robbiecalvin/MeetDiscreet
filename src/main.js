@@ -150,7 +150,7 @@ function renderRoute() {
     renderHowItWorks($('#how-view'), backToDiscovery);
     document.title = 'How it works · MeetDiscreet';
   } else if (isEditor) {
-    renderListingEditor($('#editor-view'), backToDiscovery, params.get('draft'));
+    renderListingEditor($('#editor-view'), backToDiscovery, params.get('draft'), params.get('copy') === '1');
     document.title = 'Create a listing · MeetDiscreet';
   } else if (isAccount) {
     if (accountMode === 'account') renderAccountOverview($('#account-view'), navigateAccount, backToDiscovery);
@@ -186,6 +186,7 @@ function backToDiscovery() {
   url.searchParams.delete('fromAd');
   url.searchParams.delete('page');
   url.searchParams.delete('draft');
+  url.searchParams.delete('copy');
   history.pushState(null, '', url);
   renderRoute();
   window.scrollTo({ top: discoveryScroll, behavior: 'instant' });
@@ -346,7 +347,7 @@ for (const link of document.querySelectorAll('[data-how-link]')) {
     event.preventDefault();
     if (!$('#discovery-view').hidden) discoveryScroll = window.scrollY;
     const url = new URL(location.href);
-    for (const key of ['profile', 'ad', 'fromAd', 'draft']) url.searchParams.delete(key);
+    for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy']) url.searchParams.delete(key);
     url.searchParams.set('page', 'how-it-works');
     history.pushState(null, '', url);
     renderRoute();
@@ -361,7 +362,7 @@ for (const link of document.querySelectorAll('[data-editor-link]')) {
     event.preventDefault();
     if (!$('#discovery-view').hidden) discoveryScroll = window.scrollY;
     const url = new URL(location.href);
-    for (const key of ['profile', 'ad', 'fromAd', 'draft']) url.searchParams.delete(key);
+    for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy']) url.searchParams.delete(key);
     url.searchParams.set('page', 'create-listing');
     history.pushState(null, '', url);
     renderRoute();
@@ -386,7 +387,7 @@ for (const link of document.querySelectorAll('[data-guidelines-link]')) {
     event.preventDefault();
     policyReturnUrl = location.href;
     const url = new URL(location.href);
-    for (const key of ['profile', 'ad', 'fromAd', 'draft']) url.searchParams.delete(key);
+    for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy']) url.searchParams.delete(key);
     url.searchParams.set('page', 'guidelines');
     url.hash = '';
     history.pushState({ policyReturnUrl }, '', url);
@@ -398,7 +399,7 @@ for (const link of document.querySelectorAll('[data-guidelines-link]')) {
 
 function navigateFromHelp(page) {
   const url = new URL(location.href);
-  for (const key of ['profile', 'ad', 'fromAd', 'draft']) url.searchParams.delete(key);
+  for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy']) url.searchParams.delete(key);
   if (page) url.searchParams.set('page', page);
   else url.searchParams.delete('page');
   url.hash = '';
@@ -415,7 +416,7 @@ for (const link of document.querySelectorAll('[data-help-link]')) {
     event.preventDefault();
     const source = location.href;
     const url = new URL(source);
-    for (const key of ['profile', 'ad', 'fromAd', 'draft']) url.searchParams.delete(key);
+    for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy']) url.searchParams.delete(key);
     url.searchParams.set('page', 'help');
     url.hash = '';
     helpReturnUrl = source;
@@ -439,10 +440,12 @@ function returnFromHelp() {
 function navigateAccount(page, extra = {}) {
   if (!$('#discovery-view').hidden) discoveryScroll = window.scrollY;
   const url = new URL(location.href);
-  for (const key of ['profile', 'ad', 'fromAd', 'draft']) url.searchParams.delete(key);
+  for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy']) url.searchParams.delete(key);
   url.searchParams.delete('draft');
+  url.searchParams.delete('copy');
   url.searchParams.set('page', page);
   if (extra.draft) url.searchParams.set('draft', extra.draft);
+  if (extra.copy) url.searchParams.set('copy', '1');
   url.hash = '';
   history.pushState(null, '', url);
   renderRoute();
