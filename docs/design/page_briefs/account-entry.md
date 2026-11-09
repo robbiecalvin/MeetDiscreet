@@ -79,3 +79,16 @@ is persisted as untrusted onboarding preference metadata only, with no role or
 entitlement assignment. Existing accounts can revisit it from Account. Provider
 setup has its own guided workspace; see [provider setup brief](./provider-setup.md).
 No database migration is required for this preference.
+
+
+## Provider application progress card
+
+Show the verified owner's application state in Account with an independent refresh
+button. Read only owner ID/state, not introduction or feedback. Draft links continue
+editing; submitted links show the submitted application without implying approval;
+withdrawn links invite revisions; changes-requested links lead to the private note
+and editor. Absent applications invite starting a draft. Unknown states, read errors
+or missing schema must show unavailable, preserve the general editor link and not
+block other account tools. Results from detached account views cannot update a new
+view. Backend-disabled mode retains its existing account preview. No new migration,
+notification delivery, approval, role grant or entitlement is introduced.

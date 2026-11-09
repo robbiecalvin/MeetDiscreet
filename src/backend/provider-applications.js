@@ -40,3 +40,11 @@ export async function loadProviderApplicationHistory(ownerId) {
   if (feedbackError || !Array.isArray(feedback) || feedback.some(row => row.owner_id !== ownerId)) throw new Error('Feedback unavailable.');
   return rows.map(row => ({ ...row, feedback: feedback.find(note => note.submission_id === row.id) || null }));
 }
+
+export async function loadProviderApplicationStatus(ownerId) {
+  await actor(ownerId);
+  const { data, error } = await backendClient().from('provider_applications')
+    .select('owner_id,state').eq('owner_id', ownerId).maybeSingle();
+  if (error || (data && (data.owner_id !== ownerId || !['draft','submitted','withdrawn','changes_requested'].includes(data.state)))) throw new Error('Application status unavailable.');
+  return data?.state || null;
+}

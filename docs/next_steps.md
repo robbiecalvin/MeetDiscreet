@@ -929,6 +929,18 @@ If launch scope is reduced:
   screenshot inspected. Hosted migration application and approval-policy answers
   remain pending.
 
+### Application Progress in Account
+
+- The provider application card now shows current owner-bound status with a
+  state-specific editor link and independent refresh. It requests only owner/state,
+  keeping introduction text and feedback on the private application page.
+- Absent records and failed/unrecognized status reads are distinct; missing setup
+  does not prevent other account cards loading. No additional migration is needed.
+- Build and all 54 backend browser checks passed; mobile changes-requested card
+  inspected. These include status transitions, navigation and missing-schema isolation.
+- Provider approval authority and combined-role policy remain pending; this card
+  does not grant roles, notify applicants or enable publishing.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

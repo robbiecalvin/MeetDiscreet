@@ -1026,3 +1026,35 @@ test('history errors clear previous private versions and allow retry without cla
   await page.getByRole('button',{name:'Refresh submission history',exact:true}).click();
   await expect(page.locator('.application-history [role=status]')).toHaveText('No submitted introductions found.');
 });
+
+
+test('account application status follows saved state and links to requested revisions without exposing the introduction', async ({ page }) => {
+  const state = await mockBackend(page);
+  await signIn(page); await page.locator('[data-account-link]').click();
+  const status = page.locator('[data-application-status]');
+  await expect(status).toHaveText('No provider application saved yet.');
+  for (const [value,message,label] of [
+    ['draft','Private application draft saved.','Continue application draft'],
+    ['submitted','Application submitted for review. Provider access has not been approved.','View submitted application'],
+    ['withdrawn','Application withdrawn. Save revisions before submitting again.','Revise application'],
+    ['changes_requested','Changes requested. Read your feedback, revise and resubmit.','Review requested changes'],
+  ]) {
+    state.providerApplication = {owner_id:userId,state:value,introduction:'PRIVATE INTRODUCTION NOT FOR DASHBOARD'};
+    await page.getByRole('button',{name:'Refresh application status',exact:true}).click();
+    await expect(status).toHaveText(message);
+    await expect(page.getByRole('link',{name:label,exact:true})).toHaveAttribute('href','?page=provider-application');
+    await expect(page.locator('.account-overview')).not.toContainText('PRIVATE INTRODUCTION');
+  }
+  await page.setViewportSize({width:390,height:844});
+  await status.locator('..').screenshot({path:'/tmp/account-application-status-mobile.png'});
+  await page.getByRole('link',{name:'Review requested changes',exact:true}).click();
+  await expect(page.locator('.application-state')).toContainText('changes requested');
+});
+
+test('missing application schema does not block account tools or imply an empty application', async ({ page }) => {
+  await mockBackend(page,{missingApplicationMigration:true,savedSummaries:true});
+  await signIn(page); await page.locator('[data-account-link]').click();
+  await expect(page.locator('[data-application-status]')).toContainText('Application status unavailable');
+  await expect(page.locator('[data-draft-summary=profile]')).toHaveText('Private profile draft saved');
+  await expect(page.getByRole('link',{name:'Open provider application',exact:true})).toBeVisible();
+});
