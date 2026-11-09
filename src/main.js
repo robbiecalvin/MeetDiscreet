@@ -5,6 +5,7 @@ import { renderOffering } from './offering.js';
 import { renderHowItWorks } from './how-it-works.js';
 import { renderListingEditor } from './listing-editor.js';
 import { renderGuidelines } from './guidelines.js';
+import { renderHelp } from './help.js';
 import { referencePrices, formatReferencePrice } from './pricing.js';
 
 const $ = (selector) => document.querySelector(selector);
@@ -23,6 +24,7 @@ try {
 
 let hasAgeConfirmation = false;
 let policyReturnUrl = null;
+let helpReturnUrl = null;
 function enter() {
   hasAgeConfirmation = true;
   if (gate.open) gate.close();
@@ -37,7 +39,7 @@ try {
   validConfirmation = confirmedAt > 0 && confirmedAt <= Date.now() && Date.now() - confirmedAt < confirmationDuration;
 } catch { /* Storage can be unavailable; the gate still works for this visit. */ }
 if (validConfirmation) enter();
-else if (new URL(location.href).searchParams.get('page') !== 'guidelines') gate.showModal();
+else if (!['guidelines', 'help'].includes(new URL(location.href).searchParams.get('page'))) gate.showModal();
 gate.addEventListener('cancel', (event) => event.preventDefault());
 $('#confirm-age').addEventListener('click', () => {
   try { localStorage.setItem(confirmationKey, String(Date.now())); }
@@ -76,13 +78,16 @@ let selectedAdId = null;
 function renderRoute() {
   const params = new URL(location.href).searchParams;
   const isGuidelines = params.get('page') === 'guidelines';
+  const isHelp = params.get('page') === 'help';
   $('#guidelines-shell').hidden = !isGuidelines;
-  if (isGuidelines) {
+  $('#help-shell').hidden = !isHelp;
+  if (isGuidelines || isHelp) {
     if (gate.open) gate.close();
     app.hidden = true;
     app.inert = true;
-    if (!$('#guidelines-shell').childElementCount) renderGuidelines($('#guidelines-shell'), returnFromGuidelines, () => location.replace(returnTo));
-    document.title = 'Community Guidelines & Boundaries · MeetDiscreet';
+    if (isGuidelines && !$('#guidelines-shell').childElementCount) renderGuidelines($('#guidelines-shell'), returnFromGuidelines, () => location.replace(returnTo));
+    if (isHelp && !$('#help-shell').childElementCount) renderHelp($('#help-shell'), returnFromHelp, navigateFromHelp, () => location.replace(returnTo));
+    document.title = isGuidelines ? 'Community Guidelines & Boundaries · MeetDiscreet' : 'Help · MeetDiscreet';
     return;
   }
   app.hidden = !hasAgeConfirmation;
@@ -178,8 +183,9 @@ function showOffering(ad) {
 }
 window.addEventListener('popstate', () => {
   renderRoute();
-  if (new URL(location.href).searchParams.get('page') === 'guidelines') {
-    (document.getElementById(location.hash.slice(1)) || $('#guidelines-main')).focus({ preventScroll: true });
+  if (['guidelines', 'help'].includes(new URL(location.href).searchParams.get('page'))) {
+    const main = new URL(location.href).searchParams.get('page') === 'help' ? $('#help-main') : $('#guidelines-main');
+    (document.getElementById(location.hash.slice(1)) || main).focus({ preventScroll: true });
     return;
   }
   if (!new URL(location.href).searchParams.has('profile') && !new URL(location.href).searchParams.has('ad') && !['how-it-works', 'create-listing'].includes(new URL(location.href).searchParams.get('page'))) {
@@ -325,9 +331,11 @@ function returnFromGuidelines() {
   const source = history.state?.policyReturnUrl || policyReturnUrl;
   const target = new URL(source || location.href);
   if (!source) { target.searchParams.delete('page'); target.hash = ''; }
-  history.pushState(null, '', target);
+  history.pushState(history.state?.publicSourceState || null, '', target);
   renderRoute();
-  if (hasAgeConfirmation) $('#main').focus({ preventScroll: true });
+  if (target.searchParams.get('page') === 'help') $('#help-main').focus({ preventScroll: true });
+  else if (target.searchParams.get('page') === 'guidelines') $('#guidelines-main').focus({ preventScroll: true });
+  else if (hasAgeConfirmation) $('#main').focus({ preventScroll: true });
 }
 for (const link of document.querySelectorAll('[data-guidelines-link]')) {
   link.addEventListener('click', (event) => {
@@ -343,4 +351,44 @@ for (const link of document.querySelectorAll('[data-guidelines-link]')) {
     window.scrollTo({ top: 0, behavior: 'instant' });
     $('#guidelines-main').focus({ preventScroll: true });
   });
+}
+
+function navigateFromHelp(page) {
+  const url = new URL(location.href);
+  for (const key of ['profile', 'ad', 'fromAd']) url.searchParams.delete(key);
+  if (page) url.searchParams.set('page', page);
+  else url.searchParams.delete('page');
+  url.hash = '';
+  if (page === 'guidelines') policyReturnUrl = location.href;
+  history.pushState(page === 'guidelines' ? { policyReturnUrl, publicSourceState: history.state } : null, '', url);
+  renderRoute();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  if (page === 'guidelines') $('#guidelines-main').focus({ preventScroll: true });
+  else if (hasAgeConfirmation) $('#main').focus({ preventScroll: true });
+}
+for (const link of document.querySelectorAll('[data-help-link]')) {
+  link.addEventListener('click', (event) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    const source = location.href;
+    const url = new URL(source);
+    for (const key of ['profile', 'ad', 'fromAd']) url.searchParams.delete(key);
+    url.searchParams.set('page', 'help');
+    url.hash = '';
+    helpReturnUrl = source;
+    history.pushState({ helpReturnUrl: source }, '', url);
+    renderRoute();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    $('#help-main').focus({ preventScroll: true });
+  });
+}
+
+function returnFromHelp() {
+  const source = history.state?.helpReturnUrl || helpReturnUrl;
+  const target = new URL(source || location.href);
+  if (!source) { target.searchParams.delete('page'); target.hash = ''; }
+  history.pushState(null, '', target);
+  renderRoute();
+  if (target.searchParams.get('page') === 'guidelines') $('#guidelines-main').focus({ preventScroll: true });
+  else if (hasAgeConfirmation) $('#main').focus({ preventScroll: true });
 }

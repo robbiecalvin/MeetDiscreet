@@ -543,7 +543,7 @@ If launch scope is reduced:
 
 ## 18. Current Work Snapshot
 
-- Objective: Standalone Community Guidelines & Boundaries reader, accessible before entrance confirmation.
+- Objective: Searchable Help page with public access and accurate demo/support limits.
 - Completed: Pinned Node/npm/Vite workflow; age gate; default portrait grid with three columns on mobile; bottom people/ads switch; one-column ad cards; city, search, online, and interest filters; empty reset; limited public demo dialogs.
 - Visual direction: #121521 / #38476b / #b6192e, Agrandir preferred, bold headings and thin body text. Licensed font assets absent; system fallback currently used.
 - Gate: 30-day browser confirmation; external referrer exit with Google fallback. No role or account privileges are granted.
@@ -596,6 +596,15 @@ If launch scope is reduced:
 - Accessible before confirmation while discovery remains hidden/inert. Return preserves the original route through section jumps and refresh, then restores the age gate if needed. Reading does not set the age timestamp.
 - Build and 60 Chromium checks passed, including 10 guidelines checks plus all 50 existing regressions. Final section-jump/history change verified by rerunning guidelines checks. Desktop/mobile screenshots inspected.
 - Source update prepared for GitHub/Netlify; live site verification remains blocked by environment network policy.
+
+### Help Page Increment
+
+- PUB-10 at `/?page=help`, available from the entrance gate and footer without confirmation.
+- FAQ search and combined topic filtering, open search matches, native keyboard disclosures, live result counts, and empty/reset behaviour.
+- Links to discovery, reference plans, listing drafts, and guidelines. Ordinary app pages remain gated for unconfirmed visitors; nested Help → Guidelines → Return preserves the source through refresh.
+- Explains current fictional data, locked previews, draft memory, and unavailable account/payment/communication services. No support inbox, contact details, report submission, ticket, response time, or refund action is invented.
+- An initial test identified an ambiguous select label; label/control association corrected, focused Help checks passed, and the full 70-test Chromium suite passed after the fix.
+- Desktop/mobile views inspected; build passed. Live Netlify verification remains blocked by environment network policy.
 
 ### Last Verified Result
 

@@ -141,6 +141,7 @@ conflict with approved MeetDiscreet decisions.
 - src/pricing.js: centralized reference amounts in minor units; not a payment authority.
 - src/listing-editor.js: in-memory Offering/Looking For draft form, validation, and safe preview.
 - src/guidelines.js: standalone pre-confirmation guidelines reader; no age or policy acceptance record.
+- src/help.js: public searchable FAQ, topic filtering, help navigation, and accurate support integration limits.
 - src/styles.css: shared tokens, portrait grid, single-column ads, responsive layout.
 - src/data.js: synthetic public profile and ad fixtures; no live presence.
 - public/images/demo-portraits.png: locally served AI-generated fictional portrait sheet.

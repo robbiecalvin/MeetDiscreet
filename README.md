@@ -21,7 +21,9 @@ public Offering ad details linked to their companion profiles, and a How it work
 page with separate reference plans and FAQs, plus an in-memory listing editor
 with Offering/Looking For draft previews. Nothing entered in the editor is saved
 or published. The Community Guidelines & Boundaries reader is accessible before
-age confirmation and does not grant browsing access. Profiles, generated photos, online statuses, and ads are fictional.
+age confirmation and does not grant browsing access. A searchable Help page
+explains the demo and links to existing features; live support/report submission
+is not connected. Profiles, generated photos, online statuses, and ads are fictional.
 Accounts, payments, bookings, communication, and production deployment are not
 connected. See [the roadmap](./docs/next_steps.md) for verification and limitations.
 
