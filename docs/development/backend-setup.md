@@ -89,7 +89,10 @@ keys in this slot and restricts the configured Project URL to HTTPS Supabase pro
 hosts. No admin key is needed in the app. Changing Vite variables needs a new build.
 
 The SDK uses its supported default browser token storage and refresh mechanism.
-Passwords are not persisted or logged by application code. Browser tokens remain
+Passwords are not persisted or logged by application code. Unsaved private draft
+edits trigger the browser’s supported unload warning; this is not autosave and
+browsers may suppress prompts, especially on mobile. Draft snapshots remain in
+memory only. Browser tokens remain
 sensitive to same-origin script compromise; headers disallow external scripts,
 framing, objects, and external form submission. This is not a complete security
 review. Sign-out clears owner draft state; stale account-load results are discarded.

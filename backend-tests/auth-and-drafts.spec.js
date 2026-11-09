@@ -382,3 +382,30 @@ test('missing catalogue setup does not block profile or listing summaries', asyn
   await expect(page.getByRole('button', { name: 'Refresh experience catalogue status' })).toBeEnabled();
   await expect(page.getByRole('link', { name: 'Edit profile draft' })).toBeVisible();
 });
+
+test('private profile refresh warns for unsaved edits but not after saving or sign-out', async ({ page }) => {
+  await mockBackend(page);
+  await signIn(page);
+  await page.locator('footer [data-profile-editor-link]').click();
+  await page.getByRole('button', { name: 'Use fictional profile' }).click();
+  let warnings = 0;
+  const dismiss = async dialog => { expect(dialog.type()).toBe('beforeunload'); warnings++; await dialog.dismiss(); };
+  page.once('dialog', dismiss);
+  await page.reload({ timeout: 1500 }).catch(() => {});
+  expect(warnings).toBe(1);
+  await expect(page.getByLabel('Display name', { exact: true })).toHaveValue('Maya');
+  await page.getByRole('button', { name: 'Save private draft', exact: true }).click();
+  await expect(page.locator('.private-draft-controls [role=status]')).toContainText('Private profile draft saved');
+  page.on('dialog', async dialog => { warnings++; await dialog.accept(); });
+  await page.reload();
+  expect(warnings).toBe(1);
+  await page.getByRole('button', { name: 'Load my profile draft', exact: true }).click();
+  await expect(page.getByLabel('Display name', { exact: true })).toHaveValue('Maya');
+  await page.reload();
+  expect(warnings).toBe(1);
+  await page.getByLabel('Display name', { exact: true }).fill('Unsaved private edit');
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await expect(page.getByLabel('Display name', { exact: true })).toHaveValue('');
+  await page.reload();
+  expect(warnings).toBe(1);
+});

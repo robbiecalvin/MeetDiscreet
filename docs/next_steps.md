@@ -725,6 +725,19 @@ If launch scope is reduced:
 - Listing counts use owner-filtered HEAD requests without loading listing bodies;
   profile checks select only owner ID. Catalogue reads remain private/owner-filtered.
 
+### Unsaved Private Draft Protection
+
+- Added in-memory snapshot tracking for profile, listing, and catalogue edits in
+  connected mode. Browser-supported refresh/tab-close warnings apply while dirty.
+- Successful saves mark the sent snapshot only, preserving dirty status for newer
+  edits. Loads, explicit clear/new-draft actions, and identity resets mark clean.
+- Deleting a saved record leaves retained local text/items unsaved. Catalogue
+  saves do not mark unfinished composer input as saved. No extra persistence.
+- Build, all 112 default checks, and 20 backend UI checks passed, including
+  real Chromium beforeunload cancellation, saved reload, and sign-out clearing.
+- This is a browser unload warning, not autosave or guaranteed mobile recovery;
+  internal navigation retains existing module drafts without prompting.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

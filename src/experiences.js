@@ -1,3 +1,4 @@
+import { trackDraft } from './draft-changes.js';
 import { parseDraftAmount } from './draft-amount.js';
 import { backendEnabled } from './backend/client.js';
 import { saveExperienceDraft, loadExperienceDraft, deleteExperienceDraft } from './backend/drafts.js';
@@ -9,7 +10,8 @@ const blank = () => ({ title: '', description: '', offered: true, included: true
 let composer = blank();
 let editingId = null;
 let identityEpoch = 0;
-export function clearExperienceDraftState() { identityEpoch++; items = []; nextId = 1; composer = blank(); editingId = null; }
+const changes = trackDraft('experiences', () => ({ items, composer }), backendEnabled);
+export function clearExperienceDraftState() { identityEpoch++; items = []; nextId = 1; composer = blank(); editingId = null; changes.saved(); }
 
 function amountLabel(minor) {
   return `${Math.floor(minor / 100)}.${String(minor % 100).padStart(2, '0')}`;
@@ -203,12 +205,15 @@ export function renderExperiences(container, onBack, onTool) {
       const epoch = identityEpoch;
       const removed = await deleteExperienceDraft();
       if (epoch !== identityEpoch) throw new Error('Account changed.');
+      if (removed) changes.saved({ items: [], composer: blank() });
       return removed ? 'Saved private experience catalogue deleted. Editor items are unsaved; your account is unchanged.' : 'No saved private experience catalogue found to delete. Your account is unchanged.';
     },
     onSave: async () => {
       const epoch = identityEpoch;
-      await saveExperienceDraft(items.map(item => ({ ...item })));
+      const snapshot = items.map(item => ({ ...item }));
+      await saveExperienceDraft(snapshot);
       if (epoch !== identityEpoch) throw new Error('Account changed.');
+      changes.saved({ items: snapshot, composer: blank() });
       return 'Private experience catalogue saved. Unadded item edits are not included. Nothing is published or charged.';
     },
     onLoad: async () => {
@@ -219,6 +224,7 @@ export function renderExperiences(container, onBack, onTool) {
       items = saved.map((item, index) => ({ ...item, id: index + 1 }));
       nextId = items.length + 1;
       composer = blank(); editingId = null;
+      changes.saved();
       sync(); paintList(); preview.hidden = true; editor.hidden = false;
       fields.title.focus();
       return 'Your private experience catalogue was loaded.';

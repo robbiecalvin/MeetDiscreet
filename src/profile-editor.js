@@ -1,3 +1,4 @@
+import { trackDraft } from './draft-changes.js';
 import { backendEnabled } from './backend/client.js';
 import { loadProfileDraft, saveProfileDraft, deleteProfileDraft } from './backend/drafts.js';
 import { privateDraftControls } from './backend/draft-controls.js';
@@ -6,7 +7,8 @@ import { providers } from './data.js';
 const defaults = () => ({ name: '', username: '', age: '', tagline: '', city: 'Vancouver', area: '', photo: '2', bio: '', interests: '' });
 let draft = defaults();
 let identityEpoch = 0;
-export function clearProfileDraftState() { draft = defaults(); identityEpoch++; }
+const changes = trackDraft('profile', () => draft, backendEnabled);
+export function clearProfileDraftState() { draft = defaults(); changes.saved(); identityEpoch++; }
 function element(tag, text, className) {
   const node = document.createElement(tag);
   if (text) node.textContent = text;
@@ -80,7 +82,7 @@ export function renderProfileEditor(container, onBack, onTool) {
     draft = { name: 'Maya', username: 'demo-maya', age: '28', tagline: 'Good conversation. A new perspective.', city: 'Vancouver', area: 'Mount Pleasant', photo: '2', bio: 'A fictional introduction: I enjoy gallery afternoons, a good book, and conversations with time to wander.', interests: 'Art, Books, Coffee' };
     sync(); fields.get('name').input.focus();
   });
-  clear.addEventListener('click', () => { draft = defaults(); sync(); fields.get('name').input.focus(); });
+  clear.addEventListener('click', () => { draft = defaults(); changes.saved(); sync(); fields.get('name').input.focus(); });
   const submit = element('button', 'Preview profile draft', 'button primary');
   submit.type = 'submit';
   actions.append(sample, submit, clear);
@@ -163,11 +165,16 @@ export function renderProfileEditor(container, onBack, onTool) {
       const epoch = identityEpoch;
       const removed = await deleteProfileDraft();
       if (epoch !== identityEpoch) throw new Error('Account changed.');
+      if (removed) changes.saved(defaults());
       return removed ? 'Saved private profile draft deleted. Editor text is unsaved; your account is unchanged.' : 'No saved private profile draft found to delete. Your account is unchanged.';
     },
     onSave: async () => {
       for (const [key, { input }] of fields) draft[key] = input.value;
-      await saveProfileDraft({ ...draft });
+      const snapshot = { ...draft };
+      const epoch = identityEpoch;
+      await saveProfileDraft(snapshot);
+      if (epoch !== identityEpoch) throw new Error('Account changed.');
+      changes.saved(snapshot);
       return 'Private profile draft saved. It is not published.';
     },
     onLoad: async () => {
@@ -175,7 +182,7 @@ export function renderProfileEditor(container, onBack, onTool) {
       const saved = await loadProfileDraft();
       if (epoch !== identityEpoch) throw new Error('Account changed.');
       if (!saved) return 'No private profile draft found for this account.';
-      draft = saved; sync(); preview.hidden = true; form.hidden = false;
+      draft = saved; changes.saved(); sync(); preview.hidden = true; form.hidden = false;
       fields.get('name').input.focus();
       return 'Your private profile draft was loaded.';
     },

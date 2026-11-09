@@ -1,3 +1,4 @@
+import { trackDraft } from './draft-changes.js';
 import { backendEnabled } from './backend/client.js';
 import { listListingDrafts, saveListingDraft, deleteListingDraft } from './backend/drafts.js';
 import { privateDraftControls } from './backend/draft-controls.js';
@@ -6,7 +7,8 @@ const defaults = () => ({ category: 'offering', title: '', description: '', city
 let draft = defaults();
 let savedId = null;
 let identityEpoch = 0;
-export function clearListingDraftState() { draft = defaults(); savedId = null; identityEpoch++; }
+const changes = trackDraft('listing', () => draft, backendEnabled);
+export function clearListingDraftState() { draft = defaults(); savedId = null; changes.saved(); identityEpoch++; }
 const examples = {
   offering: { title: 'A coffee, a city walk, and good conversation', description: 'Enjoy an unhurried coffee and a walk around the neighbourhood. A simple plan with time to chat and discover somewhere new.', area: 'Kitsilano' },
   looking: { title: 'Company for a gallery afternoon?', description: 'Looking for someone to explore a local gallery and share a coffee afterwards. A relaxed afternoon with no rush and plenty to talk about.', area: 'Mount Pleasant' },
@@ -106,6 +108,7 @@ export function renderListingEditor(container, onBack) {
   clear.addEventListener('click', () => {
     draft = defaults();
     savedId = null;
+    changes.saved();
     syncFields();
     fields.get('title').control.focus();
   });
@@ -178,9 +181,11 @@ export function renderListingEditor(container, onBack) {
     onSave: async () => {
       for (const [key, { control }] of fields) draft[key] = control.value;
       const epoch = identityEpoch;
-      const nextId = await saveListingDraft({ ...draft }, savedId);
+      const snapshot = { ...draft };
+      const nextId = await saveListingDraft(snapshot, savedId);
       if (epoch !== identityEpoch) throw new Error('Account changed.');
       savedId = nextId;
+      changes.saved(snapshot);
       updateSelection();
       choicesContainer?.replaceChildren();
       return 'Private listing draft saved. It has not been published.';
@@ -210,6 +215,7 @@ export function renderListingEditor(container, onBack) {
             const wasSelected = savedId === row.id;
             if (wasSelected) {
               savedId = null;
+              changes.saved(defaults());
               updateSelection();
             }
             item.replaceChildren(element('p', wasSelected ? 'Private draft deleted. Any text in the editor is now unsaved.' : 'Private draft deleted.', 'profile-small'));
@@ -224,6 +230,7 @@ export function renderListingEditor(container, onBack) {
           if (epoch !== identityEpoch) return;
           savedId = row.id;
           draft = { category: row.kind, title: row.title, description: row.description, city: row.city, area: row.area, activity: row.activity };
+          changes.saved();
           syncFields(); preview.hidden = true; form.hidden = false;
           fields.get('title').control.focus();
         });

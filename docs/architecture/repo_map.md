@@ -697,3 +697,6 @@ underlying feature is operational.
 
 - `src/account-security.js`: verified email-account password changes with current
   password reauthentication, credential clearing, and recovery navigation.
+
+- `src/draft-changes.js`: in-memory private draft snapshots and browser unload
+  protection, with race-aware save baselines and identity reset handling.
