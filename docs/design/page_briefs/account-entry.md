@@ -92,3 +92,19 @@ or missing schema must show unavailable, preserve the general editor link and no
 block other account tools. Results from detached account views cannot update a new
 view. Backend-disabled mode retains its existing account preview. No new migration,
 notification delivery, approval, role grant or entitlement is introduced.
+
+
+## Resume a private booking plan from User setup
+
+For a verified account, the booking-plan card independently checks saved presence
+using only the owner ID projection. A saved record shows Resume saved booking plan;
+absence shows no saved plan, while failed reads show unavailable and allow refresh.
+Other User setup links stay usable. No private notes or introduction text appear
+on the card. Backend-disabled previews and signed-out setup show no saved-plan data.
+
+Resume navigates to the existing composer and runs its normal owner-bound load,
+including confirmation over dirty local text and protection for edits made during
+loading. A direct `resume=1` link waits behind the age gate. Consume the URL action
+only after verifying the account, or after a user cancels replacement; do not lose
+it during initial account events. The normal load button remains available after
+errors. No browser resume flag, draft cache, new migration or booking request.

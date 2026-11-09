@@ -20,3 +20,10 @@ export async function deleteBookingPlan(ownerId) {
   if (error || (data && data.owner_id !== ownerId)) throw new Error('Plan delete unavailable.');
   return Boolean(data);
 }
+
+export async function hasSavedBookingPlan() {
+  const user = await requireUser();
+  const { data, error } = await backendClient().from('booking_plan_drafts').select('owner_id').eq('owner_id', user.id).maybeSingle();
+  if (error || (data && data.owner_id !== user.id)) throw new Error('Plan status unavailable.');
+  return Boolean(data);
+}

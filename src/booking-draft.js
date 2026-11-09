@@ -16,7 +16,7 @@ function node(tag, text, className) {
   if (className) value.className = className;
   return value;
 }
-export function renderBookingDraft(container, navigate, requestedProvider, onViewProfile, { offeringId, onViewOffering } = {}) {
+export function renderBookingDraft(container, navigate, requestedProvider, onViewProfile, { offeringId, onViewOffering, resumeSaved = false, onResumeConsumed } = {}) {
   container.replaceChildren();
   const root = node('div', null, 'booking-draft');
   const back = node('a', '← Back to User setup', 'profile-back'); back.href = '?page=user-setup';
@@ -131,7 +131,7 @@ export function renderBookingDraft(container, navigate, requestedProvider, onVie
     return user.id;
   }
   const storage = privateDraftControls({
-    loadLabel: 'Load my booking plan', deleteLabel: 'Delete saved booking plan',
+    autoLoad: resumeSaved, loadLabel: 'Load my booking plan', deleteLabel: 'Delete saved booking plan',
     deleteConfirmation: 'Delete your saved private booking plan? Current editor text will remain. No booking is cancelled. This cannot be undone.',
     onSave: async () => {
       const epoch = identityEpoch; const snapshot = { ...defaults(), ...draft };
@@ -147,9 +147,11 @@ export function renderBookingDraft(container, navigate, requestedProvider, onVie
       return 'Private booking plan saved. Nothing was sent or reserved.';
     },
     onLoad: async () => {
-      if (changes.isDirty() && !window.confirm('Load your saved booking plan and discard current unsaved edits?')) return 'Load cancelled. Current plan kept.';
+      if (changes.isDirty() && !window.confirm('Load your saved booking plan and discard current unsaved edits?')) { if (resumeSaved) onResumeConsumed?.(); return 'Load cancelled. Current plan kept.'; }
       const before = JSON.stringify(draft);
-      const epoch = identityEpoch; const id = await owner(epoch); const plan = await loadBookingPlan(id);
+      const epoch = identityEpoch; const id = await owner(epoch);
+      if (resumeSaved) onResumeConsumed?.();
+      const plan = await loadBookingPlan(id);
       if (epoch !== identityEpoch || !container.contains(root)) throw new Error('Account changed.');
       if (!plan) return 'No private booking plan found for this account.';
       if (JSON.stringify(draft) !== before) return 'Current plan kept because you edited it while loading. Load again when ready.';

@@ -81,3 +81,14 @@ checks, not final duration, booking horizon, availability or DST rules. Unknown
 fixture references on load fail visibly rather than silently changing the plan.
 No credentials, browser-persisted plan copy or service key is introduced. Account
 summaries read only the presence of an owner record, not private plan content.
+
+
+### Explicit resume navigation
+
+User setup can link directly to `?page=booking-draft&resume=1`. Treat this only as
+an explicit owner draft-load action after entrance confirmation and verified account
+identity. Use the existing confirmation/error/late-edit protections. Remove the
+one-time query action after account verification or cancellation so later route
+renders do not repeat a completed or cancelled load. A cached session's startup
+identity event must not consume the action before its active view can load. No
+payment, reservation, recipient notification or additional persistence is implied.

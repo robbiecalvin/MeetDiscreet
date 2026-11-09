@@ -1,3 +1,4 @@
+import { hasSavedBookingPlan } from './backend/booking-plans.js';
 import { backendEnabled, backendClient } from './backend/client.js';
 function node(tag, text, className) {
   const value = document.createElement(tag);
@@ -20,7 +21,7 @@ export function renderUserSetup(container, navigate, onDiscover) {
   const status = node('p', backendEnabled ? 'Checking your account…' : 'User setup preview. Discovery uses fictional providers; drafts do not publish an ad or reserve an experience.', 'editor-notice');
   status.setAttribute('role', 'status'); root.append(status); container.append(root);
   const current = () => root.parentNode === container;
-  function tools() {
+  function tools(connected = false) {
     const grid = node('div', null, 'account-tool-grid');
     for (const [page, title, copy, action] of [
       ['edit-user-profile', 'Introduce yourself', 'Prepare a private User profile with your interests and the company you’re looking for.', 'Edit User profile draft'],
@@ -29,7 +30,26 @@ export function renderUserSetup(container, navigate, onDiscover) {
       ['booking-draft', 'Shape a booking plan', 'Try the request layout with a fictional provider. No request is sent or time reserved.', 'Preview a booking request'],
       ['provider-setup', 'Interested in providing?', 'Explore the separate provider setup using the same login. This does not grant publishing access.', 'Explore provider setup'],
     ]) {
-      const card = node('section', null, 'account-tool-card'); card.append(node('h2', title), node('p', copy), link(page, action)); grid.append(card);
+      const card = node('section', null, 'account-tool-card'); card.append(node('h2', title), node('p', copy), link(page, action));
+      if (connected && page === 'booking-draft') {
+        const saved = node('p', 'Checking saved plan…', 'account-draft-summary'); saved.setAttribute('role', 'status'); saved.dataset.bookingPlanSummary = '';
+        const refresh = node('button', 'Refresh saved booking plan status', 'button quiet'); refresh.type = 'button';
+        const resume = node('a', 'Resume saved booking plan', 'button outline'); resume.href = '?page=booking-draft&resume=1'; resume.hidden = true;
+        resume.addEventListener('click', event => {
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+          event.preventDefault(); navigate('booking-draft', { resume: true });
+        });
+        const check = async () => {
+          refresh.disabled = true; resume.hidden = true; saved.textContent = 'Checking saved plan…';
+          try {
+            const found = await hasSavedBookingPlan();
+            if (current()) { saved.textContent = found ? 'Private booking plan saved' : 'No saved booking plan'; resume.hidden = !found; }
+          } catch { if (current()) saved.textContent = 'Saved plan status unavailable. Check sign-in, connection and backend setup, then retry.'; }
+          finally { if (current()) refresh.disabled = false; }
+        };
+        refresh.addEventListener('click', check); card.append(saved, refresh, resume); check();
+      }
+      grid.append(card);
     }
     root.append(grid);
   }
@@ -40,6 +60,6 @@ export function renderUserSetup(container, navigate, onDiscover) {
       status.textContent = 'Sign in to continue your User setup.'; root.append(link('sign-in', 'Sign in'), link('register', 'Create account')); return;
     }
     status.textContent = 'Your User starting point. Saved drafts stay private; public posting, subscriptions and bookings are not connected.';
-    tools();
+    tools(true);
   }).catch(() => { if (current()) { status.textContent = 'Unable to verify your account. Check your connection or sign in again.'; root.append(link('sign-in', 'Sign in')); } });
 }

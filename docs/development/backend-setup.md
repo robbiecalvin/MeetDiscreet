@@ -327,3 +327,9 @@ local preview remains usable. Use fictional data. Hosted ownership, JWT and life
 checks remain pending; local PostgreSQL and mocked browser tests do not replace them.
 Plan retention follows account deletion or explicit owner deletion, with no revision
 history or separate operational retention policy established by this increment.
+
+
+User setup can check saved booking-plan presence and resume it through the existing
+owner-bound load. Presence queries select only owner ID; all actual plan reads still
+require the verified owner and RLS. This uses migration 008 without an additional
+migration. The resume query parameter has no authority and waits behind age confirmation.

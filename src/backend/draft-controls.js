@@ -1,5 +1,5 @@
 import { backendEnabled } from './client.js';
-export function privateDraftControls({ onSave, onLoad, onDelete, multiple = false, loadLabel = '', deleteLabel = 'Delete saved profile draft', deleteConfirmation = 'Delete your saved private profile draft? This cannot be undone. Your account and current editor text will remain.' }) {
+export function privateDraftControls({ onSave, onLoad, onDelete, multiple = false, autoLoad = false, loadLabel = '', deleteLabel = 'Delete saved profile draft', deleteConfirmation = 'Delete your saved private profile draft? This cannot be undone. Your account and current editor text will remain.' }) {
   if (!backendEnabled) return null;
   const section = document.createElement('section');
   section.className = 'private-draft-controls';
@@ -32,5 +32,6 @@ export function privateDraftControls({ onSave, onLoad, onDelete, multiple = fals
   actions.append(save, load);
   if (remove) actions.append(remove);
   section.append(title, copy, actions, choices, status);
+  if (autoLoad) queueMicrotask(() => { if (section.isConnected) run(onLoad); });
   return section;
 }

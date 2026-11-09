@@ -996,6 +996,21 @@ If launch scope is reduced:
   inspected. Hosted migration 008 application and hosted ownership validation
   remain pending.
 
+### Resume Booking Plans from User Setup
+
+- The User setup card checks saved-plan presence independently, offers refresh and
+  shows Resume saved booking plan only after a successful nonempty owner read.
+  It fetches no plan text for the card; unavailable and absent states are distinct.
+- Resume uses the existing protected load, confirms replacement of local edits,
+  and preserves text entered during a delayed response. Direct links wait behind
+  age confirmation and account verification before consuming their one-time action.
+- No new migration, storage flag, sending, reservation or financial action is added.
+  Migration 008 still needs applying on the hosted project.
+- Build and all 155 standard checks passed. The full 61-case backend suite passed;
+  four focused resume cases then passed after adding the age-gate/startup guard,
+  including a cold direct visit and cancellation preserving local text. Mobile
+  User setup card inspected. Hosted migration/application checks remain pending.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

@@ -1164,3 +1164,64 @@ test('loading a saved booking plan preserves text edited while the network respo
   await expect(page.getByLabel('Requests or notes (optional)',{exact:true})).toHaveValue('New text typed during loading');
   expect(state.bookingPlan.plan.notes).toBe('Older saved notes');
 });
+
+
+test('User setup resumes a saved private booking plan and refreshes saved presence independently', async ({ page }) => {
+  const state = await mockBackend(page);
+  state.bookingPlan = {owner_id:userId,plan:{sourceOffering:'gallery',provider:'maya',activity:'Culture',date:'',time:'',timeZone:'',duration:'',venue:'',expenses:'',notes:'Private plan to resume'}};
+  await signIn(page); await enter(page,'/?page=user-setup');
+  await expect(page.locator('[data-booking-plan-summary]')).toHaveText('Private booking plan saved');
+  await page.setViewportSize({width:390,height:844});
+  await page.locator('[data-booking-plan-summary]').locator('..').screenshot({path:'/tmp/user-resume-plan-mobile.png'});
+  await page.getByRole('link',{name:'Resume saved booking plan',exact:true}).click();
+  await expect(page.locator('.private-draft-controls [role=status]')).toContainText('Your private booking plan was loaded');
+  await expect(page.getByLabel('Requests or notes (optional)',{exact:true})).toHaveValue('Private plan to resume');
+  await expect(page).not.toHaveURL(/resume=/);
+  await page.getByRole('link',{name:'Back to User setup',exact:false}).click();
+  state.bookingPlan = null;
+  await page.getByRole('button',{name:'Refresh saved booking plan status',exact:true}).click();
+  await expect(page.locator('[data-booking-plan-summary]')).toHaveText('No saved booking plan');
+  await expect(page.getByRole('link',{name:'Resume saved booking plan',exact:true})).toBeHidden();
+});
+
+test('resuming a saved plan protects dirty local text when replacement is cancelled', async ({ page }) => {
+  const state = await mockBackend(page);
+  state.bookingPlan = {owner_id:userId,plan:{sourceOffering:'',provider:'maya',activity:'',date:'',time:'',timeZone:'',duration:'',venue:'',expenses:'',notes:'Stored plan'}};
+  await signIn(page); await enter(page,'/?page=booking-draft');
+  await page.getByLabel('Requests or notes (optional)',{exact:true}).fill('Keep this local plan');
+  await page.getByRole('link',{name:'Back to User setup',exact:false}).click();
+  await expect(page.getByRole('link',{name:'Resume saved booking plan',exact:true})).toBeVisible();
+  page.once('dialog',dialog=>dialog.dismiss());
+  await page.getByRole('link',{name:'Resume saved booking plan',exact:true}).click();
+  await expect(page.locator('.private-draft-controls [role=status]')).toContainText('Load cancelled');
+  await expect(page.getByLabel('Requests or notes (optional)',{exact:true})).toHaveValue('Keep this local plan');
+  await expect(page).not.toHaveURL(/resume=/);
+});
+
+test('unavailable saved-plan status keeps User setup navigation usable and supports retry', async ({ page }) => {
+  const options = {missingBookingPlanMigration:true};
+  await mockBackend(page,options);
+  await signIn(page); await enter(page,'/?page=user-setup');
+  await expect(page.locator('[data-booking-plan-summary]')).toContainText('Saved plan status unavailable');
+  await expect(page.getByRole('link',{name:'Resume saved booking plan',exact:true})).toBeHidden();
+  await expect(page.getByRole('link',{name:'Explore discovery',exact:true})).toBeVisible();
+  options.missingBookingPlanMigration = false;
+  await page.getByRole('button',{name:'Refresh saved booking plan status',exact:true}).click();
+  await expect(page.locator('[data-booking-plan-summary]')).toHaveText('No saved booking plan');
+});
+
+
+test('direct resume waits behind the age gate and then loads the verified owner plan', async ({ page }) => {
+  const state = await mockBackend(page);
+  state.bookingPlan = {owner_id:userId,plan:{sourceOffering:'',provider:'maya',activity:'',date:'',time:'',timeZone:'',duration:'',venue:'',expenses:'',notes:'Cold-start private plan'}};
+  await signIn(page);
+  await page.evaluate(()=>localStorage.removeItem('meetdiscreet.age-confirmed.v1'));
+  const before = state.requests.filter(row => row.path === '/rest/v1/booking_plan_drafts').length;
+  await page.goto('/?page=booking-draft&resume=1');
+  await expect(page.locator('#app')).toBeHidden();
+  await expect(page).toHaveURL(/resume=1/);
+  expect(state.requests.filter(row => row.path === '/rest/v1/booking_plan_drafts')).toHaveLength(before);
+  await page.getByRole('button',{name:'I am 18 or older'}).click();
+  await expect(page.getByLabel('Requests or notes (optional)',{exact:true})).toHaveValue('Cold-start private plan');
+  await expect(page).not.toHaveURL(/resume=/);
+});
