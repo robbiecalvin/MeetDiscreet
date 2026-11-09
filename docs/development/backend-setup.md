@@ -68,6 +68,20 @@ No date-specific availability, appointments, conflicts with bookings, DST date
 resolution, reservations, public publishing, or scheduling policy is implemented.
 The agent has tested this migration locally but has not applied it remotely.
 
+## Add private User profile storage
+
+Run this additional migration once after the initial migration when enabling
+separate User profile drafts:
+
+[202611090003_user_profile_drafts.sql](../../supabase/migrations/202611090003_user_profile_drafts.sql)
+
+It adds `user_profile_drafts` with owner-only RLS and draft field bounds, nullable
+adult-age declaration (when populated, at least 18) and gender non-disclosure
+constraints. Username uniqueness, verified eligibility and field visibility are
+not determined here. Save/load/delete never modifies provider profile drafts,
+roles or the auth account. The agent has not applied this migration remotely.
+Only apply migrations not already run; do not rerun the original schema.
+
 ## Registration starting preference
 
 Signup requires User or Provider and stores `onboarding_intent` with

@@ -808,6 +808,20 @@ If launch scope is reduced:
 - Authoritative dual-role policy, provider eligibility, approval and publishing
   remain dependent work; untrusted intent metadata must never enforce access.
 
+### Separate Private User Profile
+
+- Added partial USR-02 at `/?page=edit-user-profile`, reachable from User setup
+  and Account, distinct from the provider editor and stored record.
+- Draft username, adult-age declaration and gender self-description/non-disclosure,
+  with optional name/location/interests/languages/Looking For/Enjoy fields.
+- Owner-only safe preview, fictional sample, explicit clear, private save/load/delete,
+  snapshot protection and account-change clearing. No public visibility, username
+  allocation, eligibility verification, uploads or role grants are implied.
+- Build, all 124 default checks and 33 backend UI checks passed. User profile
+  preview screenshots inspected at 390/1440px without horizontal overflow.
+- Added `202611090003_user_profile_drafts.sql` for later hosted setup. Optional
+  photo/orientation/accessibility fields remain planned, not removed from scope.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

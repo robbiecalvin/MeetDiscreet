@@ -1115,3 +1115,14 @@ explicit PostgreSQL-recognized time zone and validated weekly local-time windows
 No UTC appointment instants, reservations, public eligibility, or booking
 availability authority are derived. Date-specific/DST rules remain future work.
 Hosted application of this migration is pending.
+
+
+## Private User profile drafts
+
+[User profile migration](../../supabase/migrations/202611090003_user_profile_drafts.sql)
+adds owner-only `user_profile_drafts`, separate from provider `profile_drafts`.
+It holds draft username/adult-age declarations and optional introduction fields.
+An explicit non-disclosure flag requires empty gender description when selected;
+self-description is required otherwise. Username/age can be absent in partial
+private drafts. Neither declarations nor database constraints establish eligibility,
+username uniqueness/allocation, public visibility or authoritative account roles.

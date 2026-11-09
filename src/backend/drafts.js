@@ -70,6 +70,11 @@ export async function deleteExperienceDraft() {
 
 export async function loadPrivateDraftSummary(kind) {
   const user = await requireUser();
+  if (kind === 'user-profile') {
+    const { data, error } = await backendClient().from('user_profile_drafts').select('owner_id').eq('owner_id', user.id).maybeSingle();
+    failure(error);
+    return data ? 'Private User profile draft saved' : 'No saved User profile draft';
+  }
   if (kind === 'profile') {
     const { data, error } = await backendClient().from('profile_drafts').select('owner_id').eq('owner_id', user.id).maybeSingle();
     failure(error);
@@ -115,6 +120,29 @@ export async function loadAvailabilityDraft() {
 export async function deleteAvailabilityDraft() {
   const user = await requireUser();
   const { data, error } = await backendClient().from('availability_drafts').delete().eq('owner_id', user.id).select('owner_id').maybeSingle();
+  failure(error);
+  return Boolean(data);
+}
+
+export async function saveUserProfileDraft(draft) {
+  const user = await requireUser();
+  const { error } = await backendClient().from('user_profile_drafts').upsert({
+    owner_id: user.id, username: draft.username.trim(), adult_age: draft.age === '' ? null : Number(draft.age),
+    display_name: draft.name.trim(), city: draft.city.trim(), prefer_not_to_say: draft.preferNot,
+    gender_description: draft.preferNot ? '' : draft.gender.trim(), interests: draft.interests.trim(),
+    languages: draft.languages.trim(), looking_for: draft.lookingFor.trim(), enjoys: draft.enjoys.trim(),
+  }, { onConflict: 'owner_id' });
+  failure(error);
+}
+export async function loadUserProfileDraft() {
+  const user = await requireUser();
+  const { data, error } = await backendClient().from('user_profile_drafts').select('*').eq('owner_id', user.id).maybeSingle();
+  failure(error);
+  return data ? { username: data.username, age: data.adult_age === null ? '' : String(data.adult_age), name: data.display_name, city: data.city, preferNot: data.prefer_not_to_say, gender: data.gender_description, interests: data.interests, languages: data.languages, lookingFor: data.looking_for, enjoys: data.enjoys } : null;
+}
+export async function deleteUserProfileDraft() {
+  const user = await requireUser();
+  const { data, error } = await backendClient().from('user_profile_drafts').delete().eq('owner_id', user.id).select('owner_id').maybeSingle();
   failure(error);
   return Boolean(data);
 }

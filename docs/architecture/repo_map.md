@@ -716,3 +716,7 @@ underlying feature is operational.
 
 - `src/user-setup.js`: separate User starting page linking discovery and private
   Looking For draft tools, with same-login provider setup navigation.
+
+- `src/user-profile-editor.js`: separate private User introduction/editor/preview.
+- `supabase/migrations/202611090003_user_profile_drafts.sql`: owner-only User draft
+  schema and declaration/non-disclosure constraints; later hosted setup required.

@@ -20,10 +20,11 @@ test.beforeAll(async () => {
   await db.exec(await readFile(new URL('../supabase/migrations/202611080001_private_drafts.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611090001_experience_drafts.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611090002_availability_drafts.sql', import.meta.url), 'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/202611090003_user_profile_drafts.sql', import.meta.url), 'utf8'));
 });
 test.afterAll(async () => { await db.close(); });
 test.beforeEach(async () => {
-  await db.exec('reset role; truncate public.listing_drafts, public.profile_drafts, public.experience_catalogue_drafts, public.availability_drafts;');
+  await db.exec('reset role; truncate public.listing_drafts, public.profile_drafts, public.experience_catalogue_drafts, public.availability_drafts, public.user_profile_drafts;');
   await asUser(alice);
 });
 
@@ -130,4 +131,24 @@ test('availability drafts enforce owner isolation and reject invalid zones or ov
   await insert('UTC', [first, { day: 1, start: '12:00', end: '13:00' }]);
   await db.exec("update public.availability_drafts set time_zone='America/Toronto'");
   expect((await db.query('select windows from public.availability_drafts')).rows[0].windows).toHaveLength(2);
+});
+
+test('User profile drafts are owner-only, validate declarations, and stay separate from provider profiles', async () => {
+  await db.exec("insert into public.profile_drafts(display_name) values ('Provider draft'); insert into public.user_profile_drafts(username,adult_age,display_name) values ('alice',30,'User draft');");
+  await asUser(bob);
+  expect((await db.query('select * from public.user_profile_drafts')).rows).toHaveLength(0);
+  expect((await db.query('delete from public.user_profile_drafts returning *')).rows).toHaveLength(0);
+  expect((await db.query("update public.user_profile_drafts set display_name='Stolen' returning *")).rows).toHaveLength(0);
+  await expect(db.query('insert into public.user_profile_drafts(owner_id) values ($1)', [alice])).rejects.toThrow(/row-level security/i);
+  await asUser('', 'anon');
+  await expect(db.query('select * from public.user_profile_drafts')).rejects.toThrow(/permission denied/i);
+  await asUser(alice);
+  await expect(db.exec('update public.user_profile_drafts set adult_age=17')).rejects.toThrow(/check constraint/i);
+  await expect(db.exec("update public.user_profile_drafts set gender_description='Private description'")).rejects.toThrow(/check constraint/i);
+  await expect(db.exec('update public.user_profile_drafts set prefer_not_to_say=false')).rejects.toThrow(/check constraint/i);
+  await expect(db.query('update public.user_profile_drafts set owner_id=$1', [bob])).rejects.toThrow(/row-level security/i);
+  await db.exec("update public.user_profile_drafts set prefer_not_to_say=false,gender_description='Self-described',display_name='Updated User';");
+  expect((await db.query('select display_name from public.user_profile_drafts')).rows[0].display_name).toBe('Updated User');
+  await db.exec('delete from public.user_profile_drafts');
+  expect((await db.query('select display_name from public.profile_drafts')).rows[0].display_name).toBe('Provider draft');
 });

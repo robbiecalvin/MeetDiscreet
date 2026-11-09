@@ -73,15 +73,16 @@ export function renderAccountOverview(container, navigate, onBack) {
 
     const grid = node('div', null, 'account-tool-grid');
     for (const [page, title, copy, action] of [
+      ['edit-user-profile', 'User profile draft', 'Prepare your personal introduction separately from provider profile drafts.', 'Edit User profile draft'],
       ['availability', 'Availability draft', 'Sketch weekly time windows in an explicit time zone. Connected mode supports private draft saving.', 'Edit availability draft'],
       ['account-security', 'Account security', 'Verify your current password and choose a new one.', 'Change password'],
-      ['edit-profile', 'Profile draft', 'Edit your introduction and load or save your private profile draft.', 'Edit profile draft'],
+      ['edit-profile', 'Provider profile draft', 'Edit your provider introduction and load or save your private provider profile draft.', 'Edit provider profile draft'],
       ['my-listings', 'Listing drafts', 'Create, load, update, or delete private Offering and Looking For drafts.', 'Manage listing drafts'],
       ['experiences', 'Experience catalogue', 'Explore included experiences and optional extras. Save or load a private catalogue. Unadded edits are not saved.', 'Open experience tools'],
     ]) {
       const card = node('section', null, 'account-tool-card');
       card.append(node('h2', title), node('p', copy));
-      const kind = { availability: 'availability', 'edit-profile': 'profile', 'my-listings': 'listings', experiences: 'experiences' }[page];
+      const kind = { 'edit-user-profile': 'user-profile', availability: 'availability', 'edit-profile': 'profile', 'my-listings': 'listings', experiences: 'experiences' }[page];
       if (kind) {
         const summary = node('p', 'Checking saved drafts…', 'account-draft-summary');
         summary.setAttribute('role', 'status');

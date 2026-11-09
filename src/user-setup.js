@@ -23,6 +23,7 @@ export function renderUserSetup(container, navigate, onDiscover) {
   function tools() {
     const grid = node('div', null, 'account-tool-grid');
     for (const [page, title, copy, action] of [
+      ['edit-user-profile', 'Introduce yourself', 'Prepare a private User profile with your interests and the company you’re looking for.', 'Edit User profile draft'],
       [null, 'Discover providers', 'Browse the provider grid or compact ads view. Current profiles and online statuses are fictional.', 'Explore discovery'],
       ['my-listings', 'Plan an outing', 'Manage private listing drafts. Choose Looking For in the editor to describe a plan you want company for.', 'Open my listing drafts'],
       ['provider-setup', 'Interested in providing?', 'Explore the separate provider setup using the same login. This does not grant publishing access.', 'Explore provider setup'],

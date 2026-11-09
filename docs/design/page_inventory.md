@@ -446,3 +446,7 @@ Registration includes explicit User/Provider starting choices. `/?page=user-setu
 provides discovery/Looking For guidance; `/?page=provider-setup`
 guides provider draft preparation. See [provider setup brief](./page_briefs/provider-setup.md).
 This does not implement provider-role assignment or publishing approval.
+
+Partial USR-02 now has a distinct private User profile editor at
+`/?page=edit-user-profile`; see [User profile brief](./page_briefs/user-profile.md).
+It does not decide public field visibility or replace provider profile drafts.

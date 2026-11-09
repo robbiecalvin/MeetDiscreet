@@ -9,7 +9,7 @@ function session(profile = user) {
   return { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock_refresh_token', user: profile };
 }
 async function mockBackend(page, options = {}) {
-  const state = { user: { ...user, user_metadata: {} }, availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
+  const state = { user: { ...user, user_metadata: {} }, userProfile: null, availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
   await page.route('https://backend-test.supabase.co/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -33,6 +33,12 @@ async function mockBackend(page, options = {}) {
       return respond(state.user);
     }
     if (url.pathname === '/auth/v1/logout') return respond({});
+    if (url.pathname === '/rest/v1/user_profile_drafts') {
+      if (options.missingUserProfileMigration) return respond({ message: 'Table missing' }, 404);
+      if (method === 'POST') { state.userProfile = body; return respond(null, 201); }
+      if (method === 'DELETE') { const exists = state.userProfile !== null; state.userProfile = null; return respond(exists ? [{ owner_id: userId }] : []); }
+      return respond(state.userProfile ? [state.userProfile] : []);
+    }
     if (url.pathname === '/rest/v1/availability_drafts') {
       if (options.missingAvailabilityMigration) return respond({ message: 'Table missing' }, 404);
       if (method === 'POST') { state.availability = body; return respond(null, 201); }
@@ -223,7 +229,7 @@ for (const failDelete of [false, true]) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await page.screenshot({ path: `/tmp/account-overview-${width}.png`, fullPage: true });
   }
-  await page.getByRole('link', { name: 'Edit profile draft' }).click();
+  await page.getByRole('link', { name: 'Edit provider profile draft' }).click();
   await expect(page).toHaveURL(/page=edit-profile/);
   await page.locator('[data-account-link]').click();
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
@@ -378,7 +384,7 @@ test('account draft summaries show real saved/empty states and refresh independe
   await expect(page.locator('[data-draft-summary=listings]')).toHaveText('1 saved private listing draft');
   await expect(page.locator('[data-draft-summary=experiences]')).toHaveText('1 saved catalogue item');
   state.profile = null; state.listings = []; state.catalogue = [];
-  await page.getByRole('button', { name: 'Refresh profile draft status' }).click();
+  await page.getByRole('button', { name: 'Refresh provider profile draft status' }).click();
   await page.getByRole('button', { name: 'Refresh listing drafts status' }).click();
   await page.getByRole('button', { name: 'Refresh experience catalogue status' }).click();
   await expect(page.locator('[data-draft-summary=profile]')).toHaveText('No saved profile draft');
@@ -398,7 +404,7 @@ test('missing catalogue setup does not block profile or listing summaries', asyn
   await expect(page.locator('[data-draft-summary=profile]')).toHaveText('No saved profile draft');
   await expect(page.locator('[data-draft-summary=listings]')).toHaveText('0 saved private listing drafts');
   await expect(page.getByRole('button', { name: 'Refresh experience catalogue status' })).toBeEnabled();
-  await expect(page.getByRole('link', { name: 'Edit profile draft' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Edit provider profile draft' })).toBeVisible();
 });
 
 test('private profile refresh warns for unsaved edits but not after saving or sign-out', async ({ page }) => {
@@ -626,4 +632,42 @@ test('failed starting-point update does not report provider setup as selected', 
   await expect(page.locator('.account-starting-point [role=status]')).toContainText('Unable to save');
   await expect(page.getByRole('button', { name: 'Use Provider starting point' })).toHaveAttribute('aria-pressed', 'false');
   await expect(page.getByRole('button', { name: 'Use Provider starting point' })).toBeEnabled();
+});
+
+test('User profile saves and reloads independently from provider drafts and clears on sign-out', async ({ page }) => {
+  const state = await mockBackend(page);
+  state.profile = { owner_id: userId, display_name: 'Separate provider draft' };
+  await signIn(page);
+  await page.locator('[data-account-link]').click();
+  await page.getByRole('link', { name: 'Edit User profile draft', exact: true }).click();
+  await page.getByRole('button', { name: 'Use fictional User profile' }).click();
+  await page.getByRole('button', { name: 'Save private draft', exact: true }).click();
+  const status = page.locator('.private-draft-controls [role=status]');
+  await expect(status).toContainText('Private User profile draft saved');
+  expect(state.userProfile.owner_id).toBe(userId);
+  expect(state.userProfile.prefer_not_to_say).toBe(true);
+  expect(state.userProfile.gender_description).toBe('');
+  expect(state.profile.display_name).toBe('Separate provider draft');
+  await page.reload();
+  await page.getByRole('button', { name: 'Load my User profile draft' }).click();
+  await expect(page.getByLabel('User username', { exact: true })).toHaveValue('demo-alex');
+  await page.locator('[data-account-link]').click();
+  await expect(page.locator('[data-draft-summary=user-profile]')).toHaveText('Private User profile draft saved');
+  await page.getByRole('link', { name: 'Edit User profile draft', exact: true }).click();
+  page.once('dialog', dialog => dialog.accept());
+  await page.getByRole('button', { name: 'Delete saved User profile draft' }).click();
+  await expect(status).toContainText('Saved User profile draft deleted');
+  expect(state.userProfile).toBeNull();
+  expect(state.profile.display_name).toBe('Separate provider draft');
+  await expect(page.getByLabel('User username', { exact: true })).toHaveValue('demo-alex');
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await expect(page.getByLabel('User username', { exact: true })).toHaveValue('');
+});
+test('User profile migration errors allow retry without claiming storage success', async ({ page }) => {
+  await mockBackend(page, { missingUserProfileMigration: true });
+  await signIn(page);
+  await enter(page, '/?page=edit-user-profile');
+  await page.getByRole('button', { name: 'Load my User profile draft' }).click();
+  await expect(page.locator('.private-draft-controls [role=status]')).toContainText('Unable to complete');
+  await expect(page.getByRole('button', { name: 'Load my User profile draft' })).toBeEnabled();
 });
