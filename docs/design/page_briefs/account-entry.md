@@ -108,3 +108,20 @@ loading. A direct `resume=1` link waits behind the age gate. Consume the URL act
 only after verifying the account, or after a user cancels replacement; do not lose
 it during initial account events. The normal load button remains available after
 errors. No browser resume flag, draft cache, new migration or booking request.
+
+
+## Sign out other sessions
+
+Account security includes a separate current-password form and explicit confirmation.
+Freshly verify the same account, then revoke other sessions' refresh capability while
+keeping the freshly authenticated current session. State the delay plainly: existing
+sign-in tokens can remain active elsewhere until expiry. Show success only after a
+successful provider response, and keep 401/403/404, server and network errors visible
+rather than normalizing them into success. Cancel clears the field and sends no
+reauthentication or logout request. No devices or session count are invented.
+
+Prevent simultaneous password changes and session operations. Clear submitted
+passwords before asynchronous work, reset password visibility and clear the other
+security form's entered secrets when starting an operation. Account changes or
+navigation prevent stale responses updating another view. Keep recovery available.
+No new permission grants, service credentials, database schema or paid service.

@@ -715,3 +715,20 @@ Use backend authorization, private storage, verified financial events,
 limited operational access, and evidence-based checks.
 
 Describe security honestly and keep unresolved risks visible.
+
+## Implemented development other-session revocation
+
+The Account security action requires an explicit confirmation, freshly reauthenticates
+the current email account, verifies its ID using the returned session JWT and calls
+the provider logout SDK endpoint with that JWT and `others` scope. The SDK method
+lives under `auth.admin.signOut` but uses an ordinary user's bearer token and the
+public browser key; no elevated credential or admin authorization is introduced.
+Avoid `auth.signOut` for this control because this installed SDK normalizes some
+401/403/404 failures to success. Error responses must stay visible.
+
+This revokes other refresh capability, preserves the new current session and does
+not invalidate already-issued JWTs before expiry. RLS ownership and sensitive-data
+policies remain separate; no immediate revocation guarantee, device list, audit trail,
+or count is claimed. Password fields are cleared before async operations; concurrent
+password/session operations are disabled, and identity/navigation guards reject
+stale UI results. Hosted behavior remains to be verified with isolated test sessions.

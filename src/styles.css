@@ -102,3 +102,5 @@ main.help-main{max-width:1300px;padding-bottom:70px}.help-controls{display:grid;
 .subscription-card>.button.outline{width:100%;margin-top:18px;text-align:center;white-space:normal}.booking-provider>.button{margin-top:18px}.booking-context>p{line-height:1.8;margin:24px 0 16px}.booking-context>.button{margin-bottom:8px}
 
 .booking-provider>h3{margin-top:24px;font-size:18px;line-height:1.5}.offering-sidebar>.button.outline{margin-top:18px;width:100%;white-space:normal;text-align:center}
+
+.account-sessions{border-top:1px solid #38476b;margin-top:32px;padding-top:28px}.account-sessions h2{font-size:24px;margin-bottom:16px}.account-sessions>.profile-small{line-height:1.8;margin-bottom:24px}.account-sessions [role=status]{margin-top:18px;line-height:1.8;overflow-wrap:anywhere}.account-panel>.account-form>h2{font-size:24px;margin-bottom:8px}

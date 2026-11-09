@@ -15,7 +15,7 @@ async function mockBackend(page, options = {}) {
     const url = new URL(request.url());
     const method = request.method();
     const body = request.postDataJSON();
-    state.requests.push({ path: url.pathname, method, body });
+    state.requests.push({ path: url.pathname, query: url.searchParams.toString(), method, body });
     const respond = (data, status = 200) => route.fulfill({ status, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' }, body: JSON.stringify(data) });
     if (method === 'OPTIONS') return respond({});
     if (url.pathname === '/auth/v1/token') {
@@ -32,7 +32,10 @@ async function mockBackend(page, options = {}) {
       }
       return respond(state.user);
     }
-    if (url.pathname === '/auth/v1/logout') return respond({});
+    if (url.pathname === '/auth/v1/logout') {
+      if (url.searchParams.get('scope') === 'others' && options.failOtherSessionLogout) return respond({message:'Unavailable'},options.otherSessionFailureStatus || 500);
+      return respond({});
+    }
     if (url.pathname === '/rest/v1/booking_plan_drafts') {
       if (options.missingBookingPlanMigration || options.failBookingPlanOperation) return respond({message:'Plan unavailable'},404);
       if (method === 'POST') { if(body.owner_id !== state.user.id) return respond({message:'Wrong owner'},403); state.bookingPlan = body; return respond(null); }
@@ -420,14 +423,14 @@ for (const scenario of ['success', 'reauthentication', 'update']) {
     await next.fill('new-test-password');
     await confirm.fill('mismatch');
     await page.getByRole('button', { name: 'Change password', exact: true }).click();
-    await expect(page.locator('#account-view [role=status]')).toContainText('must match');
+    await expect(page.locator('#account-security-status')).toContainText('must match');
     expect(state.requests.filter(r => r.path === '/auth/v1/token')).toHaveLength(1);
     await confirm.fill('new-test-password');
     await page.getByRole('button', { name: 'Show new password', exact: true }).click();
     await expect(next).toHaveAttribute('type', 'text');
     await page.getByRole('button', { name: 'Change password', exact: true }).click();
     const message = scenario === 'success' ? 'Your password was changed.' : scenario === 'reauthentication' ? 'Unable to verify your current password' : 'Unable to change your password';
-    await expect(page.locator('#account-view [role=status]')).toContainText(message);
+    await expect(page.locator('#account-security-status')).toContainText(message);
     for (const field of [old, next, confirm]) {
       await expect(field).toHaveValue('');
       await expect(field).toHaveAttribute('type', 'password');
@@ -439,7 +442,7 @@ for (const scenario of ['success', 'reauthentication', 'update']) {
     await old.fill('discard-on-signout');
     await page.getByRole('button', { name: 'Sign out', exact: true }).click();
     await expect(old).toHaveCount(0);
-    await expect(page.locator('#account-view [role=status]')).toContainText('Sign in with your email');
+    await expect(page.locator('#account-security-status')).toContainText('Sign in with your email');
   });
 }
 
@@ -1224,4 +1227,60 @@ test('direct resume waits behind the age gate and then loads the verified owner 
   await page.getByRole('button',{name:'I am 18 or older'}).click();
   await expect(page.getByLabel('Requests or notes (optional)',{exact:true})).toHaveValue('Cold-start private plan');
   await expect(page).not.toHaveURL(/resume=/);
+});
+
+
+for (const scenario of ['success','reauthentication','revoke','denied-401','denied-403','denied-404']) {
+  test(`other-session sign-out ${scenario} verifies password, uses only others scope and keeps current session`, async ({ page }) => {
+    const state = await mockBackend(page,{failReauthentication:scenario==='reauthentication',failOtherSessionLogout:scenario==='revoke'||scenario.startsWith('denied-'),otherSessionFailureStatus:scenario.startsWith('denied-') ? Number(scenario.slice(-3)) : 500});
+    await signIn(page); await enter(page,'/?page=account-security');
+    const password = page.getByLabel('Current password to sign out other sessions',{exact:true});
+    await password.fill('test-password-not-real');
+    page.once('dialog',dialog=>dialog.accept());
+    await page.getByRole('button',{name:'Sign out other sessions',exact:true}).click();
+    const status = page.locator('#other-sessions-status');
+    await expect(status).toContainText(scenario==='success' ? 'Other sessions can no longer renew' : scenario==='reauthentication' ? 'Unable to verify your current password' : 'Unable to sign out other sessions');
+    await expect(password).toHaveValue('');
+    await expect(password).toHaveAttribute('type','password');
+    const logout = state.requests.filter(row=>row.path==='/auth/v1/logout');
+    expect(logout).toHaveLength(scenario==='reauthentication' ? 0 : 1);
+    if (logout.length) expect(logout[0].query).toBe('scope=others');
+    await expect(page.getByRole('button',{name:'Sign out',exact:true})).toBeVisible();
+    await expect(page.getByRole('button',{name:'Change password',exact:true})).toBeEnabled();
+    if (scenario==='success') {
+      await page.setViewportSize({width:390,height:844});
+      await page.locator('.account-sessions').screenshot({path:'/tmp/account-other-sessions-mobile.png'});
+    }
+  });
+}
+test('cancelling other-session sign-out clears the password and makes no authentication or logout request', async ({ page }) => {
+  const state = await mockBackend(page); await signIn(page); await enter(page,'/?page=account-security');
+  await page.getByLabel('Current password to sign out other sessions',{exact:true}).fill('test-password-not-real');
+  page.once('dialog',dialog=>dialog.dismiss());
+  await page.getByRole('button',{name:'Sign out other sessions',exact:true}).click();
+  await expect(page.locator('#other-sessions-status')).toHaveText('No other sessions were changed.');
+  await expect(page.getByLabel('Current password to sign out other sessions',{exact:true})).toHaveValue('');
+  expect(state.requests.filter(row=>row.path==='/auth/v1/token')).toHaveLength(1);
+  expect(state.requests.filter(row=>row.path==='/auth/v1/logout')).toHaveLength(0);
+});
+
+
+test('other-session revocation locks password changes during reauthentication and clears secret fields', async ({ page }) => {
+  await mockBackend(page); await signIn(page); await enter(page,'/?page=account-security');
+  await page.getByLabel('New password',{exact:true}).fill('unused-new-password');
+  await page.getByRole('button',{name:'Show new password',exact:true}).click();
+  let release; const gate = new Promise(resolve=>{release=resolve;});
+  let requested; const started = new Promise(resolve=>{requested=resolve;});
+  await page.route('**/auth/v1/token*',async route=>{requested();await gate;await route.fallback();});
+  await page.getByLabel('Current password to sign out other sessions',{exact:true}).fill('test-password-not-real');
+  page.once('dialog',dialog=>dialog.accept());
+  await page.getByRole('button',{name:'Sign out other sessions',exact:true}).click();
+  await started;
+  await expect(page.getByRole('button',{name:'Change password',exact:true})).toBeDisabled();
+  await expect(page.getByLabel('Current password to sign out other sessions',{exact:true})).toHaveValue('');
+  await expect(page.getByLabel('New password',{exact:true})).toHaveValue('');
+  await expect(page.getByLabel('New password',{exact:true})).toHaveAttribute('type','password');
+  release();
+  await expect(page.locator('#other-sessions-status')).toContainText('Other sessions can no longer renew');
+  await expect(page.getByRole('button',{name:'Change password',exact:true})).toBeEnabled();
 });

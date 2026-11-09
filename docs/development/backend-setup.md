@@ -8,7 +8,8 @@ Check the dashboard's plan and usage limits before changing settings.
 ## Scope
 
 - Email/password development accounts, confirmation, recovery/reset, sign-out,
-  and password changes after current-password reauthentication.
+  password changes after current-password reauthentication, and explicitly confirmed
+  revocation of other sessions after fresh password verification.
 - Private owner-only profile, listing, catalogue, availability and unsent booking-plan drafts, subject
   to the separately applied migrations below.
 - Server-controlled membership-role foundation with basic User initialization;
@@ -333,3 +334,19 @@ User setup can check saved booking-plan presence and resume it through the exist
 owner-bound load. Presence queries select only owner ID; all actual plan reads still
 require the verified owner and RLS. This uses migration 008 without an additional
 migration. The resume query parameter has no authority and waits behind age confirmation.
+
+
+## Other-session sign-out
+
+Account security can revoke other sessions using the freshly reauthenticated user's
+JWT and `others` scope. No service-role key or admin credential is used. The installed
+SDK's `auth.admin.signOut(userJwt, 'others')` targets the same normal `/logout` endpoint
+as `auth.signOut`, but preserves 401/403/404 errors that the latter currently swallows.
+It also binds the request to the verified token rather than a mutable current session.
+The freshly authenticated session remains; other refresh capability is revoked only
+on a successful provider response. Already-issued access JWTs remain valid until
+expiry. Neither immediate remote logout nor a count of affected devices is claimed.
+
+This uses existing Supabase Auth with no migration. Automated tests mock Auth HTTP
+responses with the real SDK; actual hosted two-session refresh/revocation behavior
+has not been exercised. Use test sessions during the deferred hosted walkthrough.

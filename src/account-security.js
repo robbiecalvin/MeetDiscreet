@@ -1,3 +1,4 @@
+import { otherSessionControls } from './account-sessions.js';
 import { backendEnabled, backendClient } from './backend/client.js';
 
 function node(tag, text, className) {
@@ -16,7 +17,7 @@ export function renderAccountSecurity(container, navigate) {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault(); navigate('account');
   });
-  intro.append(back, node('p', 'ACCOUNT SECURITY', 'eyebrow'), node('h1', 'Change your password.'), node('p', 'Confirm your current password, then choose a new one.', 'offering-lead'));
+  intro.append(back, node('p', 'ACCOUNT SECURITY', 'eyebrow'), node('h1', 'Account security.'), node('p', 'Manage your password and other sign-ins.', 'offering-lead'));
   const panel = node('div', null, 'account-panel');
   const status = node('p', backendEnabled ? 'Checking your account…' : 'Password changes require the development backend. This preview does not change an account.', 'account-preview-result');
   status.setAttribute('role', 'status');
@@ -67,6 +68,7 @@ export function renderAccountSecurity(container, navigate) {
       group.append(title, field, toggle); form.append(group);
     }
     const submit = node('button', 'Change password', 'button primary'); submit.type = 'submit';
+    form.prepend(node('h2', 'Change your password'));
     form.append(submit);
     panel.prepend(form);
     let busy = false;
@@ -86,7 +88,7 @@ export function renderAccountSecurity(container, navigate) {
         toggles[index].textContent = `Show ${['current password', 'new password', 'confirm new password'][index]}`;
         toggles[index].disabled = true;
       }
-      busy = true; submit.disabled = true; status.textContent = 'Verifying and updating…';
+      busy = true; sessions.setDisabled(true); submit.disabled = true; status.textContent = 'Verifying and updating…';
       try {
         const { data: verified, error: verifyError } = await backendClient().auth.signInWithPassword({ email: user.email, password: oldPassword });
         if (!current()) return;
@@ -100,7 +102,7 @@ export function renderAccountSecurity(container, navigate) {
       } catch {
         if (current()) status.textContent = 'Unable to change your password. Check your connection and try again.';
       } finally {
-        busy = false; submit.disabled = false;
+        busy = false; sessions.setDisabled(false); submit.disabled = false;
         for (const field of inputs) field.disabled = false;
         for (const toggle of toggles) toggle.disabled = false;
         if (current()) status.focus();
@@ -113,6 +115,13 @@ export function renderAccountSecurity(container, navigate) {
       event.preventDefault(); navigate('recover-account');
     });
     panel.append(recover);
+    const sessions = otherSessionControls(panel, user, current, { isBusy: () => busy, setBusy: value => {
+      busy = value; submit.disabled = value;
+      for (const [index, input] of inputs.entries()) {
+        input.disabled = value; toggles[index].disabled = value;
+        if (value) { input.value = ''; input.type = 'password'; toggles[index].setAttribute('aria-pressed', 'false'); toggles[index].textContent = `Show ${['current password', 'new password', 'confirm new password'][index]}`; }
+      }
+    } });
   }).catch(() => {
     if (!current()) return;
     status.textContent = 'Unable to verify your account. Check your connection or sign in again.';

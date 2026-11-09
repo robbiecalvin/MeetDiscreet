@@ -1011,6 +1011,22 @@ If launch scope is reduced:
   including a cold direct visit and cancellation preserving local text. Mobile
   User setup card inspected. Hosted migration/application checks remain pending.
 
+### Account Other-Session Sign-Out
+
+- Account security now offers a separate password-confirmed action that keeps the
+  freshly authenticated session and revokes renewal for other sessions. Copy explains
+  that already-issued sign-in tokens remain active until expiry.
+- Requests use the verified user's JWT with `others` scope and preserve denied/error
+  responses, including statuses the SDK's ordinary signOut method normalizes away.
+  No service key, privilege grant, session/device count or database migration.
+- Passwords clear before requests; cancellation makes no auth/logout request. Password
+  changes and session actions cannot run together; detached results cannot update a
+  different account's view. Hosted two-session verification remains pending.
+- Build, all 155 standard checks and 70 backend browser checks passed. Coverage
+  includes password reauthentication, 401/403/404 and server errors, cancellation,
+  current-session retention and operation locking/secret clearing. Mobile session
+  control inspected. Hosted refresh/revocation behavior remains unverified.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

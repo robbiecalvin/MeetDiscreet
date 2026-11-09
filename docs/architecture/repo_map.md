@@ -748,3 +748,5 @@ underlying feature is operational.
 
 - `src/backend/booking-plans.js`: actor-bound private planning draft operations.
 - `supabase/migrations/202611090008_booking_plan_drafts.sql`: bounded partial plan storage with owner CRUD RLS; no booking authority.
+
+- `src/account-sessions.js`: reauthenticated, confirmed revocation of other session refresh capability with error-preserving user-JWT logout.
