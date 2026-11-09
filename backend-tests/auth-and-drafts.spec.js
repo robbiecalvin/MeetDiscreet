@@ -174,3 +174,26 @@ for (const failDelete of [false, true]) {
     }
   });
 }
+
+ test('account overview verifies session, links tools, and clears identity on sign-out', async ({ page }) => {
+  await mockBackend(page);
+  await signIn(page);
+  await page.locator('[data-account-link]').click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Your account.');
+  await expect(page.locator('.account-overview [role=status]')).toContainText('test@example.invalid');
+  await expect(page.getByRole('link', { name: 'Manage listing drafts' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Open experience tools' })).toBeVisible();
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await expect(page.locator('.account-tool-grid')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    await page.screenshot({ path: `/tmp/account-overview-${width}.png`, fullPage: true });
+  }
+  await page.getByRole('link', { name: 'Edit profile draft' }).click();
+  await expect(page).toHaveURL(/page=edit-profile/);
+  await page.locator('[data-account-link]').click();
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await expect(page.locator('.account-overview [role=status]')).toContainText('Sign in to manage');
+  await expect(page.locator('.account-overview')).not.toContainText('test@example.invalid');
+  await expect(page.getByRole('link', { name: 'Manage listing drafts' })).toHaveCount(0);
+ });

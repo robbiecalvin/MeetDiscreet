@@ -658,6 +658,17 @@ If launch scope is reduced:
 - Robbie requested continued implementation, deferring the full manual walkthrough.
   Continue automated checks during development. See [setup](./development/backend-setup.md).
 
+### Account Overview Increment
+
+- Added `/?page=account` with a verified development-session check and links to
+  profile drafts, listing draft management, and in-memory experiences.
+- Signed-out and backend-disabled states are explicit. Identity content clears on
+  sign-out/account changes; detached results cannot populate an old overview.
+- Build, 109 regressions/policy checks, and eight backend UI checks passed.
+  Mobile and desktop screenshots inspected; no horizontal overflow at 390/1440px.
+- Header Account links target the overview; signed-out Sign in links retain their
+  entry route. No role, entitlement, billing, or publication state is claimed.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

@@ -687,3 +687,6 @@ underlying feature is operational.
 - `.env.example`, `vite.config.js`, `public/_headers`: public configuration template,
   build validation and hosted browser security headers.
 - [Backend setup](../development/backend-setup.md): activation and live validation.
+
+- `src/account-overview.js`: verified development-session workspace and draft-tool
+  navigation, with signed-out and backend-disabled states.

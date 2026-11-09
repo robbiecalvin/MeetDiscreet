@@ -5,9 +5,10 @@ later. Routes: `/?page=sign-in`, `/?page=register`, `/?page=recover-account`.
 Reuse the existing dark palette, readable form labels, restrained card, and
 mobile layout. Replace the sign-in popup with these linked screens.
 
-This is form/layout validation only. No selected authentication provider exists;
-no sign-in, registration, account role, entitlement, session, email, or password
-reset is created. Clearly request fictional demo details. Provide a fictional
+The original backend-disabled mode is form/layout validation only;
+in that mode no sign-in, registration, account role, entitlement, session, email, or
+password reset is created. Optional Supabase development authentication is now
+implemented; see [backend setup](../../development/backend-setup.md). Clearly request fictional demo details. Provide a fictional
 example fill button and explicit no-action feedback after valid submission.
 No fake login success or “email sent” screen.
 
@@ -36,3 +37,15 @@ visibility and mismatch, unchecked adult confirmation, no network writes/session
 storage, field clearing, history/filter preservation, and five responsive widths.
 Desktop sign-in and mobile registration screenshots inspected. Actual provider
 authentication, Safari, Agrandir, and live Netlify validation remain unverified.
+
+
+## Account overview
+
+`/?page=account` provides an age-gated development workspace using the existing
+dark palette. Verify the user with Supabase before displaying their email and
+links to private profile/listing drafts and in-memory experience tools. Clear
+identity-dependent content on sign-out/account change and discard detached
+asynchronous results after navigation. Signed-out visitors receive sign-in and
+registration links. Backend-disabled builds show a labelled overview preview.
+Three restrained tool cards stack into one column on mobile. No subscription,
+billing, role, publication, or verification status is invented.

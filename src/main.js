@@ -1,5 +1,6 @@
 import { backendEnabled, backendClient, processAuthCallback } from './backend/client.js';
 import './styles.css';
+import { renderAccountOverview } from './account-overview.js';
 import { providers, ads } from './data.js';
 import { renderProfile } from './profile.js';
 import { renderOffering } from './offering.js';
@@ -82,7 +83,7 @@ let selectedAdId = null;
 let callbackStarted = false;
 function renderRoute() {
   const params = new URL(location.href).searchParams;
-  const accountMode = ['sign-in', 'register', 'recover-account', 'reset-password'].includes(params.get('page')) ? params.get('page') : null;
+  const accountMode = ['account', 'sign-in', 'register', 'recover-account', 'reset-password'].includes(params.get('page')) ? params.get('page') : null;
   const isAccount = !params.has('profile') && !params.has('ad') && accountMode !== null;
   $('#account-view').hidden = !isAccount;
   if (!isAccount) $('#account-view').replaceChildren();
@@ -150,8 +151,9 @@ function renderRoute() {
     renderListingEditor($('#editor-view'), backToDiscovery);
     document.title = 'Create a listing · MeetDiscreet';
   } else if (isAccount) {
-    renderAccount($('#account-view'), accountMode, navigateAccount, backToDiscovery);
-    document.title = `${accountMode === 'register' ? 'Create account' : accountMode === 'recover-account' ? 'Account recovery' : 'Sign in'} · MeetDiscreet`;
+    if (accountMode === 'account') renderAccountOverview($('#account-view'), navigateAccount, backToDiscovery);
+    else renderAccount($('#account-view'), accountMode, navigateAccount, backToDiscovery);
+    document.title = `${accountMode === 'account' ? 'Your account' : accountMode === 'register' ? 'Create account' : accountMode === 'recover-account' ? 'Account recovery' : 'Sign in'} · MeetDiscreet`;
   } else if (isProfileEditor) {
     renderProfileEditor($('#profile-editor-view'), backToDiscovery, navigateAccount);
     document.title = 'Profile editor · MeetDiscreet';
@@ -443,7 +445,7 @@ function navigateAccount(page) {
 for (const link of document.querySelectorAll('[data-account-link]')) {
   link.addEventListener('click', (event) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    event.preventDefault(); navigateAccount('sign-in');
+    event.preventDefault(); navigateAccount(backendEnabled && new URL(link.href).searchParams.get('page') === 'account' ? 'account' : 'sign-in');
   });
 }
 
@@ -480,13 +482,14 @@ if (backendEnabled) {
     currentUserId = nextUserId;
     if (changed) {
       clearProfileDraftState(); clearListingDraftState(); clearExperienceDraftState();
-      for (const selector of ['#profile-editor-view', '#editor-view', '#experiences-view']) $(selector).replaceChildren();
+      for (const selector of ['#profile-editor-view', '#editor-view', '#experiences-view', ...(new URL(location.href).searchParams.get('page') === 'account' ? ['#account-view'] : [])]) $(selector).replaceChildren();
     }
     queueMicrotask(() => {
       $('[data-account-link]').textContent = nextUserId ? 'Account' : 'Sign in';
+      $('[data-account-link]').href = nextUserId ? '?page=account' : '?page=sign-in';
       signOut.hidden = !nextUserId;
       status.textContent = nextUserId ? 'Development session' : '';
-      if (changed && ['edit-profile', 'create-listing', 'experiences'].includes(new URL(location.href).searchParams.get('page'))) renderRoute();
+      if (changed && ['account', 'edit-profile', 'create-listing', 'experiences'].includes(new URL(location.href).searchParams.get('page'))) renderRoute();
     });
   });
 }
