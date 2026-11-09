@@ -24,7 +24,9 @@ or published. The Community Guidelines & Boundaries reader is accessible before
 age confirmation and does not grant browsing access. A searchable Help page
 explains the demo and links to existing features; live support/report submission
 is not connected. Sign-in, registration, and recovery screens support fictional
-form validation only; they do not create accounts or send emails. Profiles, generated photos, online statuses, and ads are fictional.
+form validation only; they do not create accounts or send emails. The companion
+profile editor provides an in-memory draft and labelled audience previews without
+saving a profile or changing access. Profiles, generated photos, online statuses, and ads are fictional.
 Accounts, payments, bookings, communication, and production deployment are not
 connected. See [the roadmap](./docs/next_steps.md) for verification and limitations.
 

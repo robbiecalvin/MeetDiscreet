@@ -543,7 +543,7 @@ If launch scope is reduced:
 
 ## 18. Current Work Snapshot
 
-- Objective: Sign-in, registration, and recovery screen previews without authentication or account creation.
+- Objective: Companion profile draft editing with clearly labelled audience previews.
 - Completed: Pinned Node/npm/Vite workflow; age gate; default portrait grid with three columns on mobile; bottom people/ads switch; one-column ad cards; city, search, online, and interest filters; empty reset; limited public demo dialogs.
 - Visual direction: #121521 / #38476b / #b6192e, Agrandir preferred, bold headings and thin body text. Licensed font assets absent; system fallback currently used.
 - Gate: 30-day browser confirmation; external referrer exit with Google fallback. No role or account privileges are granted.
@@ -613,12 +613,20 @@ If launch scope is reduced:
 - No authentication provider, real sign-in, registration, email, reset link, session, role, policy acceptance, or entitlement is created. No network writes or credential storage; fields clear after preview submission and the form DOM is removed on leaving account screens.
 - Normal account-screen routes remain age gated. Public Help/Guidelines remain available before confirmation.
 
+### Companion Profile Editor Increment
+
+- COM-02 frontend draft editor at `/?page=edit-profile`, reachable from registration preview and the footer.
+- Public identity, age, main fictional photo, tagline, and general location; member-only biography and interests are labelled separately.
+- Fictional example, required/adult-age validation, safe preview, visitor/member/subscriber audience controls, return to editing, clear, and in-app draft retention.
+- Visitor preview replaces biography/interests with labels. Subscriber preview contains no actual media/experience assets and grants no access. This is an owner-style synthetic draft, not backend authorization.
+- No saved/published profile, real uploads, payments, account roles, entitlements, or discovery mutations. Full reload clears the draft; only the existing age timestamp is stored.
+
 ### Last Verified Result
 
-- Vite build and all 82 Chromium tests passed: 70 existing regressions plus 12 account-route/validation/clearing/no-request/responsive checks.
-- Desktop sign-in and mobile registration screenshots inspected; responsive checks cover 320/390/700/1024/1440px.
-- Documentation links and diff whitespace checked. No payment, eligibility, or access policy changed.
-- macOS Safari, licensed Agrandir rendering, real authentication, live backend behaviour, and current Netlify deployment remain unverified/unimplemented as applicable.
+- Vite build and all 92 Chromium tests passed: 82 existing checks plus ten profile-editor validation, audience, navigation, clearing, no-write, and responsive checks.
+- Desktop editor and mobile member-preview screenshots inspected. Responsive checks cover 320/390/700/1024/1440px.
+- Documentation links and diff whitespace checked. Prices, access rules, and pending eligibility/financial policies preserved.
+- Safari, actual Agrandir, real ownership/authentication/storage, and current Netlify deployment remain unverified/unimplemented as applicable.
 
 ### Next Action
 

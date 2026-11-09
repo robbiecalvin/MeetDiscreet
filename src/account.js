@@ -170,6 +170,7 @@ export function renderAccount(container, mode, onMode, onBack) {
     recovery.className = 'account-recovery-link';
     panel.append(recovery);
   } else panel.append(modeLink('sign-in', 'Back to sign in'));
+  if (mode === 'register') panel.append(modeLink('edit-profile', 'Try the companion profile editor'));
   layout.append(intro, panel);
   container.append(layout);
 }
