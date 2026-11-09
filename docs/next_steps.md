@@ -543,7 +543,7 @@ If launch scope is reduced:
 
 ## 18. Current Work Snapshot
 
-- Objective: Frontend Offering/Looking For listing composer and owner-style draft preview.
+- Objective: Standalone Community Guidelines & Boundaries reader, accessible before entrance confirmation.
 - Completed: Pinned Node/npm/Vite workflow; age gate; default portrait grid with three columns on mobile; bottom people/ads switch; one-column ad cards; city, search, online, and interest filters; empty reset; limited public demo dialogs.
 - Visual direction: #121521 / #38476b / #b6192e, Agrandir preferred, bold headings and thin body text. Licensed font assets absent; system fallback currently used.
 - Gate: 30-day browser confirmation; external referrer exit with Google fallback. No role or account privileges are granted.
@@ -588,6 +588,15 @@ If launch scope is reduced:
 - Build and 50 Chromium checks passed (40 existing plus 10 editor checks) including five responsive widths. Desktop/mobile form and preview screenshots inspected.
 - Looking For draft preview does not resolve full-post public visibility. Publishing requires backend ownership/eligibility and confirmed policies in future work.
 
+### Guidelines Reader Increment
+
+- PUB-09 at `/?page=guidelines`, linked from age gate and footer as a standalone policy reader.
+- Uses the existing content/boundaries requirements: current platonic scope, adult eligibility, personal choice, media, privacy/authenticity, and fair reporting/review principles.
+- Clearly labelled working preview; no final legal policy, live moderation, identity verification, report submission, blocking, or acceptance recording is claimed.
+- Accessible before confirmation while discovery remains hidden/inert. Return preserves the original route through section jumps and refresh, then restores the age gate if needed. Reading does not set the age timestamp.
+- Build and 60 Chromium checks passed, including 10 guidelines checks plus all 50 existing regressions. Final section-jump/history change verified by rerunning guidelines checks. Desktop/mobile screenshots inspected.
+- Source update prepared for GitHub/Netlify; live site verification remains blocked by environment network policy.
+
 ### Last Verified Result
 
 - Frozen-lockfile npm ci completed; Vite build passed.
@@ -607,7 +616,7 @@ Backend/access-policy choices remain prerequisites only for dependent real featu
 Agrandir font assets are not present. Browser referrer policy can omit the prior
 page or reduce its URL; Exit uses the available external source and falls back
 to Google. When storage is blocked, age confirmation applies only to the visit.
-Policy notices, sign-in, actual publishing, subscription actions, and Looking For detail previews remain
+Terms/Privacy notices, sign-in, actual publishing, subscription actions, and Looking For detail previews remain
 explicit prototype summaries rather than complete services or legal documents.
 The public profile is implemented with fictional data and labelled locked previews.
 

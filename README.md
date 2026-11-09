@@ -20,7 +20,8 @@ demo filters, public companion profiles with labelled locked-content previews,
 public Offering ad details linked to their companion profiles, and a How it works
 page with separate reference plans and FAQs, plus an in-memory listing editor
 with Offering/Looking For draft previews. Nothing entered in the editor is saved
-or published. Profiles, generated photos, online statuses, and ads are fictional.
+or published. The Community Guidelines & Boundaries reader is accessible before
+age confirmation and does not grant browsing access. Profiles, generated photos, online statuses, and ads are fictional.
 Accounts, payments, bookings, communication, and production deployment are not
 connected. See [the roadmap](./docs/next_steps.md) for verification and limitations.
 

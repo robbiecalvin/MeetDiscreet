@@ -4,6 +4,7 @@ import { renderProfile } from './profile.js';
 import { renderOffering } from './offering.js';
 import { renderHowItWorks } from './how-it-works.js';
 import { renderListingEditor } from './listing-editor.js';
+import { renderGuidelines } from './guidelines.js';
 import { referencePrices, formatReferencePrice } from './pricing.js';
 
 const $ = (selector) => document.querySelector(selector);
@@ -20,7 +21,10 @@ try {
   if (['http:', 'https:'].includes(referrer.protocol) && referrer.origin !== location.origin) returnTo = referrer.href;
 } catch { /* Direct visits have no referrer; use the agreed fallback. */ }
 
+let hasAgeConfirmation = false;
+let policyReturnUrl = null;
 function enter() {
+  hasAgeConfirmation = true;
   if (gate.open) gate.close();
   app.hidden = false;
   app.inert = false;
@@ -33,12 +37,13 @@ try {
   validConfirmation = confirmedAt > 0 && confirmedAt <= Date.now() && Date.now() - confirmedAt < confirmationDuration;
 } catch { /* Storage can be unavailable; the gate still works for this visit. */ }
 if (validConfirmation) enter();
-else gate.showModal();
+else if (new URL(location.href).searchParams.get('page') !== 'guidelines') gate.showModal();
 gate.addEventListener('cancel', (event) => event.preventDefault());
 $('#confirm-age').addEventListener('click', () => {
   try { localStorage.setItem(confirmationKey, String(Date.now())); }
   catch { $('#storage-note').textContent = 'Browser storage is unavailable. Confirmation will apply to this visit only.'; }
   enter();
+  renderRoute();
   if ($('#storage-note').textContent) $('#result-count').textContent = 'Confirmed for this visit; browser storage is unavailable.';
 });
 $('#exit').addEventListener('click', () => location.replace(returnTo));
@@ -70,6 +75,19 @@ let selectedCardId = null;
 let selectedAdId = null;
 function renderRoute() {
   const params = new URL(location.href).searchParams;
+  const isGuidelines = params.get('page') === 'guidelines';
+  $('#guidelines-shell').hidden = !isGuidelines;
+  if (isGuidelines) {
+    if (gate.open) gate.close();
+    app.hidden = true;
+    app.inert = true;
+    if (!$('#guidelines-shell').childElementCount) renderGuidelines($('#guidelines-shell'), returnFromGuidelines, () => location.replace(returnTo));
+    document.title = 'Community Guidelines & Boundaries · MeetDiscreet';
+    return;
+  }
+  app.hidden = !hasAgeConfirmation;
+  app.inert = !hasAgeConfirmation;
+  if (!hasAgeConfirmation && !gate.open) gate.showModal();
   const id = params.get('profile');
   const adId = params.get('ad');
   const isProfile = id !== null;
@@ -160,6 +178,10 @@ function showOffering(ad) {
 }
 window.addEventListener('popstate', () => {
   renderRoute();
+  if (new URL(location.href).searchParams.get('page') === 'guidelines') {
+    (document.getElementById(location.hash.slice(1)) || $('#guidelines-main')).focus({ preventScroll: true });
+    return;
+  }
   if (!new URL(location.href).searchParams.has('profile') && !new URL(location.href).searchParams.has('ad') && !['how-it-works', 'create-listing'].includes(new URL(location.href).searchParams.get('page'))) {
     window.scrollTo({ top: discoveryScroll, behavior: 'instant' });
     const card = state.view === 'ads' ? (selectedAdId && document.querySelector(`[data-ad="${selectedAdId}"]`)) : (selectedCardId && document.querySelector(`[data-provider="${selectedCardId}"]`));
@@ -253,7 +275,6 @@ document.querySelectorAll('[data-category]').forEach((button) => button.addEvent
 document.querySelectorAll('.close-dialog').forEach((button) => button.addEventListener('click', () => button.closest('dialog').close()));
 const info = {
   signin: ['Account access is coming later.', 'Sign-in is not connected in this frontend prototype. No account information is collected here.'],
-  guidelines: ['Community Guidelines & Boundaries', 'The planned service is for paid platonic dates and social experiences. Respect personal boundaries and other people’s privacy. This is a prototype summary; the complete community guidelines and moderation tools are not implemented.'],
   privacy: ['Privacy · prototype notice', 'This preview does not request your device location or create accounts. Age confirmation is stored on this browser for 30 days when storage is available. Fictional demo filters stay in memory. This notice is not the final Privacy Policy.'],
   terms: ['Terms · prototype notice', 'This is a frontend demonstration using fictional profiles and ads. No purchases, subscriptions, bookings, or real service arrangements can be made. Final service terms will be provided before a live launch.'],
 };
@@ -297,5 +318,29 @@ for (const link of document.querySelectorAll('[data-editor-link]')) {
     renderRoute();
     window.scrollTo({ top: 0, behavior: 'instant' });
     $('#main').focus({ preventScroll: true });
+  });
+}
+
+function returnFromGuidelines() {
+  const source = history.state?.policyReturnUrl || policyReturnUrl;
+  const target = new URL(source || location.href);
+  if (!source) { target.searchParams.delete('page'); target.hash = ''; }
+  history.pushState(null, '', target);
+  renderRoute();
+  if (hasAgeConfirmation) $('#main').focus({ preventScroll: true });
+}
+for (const link of document.querySelectorAll('[data-guidelines-link]')) {
+  link.addEventListener('click', (event) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    policyReturnUrl = location.href;
+    const url = new URL(location.href);
+    for (const key of ['profile', 'ad', 'fromAd']) url.searchParams.delete(key);
+    url.searchParams.set('page', 'guidelines');
+    url.hash = '';
+    history.pushState({ policyReturnUrl }, '', url);
+    renderRoute();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    $('#guidelines-main').focus({ preventScroll: true });
   });
 }
