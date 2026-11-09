@@ -76,7 +76,7 @@ export function renderAccountOverview(container, navigate, onBack) {
     const grid = node('div', null, 'account-tool-grid');
     for (const [page, title, copy, action] of [
       ['provider-application', 'Provider application', 'Save an introduction and submit it to the private development intake queue.', 'Open provider application'],
-      ['booking-draft', 'Booking request preview', 'Prepare and review a fictional plan without sending, reserving or paying.', 'Build a booking draft'],
+      ['booking-draft', 'Booking request preview', 'Prepare, privately save and review a fictional plan without sending, reserving or paying.', 'Build a booking draft'],
       ['edit-user-profile', 'User profile draft', 'Prepare your personal introduction separately from provider profile drafts.', 'Edit User profile draft'],
       ['availability', 'Availability draft', 'Sketch weekly time windows in an explicit time zone. Connected mode supports private draft saving.', 'Edit availability draft'],
       ['account-security', 'Account security', 'Verify your current password and choose a new one.', 'Change password'],
@@ -86,7 +86,7 @@ export function renderAccountOverview(container, navigate, onBack) {
     ]) {
       const card = node('section', null, 'account-tool-card');
       card.append(node('h2', title), node('p', copy));
-      const kind = { 'edit-user-profile': 'user-profile', availability: 'availability', 'edit-profile': 'profile', 'my-listings': 'listings', experiences: 'experiences' }[page];
+      const kind = { 'booking-draft': 'booking-plan', 'edit-user-profile': 'user-profile', availability: 'availability', 'edit-profile': 'profile', 'my-listings': 'listings', experiences: 'experiences' }[page];
       if (kind) {
         const summary = node('p', 'Checking saved drafts…', 'account-draft-summary');
         summary.setAttribute('role', 'status');

@@ -31,10 +31,11 @@ test.beforeAll(async () => {
   await db.exec(await readFile(new URL('../supabase/migrations/202611090007_provider_submission_feedback.sql', import.meta.url), 'utf8'));
   expect((await db.query('select submission_id from public.provider_applications where owner_id=$1', [alice])).rows[0].submission_id).toBeTruthy();
   expect((await db.query('select introduction from public.provider_application_submissions')).rows[0].introduction).toBe('Submitted before the versioning upgrade.');
+  await db.exec(await readFile(new URL('../supabase/migrations/202611090008_booking_plan_drafts.sql', import.meta.url), 'utf8'));
 });
 test.afterAll(async () => { await db.close(); });
 test.beforeEach(async () => {
-  await db.exec('reset role; truncate public.listing_drafts, public.profile_drafts, public.experience_catalogue_drafts, public.availability_drafts, public.user_profile_drafts, public.provider_applications, public.provider_application_events, public.provider_application_submissions, public.provider_application_feedback, public.staff_capabilities, public.staff_capability_events, public.provider_review_access_events;');
+  await db.exec('reset role; truncate public.booking_plan_drafts, public.listing_drafts, public.profile_drafts, public.experience_catalogue_drafts, public.availability_drafts, public.user_profile_drafts, public.provider_applications, public.provider_application_events, public.provider_application_submissions, public.provider_application_feedback, public.staff_capabilities, public.staff_capability_events, public.provider_review_access_events;');
   await asUser(alice);
 });
 
@@ -358,4 +359,30 @@ test('submission history and feedback reads remain owner-only even with an expli
   expect((await db.query('select note from public.provider_application_feedback where owner_id=$1',[alice])).rows).toEqual([]);
   await asUser('', 'anon');
   await expect(db.query('select introduction from public.provider_application_submissions')).rejects.toThrow(/permission denied/i);
+});
+
+
+const partialPlan = () => ({sourceOffering:'',provider:'',activity:'',date:'',time:'',timeZone:'',duration:'',venue:'',expenses:'',notes:'Unsent private idea'});
+test('private booking plans allow partial owner CRUD while denying other owners and anonymous reads', async () => {
+  await db.query('insert into public.booking_plan_drafts(plan) values($1)',[partialPlan()]);
+  expect((await db.query('select plan from public.booking_plan_drafts')).rows[0].plan.notes).toBe('Unsent private idea');
+  await asUser(bob);
+  expect((await db.query('select * from public.booking_plan_drafts where owner_id=$1',[alice])).rows).toEqual([]);
+  expect((await db.query('update public.booking_plan_drafts set plan=$1 where owner_id=$2 returning owner_id',[partialPlan(),alice])).rows).toEqual([]);
+  expect((await db.query('delete from public.booking_plan_drafts where owner_id=$1 returning owner_id',[alice])).rows).toEqual([]);
+  await expect(db.query('insert into public.booking_plan_drafts(owner_id,plan) values($1,$2)',[alice,partialPlan()])).rejects.toThrow(/row.level security/i);
+  await asUser('', 'anon');
+  await expect(db.query('select * from public.booking_plan_drafts')).rejects.toThrow(/permission denied/i);
+  await asUser(alice);
+  await db.query('update public.booking_plan_drafts set plan=$1',[{...partialPlan(),notes:'Revised plan'}]);
+  expect((await db.query('delete from public.booking_plan_drafts returning owner_id')).rows).toHaveLength(1);
+});
+test('booking plan storage rejects malformed proposals and authority fields without creating bookings or roles', async () => {
+  for (const proposal of [
+    {...partialPlan(),price:0}, {...partialPlan(),approved:true}, {...partialPlan(),notes:'x'.repeat(1001)},
+    {...partialPlan(),duration:'1.5'}, {...partialPlan(),duration:'9007199254740992'}, {...partialPlan(),date:'2030-02-30'},
+    {...partialPlan(),time:'25:00'}, {...partialPlan(),timeZone:'Unknown/Zone'}, {...partialPlan(),notes:null},
+  ]) await expect(db.query('insert into public.booking_plan_drafts(plan) values($1)',[proposal])).rejects.toThrow(/check constraint/i);
+  await db.query('insert into public.booking_plan_drafts(plan) values($1)',[{...partialPlan(),provider:'maya',activity:'Culture',date:'2030-06-15',time:'14:00',timeZone:'America/Vancouver',duration:'120'}]);
+  expect((await db.query("select public.has_account_role('provider') as value")).rows[0].value).toBe(false);
 });

@@ -25,9 +25,10 @@ work under the booking lifecycle and pricing documents.
 
 The fictional sample date is one calendar week after the current Vancouver date,
 paired with an explicit Vancouver zone, not a real provider’s availability.
-Drafts survive internal navigation only; refresh, explicit clear, and account
-identity changes clear them. Connected-mode unload warnings apply. No backend
-writes, browser draft persistence, media permission or new migration is needed.
+Unsaved drafts survive internal navigation; refresh, explicit clear and account
+identity changes clear local text. Connected-mode unload warnings apply. Explicit
+private saving is available after migration 008 as described below; there is no
+extra browser draft persistence or media permission.
 
 
 ## Public profile-to-plan preview continuity
@@ -56,4 +57,27 @@ source when continuing to the plan. The public source title and return link appe
 beside the form; review includes the title without treating it as an agreed
 experience, catalogue selection, price or available date. Manually switching provider
 clears the prior source; the fictional sample and Clear controls also discard it.
-All source state stays in memory. Actual subscriber-only requests remain separate.
+Unsaved source state stays in memory; explicit private saves include the fixture reference.
+Actual subscriber-only requests remain separate.
+
+
+## Private unfinished-plan storage
+
+Connected mode adds explicit Save private draft, Load my booking plan and Delete
+saved booking plan controls. Keep one current private plan per verified owner,
+including unfinished fields and validated public-fixture context. No request is sent,
+subscriber entitlement granted, quote calculated or time reserved. Storing a reference
+is not evidence that a provider, ad, experience or time is live/eligible.
+
+Bind operations to the verified actor and clear local state on identity change.
+Save a copied snapshot; edits made during saving remain unsaved. Confirm before
+loading over unsaved edits, and preserve text typed while the load is in flight.
+An absent record leaves editor text intact; missing schema or errors cannot imply
+success or an empty saved record. Deleting requires confirmation, preserves local
+editor text as unsaved, and cancels no booking. Clear affects local text only.
+
+Use server RLS and bounded text/date/time formats. These are technical storage
+checks, not final duration, booking horizon, availability or DST rules. Unknown
+fixture references on load fail visibly rather than silently changing the plan.
+No credentials, browser-persisted plan copy or service key is introduced. Account
+summaries read only the presence of an owner record, not private plan content.

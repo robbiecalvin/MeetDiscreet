@@ -1,11 +1,15 @@
 import { providers, ads } from './data.js';
+import { saveBookingPlan, loadBookingPlan, deleteBookingPlan } from './backend/booking-plans.js';
+import { privateDraftControls } from './backend/draft-controls.js';
+import { requireUser } from './backend/client.js';
 import { backendEnabled } from './backend/client.js';
 import { trackDraft } from './draft-changes.js';
 import { bookingActivities, bookingDraftErrors, durationLabel } from './booking-draft-rules.js';
 const defaults = () => ({ sourceOffering: '', provider: '', activity: '', date: '', time: '', timeZone: '', duration: '', venue: '', expenses: '', notes: '' });
 let draft = defaults();
+let identityEpoch = 0;
 const changes = trackDraft('booking', () => draft, backendEnabled);
-export function clearBookingDraftState() { draft = defaults(); changes.saved(); }
+export function clearBookingDraftState() { draft = defaults(); identityEpoch++; changes.saved(); }
 function node(tag, text, className) {
   const value = document.createElement(tag);
   if (text) value.textContent = text;
@@ -17,7 +21,7 @@ export function renderBookingDraft(container, navigate, requestedProvider, onVie
   const root = node('div', null, 'booking-draft');
   const back = node('a', '← Back to User setup', 'profile-back'); back.href = '?page=user-setup';
   back.addEventListener('click', event => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate('user-setup'); });
-  root.append(back, node('p', 'A PLAN WORTH SHARING', 'eyebrow'), node('h1', 'Shape a booking request.'), node('p', 'Start with a person, a plan, and a little time together.', 'offering-lead'), node('p', 'Booking request preview. Use fictional plans. Nothing is saved or sent, no time is reserved, and no price or deposit is calculated.', 'editor-notice'));
+  root.append(back, node('p', 'A PLAN WORTH SHARING', 'eyebrow'), node('h1', 'Shape a booking request.'), node('p', 'Start with a person, a plan, and a little time together.', 'offering-lead'), node('p', backendEnabled ? 'Private booking-plan workspace. Signed-in accounts can save an unfinished plan. Nothing is sent, no time is reserved, and no price or deposit is calculated. Use fictional plans during development.' : 'Booking request preview. Use fictional plans. Nothing is saved or sent, no time is reserved, and no price or deposit is calculated.', 'editor-notice'));
   const source = ads.find(ad => ad.id === offeringId && ad.category === 'offering' && (!requestedProvider || ad.provider === requestedProvider));
   const requested = providers.find(person => person.id === (requestedProvider || source?.provider));
   const hasDraft = Object.values(draft).some(Boolean);
@@ -102,7 +106,7 @@ export function renderBookingDraft(container, navigate, requestedProvider, onVie
   sample.addEventListener('click', () => {
     const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Vancouver', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date()).map(value => [value.type, value.value]));
     const nextWeek = new Date(`${parts.year}-${parts.month}-${parts.day}T12:00:00Z`); nextWeek.setUTCDate(nextWeek.getUTCDate() + 7);
-    draft = { provider: 'maya', activity: 'Culture', date: nextWeek.toISOString().slice(0, 10), time: '14:00', timeZone: 'America/Vancouver', duration: '120', venue: 'A gallery and nearby café in Vancouver', expenses: 'Discuss admission and café expenses with the provider.', notes: 'A fictional gallery afternoon with time for conversation.' };
+    draft = { sourceOffering: '', provider: 'maya', activity: 'Culture', date: nextWeek.toISOString().slice(0, 10), time: '14:00', timeZone: 'America/Vancouver', duration: '120', venue: 'A gallery and nearby café in Vancouver', expenses: 'Discuss admission and café expenses with the provider.', notes: 'A fictional gallery afternoon with time for conversation.' };
     context.replaceChildren(); sync(); fields.get('provider').input.focus();
   });
   clear.addEventListener('click', () => { clearBookingDraftState(); context.replaceChildren(); sync(); fields.get('provider').input.focus(); });
@@ -121,5 +125,44 @@ export function renderBookingDraft(container, navigate, requestedProvider, onVie
     }
     layout.hidden = true; preview.hidden = false; heading.focus();
   });
-  sync(); layout.append(form, person); root.append(layout, preview); container.append(root);
+  async function owner(epoch) {
+    const user = await requireUser();
+    if (epoch !== identityEpoch || !container.contains(root)) throw new Error('Account changed.');
+    return user.id;
+  }
+  const storage = privateDraftControls({
+    loadLabel: 'Load my booking plan', deleteLabel: 'Delete saved booking plan',
+    deleteConfirmation: 'Delete your saved private booking plan? Current editor text will remain. No booking is cancelled. This cannot be undone.',
+    onSave: async () => {
+      const epoch = identityEpoch; const snapshot = { ...defaults(), ...draft };
+      const problems = bookingDraftErrors(snapshot, providers.map(person => person.id)).filter(([key]) => snapshot[key] !== '');
+      if (problems.length) {
+        for (const [key, text] of problems) { fields.get(key).input.setAttribute('aria-invalid', 'true'); fields.get(key).message.textContent = text; }
+        layout.hidden = false; preview.hidden = true; fields.get(problems[0][0]).input.focus();
+        return 'Check the highlighted fields before saving. Unfinished empty fields are allowed.';
+      }
+      const id = await owner(epoch); await saveBookingPlan(id, snapshot);
+      if (epoch !== identityEpoch) throw new Error('Account changed.');
+      changes.saved(snapshot);
+      return 'Private booking plan saved. Nothing was sent or reserved.';
+    },
+    onLoad: async () => {
+      if (changes.isDirty() && !window.confirm('Load your saved booking plan and discard current unsaved edits?')) return 'Load cancelled. Current plan kept.';
+      const before = JSON.stringify(draft);
+      const epoch = identityEpoch; const id = await owner(epoch); const plan = await loadBookingPlan(id);
+      if (epoch !== identityEpoch || !container.contains(root)) throw new Error('Account changed.');
+      if (!plan) return 'No private booking plan found for this account.';
+      if (JSON.stringify(draft) !== before) return 'Current plan kept because you edited it while loading. Load again when ready.';
+      if (Object.keys(defaults()).some(key => typeof plan[key] !== 'string') || (plan.provider && !providers.some(person => person.id === plan.provider)) || (plan.sourceOffering && !ads.some(ad => ad.id === plan.sourceOffering && ad.category === 'offering' && ad.provider === plan.provider))) throw new Error('Saved fixture references unavailable.');
+      draft = Object.fromEntries(Object.keys(defaults()).map(key => [key, plan[key]])); changes.saved(); context.replaceChildren(); sync(); layout.hidden = false; preview.hidden = true;
+      return 'Your private booking plan was loaded. It remains unsent.';
+    },
+    onDelete: async () => {
+      const epoch = identityEpoch; const id = await owner(epoch); const removed = await deleteBookingPlan(id);
+      if (epoch !== identityEpoch) throw new Error('Account changed.');
+      if (removed) changes.saved(defaults());
+      return removed ? 'Saved booking plan deleted. Current editor text remains unsaved; no booking was cancelled.' : 'No saved booking plan found to delete.';
+    },
+  });
+  sync(); layout.append(form, person); root.append(layout, preview); if (storage) root.append(storage); container.append(root);
 }

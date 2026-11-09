@@ -9,7 +9,7 @@ Check the dashboard's plan and usage limits before changing settings.
 
 - Email/password development accounts, confirmation, recovery/reset, sign-out,
   and password changes after current-password reauthentication.
-- Private owner-only profile, listing, catalogue, and availability drafts, subject
+- Private owner-only profile, listing, catalogue, availability and unsent booking-plan drafts, subject
   to the separately applied migrations below.
 - Server-controlled membership-role foundation with basic User initialization;
   Provider/operational role assignment and live eligibility workflows remain separate.
@@ -309,3 +309,21 @@ Application activity uses owner-readable `provider_application_events` from migr
 005 (extended for changes-requested state by 007). Its explicit loader requests at
 most 20 events, newest event ID first, without application text or reviewer identity.
 No additional migration or capability provisioning is needed for this owner view.
+
+
+## Add private unfinished booking plans
+
+After the earlier draft migrations, apply
+[202611090008_booking_plan_drafts.sql](../../supabase/migrations/202611090008_booking_plan_drafts.sql)
+once. Run only missing migrations. This file has not been applied remotely by the
+agent. It adds one owner-only `booking_plan_drafts` row containing bounded partial
+plan JSON, with authenticated owner CRUD RLS, server update timestamps and account
+deletion cascade. Anonymous/API service access is not granted. No staff or provider
+role grants, booking request, notification, reservation or pricing logic is added.
+
+The browser explicitly saves/loads/deletes the verified owner's plan. Without this
+migration, operations show unavailable and retain current editor text; the unsent
+local preview remains usable. Use fictional data. Hosted ownership, JWT and lifecycle
+checks remain pending; local PostgreSQL and mocked browser tests do not replace them.
+Plan retention follows account deletion or explicit owner deletion, with no revision
+history or separate operational retention policy established by this increment.

@@ -75,6 +75,11 @@ export async function loadPrivateDraftSummary(kind) {
     failure(error);
     return data ? 'Private User profile draft saved' : 'No saved User profile draft';
   }
+  if (kind === 'booking-plan') {
+    const { data, error } = await backendClient().from('booking_plan_drafts').select('owner_id').eq('owner_id', user.id).maybeSingle();
+    failure(error);
+    return data ? 'Private booking plan saved' : 'No saved booking plan';
+  }
   if (kind === 'profile') {
     const { data, error } = await backendClient().from('profile_drafts').select('owner_id').eq('owner_id', user.id).maybeSingle();
     failure(error);

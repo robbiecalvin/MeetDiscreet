@@ -980,6 +980,22 @@ If launch scope is reduced:
   Mobile ad entry and source-context screenshots inspected. No hosted integration
   or actual booking operation is claimed.
 
+### Private Unsent Booking-Plan Saving
+
+- Connected accounts can explicitly save, load and delete one private unfinished
+  plan, retaining fictional provider/Offering context. This extends the earlier
+  in-memory-only preview; it sends no request, grants no access and reserves no time.
+- Migration 008 adds bounded partial JSON with owner-only CRUD RLS. Load confirms
+  replacement, preserves edits made while awaiting a response, and rejects stale
+  fixture references. Delete leaves current text unsaved and cancels no booking.
+- Account shows saved presence without reading plan content. Missing setup and
+  network errors preserve editor text; identity changes clear local plan state.
+- Build, all 155 standard checks (including 23 database/config/security cases)
+  and 58 backend browser checks passed. The three booking-plan browser cases passed
+  again after adding Account presence and field-validation checks. Mobile controls
+  inspected. Hosted migration 008 application and hosted ownership validation
+  remain pending.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

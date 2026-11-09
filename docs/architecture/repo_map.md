@@ -721,7 +721,7 @@ underlying feature is operational.
 - `supabase/migrations/202611090003_user_profile_drafts.sql`: owner-only User draft
   schema and declaration/non-disclosure constraints; later hosted setup required.
 
-- `src/booking-draft.js`: in-memory fictional request composer/review with no writes.
+- `src/booking-draft.js`: unsent fictional plan composer/review with explicit owner-only private draft save/load/delete.
 - `src/booking-draft-rules.js`: UI calendar/time/zone/duration-format validation,
   separate from future authoritative scheduling and pricing services.
 
@@ -745,3 +745,6 @@ underlying feature is operational.
 - `src/provider-application-history.js`: on-demand owner submission snapshots with version-matched feedback, bounded reads and stale-response clearing.
 
 - `src/provider-application-activity.js`: explicit owner-only recent status timeline using existing application event reads.
+
+- `src/backend/booking-plans.js`: actor-bound private planning draft operations.
+- `supabase/migrations/202611090008_booking_plan_drafts.sql`: bounded partial plan storage with owner CRUD RLS; no booking authority.

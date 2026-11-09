@@ -1186,3 +1186,22 @@ Snapshot and feedback retention follows account deletion; operational policy rem
 `provider_application_feedback` capability, rejects self-review and atomically checks
 the exact current submission under a row lock before storing the note and changing
 state. Resubmission creates a new snapshot. No Provider role is granted.
+
+
+## Private booking-plan drafts
+
+[Migration 008](../../supabase/migrations/202611090008_booking_plan_drafts.sql) adds
+`booking_plan_drafts`: owner PK/FK with account deletion cascade, `plan` JSON,
+created_at and server-touched updated_at. Authenticated owner-only CRUD policies
+apply; no anonymous or API service grants. There is one current record per owner,
+with no accepted price, request status, recipient access or booking side effects.
+
+The plan stores only string fields: sourceOffering/provider fixture references,
+activity, proposed date/local time/time zone, duration, venue, expenses and notes.
+Partial empty values are supported. Exact keys, field limits and calendar/time/zone/
+safe-integer formats are checked in PostgreSQL. Numeric duration bounds reflect JS
+integer representation, not commercial duration policy. No currency/quote/approval
+fields are accepted. Fixture IDs do not identify trusted live Provider accounts.
+Local timestamps are proposals, with no UTC instant, DST resolution or availability
+claim. References that no longer match known fixtures cannot silently load into a
+new plan. Owners must choose how to proceed if that validation fails.

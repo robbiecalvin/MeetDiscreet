@@ -9,7 +9,7 @@ function session(profile = user) {
   return { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock_refresh_token', user: profile };
 }
 async function mockBackend(page, options = {}) {
-  const state = { user: { ...user, user_metadata: {} }, providerApplication: null, applicationFeedback: [], applicationActivity: [], activityFailure: false, applicationSubmissions: [], historyFailure: false, applicationSubmissionCounter: 0, userProfile: null, roles: ['user'], capabilities: [], reviewApplications: [], reviewAccessEvents: [], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
+  const state = { bookingPlan: null, user: { ...user, user_metadata: {} }, providerApplication: null, applicationFeedback: [], applicationActivity: [], activityFailure: false, applicationSubmissions: [], historyFailure: false, applicationSubmissionCounter: 0, userProfile: null, roles: ['user'], capabilities: [], reviewApplications: [], reviewAccessEvents: [], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
   await page.route('https://backend-test.supabase.co/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -33,6 +33,12 @@ async function mockBackend(page, options = {}) {
       return respond(state.user);
     }
     if (url.pathname === '/auth/v1/logout') return respond({});
+    if (url.pathname === '/rest/v1/booking_plan_drafts') {
+      if (options.missingBookingPlanMigration || options.failBookingPlanOperation) return respond({message:'Plan unavailable'},404);
+      if (method === 'POST') { if(body.owner_id !== state.user.id) return respond({message:'Wrong owner'},403); state.bookingPlan = body; return respond(null); }
+      if (method === 'DELETE') { const removed = state.bookingPlan; state.bookingPlan = null; return respond(removed ? [{owner_id:removed.owner_id}] : []); }
+      return respond(state.bookingPlan ? [state.bookingPlan] : []);
+    }
     if (url.pathname === '/rest/v1/provider_application_events') {
       if (state.activityFailure) return respond({message:'Activity unavailable'},404);
       return respond(state.applicationActivity.filter(row => `eq.${row.owner_id}` === url.searchParams.get('owner_id')).slice(0,Number(url.searchParams.get('limit'))));
@@ -1094,4 +1100,67 @@ test('application activity shows bounded private state history and clears on fai
   await page.getByRole('button',{name:'Sign out',exact:true}).click();
   await expect(page.locator('.application-activity li')).toHaveCount(0);
   await expect(page.locator('.application-activity [role=status]')).toHaveText('');
+});
+
+
+test('booking plans save partial text, reload privately and delete without sending or cancelling a booking', async ({ page }) => {
+  const state = await mockBackend(page);
+  page.on('dialog',dialog=>dialog.accept());
+  await signIn(page); await enter(page,'/?page=booking-draft&provider=maya&offering=gallery');
+  await page.getByLabel('Requests or notes (optional)',{exact:true}).fill('Private unfinished plan');
+  await page.getByLabel('Requested duration (minutes)',{exact:true}).fill('1.5');
+  await page.getByRole('button',{name:'Save private draft',exact:true}).click();
+  await expect(page.locator('.private-draft-controls [role=status]')).toContainText('Check the highlighted fields');
+  expect(state.bookingPlan).toBeNull();
+  await page.getByLabel('Requested duration (minutes)',{exact:true}).fill('');
+  await page.getByRole('button',{name:'Save private draft',exact:true}).click();
+  await expect(page.locator('.private-draft-controls [role=status]')).toContainText('Private booking plan saved');
+  expect(state.bookingPlan.owner_id).toBe(userId);
+  expect(state.bookingPlan.plan.sourceOffering).toBe('gallery');
+  expect(state.bookingPlan.plan.date).toBe('');
+  await page.locator('[data-account-link]').click();
+  await expect(page.locator('[data-draft-summary=booking-plan]')).toHaveText('Private booking plan saved');
+  await page.getByRole('link',{name:'Build a booking draft',exact:true}).click();
+  await page.reload();
+  await page.getByRole('button',{name:'Load my booking plan',exact:true}).click();
+  await expect(page.getByLabel('Requests or notes (optional)',{exact:true})).toHaveValue('Private unfinished plan');
+  await expect(page.getByRole('link',{name:'View source Offering',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Delete saved booking plan',exact:true}).click();
+  await expect(page.locator('.private-draft-controls [role=status]')).toContainText('no booking was cancelled');
+  expect(state.bookingPlan).toBeNull();
+  await expect(page.getByLabel('Requests or notes (optional)',{exact:true})).toHaveValue('Private unfinished plan');
+  await page.setViewportSize({width:390,height:844});
+  await page.locator('.private-draft-controls').screenshot({path:'/tmp/private-booking-plan-controls-mobile.png'});
+  await page.getByRole('button',{name:'Sign out',exact:true}).click();
+  await expect(page.getByLabel('Requests or notes (optional)',{exact:true})).toHaveValue('');
+  expect(state.requests.filter(row => row.method === 'POST' && row.path.startsWith('/rest/v1/')).every(row => row.path.endsWith('/booking_plan_drafts'))).toBe(true);
+});
+
+test('missing booking plan schema preserves editor text and does not claim a saved or empty plan', async ({ page }) => {
+  await mockBackend(page,{missingBookingPlanMigration:true});
+  await signIn(page); await enter(page,'/?page=booking-draft');
+  await page.getByLabel('Requests or notes (optional)',{exact:true}).fill('Keep my unsaved idea');
+  await page.getByRole('button',{name:'Save private draft',exact:true}).click();
+  await expect(page.locator('.private-draft-controls [role=status]')).toContainText('Unable to complete');
+  page.once('dialog',dialog=>dialog.accept());
+  await page.getByRole('button',{name:'Load my booking plan',exact:true}).click();
+  await expect(page.locator('.private-draft-controls [role=status]')).toContainText('Unable to complete');
+  await expect(page.getByLabel('Requests or notes (optional)',{exact:true})).toHaveValue('Keep my unsaved idea');
+});
+
+
+test('loading a saved booking plan preserves text edited while the network response is pending', async ({ page }) => {
+  const state = await mockBackend(page);
+  state.bookingPlan = {owner_id:userId,plan:{sourceOffering:'',provider:'',activity:'',date:'',time:'',timeZone:'',duration:'',venue:'',expenses:'',notes:'Older saved notes'}};
+  await signIn(page); await enter(page,'/?page=booking-draft');
+  let release; const waiting = new Promise(resolve=>{release=resolve;});
+  let requested; const started = new Promise(resolve=>{requested=resolve;});
+  await page.route('**/rest/v1/booking_plan_drafts*',async route=> { requested(); await waiting; await route.fallback(); });
+  await page.getByRole('button',{name:'Load my booking plan',exact:true}).click();
+  await started;
+  await page.getByLabel('Requests or notes (optional)',{exact:true}).fill('New text typed during loading');
+  release();
+  await expect(page.locator('.private-draft-controls [role=status]')).toContainText('Current plan kept because you edited');
+  await expect(page.getByLabel('Requests or notes (optional)',{exact:true})).toHaveValue('New text typed during loading');
+  expect(state.bookingPlan.plan.notes).toBe('Older saved notes');
 });

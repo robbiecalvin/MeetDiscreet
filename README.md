@@ -23,7 +23,8 @@ continues to work without a backend. Private experience catalogue saving require
 See [backend setup](./docs/development/backend-setup.md) for configuration and
 verification requirements. Local PostgreSQL policy checks and mocked browser
 checks do not establish hosted authentication or email delivery. The unsent
-booking-request preview remains in memory and calculates no quote.
+booking-plan editor supports an explicit private save/load/delete after migration 008;
+unsaved edits remain in memory. It sends no request and calculates no quote.
 No payments, public publishing, messaging, or live booking service is connected. Profiles,
 photos, online statuses, and discovery ads remain fictional.
 
