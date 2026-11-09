@@ -36,3 +36,13 @@ draft/edit retention, clear/refresh, unchanged public fixtures, no network/stora
 writes, registration entry, and five responsive widths. Desktop form and mobile
 member-preview screenshots inspected. Actual ownership, authentication, private
 storage, Safari/Agrandir, and live Netlify deployment remain unverified.
+
+
+## Saved draft deletion
+
+Connected development mode includes “Delete saved profile draft”. Confirm before
+sending an owner-filtered delete. This removes only the stored profile draft, not
+the authentication account, listings, or editor text. Disable save/load/delete
+while an operation is pending. Distinguish deleted, no saved record, and failed
+operations; a failure must allow retry without claiming success. Demo mode has
+no delete action or database request.

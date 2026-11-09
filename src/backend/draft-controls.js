@@ -1,5 +1,5 @@
 import { backendEnabled } from './client.js';
-export function privateDraftControls({ onSave, onLoad, multiple = false }) {
+export function privateDraftControls({ onSave, onLoad, onDelete, multiple = false }) {
   if (!backendEnabled) return null;
   const section = document.createElement('section');
   section.className = 'private-draft-controls';
@@ -10,17 +10,27 @@ export function privateDraftControls({ onSave, onLoad, multiple = false }) {
   const load = document.createElement('button'); load.type = 'button'; load.className = 'button outline'; load.textContent = multiple ? 'Load my listing drafts' : 'Load my profile draft';
   const status = document.createElement('p'); status.className = 'profile-small'; status.setAttribute('role', 'status');
   const choices = document.createElement('div'); choices.className = 'saved-draft-choices';
+  const remove = onDelete ? document.createElement('button') : null;
+  if (remove) {
+    remove.type = 'button'; remove.className = 'button quiet';
+    remove.textContent = 'Delete saved profile draft';
+    remove.addEventListener('click', () => {
+      if (busy || !window.confirm('Delete your saved private profile draft? This cannot be undone. Your account and current editor text will remain.')) return;
+      run(onDelete);
+    });
+  }
   let busy = false;
   async function run(operation) {
     if (busy) return;
-    busy = true; save.disabled = true; load.disabled = true; status.textContent = 'Working…';
+    busy = true; if (remove) remove.disabled = true; save.disabled = true; load.disabled = true; status.textContent = 'Working…';
     try { status.textContent = await operation(choices) || 'Done.'; }
     catch (error) { status.textContent = error.message === 'Sign in before saving or loading private drafts.' ? error.message : 'Unable to complete the private draft operation. Check sign-in, the connection, and database setup, then retry.'; }
-    finally { busy = false; save.disabled = false; load.disabled = false; }
+    finally { busy = false; if (remove) remove.disabled = false; save.disabled = false; load.disabled = false; }
   }
   save.addEventListener('click', () => run(onSave));
   load.addEventListener('click', () => run(onLoad));
   actions.append(save, load);
+  if (remove) actions.append(remove);
   section.append(title, copy, actions, choices, status);
   return section;
 }

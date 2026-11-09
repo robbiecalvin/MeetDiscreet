@@ -1,5 +1,5 @@
 import { backendEnabled } from './backend/client.js';
-import { loadProfileDraft, saveProfileDraft } from './backend/drafts.js';
+import { loadProfileDraft, saveProfileDraft, deleteProfileDraft } from './backend/drafts.js';
 import { privateDraftControls } from './backend/draft-controls.js';
 import { draftToolNavigation } from './draft-tools.js';
 import { providers } from './data.js';
@@ -159,6 +159,12 @@ export function renderProfileEditor(container, onBack, onTool) {
     preview.scrollIntoView({ block: 'start', behavior: 'instant' });
   });
   const storage = privateDraftControls({
+    onDelete: async () => {
+      const epoch = identityEpoch;
+      const removed = await deleteProfileDraft();
+      if (epoch !== identityEpoch) throw new Error('Account changed.');
+      return removed ? 'Saved private profile draft deleted. Editor text is unsaved; your account is unchanged.' : 'No saved private profile draft found to delete. Your account is unchanged.';
+    },
     onSave: async () => {
       for (const [key, { input }] of fields) draft[key] = input.value;
       await saveProfileDraft({ ...draft });

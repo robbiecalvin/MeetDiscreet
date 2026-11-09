@@ -669,6 +669,15 @@ If launch scope is reduced:
 - Header Account links target the overview; signed-out Sign in links retain their
   entry route. No role, entitlement, billing, or publication state is claimed.
 
+### Profile Draft Deletion Increment
+
+- Added confirmed deletion of the current account’s stored private profile draft.
+- Editor input and authentication account remain; missing records are reported
+  explicitly. Shared save/load/delete controls prevent overlapping operations and
+  restore buttons after failure. No authentication account deletion is implied.
+- Build, ten mocked-provider browser checks, and 16 profile/policy regression
+  checks passed. Full manual walkthrough remains deferred at Robbie’s request.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

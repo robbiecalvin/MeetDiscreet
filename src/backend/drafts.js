@@ -40,3 +40,10 @@ export async function deleteListingDraft(id) {
   failure(error);
   return data.id;
 }
+
+export async function deleteProfileDraft() {
+  const user = await requireUser();
+  const { data, error } = await backendClient().from('profile_drafts').delete().eq('owner_id', user.id).select('owner_id').maybeSingle();
+  failure(error);
+  return Boolean(data);
+}

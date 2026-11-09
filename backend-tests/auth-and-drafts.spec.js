@@ -27,6 +27,11 @@ async function mockBackend(page, options = {}) {
     if (url.pathname === '/auth/v1/user') return respond(user);
     if (url.pathname === '/auth/v1/logout') return respond({});
     if (url.pathname === '/rest/v1/profile_drafts') {
+      if (method === 'DELETE') {
+        if (options.failDelete) return respond({ message: 'Denied' }, 403);
+        const deleted = state.profile; state.profile = null;
+        return respond(deleted ? [{ owner_id: userId }] : []);
+      }
       if (method === 'POST') { state.profile = { ...body, created_at: '2026-11-08T00:00:00Z', updated_at: '2026-11-08T00:00:00Z' }; return respond(null, 201); }
       return respond(state.profile ? [state.profile] : []);
     }
@@ -197,3 +202,36 @@ for (const failDelete of [false, true]) {
   await expect(page.locator('.account-overview')).not.toContainText('test@example.invalid');
   await expect(page.getByRole('link', { name: 'Manage listing drafts' })).toHaveCount(0);
  });
+
+for (const failDelete of [false, true]) {
+  test(`profile draft deletion ${failDelete ? 'failure allows retry' : 'preserves editor text and account'}`, async ({ page }) => {
+    const state = await mockBackend(page, { failDelete });
+    await signIn(page);
+    await page.locator('footer [data-profile-editor-link]').click();
+    await page.getByRole('button', { name: 'Use fictional profile' }).click();
+    await page.getByRole('button', { name: 'Save private draft', exact: true }).click();
+    const status = page.locator('.private-draft-controls [role=status]');
+    await expect(status).toContainText('Private profile draft saved');
+    const remove = page.getByRole('button', { name: 'Delete saved profile draft', exact: true });
+    page.once('dialog', dialog => dialog.dismiss());
+    await remove.click();
+    expect(state.requests.filter(r => r.method === 'DELETE')).toHaveLength(0);
+    page.once('dialog', dialog => dialog.accept());
+    await remove.click();
+    if (failDelete) {
+      await expect(status).toContainText('Unable to complete');
+      await expect(remove).toBeEnabled();
+      expect(state.profile).not.toBeNull();
+    } else {
+      await expect(status).toContainText('Saved private profile draft deleted');
+      expect(state.profile).toBeNull();
+      await expect(page.getByLabel('Display name', { exact: true })).toHaveValue('Maya');
+      await expect(page.getByRole('button', { name: 'Sign out', exact: true })).toBeVisible();
+      await page.getByRole('button', { name: 'Load my profile draft', exact: true }).click();
+      await expect(status).toContainText('No private profile draft found');
+      page.once('dialog', dialog => dialog.accept());
+      await remove.click();
+      await expect(status).toContainText('No saved private profile draft found to delete');
+    }
+  });
+}
