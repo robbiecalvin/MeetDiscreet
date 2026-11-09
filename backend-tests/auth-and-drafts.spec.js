@@ -509,3 +509,19 @@ for (const failDelete of [false, true]) {
     }
   });
 }
+
+test('availability draft clears on sign-out without writing to the backend', async ({ page }) => {
+  const state = await mockBackend(page);
+  await signIn(page);
+  await page.locator('[data-account-link]').click();
+  await page.getByRole('link', { name: 'Edit availability draft' }).click();
+  await page.getByLabel('Schedule time zone').selectOption('UTC');
+  await page.getByLabel('Starts at').fill('09:00');
+  await page.getByLabel('Ends at').fill('12:00');
+  await page.getByRole('button', { name: 'Add time window', exact: true }).click();
+  await expect(page.locator('.availability-window')).toHaveCount(1);
+  expect(state.requests.filter(value => value.path.startsWith('/rest/v1/') && ['POST', 'PATCH', 'DELETE'].includes(value.method))).toHaveLength(0);
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await expect(page.locator('.availability-window')).toHaveCount(0);
+  await expect(page.getByLabel('Schedule time zone')).toHaveValue('');
+});

@@ -2,7 +2,7 @@ export function draftToolNavigation(activePage, onNavigate) {
   const nav = document.createElement('nav');
   nav.className = 'draft-tool-nav';
   nav.setAttribute('aria-label', 'Companion draft tools');
-  for (const [page, label] of [['edit-profile', 'Profile draft'], ['experiences', 'Experience catalogue']]) {
+  for (const [page, label] of [['edit-profile', 'Profile draft'], ['experiences', 'Experience catalogue'], ['availability', 'Availability draft']]) {
     const link = document.createElement('a');
     link.textContent = label;
     link.href = `?page=${page}`;

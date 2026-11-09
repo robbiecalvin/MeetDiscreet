@@ -73,7 +73,8 @@ without age confirmation; see [guidelines brief](./page_briefs/guidelines.md). P
 `/?page=sign-in`, and `/?page=recover-account`; see [account brief](./page_briefs/account-entry.md). Optional Supabase development authentication is implemented; hosted lifecycle
 checks remain incomplete. The account overview at `/?page=account` links private
 draft tools. COM-02 now has a companion profile draft editor at `/?page=edit-profile`; see
-[profile editor brief](./page_briefs/profile-editor.md). Nothing is saved/published. Partial COM-05 now has the experience catalogue draft at `/?page=experiences`;
+[profile editor brief](./page_briefs/profile-editor.md). Connected mode supports
+private saving, with no public publishing. Partial COM-05 now has the experience catalogue draft at `/?page=experiences`;
 see [experience brief](./page_briefs/experiences.md). Public general rates and live billing remain unimplemented. Other inventory surfaces remain planned.
 
 ## 4. Inventory Fields
@@ -436,3 +437,7 @@ and review status without inventing completion.
 The private development listing library is available at `/?page=my-listings`,
 linked from Account. It manages saved drafts rather than public or published ads;
 see [listing editor brief](./page_briefs/listing-editor.md).
+
+Partial COM-06 has an in-memory weekly availability editor at `/?page=availability`.
+See [availability brief](./page_briefs/availability.md). It does not reserve times
+or expose real booking availability.

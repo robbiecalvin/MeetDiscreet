@@ -14,10 +14,11 @@ in their dedicated documents.
 
 ## 2. Current Position
 
-Current phase: Phase 1 — Local frontend foundation, with the first Phase 2 discovery prototype.
+Current phase: Frontend development with an initial Supabase development backend.
 
 Current activity:
-Discovery, profiles, Offering details, How it works, and the listing draft editor are implemented as frontend demos. Routine visual choices remain provisional under Robbie’s request to keep building and revise later.
+Continue private account/draft tools and frontend pages, with a combined manual
+walkthrough deferred at Robbie’s request. Discovery remains synthetic. Routine visual choices remain provisional under Robbie’s request to keep building and revise later.
 
 Known status:
 
@@ -30,20 +31,21 @@ Known status:
 - Vanilla frontend, npm/Vite workflow, package lockfile, runtime pin, and Playwright tests added.
 - Initial dark/elegant visual direction and discovery grid recorded in DEC-014.
 - Synthetic profiles, generated portraits, online statuses, city filters, and ads only.
-- No backend, accounts, messages, bookings, payments, or deployment connected.
+- Netlify frontend hosting and Supabase development authentication/private drafts
+  are connected. Hosted catalogue storage still needs its additional migration.
+- Messaging, live bookings, payments, public publishing and production eligibility
+  enforcement remain unimplemented.
 
 Do not mark documents as installed merely because their contents
 were supplied in chat.
 
 ## 3. Immediate Next Action
 
-Review the first discovery prototype against [the page brief](./design/page_briefs/discovery.md).
-Refine the visual layout from Robbie’s feedback and provide licensed Agrandir
-webfont assets when available. macOS Safari validation remains outstanding.
-
-Backend, live currency, payment policy, and hosting choices remain open until
-their dependent work is needed. Do not expand the prototype into the entire
-application or introduce live transactions or production deployment.
+Continue focused frontend increments using approved visual direction and automatic
+checks. Defer the combined manual walkthrough as requested. Apply the prepared
+catalogue migration during later setup; no need to block independent frontend work.
+Preserve unresolved commercial/scheduling rules. Agrandir assets and macOS Safari
+validation remain outstanding; no live transactions are enabled.
 
 ## 4. Documentation Preparation
 
@@ -761,6 +763,20 @@ If launch scope is reduced:
   mobile screenshot inspected without horizontal overflow.
 - Successful deletion detaches retained editor content from the deleted record.
   Revisiting the same loaded draft preserves unsaved local edits within the app.
+
+### Availability Draft Increment
+
+- Added partial COM-06 at `/?page=availability`, reachable from Account and
+  companion draft tools: explicit IANA zone, weekly windows, edit/remove/cancel,
+  overlap validation, and ordered preview. Same-day adjacency is allowed.
+- In-memory only; no save, public availability, reservations or booking claims.
+  Zone changes retain local clock times. Overnight windows, date exceptions and
+  date-specific DST resolution remain outside this draft editor.
+- Build, all 117 default checks, 25 existing backend UI checks and the new
+  sign-out/no-write check passed. Five availability checks were repeated after
+  final spacing changes; mobile/desktop screenshots inspected.
+- Identity changes clear state; connected-mode browser unload protection applies.
+  See [availability brief](./design/page_briefs/availability.md).
 
 ### Next Action
 

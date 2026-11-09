@@ -703,3 +703,7 @@ underlying feature is operational.
 
 - `src/listing-library.js`: private saved-listing search/filter workspace and
   owner-scoped editor links. Selected draft URLs load through `src/backend/drafts.js`.
+
+- `src/availability.js`: in-memory weekly availability editor and preview.
+- `src/weekly-schedule.js`: pure weekday ordering, IANA zone validation and
+  same-day window validation; not an authoritative booking scheduler.

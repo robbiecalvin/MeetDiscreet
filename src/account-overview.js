@@ -42,6 +42,7 @@ export function renderAccountOverview(container, navigate, onBack) {
     status.textContent = data.user.email ? `Signed in as ${data.user.email}` : 'Signed in.';
     const grid = node('div', null, 'account-tool-grid');
     for (const [page, title, copy, action] of [
+      ['availability', 'Availability draft', 'Sketch weekly time windows in an explicit time zone. This preview stays in memory until refresh.', 'Edit availability draft'],
       ['account-security', 'Account security', 'Verify your current password and choose a new one.', 'Change password'],
       ['edit-profile', 'Profile draft', 'Edit your introduction and load or save your private profile draft.', 'Edit profile draft'],
       ['my-listings', 'Listing drafts', 'Create, load, update, or delete private Offering and Looking For drafts.', 'Manage listing drafts'],
