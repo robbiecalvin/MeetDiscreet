@@ -9,7 +9,7 @@ function session() {
   return { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock_refresh_token', user };
 }
 async function mockBackend(page, options = {}) {
-  const state = { profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
+  const state = { availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
   await page.route('https://backend-test.supabase.co/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -26,6 +26,12 @@ async function mockBackend(page, options = {}) {
     if (url.pathname === '/auth/v1/recover') { state.recoveryRedirect = url.searchParams.get('redirect_to'); return respond({}); }
     if (url.pathname === '/auth/v1/user') return options.failPasswordUpdate && method === 'PUT' ? respond({ message: 'Password rejected' }, 422) : respond(user);
     if (url.pathname === '/auth/v1/logout') return respond({});
+    if (url.pathname === '/rest/v1/availability_drafts') {
+      if (options.missingAvailabilityMigration) return respond({ message: 'Table missing' }, 404);
+      if (method === 'POST') { state.availability = body; return respond(null, 201); }
+      if (method === 'DELETE') { const exists = state.availability !== null; state.availability = null; return respond(exists ? [{ owner_id: userId }] : []); }
+      return respond(state.availability ? [state.availability] : []);
+    }
     if (url.pathname === '/rest/v1/experience_catalogue_drafts') {
       if (options.missingCatalogueMigration) return respond({ message: 'Table missing' }, 404);
       if (method === 'DELETE') {
@@ -524,4 +530,48 @@ test('availability draft clears on sign-out without writing to the backend', asy
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await expect(page.locator('.availability-window')).toHaveCount(0);
   await expect(page.getByLabel('Schedule time zone')).toHaveValue('');
+});
+
+test('private availability saves, reloads, summarizes, and deletes without reserving anything', async ({ page }) => {
+  const state = await mockBackend(page);
+  await signIn(page);
+  await enter(page, '/?page=availability');
+  await page.getByLabel('Schedule time zone').selectOption('America/Vancouver');
+  await page.getByLabel('Starts at').fill('09:00');
+  await page.getByLabel('Ends at').fill('12:00');
+  await page.getByRole('button', { name: 'Add time window', exact: true }).click();
+  await page.getByRole('button', { name: 'Save private draft', exact: true }).click();
+  const status = page.locator('.private-draft-controls [role=status]');
+  await expect(status).toContainText('Private availability draft saved');
+  expect(state.availability.owner_id).toBe(userId);
+  expect(state.availability.windows).toEqual([{ day: 1, start: '09:00', end: '12:00' }]);
+  expect(state.availability).not.toHaveProperty('published');
+  await page.reload();
+  await expect(page.locator('.availability-window')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Load my availability draft' }).click();
+  await expect(status).toContainText('draft was loaded');
+  await expect(page.getByLabel('Schedule time zone')).toHaveValue('America/Vancouver');
+  await expect(page.locator('.availability-window')).toHaveCount(1);
+  await page.setViewportSize({ width: 390, height: 1000 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: '/tmp/private-availability-mobile.png', fullPage: true });
+  await page.locator('[data-account-link]').click();
+  await expect(page.locator('[data-draft-summary=availability]')).toHaveText('1 saved weekly window · America/Vancouver');
+  await page.getByRole('link', { name: 'Edit availability draft' }).click();
+  page.once('dialog', dialog => dialog.accept());
+  await page.getByRole('button', { name: 'Delete saved availability draft' }).click();
+  await expect(status).toContainText('Saved availability draft deleted');
+  expect(state.availability).toBeNull();
+  await expect(page.locator('.availability-window')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Load my availability draft' }).click();
+  await expect(status).toContainText('No private availability draft found');
+});
+test('availability handles a missing migration without claiming save success', async ({ page }) => {
+  await mockBackend(page, { missingAvailabilityMigration: true });
+  await signIn(page);
+  await enter(page, '/?page=availability');
+  await page.getByRole('button', { name: 'Load my availability draft' }).click();
+  await expect(page.locator('.private-draft-controls [role=status]')).toContainText('Unable to complete');
+  await expect(page.getByRole('button', { name: 'Load my availability draft' })).toBeEnabled();
 });

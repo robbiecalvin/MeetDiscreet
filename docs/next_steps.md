@@ -778,6 +778,20 @@ If launch scope is reduced:
 - Identity changes clear state; connected-mode browser unload protection applies.
   See [availability brief](./design/page_briefs/availability.md).
 
+### Private Availability Persistence
+
+- Added explicit owner-only save/load/confirmed delete for weekly availability
+  sketches and an account summary showing saved count/time zone.
+- New migration `202611090002_availability_drafts.sql` validates installed zones,
+  nested window format/ranges and overlaps; technical payload ceiling is 32 KB.
+- Saves exclude unfinished composer edits; loads clear the composer. Deletion
+  preserves local windows and the authentication account. Identity guards and
+  snapshot baselines prevent stale reads/saves replacing newer local edits.
+- Build, all 118 default checks and 28 backend UI checks passed. Connected
+  availability save/load/delete was repeated with a mobile screenshot inspection.
+- Hosted migration application remains pending, alongside catalogue setup.
+  No bookable availability, reservations, publication, or payment is introduced.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

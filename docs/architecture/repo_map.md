@@ -707,3 +707,6 @@ underlying feature is operational.
 - `src/availability.js`: in-memory weekly availability editor and preview.
 - `src/weekly-schedule.js`: pure weekday ordering, IANA zone validation and
   same-day window validation; not an authoritative booking scheduler.
+
+- `supabase/migrations/202611090002_availability_drafts.sql`: owner-only weekly
+  sketch storage with zone/window/overlap validation; requires later hosted setup.

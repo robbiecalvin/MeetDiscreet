@@ -9,7 +9,8 @@ Check the dashboard's plan and usage limits before changing settings.
 
 - Email/password development accounts, confirmation, recovery/reset, sign-out,
   and password changes after current-password reauthentication.
-- Private owner-only profile and listing drafts.
+- Private owner-only profile, listing, catalogue, and availability drafts, subject
+  to the separately applied migrations below.
 - No public publishing, account roles, paid entitlements, payments, messaging,
   real discovery data, uploads, or completed eligibility verification.
 - Private experience catalogue snapshots require the additional migration below.
@@ -49,6 +50,23 @@ Amounts retain their exact minor-unit draft format without selecting currency or
 creating live prices. Nothing is published. Missing migration errors allow retry;
 existing profile/listing drafts remain separate. This migration has been tested
 locally but has not been applied to the hosted project by the agent.
+
+## Add private availability storage
+
+After the initial migration, run this additional file once for weekly schedule
+persistence (do not rerun migrations already applied):
+
+[202611090002_availability_drafts.sql](../../supabase/migrations/202611090002_availability_drafts.sql)
+
+It adds one owner-protected availability sketch per user. PostgreSQL validates the
+time zone against its installed time-zone names, validates HH:mm same-day windows,
+and rejects nested overlapping windows while allowing adjacency. The 32 KB payload
+ceiling is a technical bound, not a plan allowance. Save includes added/updated
+windows and the selected zone; unfinished window edits are excluded. Load restores
+the private sketch. Confirmed deletion retains editor state and the auth account.
+No date-specific availability, appointments, conflicts with bookings, DST date
+resolution, reservations, public publishing, or scheduling policy is implemented.
+The agent has tested this migration locally but has not applied it remotely.
 
 ## Authentication settings
 
@@ -116,8 +134,8 @@ these checks run against the configured project.
 
 ## Cloud networking
 
-The current cloud policy blocks the project domain. Add only the exact project
-hostname to the environment's allowed domains to enable live validation. Public
+The cloud allowlist now includes the exact project hostname; live Supabase
+connection and anonymous draft-read denial were verified. Public
 Netlify visitors use their own network; cloud egress settings do not configure
 Netlify variables or Supabase redirect settings. Draft configuration tools have
 returned INVALID_ARGUMENT, so their persistence must not be assumed.

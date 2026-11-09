@@ -86,6 +86,10 @@ export async function loadPrivateDraftSummary(kind) {
     failure(error);
     return data ? `${data.items.length} saved catalogue ${data.items.length === 1 ? 'item' : 'items'}` : 'No saved experience catalogue';
   }
+  if (kind === 'availability') {
+    const data = await loadAvailabilityDraft();
+    return data ? `${data.windows.length} saved weekly ${data.windows.length === 1 ? 'window' : 'windows'} · ${data.time_zone}` : 'No saved availability draft';
+  }
   throw new Error('Unknown draft type.');
 }
 
@@ -94,4 +98,23 @@ export async function loadListingDraft(id) {
   const { data, error } = await backendClient().from('listing_drafts').select('*').eq('owner_id', user.id).eq('id', id).maybeSingle();
   failure(error);
   return data;
+}
+
+export async function saveAvailabilityDraft(schedule) {
+  const user = await requireUser();
+  const windows = schedule.windows.map(({ day, start, end }) => ({ day, start, end }));
+  const { error } = await backendClient().from('availability_drafts').upsert({ owner_id: user.id, time_zone: schedule.timeZone, windows }, { onConflict: 'owner_id' });
+  failure(error);
+}
+export async function loadAvailabilityDraft() {
+  const user = await requireUser();
+  const { data, error } = await backendClient().from('availability_drafts').select('time_zone,windows').eq('owner_id', user.id).maybeSingle();
+  failure(error);
+  return data;
+}
+export async function deleteAvailabilityDraft() {
+  const user = await requireUser();
+  const { data, error } = await backendClient().from('availability_drafts').delete().eq('owner_id', user.id).select('owner_id').maybeSingle();
+  failure(error);
+  return Boolean(data);
 }

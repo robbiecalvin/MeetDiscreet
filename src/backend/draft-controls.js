@@ -4,7 +4,7 @@ export function privateDraftControls({ onSave, onLoad, onDelete, multiple = fals
   const section = document.createElement('section');
   section.className = 'private-draft-controls';
   const title = document.createElement('h2'); title.textContent = 'Private development drafts';
-  const copy = document.createElement('p'); copy.textContent = 'Sign in to save or load your own private drafts. Saving never publishes a profile or listing.';
+  const copy = document.createElement('p'); copy.textContent = 'Sign in to save or load your own private drafts. Saving keeps drafts private and never publishes them.';
   const actions = document.createElement('div'); actions.className = 'editor-actions';
   const save = document.createElement('button'); save.type = 'button'; save.className = 'button primary'; save.textContent = 'Save private draft';
   const load = document.createElement('button'); load.type = 'button'; load.className = 'button outline'; load.textContent = loadLabel || (multiple ? 'Load my listing drafts' : 'Load my profile draft');

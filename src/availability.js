@@ -1,3 +1,5 @@
+import { saveAvailabilityDraft, loadAvailabilityDraft, deleteAvailabilityDraft } from './backend/drafts.js';
+import { privateDraftControls } from './backend/draft-controls.js';
 import { weekdays, validTimeZone, windowError, orderedWindows } from './weekly-schedule.js';
 import { draftToolNavigation } from './draft-tools.js';
 import { trackDraft } from './draft-changes.js';
@@ -6,8 +8,10 @@ let schedule = { timeZone: '', windows: [] };
 let composer = { day: '1', start: '', end: '' };
 let editingId = null;
 let nextId = 1;
+let identityEpoch = 0;
 const changes = trackDraft('availability', () => ({ schedule, composer }), backendEnabled);
 export function clearAvailabilityState() {
+  identityEpoch++;
   schedule = { timeZone: '', windows: [] }; composer = { day: '1', start: '', end: '' }; editingId = null; nextId = 1; changes.saved();
 }
 function node(tag, text, className) {
@@ -24,7 +28,7 @@ export function renderAvailability(container, navigate) {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault(); navigate('account');
   });
-  root.append(back, draftToolNavigation('availability', navigate), node('p', 'MAKE ROOM FOR GOOD COMPANY', 'eyebrow'), node('h1', 'Shape your availability.'), node('p', 'Build a weekly pattern with time for the experiences you offer.', 'offering-lead'), node('p', 'Schedule preview. Nothing is saved or published. A full refresh clears this draft; no times are reserved and no booking availability is confirmed.', 'editor-notice'));
+  root.append(back, draftToolNavigation('availability', navigate), node('p', 'MAKE ROOM FOR GOOD COMPANY', 'eyebrow'), node('h1', 'Shape your availability.'), node('p', 'Build a weekly pattern with time for the experiences you offer.', 'offering-lead'), node('p', backendEnabled ? 'Private availability drafts. Save added windows explicitly; unsaved edits clear on refresh. Nothing is published, reserved, or confirmed for bookings.' : 'Schedule preview. Nothing is saved or published. A full refresh clears this draft; no times are reserved and no booking availability is confirmed.', 'editor-notice'));
   const form = node('form', null, 'availability-form'); form.noValidate = true;
   const error = node('p', '', 'editor-errors'); error.id = 'availability-error'; error.setAttribute('role', 'alert');
   form.append(error);
@@ -104,5 +108,39 @@ export function renderAvailability(container, navigate) {
     preview.hidden = false; heading.focus();
   });
   clear.addEventListener('click', () => { clearAvailabilityState(); zone.value = ''; sync(); paint(); preview.hidden = true; zone.focus(); });
-  sync(); paint(); root.append(form, count, list, controls, preview); container.append(root);
+  const storage = privateDraftControls({
+    loadLabel: 'Load my availability draft',
+    deleteLabel: 'Delete saved availability draft',
+    deleteConfirmation: 'Delete your saved private availability draft? Your account and current editor windows will remain. This cannot be undone.',
+    onSave: async () => {
+      if (!validTimeZone(schedule.timeZone)) { zone.focus(); return 'Choose a valid schedule time zone before saving.'; }
+      const epoch = identityEpoch;
+      const snapshot = { timeZone: schedule.timeZone, windows: schedule.windows.map(value => ({ ...value })) };
+      await saveAvailabilityDraft(snapshot);
+      if (epoch !== identityEpoch) throw new Error('Account changed.');
+      changes.saved({ schedule: snapshot, composer: { day: '1', start: '', end: '' } });
+      return 'Private availability draft saved. Unadded edits are excluded. No time is reserved or published.';
+    },
+    onLoad: async () => {
+      const epoch = identityEpoch;
+      const data = await loadAvailabilityDraft();
+      if (epoch !== identityEpoch || !container.contains(root)) throw new Error('Account changed.');
+      if (!data) return 'No private availability draft found for this account.';
+      schedule = { timeZone: data.time_zone, windows: data.windows.map((value, index) => ({ ...value, id: index + 1 })) };
+      nextId = schedule.windows.length + 1;
+      if (![...zone.options].some(option => option.value === schedule.timeZone)) { const option = node('option', schedule.timeZone); option.value = schedule.timeZone; zone.append(option); }
+      zone.value = schedule.timeZone; resetComposer(); changes.saved(); paint(); preview.hidden = true;
+      return 'Your private availability draft was loaded.';
+    },
+    onDelete: async () => {
+      const epoch = identityEpoch;
+      const removed = await deleteAvailabilityDraft();
+      if (epoch !== identityEpoch) throw new Error('Account changed.');
+      if (removed) changes.saved({ schedule: { timeZone: '', windows: [] }, composer: { day: '1', start: '', end: '' } });
+      return removed ? 'Saved availability draft deleted. Current editor windows are unsaved; your account is unchanged.' : 'No saved availability draft found to delete.';
+    },
+  });
+  sync(); paint(); root.append(form, count, list, controls, preview);
+  if (storage) root.append(storage);
+  container.append(root);
 }

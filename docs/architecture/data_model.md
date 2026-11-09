@@ -1105,3 +1105,13 @@ and once/hourly draft fee types. Included items require zero extra. No currency,
 public publication, entitlement, or booking-price authority is introduced.
 Hosted application remains pending; migration tests cover ownership and invalid
 nested payloads in PostgreSQL.
+
+
+## Private availability sketches
+
+[Availability migration](../../supabase/migrations/202611090002_availability_drafts.sql)
+adds one owner-only `availability_drafts` snapshot per auth user, containing an
+explicit PostgreSQL-recognized time zone and validated weekly local-time windows.
+No UTC appointment instants, reservations, public eligibility, or booking
+availability authority are derived. Date-specific/DST rules remain future work.
+Hosted application of this migration is pending.

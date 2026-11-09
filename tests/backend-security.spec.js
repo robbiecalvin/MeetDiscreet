@@ -19,10 +19,11 @@ test.beforeAll(async () => {
     grant execute on function auth.uid() to anon, authenticated;`);
   await db.exec(await readFile(new URL('../supabase/migrations/202611080001_private_drafts.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611090001_experience_drafts.sql', import.meta.url), 'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/202611090002_availability_drafts.sql', import.meta.url), 'utf8'));
 });
 test.afterAll(async () => { await db.close(); });
 test.beforeEach(async () => {
-  await db.exec('reset role; truncate public.listing_drafts, public.profile_drafts, public.experience_catalogue_drafts;');
+  await db.exec('reset role; truncate public.listing_drafts, public.profile_drafts, public.experience_catalogue_drafts, public.availability_drafts;');
   await asUser(alice);
 });
 
@@ -107,4 +108,26 @@ test('private experience catalogues enforce ownership and validate nested draft 
   }
   await insert([]);
   expect((await db.query('select items from public.experience_catalogue_drafts')).rows[0].items).toEqual([]);
+});
+
+test('availability drafts enforce owner isolation and reject invalid zones or overlapping windows', async () => {
+  const first = { day: 1, start: '09:00', end: '12:00' };
+  const insert = (zone, windows) => db.query('insert into public.availability_drafts(time_zone,windows) values ($1,$2::jsonb)', [zone, JSON.stringify(windows)]);
+  await insert('America/Vancouver', [first]);
+  await asUser(bob);
+  expect((await db.query('select * from public.availability_drafts')).rows).toHaveLength(0);
+  expect((await db.query('delete from public.availability_drafts returning *')).rows).toHaveLength(0);
+  expect((await db.query("update public.availability_drafts set time_zone='UTC' returning *")).rows).toHaveLength(0);
+  await expect(db.query("insert into public.availability_drafts(owner_id,time_zone) values ($1,'UTC')", [alice])).rejects.toThrow(/row-level security/i);
+  await asUser('', 'anon');
+  await expect(db.query('select * from public.availability_drafts')).rejects.toThrow(/permission denied/i);
+  await asUser(alice);
+  await expect(db.query('update public.availability_drafts set owner_id=$1', [bob])).rejects.toThrow(/row-level security/i);
+  await db.exec('delete from public.availability_drafts');
+  for (const [zone, windows] of [['Invalid/Zone', []], ['UTC', null], ['UTC', [{}]], ['UTC', [{ ...first, day: 1.5 }]], ['UTC', [{ ...first, start: '24:00' }]], ['UTC', [{ ...first, start: '20:00', end: '02:00' }]], ['UTC', [{ ...first, role: 'admin' }]], ['UTC', [first, { day: 1, start: '11:00', end: '13:00' }]], ['UTC', [first, { day: 1.0, start: '09:00', end: '12:00' }]]]) {
+    await expect(insert(zone, windows)).rejects.toThrow(/check constraint/i);
+  }
+  await insert('UTC', [first, { day: 1, start: '12:00', end: '13:00' }]);
+  await db.exec("update public.availability_drafts set time_zone='America/Toronto'");
+  expect((await db.query('select windows from public.availability_drafts')).rows[0].windows).toHaveLength(2);
 });
