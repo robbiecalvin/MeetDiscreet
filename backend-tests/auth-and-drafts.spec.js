@@ -19,12 +19,12 @@ async function mockBackend(page, options = {}) {
     const respond = (data, status = 200) => route.fulfill({ status, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' }, body: JSON.stringify(data) });
     if (method === 'OPTIONS') return respond({});
     if (url.pathname === '/auth/v1/token') {
-      if (options.failSignIn) return respond({ code: 'invalid_credentials', msg: 'Invalid credentials' }, 400);
+      if (options.failSignIn || (options.failReauthentication && state.requests.filter(r => r.path === '/auth/v1/token').length > 1)) return respond({ code: 'invalid_credentials', msg: 'Invalid credentials' }, 400);
       return respond(session());
     }
     if (url.pathname === '/auth/v1/signup') return respond({ ...user, identities: [{ id: userId, user_id: userId }] });
     if (url.pathname === '/auth/v1/recover') { state.recoveryRedirect = url.searchParams.get('redirect_to'); return respond({}); }
-    if (url.pathname === '/auth/v1/user') return respond(user);
+    if (url.pathname === '/auth/v1/user') return options.failPasswordUpdate && method === 'PUT' ? respond({ message: 'Password rejected' }, 422) : respond(user);
     if (url.pathname === '/auth/v1/logout') return respond({});
     if (url.pathname === '/rest/v1/experience_catalogue_drafts') {
       if (options.missingCatalogueMigration) return respond({ message: 'Table missing' }, 404);
@@ -312,5 +312,41 @@ for (const failDelete of [false, true]) {
       expect(state.catalogue).toHaveLength(2);
     }
     await expect(page.getByRole('button', { name: 'Sign out', exact: true })).toBeVisible();
+  });
+}
+
+for (const scenario of ['success', 'reauthentication', 'update']) {
+  test(`password change ${scenario} checks current password and clears credentials`, async ({ page }) => {
+    const state = await mockBackend(page, { failReauthentication: scenario === 'reauthentication', failPasswordUpdate: scenario === 'update' });
+    await signIn(page);
+    await page.locator('[data-account-link]').click();
+    await page.getByRole('link', { name: 'Change password', exact: true }).click();
+    const old = page.getByLabel('Current password', { exact: true });
+    const next = page.getByLabel('New password', { exact: true });
+    const confirm = page.getByLabel('Confirm new password', { exact: true });
+    await old.fill('old-test-password');
+    await next.fill('new-test-password');
+    await confirm.fill('mismatch');
+    await page.getByRole('button', { name: 'Change password', exact: true }).click();
+    await expect(page.locator('#account-view [role=status]')).toContainText('must match');
+    expect(state.requests.filter(r => r.path === '/auth/v1/token')).toHaveLength(1);
+    await confirm.fill('new-test-password');
+    await page.getByRole('button', { name: 'Show new password', exact: true }).click();
+    await expect(next).toHaveAttribute('type', 'text');
+    await page.getByRole('button', { name: 'Change password', exact: true }).click();
+    const message = scenario === 'success' ? 'Your password was changed.' : scenario === 'reauthentication' ? 'Unable to verify your current password' : 'Unable to change your password';
+    await expect(page.locator('#account-view [role=status]')).toContainText(message);
+    for (const field of [old, next, confirm]) {
+      await expect(field).toHaveValue('');
+      await expect(field).toHaveAttribute('type', 'password');
+    }
+    expect(state.requests.filter(r => r.path === '/auth/v1/user' && r.method === 'PUT')).toHaveLength(scenario === 'reauthentication' ? 0 : 1);
+    await page.setViewportSize({ width: 390, height: 900 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    if (scenario === 'success') await page.screenshot({ path: '/tmp/account-security-mobile.png', fullPage: true });
+    await old.fill('discard-on-signout');
+    await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+    await expect(old).toHaveCount(0);
+    await expect(page.locator('#account-view [role=status]')).toContainText('Sign in with your email');
   });
 }

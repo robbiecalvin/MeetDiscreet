@@ -49,3 +49,17 @@ asynchronous results after navigation. Signed-out visitors receive sign-in and
 registration links. Backend-disabled builds show a labelled overview preview.
 Three restrained tool cards stack into one column on mobile. No subscription,
 billing, role, publication, or verification status is invented.
+
+
+## Account security
+
+`/?page=account-security` is an age-gated page linked from the account overview.
+Verify the signed-in email identity before rendering a current/new/confirm password
+form. Require matching new values, reauthenticate with the current password, then
+use the provider’s password-update API. Provider password requirements remain
+server authoritative. Offer recovery for forgotten current passwords.
+Clear password fields and reset visibility before the asynchronous operation;
+clear the form on navigation/sign-out/account changes. Busy controls and generic
+errors support retry without logging or storing passwords. Backend-disabled builds
+show an explicit preview; signed-out visits show a sign-in link. No email changes,
+account deletion, MFA configuration, or session-revocation guarantees are implied.

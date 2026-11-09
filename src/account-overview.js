@@ -41,6 +41,7 @@ export function renderAccountOverview(container, navigate, onBack) {
     status.textContent = data.user.email ? `Signed in as ${data.user.email}` : 'Signed in.';
     const grid = node('div', null, 'account-tool-grid');
     for (const [page, title, copy, action] of [
+      ['account-security', 'Account security', 'Verify your current password and choose a new one.', 'Change password'],
       ['edit-profile', 'Profile draft', 'Edit your introduction and load or save your private profile draft.', 'Edit profile draft'],
       ['create-listing', 'Listing drafts', 'Create, load, update, or delete private Offering and Looking For drafts.', 'Manage listing drafts'],
       ['experiences', 'Experience catalogue', 'Explore included experiences and optional extras. Save or load a private catalogue. Unadded edits are not saved.', 'Open experience tools'],

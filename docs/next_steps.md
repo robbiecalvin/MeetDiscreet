@@ -702,6 +702,18 @@ If launch scope is reduced:
 - Reuses the existing catalogue migration; no additional database setup is needed.
   Hosted catalogue operations still require applying that pending migration.
 
+### Account Security Increment
+
+- Added account-linked password change at `/?page=account-security` with verified
+  user lookup, current-password reauthentication, matching-new-password checks,
+  provider-side updates, recovery links, and generic failure states.
+- Clears credentials before provider requests and on navigation/sign-out/identity
+  changes. No password persistence/logging, schema change, or paid service.
+- Build, all 110 regressions/policy checks, and 17 backend UI checks passed.
+  Three password checks were repeated after the accessibility association update;
+  mobile screenshot inspected without horizontal overflow. Hosted password
+  lifecycle testing remains deferred with the full walkthrough.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

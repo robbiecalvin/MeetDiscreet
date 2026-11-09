@@ -1,5 +1,6 @@
 import { backendEnabled, backendClient, processAuthCallback } from './backend/client.js';
 import './styles.css';
+import { renderAccountSecurity } from './account-security.js';
 import { renderAccountOverview } from './account-overview.js';
 import { providers, ads } from './data.js';
 import { renderProfile } from './profile.js';
@@ -83,7 +84,7 @@ let selectedAdId = null;
 let callbackStarted = false;
 function renderRoute() {
   const params = new URL(location.href).searchParams;
-  const accountMode = ['account', 'sign-in', 'register', 'recover-account', 'reset-password'].includes(params.get('page')) ? params.get('page') : null;
+  const accountMode = ['account', 'account-security', 'sign-in', 'register', 'recover-account', 'reset-password'].includes(params.get('page')) ? params.get('page') : null;
   const isAccount = !params.has('profile') && !params.has('ad') && accountMode !== null;
   $('#account-view').hidden = !isAccount;
   if (!isAccount) $('#account-view').replaceChildren();
@@ -152,8 +153,9 @@ function renderRoute() {
     document.title = 'Create a listing · MeetDiscreet';
   } else if (isAccount) {
     if (accountMode === 'account') renderAccountOverview($('#account-view'), navigateAccount, backToDiscovery);
+    else if (accountMode === 'account-security') renderAccountSecurity($('#account-view'), navigateAccount);
     else renderAccount($('#account-view'), accountMode, navigateAccount, backToDiscovery);
-    document.title = `${accountMode === 'account' ? 'Your account' : accountMode === 'register' ? 'Create account' : accountMode === 'recover-account' ? 'Account recovery' : 'Sign in'} · MeetDiscreet`;
+    document.title = `${accountMode === 'account-security' ? 'Account security' : accountMode === 'account' ? 'Your account' : accountMode === 'register' ? 'Create account' : accountMode === 'recover-account' ? 'Account recovery' : 'Sign in'} · MeetDiscreet`;
   } else if (isProfileEditor) {
     renderProfileEditor($('#profile-editor-view'), backToDiscovery, navigateAccount);
     document.title = 'Profile editor · MeetDiscreet';
@@ -482,14 +484,14 @@ if (backendEnabled) {
     currentUserId = nextUserId;
     if (changed) {
       clearProfileDraftState(); clearListingDraftState(); clearExperienceDraftState();
-      for (const selector of ['#profile-editor-view', '#editor-view', '#experiences-view', ...(new URL(location.href).searchParams.get('page') === 'account' ? ['#account-view'] : [])]) $(selector).replaceChildren();
+      for (const selector of ['#profile-editor-view', '#editor-view', '#experiences-view', ...(['account', 'account-security'].includes(new URL(location.href).searchParams.get('page')) ? ['#account-view'] : [])]) $(selector).replaceChildren();
     }
     queueMicrotask(() => {
       $('[data-account-link]').textContent = nextUserId ? 'Account' : 'Sign in';
       $('[data-account-link]').href = nextUserId ? '?page=account' : '?page=sign-in';
       signOut.hidden = !nextUserId;
       status.textContent = nextUserId ? 'Development session' : '';
-      if (changed && ['account', 'edit-profile', 'create-listing', 'experiences'].includes(new URL(location.href).searchParams.get('page'))) renderRoute();
+      if (changed && ['account', 'account-security', 'edit-profile', 'create-listing', 'experiences'].includes(new URL(location.href).searchParams.get('page'))) renderRoute();
     });
   });
 }

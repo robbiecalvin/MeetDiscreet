@@ -694,3 +694,6 @@ underlying feature is operational.
 - `src/draft-amount.js`: pure exact decimal parser for currency-pending draft amounts.
 - `supabase/migrations/202611090001_experience_drafts.sql`: private catalogue snapshot
   validation, grants and owner policies; apply separately after the first migration.
+
+- `src/account-security.js`: verified email-account password changes with current
+  password reauthentication, credential clearing, and recovery navigation.

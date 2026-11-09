@@ -7,7 +7,8 @@ Check the dashboard's plan and usage limits before changing settings.
 
 ## Scope
 
-- Email/password development accounts, confirmation, recovery/reset, and sign-out.
+- Email/password development accounts, confirmation, recovery/reset, sign-out,
+  and password changes after current-password reauthentication.
 - Private owner-only profile and listing drafts.
 - No public publishing, account roles, paid entitlements, payments, messaging,
   real discovery data, uploads, or completed eligibility verification.
