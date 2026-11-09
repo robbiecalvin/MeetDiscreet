@@ -9,7 +9,7 @@ function session(profile = user) {
   return { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock_refresh_token', user: profile };
 }
 async function mockBackend(page, options = {}) {
-  const state = { user: { ...user, user_metadata: {} }, providerApplication: null, userProfile: null, roles: ['user'], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
+  const state = { user: { ...user, user_metadata: {} }, providerApplication: null, userProfile: null, roles: ['user'], capabilities: [], reviewApplications: [], reviewAccessEvents: [], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
   await page.route('https://backend-test.supabase.co/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -33,6 +33,23 @@ async function mockBackend(page, options = {}) {
       return respond(state.user);
     }
     if (url.pathname === '/auth/v1/logout') return respond({});
+    if (url.pathname === '/rest/v1/rpc/can_review_provider_applications') {
+      if (options.missingReviewMigration) return respond({ message: 'Unavailable' }, 404);
+      return respond(state.roles.some(role => ['moderator','admin'].includes(role)) && state.capabilities.includes('provider_application_review'));
+    }
+    if (['/rest/v1/rpc/list_provider_applications_for_review','/rest/v1/rpc/get_provider_application_for_review'].includes(url.pathname)) {
+      if (options.missingReviewMigration) return respond({ message: 'Unavailable' }, 404);
+      const allowed = state.roles.some(role => ['moderator','admin'].includes(role)) && state.capabilities.includes('provider_application_review');
+      if (!allowed || body.p_expected_reviewer !== state.user.id) return respond({ message: 'Denied' }, 403);
+      const submitted = state.reviewApplications.filter(row => row.state === 'submitted').sort((a,b) => a.submitted_at.localeCompare(b.submitted_at) || a.owner_id.localeCompare(b.owner_id));
+      if (url.pathname.endsWith('/get_provider_application_for_review')) {
+        const row = submitted.find(value => value.owner_id === body.p_owner);
+        if (row) state.reviewAccessEvents.push({ action: 'application_opened', owner: row.owner_id });
+        return respond(row ? [row] : []);
+      }
+      state.reviewAccessEvents.push({ action: 'queue_list' });
+      return respond(submitted.filter(row => !body.p_after_submitted_at || row.submitted_at > body.p_after_submitted_at || (row.submitted_at === body.p_after_submitted_at && row.owner_id > body.p_after_owner)).slice(0,body.p_limit).map(({owner_id,display_name,city,submitted_at,updated_at}) => ({owner_id,display_name,city,submitted_at,updated_at})));
+    }
     if (url.pathname === '/rest/v1/provider_applications') {
       if (options.missingApplicationMigration) return respond({ message: 'Table missing' }, 404);
       return respond(state.providerApplication ? [state.providerApplication] : []);
@@ -839,3 +856,71 @@ for (const operation of ['save', 'withdraw']) {
     expect(state.roles).toEqual(['user']);
   });
 }
+
+function reviewRows(count) {
+  return Array.from({ length: count }, (_, index) => ({ owner_id: `44444444-4444-4444-8444-${String(index + 1).padStart(12,'0')}`, display_name: `Applicant ${String(index + 1).padStart(2,'0')}`, city: 'Vancouver', introduction: index === 0 ? '<img src=x onerror=alert(1)> Private submitted introduction.' : 'Private submitted introduction.', state: 'submitted', submitted_at: `2026-11-08T10:${String(index).padStart(2,'0')}:00Z`, updated_at: `2026-11-08T10:${String(index).padStart(2,'0')}:00Z` }));
+}
+test('assigned staff review access paginates, escapes introductions and clears on revocation', async ({ page }) => {
+  const state = await mockBackend(page);
+  state.roles = ['user','moderator']; state.capabilities = ['provider_application_review']; state.reviewApplications = reviewRows(23);
+  await signIn(page);
+  await page.locator('[data-account-link]').click();
+  await page.getByRole('link', { name: 'Open provider review queue', exact: true }).click();
+  await expect(page.locator('.review-card')).toHaveCount(20);
+  await page.getByRole('button', { name: 'Next applications', exact: true }).click();
+  await expect(page.locator('.review-card')).toHaveCount(3);
+  await expect(page.getByRole('button', { name: 'Next applications', exact: true })).toBeDisabled();
+  await page.getByRole('button', { name: 'Previous applications', exact: true }).click();
+  await expect(page.locator('.review-card')).toHaveCount(20);
+  await page.getByRole('button', { name: 'Inspect Applicant 01', exact: true }).click();
+  await expect(page.locator('.review-introduction')).toContainText('<img src=x onerror=alert(1)>');
+  await expect(page.locator('.review-detail img')).toHaveCount(0);
+  await page.setViewportSize({ width: 390, height: 1000 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: '/tmp/provider-review-mobile.png' });
+  await page.locator('.review-detail').screenshot({ path: '/tmp/provider-review-detail-mobile.png' });
+  expect(state.reviewAccessEvents.some(value => value.action === 'application_opened')).toBe(true);
+  state.capabilities = [];
+  await page.getByRole('button', { name: 'Refresh review queue', exact: true }).click();
+  await expect(page.locator('.review-status')).toContainText('does not have assigned');
+  await expect(page.locator('.review-card')).toHaveCount(0);
+  await expect(page.locator('.review-introduction')).toHaveCount(0);
+  expect(state.requests.filter(value => value.path.endsWith('/save_provider_application') || value.path.endsWith('/submit_provider_application') || value.path.endsWith('/withdraw_provider_application'))).toHaveLength(0);
+  state.capabilities = ['provider_application_review'];
+  await page.getByRole('button', { name: 'Refresh review queue', exact: true }).click();
+  await expect(page.locator('.review-card')).toHaveCount(20);
+  await page.getByRole('button', { name: 'Inspect Applicant 01', exact: true }).click();
+  await expect(page.locator('.review-introduction')).toBeVisible();
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await expect(page.locator('.review-card')).toHaveCount(0);
+  await expect(page.locator('.review-introduction')).toHaveCount(0);
+});
+for (const [label, roles, capabilities] of [['User with forged metadata',['user'],[]],['Moderator without capability',['user','moderator'],[]],['User with capability only',['user'],['provider_application_review']]]) {
+  test(`${label} cannot load the staff application queue`, async ({ page }) => {
+    const state = await mockBackend(page); state.roles = roles; state.capabilities = capabilities;
+    state.user.user_metadata = { role: 'admin', capabilities: ['provider_application_review'] }; state.reviewApplications = reviewRows(1);
+    await signIn(page);
+    await enter(page, '/?page=provider-review');
+    await expect(page.locator('.review-status')).toContainText('does not have assigned');
+    await expect(page.locator('.review-card')).toHaveCount(0);
+    expect(state.requests.filter(value => value.path.endsWith('/list_provider_applications_for_review'))).toHaveLength(0);
+  });
+}
+test('withdrawn intake cannot remain open in the review queue', async ({ page }) => {
+  const state = await mockBackend(page); state.roles = ['user','admin']; state.capabilities = ['provider_application_review']; state.reviewApplications = reviewRows(1);
+  await signIn(page); await enter(page, '/?page=provider-review');
+  await expect(page.locator('.review-card')).toHaveCount(1);
+  state.reviewApplications[0].state = 'withdrawn';
+  await page.getByRole('button', { name: 'Inspect Applicant 01', exact: true }).click();
+  await expect(page.locator('.review-status')).toContainText('No submitted applications');
+  await expect(page.locator('.review-card')).toHaveCount(0);
+  await expect(page.locator('.review-introduction')).toHaveCount(0);
+});
+test('missing staff review schema reports unavailable data without fallback records', async ({ page }) => {
+  await mockBackend(page, { missingReviewMigration: true });
+  await signIn(page); await enter(page, '/?page=provider-review');
+  await expect(page.locator('.review-status')).toContainText('Unable to verify review access');
+  await expect(page.locator('.review-card')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Refresh review queue' })).toBeEnabled();
+});

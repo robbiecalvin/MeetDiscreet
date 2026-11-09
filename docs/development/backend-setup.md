@@ -145,11 +145,45 @@ requests. Status events contain owner, state and server time rather than duplica
 application content. They follow auth-account deletion; operational retention and
 content-version/approval records still need definition before a live review process.
 
-No approval/denial or role-assignment RPC, staff review interface, notifications,
+A separately scoped read-only staff inspection workspace is implemented below.
+No approval/denial or role-assignment RPC, notifications,
 response deadline or public publishing is implemented. A future review operation
 must verify assigned operational roles and current submitted state/version before
 an authorized audited decision. This migration has not been applied remotely by
 the agent. Run only missing migrations; keep the existing schema intact.
+
+## Add scoped staff review access
+
+After the role/application migrations, apply this file once:
+
+[202611090006_provider_review_queue.sql](../../supabase/migrations/202611090006_provider_review_queue.sql)
+
+It adds server-controlled `staff_capabilities` with no default grants. Review needs
+both an assigned `moderator` or `admin` role and the separate
+`provider_application_review` capability. Administrator membership alone does not
+imply every operational capability. Browser clients can read only their own
+capability assignments and cannot change them. No privileged key belongs in the
+browser; staff use ordinary verified sessions and protected RPCs.
+
+`list_provider_applications_for_review` and `get_provider_application_for_review`
+check actual current role/capability rows and expected reviewer identity before
+returning a curated submitted-intake view. Raw application table RLS remains
+owner-only for browser requests. Pagination is keyset-based, bounded to 50 server
+rows; the UI requests 21 and displays 20. Drafts/withdrawn entries are excluded;
+withdrawn details return no record. These RPCs never decide or mutate applications.
+
+Capability changes have protected audit events. Authorized queue/detail reads also
+record private access metadata, with no introduction text or credentials in logs.
+These read RPCs use POST because they record audit metadata. Browser audit access
+and service-API audit rewriting are denied; trusted database administration remains
+outside those restrictions. Retention/export and incident operations remain launch
+requirements. No immutable/compliance guarantee is implied.
+
+A trusted operator must provision staff role plus capability through a separately
+authorized administrative process before hosted review is usable. No account gets
+staff access automatically, and the agent has not assigned any real staff privileges
+or applied this migration. Approval/rejection, eligibility decisions, conflict rules,
+role granting and public publishing require separate implementation and authority.
 
 ## Registration starting preference
 

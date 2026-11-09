@@ -25,9 +25,9 @@ loaded the form and reject mid-session actor changes. Status events are server
 recorded and owner-readable; they are not complete content-version history.
 
 This is development intake. Submitted records are privately stored for future
-trusted review; no reviewer notifications, staff console, approval/denial process,
-Provider role grant, verification, publishing, paid plan or response deadline is
-implemented. An eventual approval process must define eligibility, confirm the
+trusted review. A separately scoped read-only inspection workspace is now prepared.
+Reviewer notifications, approval/denial decisions, Provider role grants, verification,
+publishing, paid plans and response deadlines remain unimplemented. An eventual approval process must define eligibility, confirm the
 current submitted state/version, and perform authorized audited role changes.
 
 Missing schema, failed saves and failed withdrawals preserve reliable prior state

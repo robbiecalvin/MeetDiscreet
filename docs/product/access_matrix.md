@@ -363,6 +363,12 @@ with appropriate abuse controls.
 
 Operational roles require explicit capabilities.
 
+The prepared provider-intake review increment requires both assigned Moderator/
+Administrator membership and `provider_application_review`. It grants read access
+only to submitted intake metadata/introductions through scoped backend RPCs. It
+does not grant approval, role assignment, audit reading, financial powers, or
+access to unrelated private content. No staff capability is assigned at signup.
+
 Possible capabilities include:
 
 - Review public content.

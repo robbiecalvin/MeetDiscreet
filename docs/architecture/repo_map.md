@@ -734,3 +734,8 @@ underlying feature is operational.
 - `src/backend/provider-applications.js`: verified actor-bound application reads/RPCs.
 - `supabase/migrations/202611090005_provider_applications.sql`: owner-only intake,
   protected transitions and status history, with no automatic role assignment.
+
+- `src/provider-review.js`: scoped read-only intake queue and introduction inspection.
+- `src/backend/provider-review.js`: reviewer binding and reauthorized review RPCs.
+- `supabase/migrations/202611090006_provider_review_queue.sql`: explicit review
+  capabilities, bounded submitted-intake reads and protected access audit metadata.

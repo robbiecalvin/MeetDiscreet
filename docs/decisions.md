@@ -535,3 +535,13 @@ metadata never grants roles. Protected assignment-event records support future
 operations, with retention and administrative workflow still pending. This does
 not resolve combined-role policy, provider eligibility or publishing-plan rules,
 assign a real Provider role, enable public publishing, or grant paid access.
+
+
+## DEC-021 — Explicit Capability for Intake Inspection
+
+Follow the access matrix’s scoped operational model: provider-intake reads require
+assigned staff membership plus a separate review capability, rather than blanket
+Moderator/Administrator access. This increment authorizes submitted-introduction
+inspection only and records read metadata. Decision authority, role granting,
+financial duties and public publishing are separate future capabilities/workflows;
+no real staff assignment or hosted migration is performed by the code increment.

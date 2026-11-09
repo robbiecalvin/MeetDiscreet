@@ -459,3 +459,7 @@ Provider onboarding now includes private application intake at
 `/?page=provider-application`; see [application brief](./page_briefs/provider-application.md).
 Save/submission/withdrawal require the prepared migration. Review and approval
 operations, notifications and role assignment remain separate future work.
+
+Staff intake inspection is implemented at `/?page=provider-review`; see
+[review brief](./page_briefs/provider-review.md). Assigned staff membership and
+review capability are required. Approval/rejection and publishing remain absent.

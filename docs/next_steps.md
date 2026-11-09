@@ -882,9 +882,26 @@ If launch scope is reduced:
   full run and added failure checks. Final SQL validation was rechecked with all
   15 database/security cases, and final layout/account checks passed. Mobile
   intake layout inspected; submitted editing, withdrawal and retry verified.
-- Hosted application remains pending. Staff review, provider eligibility/approval,
+- Hosted application remains pending. Decision-making review operations and provider eligibility/approval,
   notifications, role grants and controlled publishing are still future work.
   See [brief](./design/page_briefs/provider-application.md).
+
+### Scoped Staff Review Queue
+
+- Added `/?page=provider-review` with bounded pagination, explicit introduction
+  inspection, empty/unavailable/denied states, stale-response guards and data purge
+  on denied refresh/sign-out. No application or role mutation controls are present.
+- New `202611090006_provider_review_queue.sql` requires assigned staff membership
+  plus a separate provider-review capability, rechecked on every RPC. Raw table
+  browser reads remain owner-only; only submitted intake is returned to reviewers.
+- Capability changes and successful private reads have protected audit metadata;
+  no introduction text or credentials are logged. Audit retention remains pending.
+- Build, all 144 default checks and 48 backend UI checks passed. All 18 database
+  permission cases and the staff inspection/sign-out case were repeated after
+  hardening; final preview checks passed. Mobile queue/detail screenshots inspected.
+- Hosted migration application and staff provisioning are not done. Approval,
+  rejection, eligibility/conflict rules and publication remain separate work.
+  See [brief](./design/page_briefs/provider-review.md).
 
 ### Next Action
 

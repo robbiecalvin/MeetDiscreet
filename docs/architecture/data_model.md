@@ -1156,3 +1156,18 @@ separate future operations. Status history does not preserve prior content versi
 or establish identity eligibility; it stores only state/owner/time. Auth-account
 deletion cascades to these intake records/events, unlike protected role-event
 storage whose retention remains a separate operational requirement.
+
+
+## Scoped staff review capability
+
+[Review migration](../../supabase/migrations/202611090006_provider_review_queue.sql)
+adds owner-readable, server-controlled staff capabilities and protected capability/
+read-access events. The only current capability is `provider_application_review`;
+it additionally requires an assigned Moderator or Administrator role. Submitted
+application reads use actor-bound, reauthorizing RPCs returning a minimal list or
+explicit introduction detail. No global staff SELECT policy is added to applications.
+
+Read/capability event tables are service-readable but not service-rewritable through
+API grants; browser access is denied. They retain security identifiers independently
+of application state/content and need a defined retention/export process before
+live operations. They do not store application text or implement approval decisions.

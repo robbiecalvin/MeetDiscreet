@@ -70,7 +70,7 @@ export function renderAccountOverview(container, navigate, onBack) {
       buttons.push(button); options.append(button);
     }
     starting.append(options, link('user-setup', 'Explore user setup'), link('provider-setup', 'Explore provider setup'));
-    content.append(starting, accountPermissions(current));
+    content.append(starting, accountPermissions(current, navigate));
 
     const grid = node('div', null, 'account-tool-grid');
     for (const [page, title, copy, action] of [
