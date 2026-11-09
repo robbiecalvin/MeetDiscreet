@@ -1,6 +1,12 @@
+import { backendEnabled } from './backend/client.js';
+import { listListingDrafts, saveListingDraft } from './backend/drafts.js';
+import { privateDraftControls } from './backend/draft-controls.js';
 // A frontend-only draft. Never persist this as a real listing or account state.
 const defaults = () => ({ category: 'offering', title: '', description: '', city: 'Vancouver', area: '', activity: 'Coffee' });
 let draft = defaults();
+let savedId = null;
+let identityEpoch = 0;
+export function clearListingDraftState() { draft = defaults(); savedId = null; identityEpoch++; }
 const examples = {
   offering: { title: 'A coffee, a city walk, and good conversation', description: 'Enjoy an unhurried coffee and a walk around the neighbourhood. A simple plan with time to chat and discover somewhere new.', area: 'Kitsilano' },
   looking: { title: 'Company for a gallery afternoon?', description: 'Looking for someone to explore a local gallery and share a coffee afterwards. A relaxed afternoon with no rush and plenty to talk about.', area: 'Mount Pleasant' },
@@ -22,7 +28,7 @@ export function renderListingEditor(container, onBack) {
   });
   const intro = element('div', null, 'editor-intro');
   intro.append(element('p', 'A LITTLE PLAN STARTS HERE', 'eyebrow'), element('h1', 'Put a plan into words.'), element('p', 'Offer your company or describe an experience you’d like to share.', 'offering-lead'));
-  const notice = element('p', 'Demo editor. Use fictional details. Nothing is saved or published; a full refresh clears this draft.', 'editor-notice');
+  const notice = element('p', backendEnabled ? 'Development listing drafts. Use test data. Unsaved edits clear on refresh; sign in to save/load private drafts. Saving does not publish or grant posting access.' : 'Demo editor. Use fictional details. Nothing is saved or published; a full refresh clears this draft.', 'editor-notice');
   container.append(back, intro, notice);
   const form = element('form', null, 'listing-form');
   form.noValidate = true;
@@ -92,6 +98,7 @@ export function renderListingEditor(container, onBack) {
   });
   clear.addEventListener('click', () => {
     draft = defaults();
+    savedId = null;
     syncFields();
     fields.get('title').control.focus();
   });
@@ -121,7 +128,7 @@ export function renderListingEditor(container, onBack) {
     form.hidden = false;
     fields.get('title').control.focus();
   });
-  preview.append(heading, card, element('p', 'Preview only. This draft is not saved, published, or added to discovery. No publishing or posting access has been granted.', 'profile-small'), edit);
+  preview.append(heading, card, element('p', backendEnabled ? 'Preview only. Save controls store a private draft; nothing is published or added to discovery. No publishing or posting access is granted.' : 'Preview only. This draft is not saved, published, or added to discovery. No publishing or posting access has been granted.', 'profile-small'), edit);
   form.addEventListener('submit', (event) => {
     event.preventDefault();
     for (const [key, { control }] of fields) draft[key] = control.value;
@@ -157,5 +164,36 @@ export function renderListingEditor(container, onBack) {
     heading.focus();
     preview.scrollIntoView({ block: 'start', behavior: 'instant' });
   });
+  const storage = privateDraftControls({
+    multiple: true,
+    onSave: async () => {
+      for (const [key, { control }] of fields) draft[key] = control.value;
+      const epoch = identityEpoch;
+      const nextId = await saveListingDraft({ ...draft }, savedId);
+      if (epoch !== identityEpoch) throw new Error('Account changed.');
+      savedId = nextId;
+      return 'Private listing draft saved. It has not been published.';
+    },
+    onLoad: async (choices) => {
+      const epoch = identityEpoch;
+      const rows = await listListingDrafts();
+      if (epoch !== identityEpoch) throw new Error('Account changed.');
+      choices.replaceChildren();
+      for (const row of rows) {
+        const button = element('button', row.title, 'button outline');
+        button.type = 'button';
+        button.addEventListener('click', () => {
+          if (epoch !== identityEpoch) return;
+          savedId = row.id;
+          draft = { category: row.kind, title: row.title, description: row.description, city: row.city, area: row.area, activity: row.activity };
+          syncFields(); preview.hidden = true; form.hidden = false;
+          fields.get('title').control.focus();
+        });
+        choices.append(button);
+      }
+      return rows.length ? 'Choose one of your private drafts to load.' : 'No private listing drafts found for this account.';
+    },
+  });
   container.append(form, preview);
+  if (storage) container.append(storage);
 }

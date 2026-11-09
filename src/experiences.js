@@ -4,6 +4,7 @@ let nextId = 1;
 const blank = () => ({ title: '', description: '', offered: true, included: true, amount: '', feeType: 'once' });
 let composer = blank();
 let editingId = null;
+export function clearExperienceDraftState() { items = []; nextId = 1; composer = blank(); editingId = null; }
 
 // Exact draft-format parsing only. No currency or live billing policy is selected.
 export function parseDraftAmount(value) {

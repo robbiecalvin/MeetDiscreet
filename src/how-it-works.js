@@ -1,3 +1,4 @@
+import { backendEnabled } from './backend/client.js';
 import { referencePrices, formatReferencePrice } from './pricing.js';
 
 function element(tag, content, className) {
@@ -10,7 +11,7 @@ function element(tag, content, className) {
 const journeys = {
   users: [
     ['Find your kind of company', 'Explore public profiles and Offering ads by general location. Start with someone or a plan that catches your interest.'],
-    ['Get to know a little more', 'A registered member account is intended to unlock member-level profile information. Registration and accounts are not connected in this preview.'],
+    ['Get to know a little more', backendEnabled ? 'Development accounts can sign in and save their own private drafts. Member/subscriber access to real marketplace profiles is a separate integration and is not granted by the demo.' : 'A registered member account is intended to unlock member-level profile information. Registration and accounts are not connected in this preview.'],
     ['Choose a companion subscription', 'A subscription unlocks the selected companion’s subscriber media, detailed experiences, messages, calls, and booking requests. It does not unlock every companion.'],
     ['Make a plan together', 'The companion can accept, decline, or suggest changes to a booking request. The experience is priced separately; booking and payment policies must be finalized before live use.'],
   ],
@@ -92,7 +93,7 @@ export function renderHowItWorks(container, onDiscover) {
     ['Does one subscription unlock every companion?', 'No. An individual subscription applies to the selected companion. Subscribing to one companion does not unlock another.'],
     ['Is the booked experience included?', 'No. A subscription unlocks content, communication, and booking-request access. Companionship time and agreed expenses are separately priced.'],
     ['Does Premium include companion messaging?', 'No. Premium is a separate user membership for posting and boost benefits. It does not replace an individual companion subscription.'],
-    ['Can I sign up, subscribe, or book now?', 'Not yet. This is a frontend demo with fictional profiles and ads. Accounts, private content, messages, calls, payments, and bookings are not connected.'],
+    ['Can I sign up, subscribe, or book now?', backendEnabled ? 'Development registration and private draft storage are available. Public profiles are fictional; subscriptions, private marketplace content, messaging, calls, payments, and bookings remain unconnected.' : 'Not yet. This is a frontend demo with fictional profiles and ads. Accounts, private content, messages, calls, payments, and bookings are not connected.'],
     ['What happens after I request a booking?', 'The planned flow lets the companion accept, decline, or propose revisions. Deposit, cancellation, and remaining-balance rules are still being finalized; no booking payment is collected here.'],
   ]) {
     const details = element('details');

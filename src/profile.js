@@ -97,5 +97,5 @@ export function renderProfile(container, provider, onBack, onSubscribe, backLabe
   button.addEventListener('click', () => onSubscribe(provider));
   aside.append(button, element('p', 'Currency and renewal terms remain pending. Subscriptions and payments are not connected in this demo.', 'profile-small'));
   layout.append(content, aside);
-  container.append(layout, element('p', 'Fictional profile and online status. Labelled previews contain no private content. No accounts, subscriptions, messaging, or bookings are connected.', 'profile-demo-note'));
+  container.append(layout, element('p', 'Fictional profile and online status. Labelled previews contain no private content. These fictional profiles are not connected to subscriptions, messaging, or bookings.', 'profile-demo-note'));
 }

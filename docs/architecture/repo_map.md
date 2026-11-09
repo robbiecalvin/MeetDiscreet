@@ -676,3 +676,14 @@ Report checks that could not be completed.
 
 A directory, document, or interface control is not evidence that its
 underlying feature is operational.
+
+## Development Backend Increment
+
+- `src/backend/`: public configuration validation, official Supabase SDK client,
+  authentication callback handling, private draft repository and UI controls.
+- `supabase/migrations/`: versioned owner-only PostgreSQL draft schema and RLS.
+- `tests/backend-security.spec.js`: migration/grants/RLS checks in PGlite.
+- `backend-tests/` and `playwright.backend.config.js`: mocked-provider browser checks.
+- `.env.example`, `vite.config.js`, `public/_headers`: public configuration template,
+  build validation and hosted browser security headers.
+- [Backend setup](../development/backend-setup.md): activation and live validation.

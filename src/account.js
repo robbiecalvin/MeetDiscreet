@@ -1,6 +1,8 @@
+import { backendEnabled, backendClient, authRedirect } from './backend/client.js';
 const modes = {
   'sign-in': { title: 'Good to see you again.', intro: 'A familiar face. A new plan.', action: 'Check sign-in preview' },
   register: { title: 'A new connection starts here.', intro: 'A little introduction, and room for something new.', action: 'Check registration preview' },
+  'reset-password': { title: 'Choose a new password.', intro: 'Complete recovery using your verified link.', action: 'Update password' },
   'recover-account': { title: 'Let’s find your way back.', intro: 'A preview of the account-recovery screen.', action: 'Check recovery preview' },
 };
 function element(tag, text, className) {
@@ -12,7 +14,9 @@ function element(tag, text, className) {
 
 export function renderAccount(container, mode, onMode, onBack) {
   container.replaceChildren();
+  if (mode === 'reset-password' && !backendEnabled) mode = 'recover-account';
   const config = modes[mode];
+  const actionLabel = backendEnabled ? ({ 'sign-in': 'Sign in', register: 'Create account', 'recover-account': 'Send recovery email', 'reset-password': 'Update password' })[mode] : config.action;
   const back = element('a', '← Back to discovery', 'profile-back');
   back.href = './';
   back.addEventListener('click', (event) => {
@@ -22,7 +26,7 @@ export function renderAccount(container, mode, onMode, onBack) {
   container.append(back);
   const layout = element('div', null, 'account-layout');
   const intro = element('div', null, 'account-intro');
-  intro.append(element('p', 'YOUR NEXT SHARED MOMENT', 'eyebrow'), element('h1', config.title), element('p', config.intro, 'offering-lead'), element('p', 'Account screen preview. Use fictional details only. Authentication is not connected; nothing is sent or saved.', 'account-preview-note'));
+  intro.append(element('p', 'YOUR NEXT SHARED MOMENT', 'eyebrow'), element('h1', config.title), element('p', config.intro, 'offering-lead'), element('p', backendEnabled ? 'Development authentication is connected. Use test accounts while eligibility, final policies, and launch operations are being completed. Saving a private draft does not publish it.' : 'Account screen preview. Use fictional details only. Authentication is not connected; nothing is sent or saved.', 'account-preview-note'));
   const panel = element('div', null, 'account-panel');
   const tabs = element('nav', null, 'account-tabs');
   tabs.setAttribute('aria-label', 'Account screens');
@@ -39,7 +43,7 @@ export function renderAccount(container, mode, onMode, onBack) {
   tabs.append(modeLink('sign-in', 'Sign in'), modeLink('register', 'Create account'));
   const form = element('form', null, 'account-form');
   form.noValidate = true;
-  form.autocomplete = 'off';
+  form.autocomplete = backendEnabled ? 'on' : 'off';
   const summary = element('p', '', 'account-error-summary');
   summary.setAttribute('role', 'alert');
   const result = element('p', '', 'account-preview-result');
@@ -55,8 +59,8 @@ export function renderAccount(container, mode, onMode, onBack) {
     input.name = key;
     input.type = type;
     input.required = true;
-    input.autocomplete = 'off';
-    input.maxLength = type === 'email' ? 254 : 128;
+    input.autocomplete = backendEnabled ? (key === 'email' ? 'email' : key === 'username' ? 'username' : mode === 'sign-in' ? 'current-password' : 'new-password') : 'off';
+    if (type !== 'password' || !backendEnabled) input.maxLength = type === 'email' ? 254 : 128;
     labelNode.htmlFor = input.id;
     const error = element('p', '', 'account-field-error');
     error.id = `account-${key}-error`;
@@ -87,10 +91,10 @@ export function renderAccount(container, mode, onMode, onBack) {
     fields.set(key, { input, error });
   }
   if (mode === 'register') addField('username', 'Username', 'text');
-  addField('email', 'Email', 'email');
+  if (mode !== 'reset-password') addField('email', 'Email', 'email');
   if (mode !== 'recover-account') addField('password', 'Password', 'password');
+  if (mode === 'register' || mode === 'reset-password') addField('confirm-password', 'Confirm password', 'password');
   if (mode === 'register') {
-    addField('confirm-password', 'Confirm password', 'password');
     const label = element('label', null, 'account-adult');
     const input = element('input');
     input.id = 'account-adult';
@@ -105,7 +109,7 @@ export function renderAccount(container, mode, onMode, onBack) {
     fields.set('adult', { input, error });
     form.append(element('p', 'This is self-attestation, not identity verification. Final account eligibility and policy acceptance are not implemented.', 'profile-small'));
   }
-  const submit = element('button', config.action, 'button primary');
+  const submit = element('button', actionLabel, 'button primary');
   submit.type = 'submit';
   const example = element('button', 'Use fictional example', 'button outline');
   example.type = 'button';
@@ -124,7 +128,9 @@ export function renderAccount(container, mode, onMode, onBack) {
     result.textContent = '';
     fields.get('email').input.focus();
   });
-  form.addEventListener('submit', (event) => {
+  let busy = false;
+  form.addEventListener('submit', async (event) => {
+    if (busy) { event.preventDefault(); return; }
     event.preventDefault();
     const errors = [];
     for (const [key, field] of fields) {
@@ -134,7 +140,7 @@ export function renderAccount(container, mode, onMode, onBack) {
       input.removeAttribute('aria-invalid');
       if (key === 'adult' && !input.checked) error.textContent = 'Adult confirmation is required for this form preview.';
       else if (key !== 'adult' && !input.value.trim()) error.textContent = 'This field is required.';
-      else if (key === 'email' && input.validity.typeMismatch) error.textContent = 'Enter a valid email format, using fictional details.';
+      else if (key === 'email' && input.validity.typeMismatch) error.textContent = backendEnabled ? 'Enter a valid email address.' : 'Enter a valid email format, using fictional details.';
       else if (key === 'confirm-password' && input.value !== fields.get('password').input.value) error.textContent = 'Passwords must match in the preview.';
       if (error.textContent) { input.setAttribute('aria-invalid', 'true'); errors.push(input); }
     }
@@ -145,6 +151,7 @@ export function renderAccount(container, mode, onMode, onBack) {
       return;
     }
     summary.textContent = '';
+    const credentials = { email: fields.get('email')?.input.value.trim(), password: fields.get('password')?.input.value, username: fields.get('username')?.input.value.trim() };
     for (const field of fields.values()) {
       if (!field.error) continue;
       if (field.input.type === 'checkbox') field.input.checked = false;
@@ -156,6 +163,36 @@ export function renderAccount(container, mode, onMode, onBack) {
       field.toggle.textContent = field.input.id === 'account-password' ? 'Show password' : 'Show confirm password';
       field.toggle.setAttribute('aria-pressed', 'false');
     }
+    if (backendEnabled) {
+      busy = true;
+      submit.disabled = true;
+      submit.textContent = 'Please wait…';
+      try {
+        const auth = backendClient().auth;
+        let response;
+        if (mode === 'sign-in') response = await auth.signInWithPassword({ email: credentials.email, password: credentials.password });
+        else if (mode === 'register') response = await auth.signUp({ email: credentials.email, password: credentials.password, options: { emailRedirectTo: authRedirect(), data: { requested_username: credentials.username } } });
+        else if (mode === 'recover-account') response = await auth.resetPasswordForEmail(credentials.email, { redirectTo: authRedirect(true) });
+        else response = await auth.updateUser({ password: credentials.password });
+        if (response.error) throw response.error;
+        if (!result.isConnected) return;
+        result.textContent = mode === 'sign-in'
+          ? 'Signed in to the development backend. You can save your own private drafts. No publishing, subscription, or administrative access is granted.'
+          : mode === 'register'
+            ? (response.data.session ? 'Development account created and signed in. You can save private drafts; no paid or publishing access is granted.' : 'If registration is eligible, check your email for confirmation before signing in. No paid or publishing access is granted.')
+            : mode === 'recover-account'
+              ? 'If this email is eligible for recovery, a recovery message will be sent. Check the inbox and open the link in this same browser.'
+              : 'Your password was updated by the authentication provider.';
+      } catch {
+        if (result.isConnected) result.textContent = mode === 'sign-in' ? 'Unable to sign in. Check your details, email confirmation, and connection, then retry.' : 'The authentication request could not be completed. Check your details and connection, then retry.';
+      } finally {
+        busy = false;
+        submit.disabled = false;
+        submit.textContent = actionLabel;
+        if (result.isConnected) result.focus();
+      }
+      return;
+    }
     result.textContent = mode === 'recover-account'
       ? 'Recovery form preview checked. Authentication is not connected; no email was sent and no reset link was created. Demo fields have been cleared.'
       : mode === 'register'
@@ -163,9 +200,11 @@ export function renderAccount(container, mode, onMode, onBack) {
         : 'Sign-in form preview checked. Authentication is not connected; you have not been signed in and no session or access was granted. Demo fields have been cleared.';
     result.focus();
   });
-  form.append(submit, example, result);
+  form.append(submit);
+  if (!backendEnabled) form.append(example);
+  form.append(result);
   panel.append(tabs, form);
-  if (mode !== 'recover-account') {
+  if (!['recover-account', 'reset-password'].includes(mode)) {
     const recovery = modeLink('recover-account', 'Forgot your password?');
     recovery.className = 'account-recovery-link';
     panel.append(recovery);

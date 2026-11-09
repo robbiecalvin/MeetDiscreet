@@ -636,6 +636,22 @@ If launch scope is reduced:
 - Documentation links and diff whitespace checked. Established platform prices and pending commercial/access policies preserved.
 - Safari, Agrandir, real authentication/ownership/storage, and live Netlify verification remain unverified/unimplemented as applicable.
 
+### Supabase Development Increment
+
+- Implemented feature-flagged email/password accounts, PKCE callbacks, recovery,
+  sign-out, and private profile/listing draft save/load through the official SDK.
+- Owner-only PostgreSQL migration committed separately. Robbie reports running
+  it successfully; hosted schema verification remains outstanding.
+- Build passed; all 109 default tests (including six PostgreSQL/configuration
+  checks) and five mocked-provider browser integration tests passed. Policy
+  checks exercise owner, cross-owner, anonymous, and invalid writes.
+- Running cloud still denies the project domain after the reported settings edit;
+  current observed custom allowlist is empty. No live authentication, email,
+  schema, or Netlify integration verification is claimed.
+- Default backend flag remains false. Configure Supabase redirects and Netlify
+  build variables, then validate with two test accounts before enabling real use.
+  See [setup](./development/backend-setup.md). No payments or public publishing.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

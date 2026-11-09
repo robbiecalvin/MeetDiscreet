@@ -1,7 +1,12 @@
+import { backendEnabled } from './backend/client.js';
+import { loadProfileDraft, saveProfileDraft } from './backend/drafts.js';
+import { privateDraftControls } from './backend/draft-controls.js';
 import { draftToolNavigation } from './draft-tools.js';
 import { providers } from './data.js';
 const defaults = () => ({ name: '', username: '', age: '', tagline: '', city: 'Vancouver', area: '', photo: '2', bio: '', interests: '' });
 let draft = defaults();
+let identityEpoch = 0;
+export function clearProfileDraftState() { draft = defaults(); identityEpoch++; }
 function element(tag, text, className) {
   const node = document.createElement(tag);
   if (text) node.textContent = text;
@@ -18,7 +23,7 @@ export function renderProfileEditor(container, onBack, onTool) {
   });
   const intro = element('div', null, 'editor-intro');
   intro.append(element('p', 'A LITTLE MORE ABOUT YOU', 'eyebrow'), element('h1', 'Make an introduction.'), element('p', 'Try out a companion profile and see what each audience would see.', 'offering-lead'));
-  container.append(back, draftToolNavigation('edit-profile', onTool), intro, element('p', 'Demo profile editor. Use fictional details only. Nothing is saved or published; a full refresh clears the draft. Audience previews do not grant account access.', 'editor-notice'));
+  container.append(back, draftToolNavigation('edit-profile', onTool), intro, element('p', backendEnabled ? 'Development profile drafts. Use test data. Unsaved edits are kept in memory; save/load controls require sign-in and store private drafts only. Audience previews do not grant access.' : 'Demo profile editor. Use fictional details only. Nothing is saved or published; a full refresh clears the draft. Audience previews do not grant account access.', 'editor-notice'));
   const form = element('form', null, 'listing-form profile-draft-form');
   form.noValidate = true;
   form.autocomplete = 'off';
@@ -153,5 +158,22 @@ export function renderProfileEditor(container, onBack, onTool) {
     title.focus();
     preview.scrollIntoView({ block: 'start', behavior: 'instant' });
   });
+  const storage = privateDraftControls({
+    onSave: async () => {
+      for (const [key, { input }] of fields) draft[key] = input.value;
+      await saveProfileDraft({ ...draft });
+      return 'Private profile draft saved. It is not published.';
+    },
+    onLoad: async () => {
+      const epoch = identityEpoch;
+      const saved = await loadProfileDraft();
+      if (epoch !== identityEpoch) throw new Error('Account changed.');
+      if (!saved) return 'No private profile draft found for this account.';
+      draft = saved; sync(); preview.hidden = true; form.hidden = false;
+      fields.get('name').input.focus();
+      return 'Your private profile draft was loaded.';
+    },
+  });
   container.append(form, preview);
+  if (storage) container.append(storage);
 }

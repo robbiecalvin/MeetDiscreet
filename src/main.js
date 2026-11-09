@@ -1,14 +1,15 @@
+import { backendEnabled, backendClient, processAuthCallback } from './backend/client.js';
 import './styles.css';
 import { providers, ads } from './data.js';
 import { renderProfile } from './profile.js';
 import { renderOffering } from './offering.js';
 import { renderHowItWorks } from './how-it-works.js';
-import { renderListingEditor } from './listing-editor.js';
+import { renderListingEditor, clearListingDraftState } from './listing-editor.js';
 import { renderGuidelines } from './guidelines.js';
 import { renderHelp } from './help.js';
 import { renderAccount } from './account.js';
-import { renderProfileEditor } from './profile-editor.js';
-import { renderExperiences } from './experiences.js';
+import { renderProfileEditor, clearProfileDraftState } from './profile-editor.js';
+import { renderExperiences, clearExperienceDraftState } from './experiences.js';
 import { referencePrices, formatReferencePrice } from './pricing.js';
 
 const $ = (selector) => document.querySelector(selector);
@@ -78,9 +79,10 @@ function openDetail(title, copy, provider) {
 let discoveryScroll = 0;
 let selectedCardId = null;
 let selectedAdId = null;
+let callbackStarted = false;
 function renderRoute() {
   const params = new URL(location.href).searchParams;
-  const accountMode = ['sign-in', 'register', 'recover-account'].includes(params.get('page')) ? params.get('page') : null;
+  const accountMode = ['sign-in', 'register', 'recover-account', 'reset-password'].includes(params.get('page')) ? params.get('page') : null;
   const isAccount = !params.has('profile') && !params.has('ad') && accountMode !== null;
   $('#account-view').hidden = !isAccount;
   if (!isAccount) $('#account-view').replaceChildren();
@@ -108,17 +110,19 @@ function renderRoute() {
   const isEditor = !isProfile && !isOffering && params.get('page') === 'create-listing';
   const isProfileEditor = !isProfile && !isOffering && params.get('page') === 'edit-profile';
   const isExperiences = !isProfile && !isOffering && params.get('page') === 'experiences';
+  const isAuthCallback = !isProfile && !isOffering && params.get('page') === 'auth-callback';
+  $('#auth-callback-view').hidden = !isAuthCallback;
   $('#experiences-view').hidden = !isExperiences;
   $('#profile-editor-view').hidden = !isProfileEditor;
   $('#editor-view').hidden = !isEditor;
-  $('#discovery-view').hidden = isProfile || isOffering || isHow || isEditor || isAccount || isProfileEditor || isExperiences;
+  $('#discovery-view').hidden = isProfile || isOffering || isHow || isEditor || isAccount || isProfileEditor || isExperiences || isAuthCallback;
   $('#how-view').hidden = !isHow;
   $('#profile-view').hidden = !isProfile;
   $('#offering-view').hidden = !isOffering;
-  $('.view-dock').hidden = isProfile || isOffering || isHow || isEditor || isAccount || isProfileEditor || isExperiences;
+  $('.view-dock').hidden = isProfile || isOffering || isHow || isEditor || isAccount || isProfileEditor || isExperiences || isAuthCallback;
   const discoverLink = $('.desktop-nav a');
   discoverLink.href = './';
-  if (isProfile || isOffering || isHow || isEditor || isAccount || isProfileEditor || isExperiences) discoverLink.removeAttribute('aria-current');
+  if (isProfile || isOffering || isHow || isEditor || isAccount || isProfileEditor || isExperiences || isAuthCallback) discoverLink.removeAttribute('aria-current');
   else discoverLink.setAttribute('aria-current', 'page');
   document.querySelectorAll('[data-how-link]').forEach((link) => {
     if (isHow) link.setAttribute('aria-current', 'page');
@@ -154,6 +158,19 @@ function renderRoute() {
   } else if (isExperiences) {
     renderExperiences($('#experiences-view'), backToDiscovery, navigateAccount);
     document.title = 'Experience catalogue · MeetDiscreet';
+  } else if (isAuthCallback) {
+    document.title = 'Verify account link · MeetDiscreet';
+    if (!callbackStarted) {
+      callbackStarted = true;
+      processAuthCallback().then((result) => {
+        if (new URL(location.href).searchParams.get('page') !== 'auth-callback') return;
+        if (result.error) $('.auth-callback-status').textContent = result.error;
+        else {
+          $('.auth-callback-status').textContent = 'Account link verified.';
+          navigateAccount(result.recovery ? 'reset-password' : 'edit-profile');
+        }
+      }).catch(() => { $('.auth-callback-status').textContent = 'Unable to verify this link. Request a fresh link and try again.'; });
+    }
   } else document.title = 'Discover · MeetDiscreet';
 }
 function backToDiscovery() {
@@ -208,7 +225,7 @@ window.addEventListener('popstate', () => {
     (document.getElementById(location.hash.slice(1)) || main).focus({ preventScroll: true });
     return;
   }
-  if (!new URL(location.href).searchParams.has('profile') && !new URL(location.href).searchParams.has('ad') && !['how-it-works', 'create-listing', 'sign-in', 'register', 'recover-account', 'edit-profile', 'experiences'].includes(new URL(location.href).searchParams.get('page'))) {
+  if (!new URL(location.href).searchParams.has('profile') && !new URL(location.href).searchParams.has('ad') && !['how-it-works', 'create-listing', 'sign-in', 'register', 'recover-account', 'edit-profile', 'experiences', 'auth-callback', 'reset-password'].includes(new URL(location.href).searchParams.get('page'))) {
     window.scrollTo({ top: discoveryScroll, behavior: 'instant' });
     const card = state.view === 'ads' ? (selectedAdId && document.querySelector(`[data-ad="${selectedAdId}"]`)) : (selectedCardId && document.querySelector(`[data-provider="${selectedCardId}"]`));
     (card || $('#main')).focus({ preventScroll: true });
@@ -300,7 +317,7 @@ $('#reset').addEventListener('click', () => {
 document.querySelectorAll('[data-category]').forEach((button) => button.addEventListener('click', () => { state.category = button.dataset.category; render(); }));
 document.querySelectorAll('.close-dialog').forEach((button) => button.addEventListener('click', () => button.closest('dialog').close()));
 const info = {
-  privacy: ['Privacy · prototype notice', 'This preview does not request your device location or create accounts. Age confirmation is stored on this browser for 30 days when storage is available. Fictional demo filters stay in memory. This notice is not the final Privacy Policy.'],
+  privacy: ['Privacy · prototype notice', backendEnabled ? 'Development authentication uses Supabase. Its supported browser SDK stores session tokens in browser storage. Profile and listing drafts are stored privately only when you explicitly save them. Public discovery is fictional. Use test data while the final Privacy Policy, eligibility, and operational controls are pending.' : 'This preview does not request your device location or create accounts. Age confirmation is stored on this browser for 30 days when storage is available. Fictional demo filters stay in memory. This notice is not the final Privacy Policy.'],
   terms: ['Terms · prototype notice', 'This is a frontend demonstration using fictional profiles and ads. No purchases, subscriptions, bookings, or real service arrangements can be made. Final service terms will be provided before a live launch.'],
 };
 document.querySelectorAll('[data-info]').forEach((button) => button.addEventListener('click', () => openDetail(...info[button.dataset.info])));
@@ -310,7 +327,7 @@ render();
 renderRoute();
 
 $('.desktop-nav a').addEventListener('click', (event) => {
-  if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && (new URL(location.href).searchParams.has('profile') || new URL(location.href).searchParams.has('ad') || ['how-it-works', 'create-listing', 'sign-in', 'register', 'recover-account', 'edit-profile', 'experiences'].includes(new URL(location.href).searchParams.get('page')))) {
+  if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && (new URL(location.href).searchParams.has('profile') || new URL(location.href).searchParams.has('ad') || ['how-it-works', 'create-listing', 'sign-in', 'register', 'recover-account', 'edit-profile', 'experiences', 'auth-callback', 'reset-password'].includes(new URL(location.href).searchParams.get('page')))) {
     event.preventDefault();
     backToDiscovery();
   }
@@ -434,5 +451,42 @@ for (const link of document.querySelectorAll('[data-profile-editor-link]')) {
   link.addEventListener('click', (event) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault(); navigateAccount('edit-profile');
+  });
+}
+
+if (backendEnabled) {
+  const actions = document.createElement('div');
+  actions.className = 'backend-session-actions';
+  const status = document.createElement('span');
+  status.className = 'profile-small';
+  status.setAttribute('role', 'status');
+  const signOut = document.createElement('button');
+  signOut.textContent = 'Sign out';
+  signOut.hidden = true;
+  signOut.addEventListener('click', async () => {
+    signOut.disabled = true;
+    try {
+      const { error } = await backendClient().auth.signOut();
+      if (error) status.textContent = 'Sign-out could not complete. Retry.';
+    } catch { status.textContent = 'Sign-out could not complete. Retry.'; }
+    finally { signOut.disabled = false; }
+  });
+  actions.append(status, signOut);
+  $('.account-actions').append(actions);
+  let currentUserId;
+  backendClient().auth.onAuthStateChange((_event, session) => {
+    const nextUserId = session?.user?.id || null;
+    const changed = currentUserId !== nextUserId;
+    currentUserId = nextUserId;
+    if (changed) {
+      clearProfileDraftState(); clearListingDraftState(); clearExperienceDraftState();
+      for (const selector of ['#profile-editor-view', '#editor-view', '#experiences-view']) $(selector).replaceChildren();
+    }
+    queueMicrotask(() => {
+      $('[data-account-link]').textContent = nextUserId ? 'Account' : 'Sign in';
+      signOut.hidden = !nextUserId;
+      status.textContent = nextUserId ? 'Development session' : '';
+      if (changed && ['edit-profile', 'create-listing', 'experiences'].includes(new URL(location.href).searchParams.get('page'))) renderRoute();
+    });
   });
 }

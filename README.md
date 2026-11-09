@@ -14,23 +14,17 @@ MeetDiscreet is in planning and development.
 This README describes the intended product. It does not establish that
 any feature, payment integration, or deployment is operational.
 
-The repository now includes a local frontend discovery prototype: a 30-day
-entrance age confirmation, portrait provider grid, compact ads view, working
-demo filters, public companion profiles with labelled locked-content previews,
-public Offering ad details linked to their companion profiles, and a How it works
-page with separate reference plans and FAQs, plus an in-memory listing editor
-with Offering/Looking For draft previews. Nothing entered in the editor is saved
-or published. The Community Guidelines & Boundaries reader is accessible before
-age confirmation and does not grant browsing access. A searchable Help page
-explains the demo and links to existing features; live support/report submission
-is not connected. Sign-in, registration, and recovery screens support fictional
-form validation only; they do not create accounts or send emails. The companion
-profile editor provides an in-memory draft and labelled audience previews without
-saving a profile or changing access. Its companion draft tools include an experience
-catalogue with included/extra options and currency-pending draft amounts; no
-charges or booking quotes are calculated. Profiles, generated photos, online statuses, and ads are fictional.
-Accounts, payments, bookings, communication, and production deployment are not
-connected. See [the roadmap](./docs/next_steps.md) for verification and limitations.
+The Netlify frontend prototype includes age confirmation, discovery, fictional
+profiles and ads, account forms, private draft editors, and experience previews.
+Supabase Free was selected for development authentication and owner-only profile
+and listing drafts. This integration is disabled by default; the existing demo
+continues to work without a backend. Experiences remain in memory.
+
+See [backend setup](./docs/development/backend-setup.md) for configuration and
+verification requirements. Local PostgreSQL policy checks and mocked browser
+checks do not establish hosted authentication or email delivery. No payments,
+public publishing, messaging, or live booking service is connected. Profiles,
+photos, online statuses, and discovery ads remain fictional.
 
 ## Product Overview
 

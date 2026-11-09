@@ -4,7 +4,12 @@
 
 Describe the logical data model for MeetDiscreet.
 
-This is a design specification, not an implemented database schema.
+The marketplace entities below remain a design specification. The first implemented
+schema is limited to `profile_drafts` and `listing_drafts` in the versioned
+[private draft migration](../../supabase/migrations/202611080001_private_drafts.sql).
+Both are owner-only with RLS; neither is a public profile, listing, entitlement,
+or publication record. Supabase Auth supplies development identities. Hosted
+schema validation remains pending; see [setup](../development/backend-setup.md).
 
 Entity names are proposed.
 Adapt them to the selected database while preserving responsibilities,

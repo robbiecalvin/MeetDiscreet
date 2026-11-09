@@ -31,15 +31,10 @@ permissions, subscriptions, bookings, private media, and communication.
 The following remain unselected until recorded as approved decisions:
 
 
-- Backend provider and runtime.
-- Database provider.
-- Authentication provider.
 - Private media storage.
 - Payment and payout provider.
 - Realtime messaging infrastructure.
 - Audio/video calling infrastructure.
-- Production hosting provider.
-- CI and deployment configuration.
 
 Do not describe these services as configured or operational before
 they have been implemented and verified.
@@ -49,7 +44,11 @@ they have been implemented and verified.
 Robbie’s local platform is macOS. The cloud validation machine is Linux.
 Use Node.js 24.22.1 (`.nvmrc`) and npm with the committed package-lock.json.
 Vite 8.3.6 supplies the development server and build; Playwright 1.65.0 supplies
-meaningful browser checks. No frontend framework or backend service is installed.
+meaningful browser checks. Supabase JS 2.119.0 provides optional development
+authentication and private drafts; PGlite 0.5.15 exercises PostgreSQL policies.
+Supabase Free was selected for these services; live integration remains unverified.
+Netlify is the approved GitHub-connected frontend host. See
+[backend setup](../development/backend-setup.md) for configuration and limits.
 
 From the repository root:
 

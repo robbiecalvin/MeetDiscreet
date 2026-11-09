@@ -494,3 +494,13 @@ availability order, and “View companion profile” as its primary action, fixe
 on mobile. Up to three same-city related Offering ads are a provisional choice.
 See [Offering brief](./design/page_briefs/offering-ad.md). Existing prices and
 visibility rules remain unchanged; Looking For full-post visibility is still pending.
+
+
+## DEC-017 — Supabase Free Development Backend
+
+Robbie selected a new Supabase Free project for authentication and PostgreSQL.
+The first integration covers email/password development accounts and private
+owner-only profile/listing drafts. It grants no marketplace role, public publishing,
+paid entitlement, or eligibility verification. Experiences remain in memory.
+The deployment flag defaults off until project configuration and live checks are
+completed. See [backend setup](./development/backend-setup.md).

@@ -44,7 +44,10 @@ Keep email confirmation enabled. In Authentication → URL Configuration:
 
 The app constructs redirects from its own origin; it does not accept a return URL
 from user input. Auth links use the SDK's PKCE flow. Browser-managed verification
-state must be available in the browser opening the link. Callback codes/errors are
+state must be available in the browser opening the link. SDK 2.119.0 appends an
+`sb_flow_id`; the callback captures it before removing it from the URL and passes
+it explicitly to the supported exchange method. Keep redirect patterns scoped to
+the exact Netlify origin, including callback query variations. Callback codes/errors are
 removed from the address bar before exchange; Netlify headers disable referrers.
 
 Supabase's default email sender has restrictions and rate limits. Use the project
