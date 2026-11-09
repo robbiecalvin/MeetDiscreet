@@ -543,7 +543,7 @@ If launch scope is reduced:
 
 ## 18. Current Work Snapshot
 
-- Objective: Searchable Help page with public access and accurate demo/support limits.
+- Objective: Sign-in, registration, and recovery screen previews without authentication or account creation.
 - Completed: Pinned Node/npm/Vite workflow; age gate; default portrait grid with three columns on mobile; bottom people/ads switch; one-column ad cards; city, search, online, and interest filters; empty reset; limited public demo dialogs.
 - Visual direction: #121521 / #38476b / #b6192e, Agrandir preferred, bold headings and thin body text. Licensed font assets absent; system fallback currently used.
 - Gate: 30-day browser confirmation; external referrer exit with Google fallback. No role or account privileges are granted.
@@ -606,12 +606,19 @@ If launch scope is reduced:
 - An initial test identified an ambiguous select label; label/control association corrected, focused Help checks passed, and the full 70-test Chromium suite passed after the fix.
 - Desktop/mobile views inspected; build passed. Live Netlify verification remains blocked by environment network policy.
 
+### Account Entry Increment
+
+- AUTH-01/AUTH-02/AUTH-04 layouts at `/?page=register`, `/?page=sign-in`, and `/?page=recover-account`, replacing the sign-in popup.
+- Fictional sample fill, required/email validation, matching passwords, explicit unchecked adult self-attestation, show/hide controls, and clear no-action feedback.
+- No authentication provider, real sign-in, registration, email, reset link, session, role, policy acceptance, or entitlement is created. No network writes or credential storage; fields clear after preview submission and the form DOM is removed on leaving account screens.
+- Normal account-screen routes remain age gated. Public Help/Guidelines remain available before confirmation.
+
 ### Last Verified Result
 
-- Frozen-lockfile npm ci completed; Vite build passed.
-- 11 Playwright Chromium checks passed: age persistence/expiry, blocking Escape, policy access, blocked storage, exit routing, filters/empty state, profile dialog, ads/category switching, and responsive layout at 320/390/700/1024/1440px.
-- Desktop and mobile screenshots inspected. Initial hover movement affecting alignment checks removed; final rerun passed.
-- macOS Safari, actual Agrandir rendering, real geolocation, and all backend behaviour remain unverified/unimplemented.
+- Vite build and all 82 Chromium tests passed: 70 existing regressions plus 12 account-route/validation/clearing/no-request/responsive checks.
+- Desktop sign-in and mobile registration screenshots inspected; responsive checks cover 320/390/700/1024/1440px.
+- Documentation links and diff whitespace checked. No payment, eligibility, or access policy changed.
+- macOS Safari, licensed Agrandir rendering, real authentication, live backend behaviour, and current Netlify deployment remain unverified/unimplemented as applicable.
 
 ### Next Action
 
@@ -625,7 +632,7 @@ Backend/access-policy choices remain prerequisites only for dependent real featu
 Agrandir font assets are not present. Browser referrer policy can omit the prior
 page or reduce its URL; Exit uses the available external source and falls back
 to Google. When storage is blocked, age confirmation applies only to the visit.
-Terms/Privacy notices, sign-in, actual publishing, subscription actions, and Looking For detail previews remain
+Terms/Privacy notices, real authentication, actual publishing, subscription actions, and Looking For detail previews remain
 explicit prototype summaries rather than complete services or legal documents.
 The public profile is implemented with fictional data and labelled locked previews.
 

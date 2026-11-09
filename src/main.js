@@ -6,6 +6,7 @@ import { renderHowItWorks } from './how-it-works.js';
 import { renderListingEditor } from './listing-editor.js';
 import { renderGuidelines } from './guidelines.js';
 import { renderHelp } from './help.js';
+import { renderAccount } from './account.js';
 import { referencePrices, formatReferencePrice } from './pricing.js';
 
 const $ = (selector) => document.querySelector(selector);
@@ -77,6 +78,10 @@ let selectedCardId = null;
 let selectedAdId = null;
 function renderRoute() {
   const params = new URL(location.href).searchParams;
+  const accountMode = ['sign-in', 'register', 'recover-account'].includes(params.get('page')) ? params.get('page') : null;
+  const isAccount = !params.has('profile') && !params.has('ad') && accountMode !== null;
+  $('#account-view').hidden = !isAccount;
+  if (!isAccount) $('#account-view').replaceChildren();
   const isGuidelines = params.get('page') === 'guidelines';
   const isHelp = params.get('page') === 'help';
   $('#guidelines-shell').hidden = !isGuidelines;
@@ -100,14 +105,14 @@ function renderRoute() {
   const isHow = !isProfile && !isOffering && params.get('page') === 'how-it-works';
   const isEditor = !isProfile && !isOffering && params.get('page') === 'create-listing';
   $('#editor-view').hidden = !isEditor;
-  $('#discovery-view').hidden = isProfile || isOffering || isHow || isEditor;
+  $('#discovery-view').hidden = isProfile || isOffering || isHow || isEditor || isAccount;
   $('#how-view').hidden = !isHow;
   $('#profile-view').hidden = !isProfile;
   $('#offering-view').hidden = !isOffering;
-  $('.view-dock').hidden = isProfile || isOffering || isHow || isEditor;
+  $('.view-dock').hidden = isProfile || isOffering || isHow || isEditor || isAccount;
   const discoverLink = $('.desktop-nav a');
   discoverLink.href = './';
-  if (isProfile || isOffering || isHow || isEditor) discoverLink.removeAttribute('aria-current');
+  if (isProfile || isOffering || isHow || isEditor || isAccount) discoverLink.removeAttribute('aria-current');
   else discoverLink.setAttribute('aria-current', 'page');
   document.querySelectorAll('[data-how-link]').forEach((link) => {
     if (isHow) link.setAttribute('aria-current', 'page');
@@ -134,6 +139,9 @@ function renderRoute() {
   } else if (isEditor) {
     renderListingEditor($('#editor-view'), backToDiscovery);
     document.title = 'Create a listing · MeetDiscreet';
+  } else if (isAccount) {
+    renderAccount($('#account-view'), accountMode, navigateAccount, backToDiscovery);
+    document.title = `${accountMode === 'register' ? 'Create account' : accountMode === 'recover-account' ? 'Account recovery' : 'Sign in'} · MeetDiscreet`;
   } else document.title = 'Discover · MeetDiscreet';
 }
 function backToDiscovery() {
@@ -188,7 +196,7 @@ window.addEventListener('popstate', () => {
     (document.getElementById(location.hash.slice(1)) || main).focus({ preventScroll: true });
     return;
   }
-  if (!new URL(location.href).searchParams.has('profile') && !new URL(location.href).searchParams.has('ad') && !['how-it-works', 'create-listing'].includes(new URL(location.href).searchParams.get('page'))) {
+  if (!new URL(location.href).searchParams.has('profile') && !new URL(location.href).searchParams.has('ad') && !['how-it-works', 'create-listing', 'sign-in', 'register', 'recover-account'].includes(new URL(location.href).searchParams.get('page'))) {
     window.scrollTo({ top: discoveryScroll, behavior: 'instant' });
     const card = state.view === 'ads' ? (selectedAdId && document.querySelector(`[data-ad="${selectedAdId}"]`)) : (selectedCardId && document.querySelector(`[data-provider="${selectedCardId}"]`));
     (card || $('#main')).focus({ preventScroll: true });
@@ -280,7 +288,6 @@ $('#reset').addEventListener('click', () => {
 document.querySelectorAll('[data-category]').forEach((button) => button.addEventListener('click', () => { state.category = button.dataset.category; render(); }));
 document.querySelectorAll('.close-dialog').forEach((button) => button.addEventListener('click', () => button.closest('dialog').close()));
 const info = {
-  signin: ['Account access is coming later.', 'Sign-in is not connected in this frontend prototype. No account information is collected here.'],
   privacy: ['Privacy · prototype notice', 'This preview does not request your device location or create accounts. Age confirmation is stored on this browser for 30 days when storage is available. Fictional demo filters stay in memory. This notice is not the final Privacy Policy.'],
   terms: ['Terms · prototype notice', 'This is a frontend demonstration using fictional profiles and ads. No purchases, subscriptions, bookings, or real service arrangements can be made. Final service terms will be provided before a live launch.'],
 };
@@ -291,7 +298,7 @@ render();
 renderRoute();
 
 $('.desktop-nav a').addEventListener('click', (event) => {
-  if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && (new URL(location.href).searchParams.has('profile') || new URL(location.href).searchParams.has('ad') || ['how-it-works', 'create-listing'].includes(new URL(location.href).searchParams.get('page')))) {
+  if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && (new URL(location.href).searchParams.has('profile') || new URL(location.href).searchParams.has('ad') || ['how-it-works', 'create-listing', 'sign-in', 'register', 'recover-account'].includes(new URL(location.href).searchParams.get('page')))) {
     event.preventDefault();
     backToDiscovery();
   }
@@ -391,4 +398,22 @@ function returnFromHelp() {
   renderRoute();
   if (target.searchParams.get('page') === 'guidelines') $('#guidelines-main').focus({ preventScroll: true });
   else if (hasAgeConfirmation) $('#main').focus({ preventScroll: true });
+}
+
+function navigateAccount(page) {
+  if (!$('#discovery-view').hidden) discoveryScroll = window.scrollY;
+  const url = new URL(location.href);
+  for (const key of ['profile', 'ad', 'fromAd']) url.searchParams.delete(key);
+  url.searchParams.set('page', page);
+  url.hash = '';
+  history.pushState(null, '', url);
+  renderRoute();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  if (hasAgeConfirmation) $('#main').focus({ preventScroll: true });
+}
+for (const link of document.querySelectorAll('[data-account-link]')) {
+  link.addEventListener('click', (event) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault(); navigateAccount('sign-in');
+  });
 }

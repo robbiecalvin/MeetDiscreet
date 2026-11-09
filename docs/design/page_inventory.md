@@ -69,7 +69,8 @@ are labels only. PUB-05 now has an Offering detail route at `/?ad=<id>`; see
 [How it works brief](./page_briefs/how-it-works.md). USR-05/COM-08 now have a shared demo draft editor at `/?page=create-listing`; see
 [listing editor brief](./page_briefs/listing-editor.md). No saving or publication is connected. PUB-09 now has the working guidelines reader at `/?page=guidelines`, accessible
 without age confirmation; see [guidelines brief](./page_briefs/guidelines.md). PUB-10 now has searchable Help at `/?page=help`; see
-[Help brief](./page_briefs/help.md). Operational contact/report channels remain unconnected. Other inventory surfaces remain planned.
+[Help brief](./page_briefs/help.md). Operational contact/report channels remain unconnected. AUTH-01/AUTH-02/AUTH-04 now have account-screen previews at `/?page=register`,
+`/?page=sign-in`, and `/?page=recover-account`; see [account brief](./page_briefs/account-entry.md). No authentication is connected. Other inventory surfaces remain planned.
 
 ## 4. Inventory Fields
 
