@@ -1137,6 +1137,20 @@ If launch scope is reduced:
   a Vancouver browser time zone. The new migration has not been applied remotely,
   and no real staff provisioning was performed.
 
+### Pending Provider Application Search
+
+- Assigned reviewers can search pending applications by name or city, with literal
+  case-insensitive matching, retained filters across paging/refresh, and Clear to
+  restore the unfiltered queue. No introduction or unsent-draft search is added.
+- The new RPC enforces existing actual review authority, bounded query/cursor/pages
+  and metadata-only read events. Old default listing remains usable if the new
+  search setup is missing. Stale responses cannot overwrite a newer query.
+- Build, all 171 standard checks (including 33 PostgreSQL/config/security cases)
+  and 95 backend browser checks passed; mobile search controls inspected. Coverage
+  includes literal matching, permission/actor boundaries, pagination, missing setup,
+  and out-of-order responses. The migration has not been applied remotely, and
+  hosted staff/JWT checks remain pending.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

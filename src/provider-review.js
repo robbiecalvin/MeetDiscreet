@@ -15,15 +15,22 @@ export function renderProviderReview(container, navigate) {
   root.append(back, node('p', 'STAFF WORKSPACE', 'eyebrow'), node('h1', 'Provider application queue.'), node('p', 'Inspect submitted introductions with explicitly assigned review access.', 'offering-lead'), node('p', 'Staff review workspace. Requesting changes and approving pilot Provider access require separate permissions. Identity checks, paid access and publishing remain separate.', 'editor-notice'));
   const status = node('p', '', 'review-status'); status.setAttribute('role', 'status');
   const refresh = node('button', 'Refresh review queue', 'button outline'); refresh.type = 'button';
+  const searchForm = node('form',null,'review-search'); searchForm.hidden=true;
+  const searchLabel=node('label','Search pending applications');searchLabel.htmlFor='review-search';
+  const search=node('input');search.id='review-search';search.type='search';search.maxLength=100;search.placeholder='Applicant name or city';search.autocomplete='off';
+  const searchSubmit=node('button','Search queue','button outline');searchSubmit.type='submit';
+  const clearSearch=node('button','Clear queue search','button quiet');clearSearch.type='button';clearSearch.disabled=true;
+  searchForm.append(searchLabel,search,searchSubmit,clearSearch);
   const list = node('div', null, 'review-queue'); list.setAttribute('aria-label', 'Submitted provider applications');
   const detail = node('section', null, 'review-detail'); detail.hidden = true;
   const pages = node('div', null, 'editor-actions');
   const previous = node('button', 'Previous applications', 'button quiet'); previous.type = 'button';
   const next = node('button', 'Next applications', 'button outline'); next.type = 'button';
   pages.append(previous, next); pages.hidden = true;
-  root.append(status, refresh, list, pages, detail); container.append(root);
+  root.append(status, refresh, searchForm, list, pages, detail); container.append(root);
   if (!backendEnabled) { status.textContent = 'Staff review requires the connected backend and explicitly assigned staff permissions. No application data is available in this preview.'; refresh.hidden = true; return; }
   let reviewerId = null;
+  let query = '';
   let cursors = [null];
   let page = 0;
   let rows = [];
@@ -98,25 +105,26 @@ export function renderProviderReview(container, navigate) {
       }
       detail.hidden = false; status.textContent = 'Submitted application loaded.'; heading.focus();
     } catch {
-      if (current(request)) { clearData(); reviewerId = null; status.textContent = 'Review access or application data is unavailable. Refresh to verify access again.'; }
+      if (current(request)) { clearData(); searchForm.hidden=true; reviewerId = null; status.textContent = 'Review access or application data is unavailable. Refresh to verify access again.'; }
     } finally { if (current(request)) refresh.disabled = false; }
   }
   async function load(reset = false) {
     const request = ++version; clearData(); refresh.disabled = true; status.textContent = 'Verifying review access…';
+    let verifiedAccess=false;
     try {
       const access = await loadProviderReviewAccess();
       if (!current(request)) return;
-      if (!access.allowed) { reviewerId = null; status.textContent = 'This account does not have assigned provider-application review access.'; return; }
-      reviewerId = access.reviewerId;
+      if (!access.allowed) { reviewerId = null; query='';search.value='';clearSearch.disabled=true;searchForm.hidden=true;status.textContent = 'This account does not have assigned provider-application review access.'; return; }
+      reviewerId = access.reviewerId; verifiedAccess=true; searchForm.hidden=false;
       if (reset) { cursors = [null]; page = 0; }
       const [result, approvalAccess] = await Promise.all([
-        listProviderReviewQueue(reviewerId, cursors[page]),
+        listProviderReviewQueue(reviewerId, cursors[page], query),
         loadProviderApprovalAccess(reviewerId).catch(() => false),
       ]);
       if (!current(request)) return;
       ownApprovals.setAccess(reviewerId, approvalAccess);
       hasNext = result.length > 20; rows = result.slice(0, 20);
-      status.textContent = rows.length ? `${rows.length} submitted applications on this page. Oldest submissions first.` : 'No submitted applications on this page.';
+      status.textContent = rows.length ? `${rows.length} submitted applications on this page.${query ? ' Search active.' : ''} Oldest submissions first.` : query ? 'No submitted applications match this search.' : 'No submitted applications on this page.';
       for (const value of rows) {
         const card = node('article', null, 'review-card');
         const open = node('button', `Inspect ${value.display_name}`, 'button outline'); open.type = 'button'; open.addEventListener('click', () => showDetail(value.owner_id));
@@ -124,9 +132,12 @@ export function renderProviderReview(container, navigate) {
       }
       previous.disabled = page === 0; next.disabled = !hasNext; pages.hidden = !rows.length && page === 0;
       return true;
-    } catch { if (current(request)) { clearData(); status.textContent = 'Unable to verify review access or load the queue. Check sign-in, connection and setup, then retry.'; } }
+    } catch { if (current(request)) { clearData(); searchForm.hidden=!verifiedAccess; status.textContent = verifiedAccess && query ? 'Unable to load matching applications. Clear the search or retry.' : 'Unable to verify review access or load the queue. Check sign-in, connection and setup, then retry.'; } }
     finally { if (current(request)) refresh.disabled = false; }
   }
+  searchForm.addEventListener('submit',event=>{event.preventDefault();query=search.value.trim();search.value=query;clearSearch.disabled=!query;load(true);});
+  search.addEventListener('input',()=>{clearSearch.disabled=!search.value && !query;});
+  clearSearch.addEventListener('click',()=>{query='';search.value='';clearSearch.disabled=true;load(true);search.focus();});
   refresh.addEventListener('click', () => load(true));
   next.addEventListener('click', () => { if (!hasNext || !rows.length) return; cursors[page + 1] = rows.at(-1); page++; load(); });
   previous.addEventListener('click', () => { if (page === 0) return; page--; load(); });

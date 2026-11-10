@@ -1244,3 +1244,16 @@ empty results. Direct table policies/column grants remain unchanged. Applicant
 deletion can remove retained decisions under the existing cascade; this is not an
 indefinite or complete audit archive. Role revocation does not rewrite old approval
 records, and reading those records changes no role or application state.
+
+
+## Pending application search read
+
+[Search migration](../../supabase/migrations/202611100003_provider_review_search.sql)
+adds a curated RPC using current assigned review scope and actual authenticated
+reviewer identity. It returns the existing queue metadata only, filtering submitted
+names/cities using a case-insensitive literal substring. Private introductions and
+unsent drafts are excluded. Query and cursor bounds are validated; oldest-first
+keyset ordering matches the existing queue. The original list RPC is preserved.
+
+Successful calls record `queue_search` in protected read-access events, without
+search text. No entities, role grants or application mutations are introduced.

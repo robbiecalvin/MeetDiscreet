@@ -9,9 +9,11 @@ async function verifyActor(expected) {
   const user = await requireUser();
   if (user.id !== expected) throw new Error('Reviewer account changed.');
 }
-export async function listProviderReviewQueue(reviewerId, cursor = null) {
+export async function listProviderReviewQueue(reviewerId, cursor = null, query = '') {
   await verifyActor(reviewerId);
-  const { data, error } = await backendClient().rpc('list_provider_applications_for_review', {
+  const needle = query.trim();
+  const { data, error } = await backendClient().rpc(needle ? 'search_provider_applications_for_review' : 'list_provider_applications_for_review', {
+    ...(needle ? {p_query:needle} : {}),
     p_expected_reviewer: reviewerId, p_limit: 21,
     p_after_submitted_at: cursor?.submitted_at ?? null, p_after_owner: cursor?.owner_id ?? null,
   });

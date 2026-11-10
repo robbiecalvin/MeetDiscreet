@@ -84,3 +84,17 @@ The existing Admin approval authority is rechecked on every history RPC and the
 server derives the actual reviewer. Read access records metadata only. Decisions
 remain historical if a target's Provider role is later revoked; reading history
 must never grant it again. No undo, reapproval or role-revocation action is added.
+
+
+## Search pending applications
+
+Assigned reviewers can explicitly submit a name/city search, case-insensitive and
+matched as a literal substring (including percent and underscore). Only pending
+submitted applications participate; introductions and unsent drafts are excluded.
+The applied filter persists across pagination and refresh; a new search resets the
+page and closes prior detail. Clear restores the original unfiltered queue.
+
+Search is limited to 100 characters and remains in page memory, outside URLs and
+browser persistence. Missing search setup shows an unavailable state, with Clear
+providing access to the existing queue. Late responses cannot replace a newer
+search. The mobile form wraps within the existing staff workspace.

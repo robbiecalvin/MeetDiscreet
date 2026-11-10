@@ -795,3 +795,17 @@ history authority; server checks repeat per request. Already-seen data cannot be
 unseen, so no real-time erasure/revocation claim is made. Protected read events log
 access metadata without applicant content. This read never restores a revoked
 Provider role; historic decisions and current permissions remain distinct.
+
+
+## Staff queue search
+
+Search rechecks actual assigned review authority and expected/actual reviewer
+identity on every RPC. It searches submitted names/cities only, never private
+introductions or unsent drafts. Literal substring matching avoids wildcard expansion;
+query length, page size and paired cursors are bounded. Protected access events
+record the operation without query text; infrastructure logging remains separately
+configured. Search text is neither placed in URLs nor persisted by the app.
+
+Existing identity-change cleanup and response-version checks apply to searched
+results. Permission denial removes displayed data; missing search setup is an
+explicit error with an unfiltered-queue fallback, never a fabricated empty result.

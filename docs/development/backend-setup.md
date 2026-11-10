@@ -462,3 +462,18 @@ Missing history schema is an explicit unavailable state and does not disable oth
 permitted review operations. Hosted role/JWT/ownership checks remain pending. This
 is retained own-decision metadata, not a complete global audit export or a new
 retention policy. Existing applicant/account deletion and audit-retention rules apply.
+
+
+## Pending application search
+
+After the own-decision history migration, apply
+[202611100003_provider_review_search.sql](../../supabase/migrations/202611100003_provider_review_search.sql)
+once. It adds an actor-bound search RPC using existing assigned review authority;
+no roles or capabilities are granted. The agent has not applied it remotely.
+
+Search matches only submitted application names/cities, case-insensitively with
+literal substring semantics. Query length is 1–100 characters; pages default to 21
+and allow at most 50, with paired timestamp/owner cursors. Protected read events
+record `queue_search` without the query text. The original list RPC is unchanged.
+Missing search setup is explicitly unavailable; Clear returns to that original
+queue. Hosted JWT and actual staff-account checks remain pending.

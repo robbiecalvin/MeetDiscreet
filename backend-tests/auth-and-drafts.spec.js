@@ -98,17 +98,20 @@ async function mockBackend(page, options = {}) {
       if (options.missingReviewMigration) return respond({ message: 'Unavailable' }, 404);
       return respond(state.roles.some(role => ['moderator','admin'].includes(role)) && state.capabilities.includes('provider_application_review'));
     }
-    if (['/rest/v1/rpc/list_provider_applications_for_review','/rest/v1/rpc/get_provider_application_for_review'].includes(url.pathname)) {
+    if (['/rest/v1/rpc/list_provider_applications_for_review','/rest/v1/rpc/search_provider_applications_for_review','/rest/v1/rpc/get_provider_application_for_review'].includes(url.pathname)) {
       if (options.missingReviewMigration) return respond({ message: 'Unavailable' }, 404);
       const allowed = state.roles.some(role => ['moderator','admin'].includes(role)) && state.capabilities.includes('provider_application_review');
       if (!allowed || body.p_expected_reviewer !== state.user.id) return respond({ message: 'Denied' }, 403);
-      const submitted = state.reviewApplications.filter(row => row.state === 'submitted').sort((a,b) => a.submitted_at.localeCompare(b.submitted_at) || a.owner_id.localeCompare(b.owner_id));
+      const isSearch=url.pathname.endsWith('/search_provider_applications_for_review');
+      if(isSearch && options.missingReviewSearchMigration)return respond({message:'Search unavailable'},404);
+      const needle=isSearch ? body.p_query.trim().toLowerCase() : '';
+      const submitted = state.reviewApplications.filter(row => row.state === 'submitted' && (!needle || `${row.display_name} ${row.city}`.toLowerCase().includes(needle))).sort((a,b) => a.submitted_at.localeCompare(b.submitted_at) || a.owner_id.localeCompare(b.owner_id));
       if (url.pathname.endsWith('/get_provider_application_for_review')) {
         const row = submitted.find(value => value.owner_id === body.p_owner);
         if (row) state.reviewAccessEvents.push({ action: 'application_opened', owner: row.owner_id });
         return respond(row ? [row] : []);
       }
-      state.reviewAccessEvents.push({ action: 'queue_list' });
+      state.reviewAccessEvents.push({ action: isSearch ? 'queue_search' : 'queue_list' });
       return respond(submitted.filter(row => !body.p_after_submitted_at || row.submitted_at > body.p_after_submitted_at || (row.submitted_at === body.p_after_submitted_at && row.owner_id > body.p_after_owner)).slice(0,body.p_limit).map(({owner_id,display_name,city,submitted_at,updated_at}) => ({owner_id,display_name,city,submitted_at,updated_at})));
     }
     if (url.pathname === '/rest/v1/provider_applications') {
@@ -1556,4 +1559,34 @@ test('missing approval history setup keeps inspection and authorized approval av
   await page.getByRole('button',{name:'Inspect Applicant 01',exact:true}).click();await expect(page.getByRole('button',{name:'Approve Provider access',exact:true})).toBeVisible();
 });
 
+});
+
+
+test('review search matches name/city across keyset pages, refreshes the same query and clears to the normal queue',async({page})=>{
+  const state=await mockBackend(page);state.roles=['user','moderator'];state.capabilities=['provider_application_review'];state.reviewApplications=reviewRows(26).map((row,index)=>({...row,city:index<24?'North Vancouver':'Toronto'}));
+  await signIn(page);await enter(page,'/?page=provider-review');const search=page.getByLabel('Search pending applications',{exact:true});
+  await search.fill('north VANCOUVER');await page.getByRole('button',{name:'Search queue',exact:true}).click();await expect(page.locator('.review-card')).toHaveCount(20);await expect(page.locator('.review-status')).toContainText('Search active');
+  await page.getByRole('button',{name:'Next applications',exact:true}).click();await expect(page.locator('.review-card')).toHaveCount(4);
+  await page.getByRole('button',{name:'Previous applications',exact:true}).click();await expect(page.locator('.review-card')).toHaveCount(20);
+  await page.getByRole('button',{name:'Refresh review queue',exact:true}).click();await expect(page.locator('.review-card')).toHaveCount(20);
+  expect(state.requests.filter(row=>row.path.endsWith('/search_provider_applications_for_review')).every(row=>row.body.p_query==='north VANCOUVER')).toBe(true);
+  await page.setViewportSize({width:390,height:844});await page.locator('.review-search').screenshot({path:'/tmp/provider-review-search-mobile.png'});
+  await page.getByRole('button',{name:'Clear queue search',exact:true}).click();await expect(search).toHaveValue('');await expect(page.locator('.review-status')).not.toContainText('Search active');await expect(page.locator('.review-card')).toHaveCount(20);
+});
+test('literal search, no matches and missing search setup remain distinct and can return to the normal queue',async({page})=>{
+  const options={missingReviewSearchMigration:false};const state=await mockBackend(page,options);state.roles=['user','moderator'];state.capabilities=['provider_application_review'];state.reviewApplications=reviewRows(1);state.reviewApplications[0].display_name='Literal %_ Applicant';
+  await signIn(page);await enter(page,'/?page=provider-review');const input=page.getByLabel('Search pending applications',{exact:true});const button=page.getByRole('button',{name:'Search queue',exact:true});
+  await input.fill('%_');await button.click();await expect(page.locator('.review-card')).toHaveCount(1);
+  await input.fill('missing applicant');await button.click();await expect(page.locator('.review-status')).toContainText('No submitted applications match');await expect(page.locator('.review-card')).toHaveCount(0);
+  options.missingReviewSearchMigration=true;await input.fill('Literal');await button.click();await expect(page.locator('.review-status')).toContainText('Unable to load matching');await expect(page.locator('.review-card')).toHaveCount(0);
+  await page.getByRole('button',{name:'Clear queue search',exact:true}).click();await expect(page.locator('.review-card')).toHaveCount(1);
+});
+test('a slower earlier queue search cannot overwrite a newer query result',async({page})=>{
+  const state=await mockBackend(page);state.roles=['user','moderator'];state.capabilities=['provider_application_review'];state.reviewApplications=reviewRows(2).map((row,index)=>({...row,city:index===0?'Slow City':'Fast City'}));
+  await signIn(page);await enter(page,'/?page=provider-review');await expect(page.locator('.review-card')).toHaveCount(2);
+  let release;const gate=new Promise(resolve=>{release=resolve;});let requested;const started=new Promise(resolve=>{requested=resolve;});
+  await page.route('**/rest/v1/rpc/search_provider_applications_for_review',async route=>{if(route.request().postDataJSON().p_query==='Slow City'){requested();await gate;}await route.fallback();});
+  const input=page.getByLabel('Search pending applications',{exact:true});const button=page.getByRole('button',{name:'Search queue',exact:true});
+  await input.fill('Slow City');await button.click();await started;await input.fill('Fast City');await button.click();await expect(page.locator('.review-card')).toHaveCount(1);await expect(page.locator('.review-card')).toContainText('Fast City');
+  release();await page.waitForLoadState('networkidle');await expect(page.locator('.review-card')).toHaveCount(1);await expect(page.locator('.review-card')).toContainText('Fast City');
 });

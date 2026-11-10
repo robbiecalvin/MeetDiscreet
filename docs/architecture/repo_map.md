@@ -762,3 +762,5 @@ underlying feature is operational.
 
 - `src/provider-approval-history.js`: explicit, paginated own-approval metadata panel within the staff queue, with separate stale-response guards and no cached records.
 - `supabase/migrations/202611100002_provider_approval_history.sql`: current-scope actor-only history RPC, reviewer index and protected access-event action; no role grants.
+
+- `supabase/migrations/202611100003_provider_review_search.sql`: bounded actor-bound pending name/city search and protected read-event action; original list RPC preserved.

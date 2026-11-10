@@ -34,6 +34,7 @@ test.beforeAll(async () => {
   await db.exec(await readFile(new URL('../supabase/migrations/202611090008_booking_plan_drafts.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611100001_provider_application_approval.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611100002_provider_approval_history.sql', import.meta.url), 'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/202611100003_provider_review_search.sql', import.meta.url), 'utf8'));
 });
 test.afterAll(async () => { await db.close(); });
 test.beforeEach(async () => {
@@ -515,5 +516,38 @@ test.describe('own Administrator approval history',()=>{
     await db.query("delete from public.account_roles where user_id=$1 and role='provider'",[applicants[0]]);
     await asUser(alice);expect((await history(alice,50)).rows.some(row=>row.owner_id===applicants[0])).toBe(true);await db.exec('reset role');
     expect((await db.query("select count(*)::int as value from public.account_roles where user_id=$1 and role='provider'",[applicants[0]])).rows[0].value).toBe(0);
+  });
+});
+
+
+test.describe('scoped pending application search',()=>{
+  const applicants=Array.from({length:4},(_,index)=>`99999999-9999-4999-8999-${String(index+1).padStart(12,'0')}`);
+  test.afterEach(async()=>{await db.exec('reset role');for(const id of applicants)await db.query('delete from auth.users where id=$1',[id]);await db.query("delete from public.account_roles where user_id=$1 and role='moderator'",[alice]);});
+  async function queue() {
+    for(const [index,id] of applicants.entries()) {
+      await db.exec('reset role');await db.query('insert into auth.users(id) values($1)',[id]);await asUser(id);
+      await db.query('select * from public.save_provider_application($1,$2,$3,$4)',[id,['Coastal Gallery','Literal %_ Applicant','Remote Applicant','Unsubmitted Draft'][index],index===1?'Toronto':'Vancouver','HIDDEN_INTRO_ONLY should not be searchable here.']);
+      if(index<3)await db.query('select * from public.submit_provider_application($1)',[id]);
+    }
+    await db.exec('reset role');await db.query("insert into public.account_roles(user_id,role) values($1,'moderator') on conflict do nothing",[alice]);await db.query("insert into public.staff_capabilities(user_id,capability) values($1,'provider_application_review')",[alice]);await asUser(alice);
+  }
+  const search=(text,reviewer=alice,limit=21,time=null,id=null)=>db.query('select * from public.search_provider_applications_for_review($1,$2,$3,$4,$5)',[reviewer,text,limit,time,id]);
+  test('name/city search is case-insensitive, literal, submitted-only and cursor-stable without exposing introductions',async()=>{
+    await queue();const first=(await search('vAnC',alice,1)).rows;expect(first).toHaveLength(1);
+    const second=(await search('vanc',alice,1,first[0].submitted_at,first[0].owner_id)).rows;expect(second).toHaveLength(1);expect(second[0].owner_id).not.toBe(first[0].owner_id);
+    expect([first[0].owner_id,second[0].owner_id].sort()).toEqual([applicants[0],applicants[2]].sort());
+    expect((await search('%_')).rows.map(row=>row.owner_id)).toEqual([applicants[1]]);
+    expect((await search('HIDDEN_INTRO_ONLY')).rows).toEqual([]);expect(Object.hasOwn(first[0],'introduction')).toBe(false);
+    await db.exec('reset role');const events=(await db.query("select * from public.provider_review_access_events where action='queue_search'")).rows;expect(events).toHaveLength(4);expect(JSON.stringify(events)).not.toContain('HIDDEN_INTRO_ONLY');
+  });
+  test('search binds the actual reviewer and denies lost roles/scopes, metadata-only authority and anonymous access',async()=>{
+    await queue();await expect(search('Vancouver',bob)).rejects.toThrow(/account changed/i);
+    await db.exec('reset role');await db.query("delete from public.staff_capabilities where user_id=$1",[alice]);await asUser(alice);await expect(search('Vancouver')).rejects.toThrow(/review access/i);
+    await db.exec('reset role');await db.query("insert into public.staff_capabilities(user_id,capability) values($1,'provider_application_review')",[alice]);await db.query("delete from public.account_roles where user_id=$1 and role='moderator'",[alice]);await db.query('update auth.users set raw_user_meta_data=$1 where id=$2',[{role:'admin'},alice]);await asUser(alice);await expect(search('Vancouver')).rejects.toThrow(/review access/i);
+    await asUser('','anon');await expect(search('Vancouver')).rejects.toThrow(/permission denied/i);
+  });
+  test('search bounds text/pages and rejects incomplete cursors without mutating intake or roles',async()=>{
+    await queue();await expect(search('x'.repeat(101))).rejects.toThrow(/search text/i);await expect(search(' ')).rejects.toThrow(/search text/i);await expect(search('Van',alice,51)).rejects.toThrow(/page size/i);await expect(search('Van',alice,21,'2030-01-01T00:00:00Z')).rejects.toThrow(/page cursor/i);
+    await search('Coastal');await db.exec('reset role');expect((await db.query("select count(*)::int as value from public.provider_applications where state='submitted'")).rows[0].value).toBe(3);expect((await db.query("select count(*)::int as value from public.account_roles where role='provider'")).rows[0].value).toBe(0);
   });
 });
