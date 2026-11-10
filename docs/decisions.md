@@ -388,6 +388,8 @@ Do not enable dependent live charges before the required policy is resolved.
 | OPEN-049 | Enforcement | Effects on obligations, access, and payouts |
 | OPEN-050 | Retention | Application, financial, and moderation records |
 | OPEN-051 | Launch scope | Exact features enabled in the initial production release |
+| OPEN-052 | Public profile approval authority | Which staff roles may approve with an explicit publishing capability; separate from Provider access approval |
+| OPEN-053 | Public profile revision visibility | Keep the last approved version visible during review, or hide until the replacement is approved |
 
 ## 13. Resolving a Decision
 

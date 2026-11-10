@@ -1234,6 +1234,19 @@ If launch scope is reduced:
   Controlled public publishing still needs server-enforced eligibility/approval
   and plan rules; this preview is an independent preparation step.
 
+### Controlled Publishing Contract Prepared
+
+- Prepared the next version-bound submission/public-projection contract in the
+  data model. It separates private drafts, immutable submitted candidates and
+  approved public fields; it is a design note, not an implemented publishing API.
+- OPEN-052/053 now track the two immediate choices: explicit publishing approval
+  authority and visibility of an already-approved version during revision review.
+  Recommendations were presented to Robbie; neither is recorded as approved.
+- Existing Provider membership approval does not decide publication permission.
+  Actual activation still needs eligibility, plan enforcement and hosted checks.
+  Independent private/frontend work can continue without unrelated business rules.
+- Documentation-only increment; no migration, application change or public data.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

@@ -1257,3 +1257,36 @@ keyset ordering matches the existing queue. The original list RPC is preserved.
 
 Successful calls record `queue_search` in protected read-access events, without
 search text. No entities, role grants or application mutations are introduced.
+
+
+## Controlled profile publishing — next increment contract
+
+Status: design preparation only. No publishing schema, public record or endpoint
+is implemented by this contract. Existing owner drafts and the saved public-field
+preview remain private. Staff authority and revision visibility await OPEN-052/053;
+DEC-023 approves Provider membership only and cannot answer either question.
+
+The proposed review flow should preserve these boundaries:
+
+- A submission captures an immutable, server-selected version of public profile
+  candidates, bound to the actual owner, presentation and source draft version.
+  A stale preview must be refreshed before submitting; browser content cannot
+  silently replace the saved source or assign approval/eligibility/paid status.
+- The owner can inspect the exact submitted version. Later private draft edits
+  neither modify that submission nor an approved public version. Any review action
+  binds to the exact pending version and records protected operation metadata.
+- A separate, curated public projection contains approved fields only. Private
+  biography/interests, contact details, staff notes, Auth metadata and audit data
+  must not enter a public response simply because an owner submitted a draft.
+- Current role, eligibility, moderation and publishing-plan enforcement stay
+  independent. Previewing or submitting cannot bypass them. Actual activation
+  remains disabled until those server rules and hosted checks are established.
+- Approval/replacement must be transactional and reject stale/replayed decisions.
+  Reviewer authority follows the explicit publishing decision once confirmed,
+  rather than automatically inheriting intake approval permission.
+
+The choice to retain or hide an already-approved version while a revision is
+reviewed is intentionally unresolved. No default is enacted here. Demo portrait
+selection is not an approved uploaded-media pipeline. The two-presentation limit
+and existing unresolved commercial rules remain unchanged; no payment exception
+or live publication rollout is authorized by this design note.
