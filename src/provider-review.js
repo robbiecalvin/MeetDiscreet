@@ -1,3 +1,4 @@
+import { providerApprovalHistory } from './provider-approval-history.js';
 import { backendEnabled } from './backend/client.js';
 import { loadProviderReviewAccess, listProviderReviewQueue, loadProviderReviewDetail, loadProviderFeedbackAccess, requestProviderChanges, loadProviderApprovalAccess, approveProviderApplication } from './backend/provider-review.js';
 function node(tag, text, className) {
@@ -29,7 +30,8 @@ export function renderProviderReview(container, navigate) {
   let hasNext = false;
   let version = 0;
   const current = request => root.parentNode === container && request === version;
-  function clearData() { list.replaceChildren(); detail.replaceChildren(); detail.hidden = true; pages.hidden = true; rows = []; }
+  const ownApprovals = providerApprovalHistory(root, () => root.parentNode === container);
+  function clearData() { ownApprovals.setAccess(null,false); list.replaceChildren(); detail.replaceChildren(); detail.hidden = true; pages.hidden = true; rows = []; }
   async function showDetail(ownerId) {
     const request = ++version;
     detail.replaceChildren(); detail.hidden = true; status.textContent = 'Loading submitted application…';
@@ -107,8 +109,12 @@ export function renderProviderReview(container, navigate) {
       if (!access.allowed) { reviewerId = null; status.textContent = 'This account does not have assigned provider-application review access.'; return; }
       reviewerId = access.reviewerId;
       if (reset) { cursors = [null]; page = 0; }
-      const result = await listProviderReviewQueue(reviewerId, cursors[page]);
+      const [result, approvalAccess] = await Promise.all([
+        listProviderReviewQueue(reviewerId, cursors[page]),
+        loadProviderApprovalAccess(reviewerId).catch(() => false),
+      ]);
       if (!current(request)) return;
+      ownApprovals.setAccess(reviewerId, approvalAccess);
       hasNext = result.length > 20; rows = result.slice(0, 20);
       status.textContent = rows.length ? `${rows.length} submitted applications on this page. Oldest submissions first.` : 'No submitted applications on this page.';
       for (const value of rows) {

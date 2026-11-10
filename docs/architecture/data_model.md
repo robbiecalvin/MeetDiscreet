@@ -1227,3 +1227,20 @@ versions fail. Previously assigned Provider roles are not duplicated. Approved
 intake is closed; current membership remains independently revocable and authoritative.
 No public/premium/subscriber/identity permission, Auth metadata update or publishing
 write occurs. Default staff capabilities remain empty until trusted provisioning.
+
+
+## Administrator own approval history read
+
+[History migration](../../supabase/migrations/202611100002_provider_approval_history.sql)
+adds no new entity or role assignment. A `(reviewer_id, approved_at desc, id desc)`
+index supports a curated actor-bound RPC. It requires current Admin/review/approval
+scope and selects only rows whose reviewer is `auth.uid()`, joining the original
+submitted snapshot by both owner and version. It returns metadata, not applicant
+introductions, other reviewers' identities or current membership/entitlement data.
+
+The paired keyset cursor and maximum 50-row limit bound reads. Successful calls
+record `approval_history_list` in the existing protected read-event table, including
+empty results. Direct table policies/column grants remain unchanged. Applicant
+deletion can remove retained decisions under the existing cascade; this is not an
+indefinite or complete audit archive. Role revocation does not rewrite old approval
+records, and reading those records changes no role or application state.

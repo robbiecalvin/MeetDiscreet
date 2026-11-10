@@ -759,3 +759,6 @@ underlying feature is operational.
 - `src/backend/draft-backup.js`: allowlisted owner draft reads, projected fields, count/completeness checks and actor revalidation; no application or Auth object export.
 
 - `supabase/migrations/202611100001_provider_application_approval.sql`: Admin-only explicit-scope, version-bound pilot approval with atomic additive Provider membership and protected approval records.
+
+- `src/provider-approval-history.js`: explicit, paginated own-approval metadata panel within the staff queue, with separate stale-response guards and no cached records.
+- `supabase/migrations/202611100002_provider_approval_history.sql`: current-scope actor-only history RPC, reviewer index and protected access-event action; no role grants.

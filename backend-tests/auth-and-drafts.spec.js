@@ -61,6 +61,14 @@ async function mockBackend(page, options = {}) {
       if(options.missingApprovalMigration)return respond({message:'Unavailable'},404);
       return respond(state.applicationApprovals.filter(row=>row.owner_id===state.user.id && (!url.searchParams.has('submission_id') || url.searchParams.get('submission_id').includes(row.submission_id))).map(({owner_id,submission_id,approved_at})=>({owner_id,submission_id,approved_at})));
     }
+    if(url.pathname==='/rest/v1/rpc/list_my_provider_approvals') {
+      if(options.missingApprovalHistoryMigration)return respond({message:'History unavailable'},404);
+      const allowed=state.roles.includes('admin') && state.capabilities.includes('provider_application_review') && state.capabilities.includes('provider_application_approval');
+      if(!allowed || body.p_expected_reviewer!==state.user.id)return respond({message:'Denied'},403);
+      state.reviewAccessEvents.push({action:'approval_history_list'});
+      const values=state.applicationApprovals.filter(row=>row.reviewer_id===state.user.id && (!body.p_before_approved_at || row.approved_at<body.p_before_approved_at || (row.approved_at===body.p_before_approved_at && row.approval_id<body.p_before_id))).sort((a,b)=>b.approved_at.localeCompare(a.approved_at)||b.approval_id.localeCompare(a.approval_id));
+      return respond(values.slice(0,body.p_limit).map(({approval_id,owner_id,submission_id,approved_at,display_name,city,submitted_at})=>({approval_id,owner_id,submission_id,approved_at,display_name,city,submitted_at})));
+    }
     if(url.pathname==='/rest/v1/rpc/can_approve_provider_applications') {
       if(options.missingApprovalMigration)return respond({message:'Unavailable'},404);
       return respond(state.roles.includes('admin') && state.capabilities.includes('provider_application_review') && state.capabilities.includes('provider_application_approval'));
@@ -70,7 +78,7 @@ async function mockBackend(page, options = {}) {
       const row=state.reviewApplications.find(value=>value.owner_id===body.p_owner);
       if(options.missingApprovalMigration || state.approvalFailure || !allowed || body.p_expected_reviewer!==state.user.id || body.p_owner===state.user.id || row?.state!=='submitted' || row.submission_id!==body.p_submission || !state.targetRoles.includes('user')) return respond({message:'Denied or stale approval'},409);
       row.state='approved';if(!state.targetRoles.includes('provider'))state.targetRoles.push('provider');
-      state.applicationApprovals.push({owner_id:row.owner_id,submission_id:row.submission_id,reviewer_id:state.user.id,approved_at:'2026-11-10T18:00:00Z'});
+      state.applicationApprovals.push({approval_id:`88888888-8888-4888-8888-${String(state.applicationApprovals.length+1).padStart(12,'0')}`,owner_id:row.owner_id,submission_id:row.submission_id,reviewer_id:state.user.id,approved_at:'2026-11-10T18:00:00Z',display_name:row.display_name,city:row.city,submitted_at:row.submitted_at});
       return respond(row);
     }
     if (url.pathname === '/rest/v1/provider_application_feedback') {
@@ -1492,6 +1500,7 @@ for(const [label,roles,capabilities,missing] of [
     const state=await mockBackend(page,{missingApprovalMigration:missing});state.roles=roles;state.capabilities=capabilities;state.reviewApplications=reviewRows(1);state.reviewApplications[0].submission_id='66666666-6666-4666-8666-000000000001';state.user.user_metadata={role:'admin',approval:true};
     await signIn(page);await enter(page,'/?page=provider-review');await page.getByRole('button',{name:'Inspect Applicant 01',exact:true}).click();
     await expect(page.locator('.review-introduction')).toBeVisible();await expect(page.getByRole('button',{name:'Approve Provider access',exact:true})).toHaveCount(0);
+    await expect(page.locator('.staff-approval-history')).toBeHidden();
     expect(state.requests.filter(row=>row.path.endsWith('/approve_provider_application'))).toHaveLength(0);
   });
 }
@@ -1514,4 +1523,37 @@ test('approved applicant sees immutable history and both roles while current rol
   await page.getByRole('button',{name:'Load application activity',exact:true}).click();await expect(page.locator('.application-activity')).toContainText('Pilot Provider application approved');
   await page.locator('[data-account-link]').click();await expect(page.locator('[data-account-permissions]')).toContainText('Assigned roles: User, Provider.');await expect(page.getByRole('link',{name:'Explore user setup',exact:true})).toBeVisible();await expect(page.getByRole('link',{name:'View approved application',exact:true})).toBeVisible();
   state.roles=['user'];await page.getByRole('button',{name:'Refresh account permissions',exact:true}).click();await expect(page.locator('[data-account-permissions]')).toContainText('Provider role: Not assigned');await expect(page.locator('[data-application-status]')).toContainText('Application approved');
+});
+
+
+function ownApprovalRows(count,reviewer=userId) {
+  return Array.from({length:count},(_,index)=>({approval_id:`88888888-8888-4888-8888-${String(index+1).padStart(12,'0')}`,reviewer_id:reviewer,owner_id:`77777777-7777-4777-8777-${String(index+1).padStart(12,'0')}`,submission_id:`66666666-6666-4666-8666-${String(index+1).padStart(12,'0')}`,approved_at:'2026-11-10T18:00:00Z',submitted_at:'2026-11-10T17:00:00Z',display_name:index===0?'<img src=x onerror=alert(1)> History applicant':`History applicant ${index+1}`,city:'Vancouver',introduction:'PRIVATE INTRODUCTION MUST NOT APPEAR IN HISTORY'}));
+}
+test.describe('own Administrator decision history',()=>{
+  test.use({timezoneId:'America/Vancouver'});
+test('Admin own approval history is explicit, paginated, escaped and excludes another reviewer decisions',async({page})=>{
+  const state=await mockBackend(page);state.roles=['user','admin'];state.capabilities=['provider_application_review','provider_application_approval'];state.applicationApprovals=[...ownApprovalRows(24),{...ownApprovalRows(1,'33333333-3333-4333-8333-333333333333')[0],approval_id:'99999999-9999-4999-8999-999999999999',owner_id:'99999999-9999-4999-8999-000000000001',submission_id:'55555555-5555-4555-8555-000000000001',display_name:'Other reviewer decision'}];
+  await signIn(page);await enter(page,'/?page=provider-review');await expect(page.getByRole('button',{name:'Load my approval decisions',exact:true})).toBeVisible();
+  expect(state.requests.filter(row=>row.path.endsWith('/list_my_provider_approvals'))).toHaveLength(0);
+  await page.getByRole('button',{name:'Load my approval decisions',exact:true}).click();await expect(page.locator('.staff-approval-card')).toHaveCount(20);
+  await expect(page.locator('.staff-approval-history')).not.toContainText('Other reviewer decision');await expect(page.locator('.staff-approval-history')).not.toContainText('PRIVATE INTRODUCTION');
+  await page.getByRole('button',{name:'Older approvals',exact:true}).click();await expect(page.locator('.staff-approval-card')).toHaveCount(4);
+  await expect(page.locator('.staff-approval-history')).toContainText('<img src=x onerror=alert(1)>');await expect(page.locator('.staff-approval-history img')).toHaveCount(0);
+  await page.setViewportSize({width:390,height:844});await page.locator('.staff-approval-history').screenshot({path:'/tmp/staff-own-approval-history-mobile.png'});
+  await page.getByRole('button',{name:'Newer approvals',exact:true}).click();await expect(page.locator('.staff-approval-card')).toHaveCount(20);
+  expect(state.reviewAccessEvents.filter(row=>row.action==='approval_history_list')).toHaveLength(3);expect(state.targetRoles).toEqual(['user']);
+  await page.getByRole('button',{name:'Sign out',exact:true}).click();await expect(page.locator('.staff-approval-card')).toHaveCount(0);
+});
+test('revoked history scope clears displayed decisions and queue refresh removes the history control',async({page})=>{
+  const state=await mockBackend(page);state.roles=['user','admin'];state.capabilities=['provider_application_review','provider_application_approval'];state.applicationApprovals=ownApprovalRows(1);
+  await signIn(page);await enter(page,'/?page=provider-review');await page.getByRole('button',{name:'Load my approval decisions',exact:true}).click();await expect(page.locator('.staff-approval-card')).toHaveCount(1);
+  state.capabilities=['provider_application_review'];await page.getByRole('button',{name:'Refresh my approval decisions',exact:true}).click();await expect(page.locator('.staff-history-status')).toContainText('unavailable');await expect(page.locator('.staff-approval-card')).toHaveCount(0);
+  await page.getByRole('button',{name:'Refresh review queue',exact:true}).click();await expect(page.locator('.staff-approval-history')).toBeHidden();
+});
+test('missing approval history setup keeps inspection and authorized approval available without fabricated history',async({page})=>{
+  const state=await mockBackend(page,{missingApprovalHistoryMigration:true});state.roles=['user','admin'];state.capabilities=['provider_application_review','provider_application_approval'];state.reviewApplications=reviewRows(1);state.reviewApplications[0].submission_id='66666666-6666-4666-8666-000000000001';
+  await signIn(page);await enter(page,'/?page=provider-review');await page.getByRole('button',{name:'Load my approval decisions',exact:true}).click();await expect(page.locator('.staff-history-status')).toContainText('unavailable');await expect(page.locator('.staff-approval-card')).toHaveCount(0);
+  await page.getByRole('button',{name:'Inspect Applicant 01',exact:true}).click();await expect(page.getByRole('button',{name:'Approve Provider access',exact:true})).toBeVisible();
+});
+
 });

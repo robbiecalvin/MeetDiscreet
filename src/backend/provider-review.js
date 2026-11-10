@@ -54,3 +54,13 @@ export async function approveProviderApplication(reviewerId, ownerId, submission
   if (error || !data || data.owner_id !== ownerId || data.state !== 'approved' || data.submission_id !== submissionId) throw new Error('Approval failed.');
   return data;
 }
+
+export async function listOwnProviderApprovals(reviewerId, cursor = null) {
+  await verifyActor(reviewerId);
+  const { data, error } = await backendClient().rpc('list_my_provider_approvals', {
+    p_expected_reviewer: reviewerId, p_limit: 21,
+    p_before_approved_at: cursor?.approved_at ?? null, p_before_id: cursor?.approval_id ?? null,
+  });
+  if (error || !Array.isArray(data)) throw new Error('Approval history unavailable.');
+  return data;
+}

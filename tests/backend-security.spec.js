@@ -33,6 +33,7 @@ test.beforeAll(async () => {
   expect((await db.query('select introduction from public.provider_application_submissions')).rows[0].introduction).toBe('Submitted before the versioning upgrade.');
   await db.exec(await readFile(new URL('../supabase/migrations/202611090008_booking_plan_drafts.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611100001_provider_application_approval.sql', import.meta.url), 'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/202611100002_provider_approval_history.sql', import.meta.url), 'utf8'));
 });
 test.afterAll(async () => { await db.close(); });
 test.beforeEach(async () => {
@@ -463,5 +464,56 @@ test.describe('Administrator pilot Provider approval',()=>{
       expect((await db.query("select count(*)::int as value from public.account_roles where user_id=$1 and role='provider'",[bob])).rows[0].value).toBe(0);
     } finally {await db.exec('reset role; drop trigger test_provider_grant_failure on public.account_roles; drop function public.test_reject_provider_grant();');}
     await asUser(alice);expect((await approve(bob,app.submission_id)).rows[0].state).toBe('approved');
+  });
+});
+
+
+test.describe('own Administrator approval history',()=>{
+  const applicants=Array.from({length:4},(_,index)=>`77777777-7777-4777-8777-${String(index+1).padStart(12,'0')}`);
+  test.afterEach(async()=>{
+    await db.exec('reset role');
+    for(const id of applicants)await db.query('delete from auth.users where id=$1',[id]);
+    await db.query("delete from public.account_roles where user_id in ($1,$2) and role<>'user'",[alice,bob]);
+  });
+  async function decisions() {
+    await db.exec('reset role');
+    for(const reviewer of [alice,bob]) {
+      await db.query("insert into public.account_roles(user_id,role) values($1,'admin') on conflict do nothing",[reviewer]);
+      await db.query("insert into public.staff_capabilities(user_id,capability) values($1,'provider_application_review'),($1,'provider_application_approval')",[reviewer]);
+    }
+    for(const [index,id] of applicants.entries()) {
+      await db.exec('reset role');await db.query('insert into auth.users(id) values($1)',[id]);await asUser(id);
+      await db.query('select * from public.save_provider_application($1,$2,$3,$4)',[id,`History applicant ${index+1}`,'Vancouver','Private submitted text not returned in history lists.']);
+      const app=(await db.query('select * from public.submit_provider_application($1)',[id])).rows[0];
+      const reviewer=index===3?bob:alice;await asUser(reviewer);
+      await db.query('select * from public.approve_provider_application($1,$2,$3)',[reviewer,id,app.submission_id]);
+    }
+    await asUser(alice);
+  }
+  const history=(reviewer=alice,limit=2,time=null,id=null)=>db.query('select * from public.list_my_provider_approvals($1,$2,$3,$4)',[reviewer,limit,time,id]);
+  test('history returns only decisions by the actual reviewer with stable pagination and minimal fields',async()=>{
+    await decisions();const first=(await history()).rows;expect(first).toHaveLength(2);
+    const next=(await history(alice,2,first.at(-1).approved_at,first.at(-1).approval_id)).rows;expect(next).toHaveLength(1);
+    const all=[...first,...next];expect(new Set(all.map(row=>row.approval_id)).size).toBe(3);
+    expect(all.map(row=>row.owner_id).sort()).toEqual(applicants.slice(0,3).sort());
+    expect(Object.hasOwn(first[0],'introduction')).toBe(false);expect(Object.hasOwn(first[0],'reviewer_id')).toBe(false);
+    await db.exec('reset role');expect((await db.query("select count(*)::int as value from public.provider_review_access_events where reviewer_id=$1 and action='approval_history_list'",[alice])).rows[0].value).toBe(2);
+  });
+  test('forged actor, removed approval capability, Moderator membership and anonymous calls cannot read history',async()=>{
+    await decisions();await expect(history(bob)).rejects.toThrow(/account changed/i);
+    await db.exec('reset role');await db.query("delete from public.staff_capabilities where user_id=$1 and capability='provider_application_approval'",[alice]);await asUser(alice);
+    await expect(history()).rejects.toThrow(/administrator approval access/i);
+    await db.exec('reset role');await db.query("insert into public.staff_capabilities(user_id,capability) values($1,'provider_application_approval')",[alice]);await db.query("update public.account_roles set role='moderator' where user_id=$1 and role='admin'",[alice]);await asUser(alice);
+    await expect(history()).rejects.toThrow(/administrator approval access/i);
+    await asUser('','anon');await expect(history()).rejects.toThrow(/permission denied/i);
+  });
+  test('history bounds requests and rejects incomplete cursors without rewriting decisions or grants',async()=>{
+    await decisions();await expect(history(alice,51)).rejects.toThrow(/page size/i);await expect(history(alice,2,'2030-01-01T00:00:00Z')).rejects.toThrow(/page cursor/i);
+    await db.exec('reset role');const before=(await db.query('select count(*)::int as value from public.provider_application_approvals')).rows[0].value;
+    await asUser(alice);await history();await db.exec('reset role');expect((await db.query('select count(*)::int as value from public.provider_application_approvals')).rows[0].value).toBe(before);
+    expect((await db.query("select count(*)::int as value from public.account_roles where user_id=$1 and role in ('user','provider')",[applicants[0]])).rows[0].value).toBe(2);
+    await db.query("delete from public.account_roles where user_id=$1 and role='provider'",[applicants[0]]);
+    await asUser(alice);expect((await history(alice,50)).rows.some(row=>row.owner_id===applicants[0])).toBe(true);await db.exec('reset role');
+    expect((await db.query("select count(*)::int as value from public.account_roles where user_id=$1 and role='provider'",[applicants[0]])).rows[0].value).toBe(0);
   });
 });

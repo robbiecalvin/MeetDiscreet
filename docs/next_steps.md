@@ -1118,6 +1118,25 @@ If launch scope is reduced:
   between historical approval and current roles. Mobile approval control inspected.
   Hosted migration/provisioning and actual JWT/concurrency behavior remain unverified.
 
+### Administrator Own-Approval History
+
+- The staff queue now lets authorized Admins explicitly load their own recorded
+  approvals, newest first with bounded Older/Newer pagination. It shows original
+  submitted name/city and timestamps, not another reviewer's decisions or private
+  introduction/current-role information. History remains distinct from permissions.
+- The new read RPC rechecks current Admin/review/approval scope, binds actual actor,
+  validates page/cursor limits and records protected read metadata. Revoked scope,
+  identity changes and failures clear or hide displayed history without cached fallback.
+- No grants or role/application mutations are introduced; reading a historical
+  decision cannot restore a revoked Provider role. Missing history schema preserves
+  other permitted review operations with an explicit unavailable state.
+- Build, all 168 standard checks (including 30 PostgreSQL/config/security cases)
+  and 92 backend browser checks passed. Coverage includes own-actor isolation,
+  cursor bounds, revoked scope, safe rendering, missing setup and history remaining
+  visible without restoring a revoked role. Mobile timestamps/layout inspected with
+  a Vancouver browser time zone. The new migration has not been applied remotely,
+  and no real staff provisioning was performed.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

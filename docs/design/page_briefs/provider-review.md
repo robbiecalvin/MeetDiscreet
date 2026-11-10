@@ -62,3 +62,25 @@ records and applicants whose basic User membership was separately revoked.
 
 No real staff assignment or hosted migration is performed. Privileged keys never
 enter this UI. Actual Provider eligibility and publishing operations remain future.
+
+
+## Your recorded approvals
+
+Administrators with the existing review + approval scopes can explicitly load only
+the decisions they recorded. Show immutable submitted name/city and submission/
+approval timestamps with the viewer's time-zone abbreviation, not current roles or
+private introduction text. Do not expose another reviewer's decisions or a global
+audit log. The applicant's own approval history remains a different owner view.
+
+Use newest-first keyset pages: 20 visible and one extra row for Older approvals,
+with Newer approvals and explicit refresh. Native text rendering handles names;
+no media, current profile or entitlement is loaded. Missing history setup leaves
+inspection and authorized approval usable, with an unavailable history state rather
+than fabricated/empty results. Failed refresh clears old cards; queue permission
+refresh and identity/sign-out changes remove unavailable private history. No cache,
+automatic polling or live-revocation claim.
+
+The existing Admin approval authority is rechecked on every history RPC and the
+server derives the actual reviewer. Read access records metadata only. Decisions
+remain historical if a target's Provider role is later revoked; reading history
+must never grant it again. No undo, reapproval or role-revocation action is added.

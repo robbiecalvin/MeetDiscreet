@@ -778,3 +778,20 @@ truncation/read failures abort rather than download a misleading partial copy.
 Free-form text is preserved without secret detection: keep the file private.
 Only explicit downloads create a device file; no custom browser data cache is added,
 and temporary Blob URLs are revoked. Existing RLS remains the authorization boundary.
+
+
+## Administrator own-decision history
+
+The curated history RPC requires current assigned Admin membership plus the existing
+review and approval capabilities. It compares expected/actual reviewer identity and
+filters on the actual JWT user, returning only that actor's retained decisions.
+Moderator or revoked-scope requests are denied even when metadata claims Admin.
+No global approval-table read, other reviewer's decision list, introduction text or
+current target-role data is exposed. Timestamp/UUID cursor pages are bounded.
+
+The UI requests history explicitly, renders text nodes, clears cards before failed
+refreshes and drops stale/identity-changed responses. Queue access refresh resets
+history authority; server checks repeat per request. Already-seen data cannot be
+unseen, so no real-time erasure/revocation claim is made. Protected read events log
+access metadata without applicant content. This read never restores a revoked
+Provider role; historic decisions and current permissions remain distinct.

@@ -440,3 +440,25 @@ behavior. During the deferred walkthrough, use distinct test reviewer/applicant
 accounts, verify User + Provider membership, denied Moderator/self/stale calls, and
 rollback/error behavior. Staff identity provisioning and operational audit retention
 need their own authorized process; do not paste privileged credentials into chat.
+
+
+## Administrator own-decision history
+
+After the approval migration, apply
+[202611100002_provider_approval_history.sql](../../supabase/migrations/202611100002_provider_approval_history.sql)
+once. It adds a reviewer/time index, a bounded `list_my_provider_approvals` RPC and
+an audited history-read operation. It introduces no role/capability grants and
+has not been applied remotely by the agent.
+
+Use existing assigned Admin + review + approval scopes. History is filtered to the
+actual authenticated reviewer, even if the caller supplies a different expected ID.
+Only submitted snapshot name/city/version identifiers and timestamps are returned;
+no introduction, other reviewer identity or current target-role status. Default 21,
+maximum 50 results with paired timestamp/UUID cursor; the UI displays 20 per page.
+No raw approval-table global SELECT policy is added. Protected access events record
+`approval_history_list` without copying applicant text.
+
+Missing history schema is an explicit unavailable state and does not disable other
+permitted review operations. Hosted role/JWT/ownership checks remain pending. This
+is retained own-decision metadata, not a complete global audit export or a new
+retention policy. Existing applicant/account deletion and audit-retention rules apply.
