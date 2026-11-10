@@ -1,5 +1,5 @@
 import { backendEnabled } from './backend/client.js';
-import { loadProviderReviewAccess, listProviderReviewQueue, loadProviderReviewDetail, loadProviderFeedbackAccess, requestProviderChanges } from './backend/provider-review.js';
+import { loadProviderReviewAccess, listProviderReviewQueue, loadProviderReviewDetail, loadProviderFeedbackAccess, requestProviderChanges, loadProviderApprovalAccess, approveProviderApplication } from './backend/provider-review.js';
 function node(tag, text, className) {
   const value = document.createElement(tag);
   if (text) value.textContent = text;
@@ -11,7 +11,7 @@ export function renderProviderReview(container, navigate) {
   const root = node('section', null, 'provider-review');
   const back = node('a', '← Back to account', 'profile-back'); back.href = '?page=account';
   back.addEventListener('click', event => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate('account'); });
-  root.append(back, node('p', 'STAFF WORKSPACE', 'eyebrow'), node('h1', 'Provider application queue.'), node('p', 'Inspect submitted introductions with explicitly assigned review access.', 'offering-lead'), node('p', 'Staff review workspace. Requesting changes requires separate permission. Approval, role changes and publishing are not available here.', 'editor-notice'));
+  root.append(back, node('p', 'STAFF WORKSPACE', 'eyebrow'), node('h1', 'Provider application queue.'), node('p', 'Inspect submitted introductions with explicitly assigned review access.', 'offering-lead'), node('p', 'Staff review workspace. Requesting changes and approving pilot Provider access require separate permissions. Identity checks, paid access and publishing remain separate.', 'editor-notice'));
   const status = node('p', '', 'review-status'); status.setAttribute('role', 'status');
   const refresh = node('button', 'Refresh review queue', 'button outline'); refresh.type = 'button';
   const list = node('div', null, 'review-queue'); list.setAttribute('aria-label', 'Submitted provider applications');
@@ -40,10 +40,15 @@ export function renderProviderReview(container, navigate) {
       const heading = node('h2', value.display_name); heading.tabIndex = -1;
       const close = node('button', 'Close application details', 'button quiet'); close.type = 'button';
       close.addEventListener('click', () => { version++; detail.replaceChildren(); detail.hidden = true; status.textContent = `${rows.length} submitted applications on this page.`; refresh.focus(); });
-      detail.append(heading, node('p', value.city, 'profile-small'), node('p', 'SUBMITTED INTRODUCTION', 'eyebrow'), node('p', value.introduction, 'review-introduction'), node('p', 'This view records access but does not make an approval decision.', 'profile-small'), close);
+      detail.append(heading, node('p', value.city, 'profile-small'), node('p', 'SUBMITTED INTRODUCTION', 'eyebrow'), node('p', value.introduction, 'review-introduction'), node('p', 'Inspect this submitted version before making a separately authorized decision.', 'profile-small'), close);
       if (value.submission_id && value.owner_id !== reviewerId) {
-        let canGiveFeedback = false;
-        try { canGiveFeedback = await loadProviderFeedbackAccess(reviewerId); } catch { /* Keep scoped inspection usable without feedback setup. */ }
+        const [feedbackAccess, approvalAccess] = await Promise.allSettled([loadProviderFeedbackAccess(reviewerId),loadProviderApprovalAccess(reviewerId)]);
+        const canGiveFeedback = feedbackAccess.status==='fulfilled' && feedbackAccess.value;
+        const canApprove = approvalAccess.status==='fulfilled' && approvalAccess.value;
+        let deciding = false;
+        const decisionControls = [];
+        const setDeciding = active => { deciding=active; for(const control of decisionControls) control.disabled=active; };
+
         if (!current(request)) return;
         if (canGiveFeedback) {
           const form = node('form', null, 'review-feedback-form');
@@ -52,19 +57,41 @@ export function renderProviderReview(container, navigate) {
           const send = node('button', 'Request changes', 'button primary'); send.type = 'submit';
           const result = node('p', '', 'profile-small'); result.setAttribute('role', 'status');
           form.append(label, note, send, result);
+          decisionControls.push(send,note);
           form.addEventListener('submit', async event => {
             event.preventDefault();
+            if(deciding || !current(request))return;
             if (!note.value.trim()) { result.textContent = 'Describe the requested changes.'; note.focus(); return; }
             if (!window.confirm('Request changes to this submission? The applicant will be able to edit and resubmit. No Provider role is granted.')) return;
-            send.disabled = true; note.disabled = true;
+            setDeciding(true);
             try {
               await requestProviderChanges(reviewerId, value.owner_id, value.submission_id, note.value);
               if (!current(request)) return;
               await load(true);
             } catch { if (current(request)) result.textContent = 'Unable to request changes. Refresh the submission and check your access before retrying.'; }
-            finally { send.disabled = false; note.disabled = false; }
+            finally { setDeciding(false); }
           });
           detail.append(form);
+        }
+        if(canApprove) {
+          const approval = node('section',null,'review-approval');
+          approval.append(node('h3','Pilot Provider access'),node('p','Approval adds Provider access while keeping User features. It does not verify identity, enable paid access or publish a profile.','profile-small'));
+          const approve=node('button','Approve Provider access','button primary');approve.type='button';
+          const result=node('p','','profile-small');result.setAttribute('role','status');
+          decisionControls.push(approve);
+          approve.addEventListener('click',async()=>{
+            if(deciding || !current(request))return;
+            if(!window.confirm(`Approve pilot Provider access for ${value.display_name}? User access is retained. This does not verify identity or grant paid/publishing access.`))return;
+            setDeciding(true);result.textContent='Recording approval…';
+            try {
+              await approveProviderApplication(reviewerId,value.owner_id,value.submission_id);
+              if(!current(request))return;
+              const pending=load(true);const reloadVersion=version;const reloaded=await pending;
+              if(current(reloadVersion))status.textContent=reloaded ? 'Pilot Provider approval recorded. User access was retained. The review queue was refreshed.' : 'Pilot Provider approval recorded. The queue is unavailable; refresh to check current review access.';
+            } catch {if(current(request))result.textContent='Unable to confirm approval. Refresh the queue and check current access before retrying.';}
+            finally {setDeciding(false);}
+          });
+          approval.append(approve,result);detail.append(approval);
         }
       }
       detail.hidden = false; status.textContent = 'Submitted application loaded.'; heading.focus();
@@ -90,6 +117,7 @@ export function renderProviderReview(container, navigate) {
         card.append(node('h2', value.display_name), node('p', value.city, 'profile-small'), open); list.append(card);
       }
       previous.disabled = page === 0; next.disabled = !hasNext; pages.hidden = !rows.length && page === 0;
+      return true;
     } catch { if (current(request)) { clearData(); status.textContent = 'Unable to verify review access or load the queue. Check sign-in, connection and setup, then retry.'; } }
     finally { if (current(request)) refresh.disabled = false; }
   }

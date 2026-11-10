@@ -25,7 +25,7 @@ export function renderProviderApplication(container, navigate) {
   const root = node('section', null, 'provider-application');
   const back = node('a', '← Back to provider setup', 'profile-back'); back.href = '?page=provider-setup';
   back.addEventListener('click', event => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate('provider-setup'); });
-  root.append(back, node('p', 'YOUR NEXT STEP', 'eyebrow'), node('h1', 'Your provider application.'), node('p', 'Prepare an introduction and submit it to the private application queue.', 'offering-lead'), node('p', backendEnabled ? 'Development application intake. Staff can request changes with separate permission. Approval and notifications are not connected. Submission does not approve provider access or publish a profile.' : 'Application preview. Use fictional details; nothing is saved or submitted without the development backend.', 'editor-notice'));
+  root.append(back, node('p', 'YOUR NEXT STEP', 'eyebrow'), node('h1', 'Your provider application.'), node('p', 'Prepare an introduction and submit it to the private application queue.', 'offering-lead'), node('p', backendEnabled ? 'Development application intake. Separately authorized administrators can approve pilot Provider access. Identity checks, paid access and publishing remain separate.' : 'Application preview. Use fictional details; nothing is saved or submitted without the development backend.', 'editor-notice'));
   const state = node('p', '', 'application-state'); state.setAttribute('role', 'status');
   const feedback = node('p', '', 'profile-small'); feedback.setAttribute('role', 'status'); feedback.id = 'provider-application-feedback';
   const form = node('form', null, 'application-form'); form.noValidate = true;
@@ -50,7 +50,8 @@ export function renderProviderApplication(container, navigate) {
   const signIn = node('a', 'Sign in', 'account-recovery-link'); signIn.href = '?page=sign-in'; signIn.hidden = true;
   signIn.addEventListener('click', event => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate('sign-in'); });
   const reviewNote = node('section', null, 'application-review-note'); reviewNote.hidden = true;
-  root.append(state, reviewNote, form, feedback, signIn); container.append(root);
+  const approvalNotice=node('p','This application was approved for pilot Provider access. See your current roles in Account.','editor-notice');approvalNotice.hidden=true;
+  root.append(state, approvalNotice, reviewNote, form, feedback, signIn); container.append(root);
   let busy = false;
   const current = epoch => epoch === identityEpoch && root.parentNode === container;
   const renderEpoch = identityEpoch;
@@ -58,8 +59,9 @@ export function renderProviderApplication(container, navigate) {
   const activity = backendEnabled ? renderProviderApplicationActivity(root, () => busy ? null : ownerId, () => current(renderEpoch)) : null;
   function sync() { for (const [key, input] of fields) input.value = draft[key]; }
   function paintState() {
-    const locked = saved?.state === 'submitted';
-    reviewNote.replaceChildren(); reviewNote.hidden = !reviewFeedback || saved?.state === 'submitted';
+    const locked = ['submitted','approved'].includes(saved?.state);
+    approvalNotice.hidden=saved?.state!=='approved';
+    reviewNote.replaceChildren(); reviewNote.hidden = !reviewFeedback || locked;
     if (!reviewNote.hidden) reviewNote.append(node('h2', 'Requested changes'), node('p', reviewFeedback.note));
     state.textContent = !backendEnabled ? 'Application preview.' : !loaded ? 'Application status has not been loaded.' : saved ? `Application status: ${saved.state === 'changes_requested' ? 'changes requested' : saved.state}.` : 'No saved application.';
     for (const input of fields.values()) input.disabled = busy || locked || (backendEnabled && !ownerId);
@@ -68,7 +70,7 @@ export function renderProviderApplication(container, navigate) {
     refresh.disabled = busy;
     const unchanged = saved && JSON.stringify(draft) === JSON.stringify(fromRow(saved));
     submit.disabled = busy || saved?.state !== 'draft' || !unchanged || !draft.name.trim() || !draft.city.trim() || !draft.introduction.trim();
-    withdraw.disabled = busy || !locked;
+    withdraw.disabled = busy || saved?.state !== 'submitted';
   }
   async function run(operation) {
     if (busy) return;

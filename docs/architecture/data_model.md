@@ -1149,10 +1149,11 @@ subscriptions, publishing plans, ownership and permissions for individual resour
 
 [Provider intake migration](../../supabase/migrations/202611090005_provider_applications.sql)
 adds one current private intake record per account and owner-readable status events.
-States are draft/submitted/withdrawn, extended by migration 007 with changes_requested; there is no approval or publishing state.
+States are draft/submitted/withdrawn, extended by migration 007 with changes_requested
+and the later pilot approval migration with approved. No publishing state is implied.
 Authenticated owners mutate through actor-bound RPCs, not direct table writes.
-Submitted text is locked until withdrawal or a request for changes. Role grants and review decisions are
-separate future operations. Status history alone does not preserve prior content versions
+Submitted text is locked until withdrawal or a request for changes. Pilot approval
+and role grants use the separate scoped transaction described below. Status history alone does not preserve prior content versions
 or establish identity eligibility; it stores only state/owner/time. Auth-account
 deletion cascades to these intake records/events, unlike protected role-event
 storage whose retention remains a separate operational requirement.
@@ -1205,3 +1206,24 @@ fields are accepted. Fixture IDs do not identify trusted live Provider accounts.
 Local timestamps are proposals, with no UTC instant, DST resolution or availability
 claim. References that no longer match known fixtures cannot silently load into a
 new plan. Owners must choose how to proceed if that validation fails.
+
+
+## Pilot approval records and additive roles
+
+[Approval migration](../../supabase/migrations/202611100001_provider_application_approval.sql)
+adds `provider_application_approvals` with owner, unique submission snapshot,
+reviewer and server time. Owner column grants expose only owner/version/time; service
+API reads can include protected reviewer identity. No direct browser/service API
+mutations. These records follow applicant/snapshot deletion, consistent with other
+intake content; protected account_role_events retain their separate pending policy.
+No tamperproof/retention compliance guarantee is implied.
+
+`approve_provider_application` binds the JWT actor, requires Administrator + review
+and approval scopes, denies self-approval and locks current authority, applicant
+membership and application while validating the exact submitted snapshot. It inserts
+approval, adds Provider without removing User and transitions to approved in one
+transaction. A role-insert failure rolls everything back; repeats/stale/nonpending
+versions fail. Previously assigned Provider roles are not duplicated. Approved
+intake is closed; current membership remains independently revocable and authoritative.
+No public/premium/subscriber/identity permission, Auth metadata update or publishing
+write occurs. Default staff capabilities remain empty until trusted provisioning.

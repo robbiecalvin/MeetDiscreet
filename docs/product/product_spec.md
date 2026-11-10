@@ -96,7 +96,9 @@ Can perform authorized operational and configuration functions.
 
 Roles and paid entitlements are distinct.
 
-Whether one account may act as both user and companion remains pending.
+Approved Providers retain User membership/features under the same login (DEC-023).
+Development-pilot approval requires an assigned Administrator with an explicit
+approval capability; identity verification, paid plans and publishing remain separate.
 
 Account lifecycle states must distinguish active access from restrictions,
 suspension, and deletion handling.

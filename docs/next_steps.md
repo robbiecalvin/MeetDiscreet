@@ -806,8 +806,9 @@ If launch scope is reduced:
 - Build, all 119 default checks and 31 backend UI checks passed. The 23 account/
   profile checks were repeated after the chooser/layout updates. Registration and
   provider setup mobile screenshots inspected; no horizontal overflow.
-- Authoritative dual-role policy, provider eligibility, approval and publishing
-  remain dependent work; untrusted intent metadata must never enforce access.
+- Dual-role policy and pilot approval were subsequently resolved in DEC-023. Live
+  eligibility and publishing remain dependent work; untrusted intent metadata must
+  never enforce access.
 
 ### Separate Private User Profile
 
@@ -912,7 +913,8 @@ If launch scope is reduced:
   Browser reads exclude reviewer identity; feedback never grants Provider access.
 - All 146 default checks (including 20 database/config/security cases) and 50
   backend UI checks passed. Hosted migration application remains pending.
-- Approval authority and combined User/Provider role policy await Robbie's answers.
+- Approval authority and combined User/Provider membership were subsequently
+  resolved in DEC-023; live eligibility/publishing remain separate.
   No approval, eligibility verification, role grant or public publishing is added.
 
 ### Private Applicant Submission History
@@ -938,8 +940,8 @@ If launch scope is reduced:
   does not prevent other account cards loading. No additional migration is needed.
 - Build and all 54 backend browser checks passed; mobile changes-requested card
   inspected. These include status transitions, navigation and missing-schema isolation.
-- Provider approval authority and combined-role policy remain pending; this card
-  does not grant roles, notify applicants or enable publishing.
+- Pilot approval and combined roles were subsequently resolved in DEC-023; this
+  card itself does not grant roles, notify applicants or enable publishing.
 
 ### Private Application Activity Timeline
 
@@ -1084,8 +1086,8 @@ If launch scope is reduced:
 - The JSON reference file has no import action or full-account/atomic snapshot claim.
   Technical bounds are 1,000 listings and 10 MiB; existing posting/pricing rules are
   unchanged. Keep the file private; free-form saved text is preserved.
-- Provider approval authority and combined User/Provider roles still await answers
-  to the pending policy questions. No approval or role grant has been assumed.
+- Pilot approval authority and combined roles were subsequently confirmed in
+  DEC-023; the download itself never grants roles.
 - Build, all 161 standard checks and 83 backend browser checks passed on stable
   sequential reruns. New cases cover selected-field JSON, omission of Auth/extra
   fields, missing-table retry, incomplete listing refusal, empty selection and
@@ -1093,6 +1095,28 @@ If launch scope is reduced:
   focused download cases and a final mobile visual/focus check passed after this
   adjustment. Mobile download layout inspected. See the
   [brief](./design/page_briefs/draft-backup.md).
+
+### Administrator Pilot Provider Approval
+
+- DEC-023 records Robbie's confirmed Admin-only, explicit-capability approval and
+  retention of User features under the same login. Onboarding intent remains untrusted.
+- New approval migration locks current authority, base User membership and exact
+  submitted version. It atomically records approval, adds Provider without removing
+  User, and transitions intake. Self, stale, replayed, withdrawn and revoked-membership
+  decisions fail; a failed role grant rolls back the entire approval.
+- The staff page shows separately scoped approval after inspection and serializes
+  decision controls. Missing setup preserves permitted inspection/feedback. Owners
+  see read-only historical approval and version/time without reviewer identity;
+  current role checks remain independent after any later revocation.
+- No staff scopes/Provider role were assigned to real accounts by the agent, and
+  the new migration has not been applied remotely. Identity/eligibility verification,
+  paid access, notifications and public publishing remain separate.
+- Build, all 165 standard checks (including 27 PostgreSQL/config/security cases)
+  and 89 backend browser checks passed. New checks cover role/capability boundaries,
+  exact-version approval, User retention, stale/replay/self/withdrawn denial, rollback
+  on failed role grant, missing setup, revoked scope, owner history and distinction
+  between historical approval and current roles. Mobile approval control inspected.
+  Hosted migration/provisioning and actual JWT/concurrency behavior remain unverified.
 
 ### Next Action
 

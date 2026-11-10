@@ -49,10 +49,9 @@ migration. It initializes only basic User membership, allows own-role reads, and
 denies client role assignment. This is separate from identity/eligibility
 verification and paid/public access. Hosted migration application remains pending.
 
-Whether one account may hold both authoritative user and companion roles remains
-pending. The implemented User/Provider onboarding choice is a revisitable
-user-metadata preference under one login, not an assigned role. It must not grant
-publishing, subscriber access, verification, or administrative permissions.
+Approved Providers retain authoritative User membership under the same login
+(DEC-023). Onboarding preference remains untrusted user metadata, not an assigned
+role; it grants no publishing, subscriber, verification or administrative permission.
 
 ## 3. Matrix Legend
 
@@ -453,7 +452,6 @@ Track confirmations in ../decisions.md.
 
 Pending permissions include:
 
-- Combined user/companion accounts.
 - Full Looking For post visibility.
 - User-profile field visibility.
 - One subscription covering both presentations.
@@ -483,4 +481,21 @@ Requesting application changes requires assigned Moderator/Administrator members
 Self-feedback is denied. Each mutation rechecks actor, scope, submitted state and the
 inspected version. Applicants read only their own notes without reviewer identity.
 These controls grant no Provider, publishing, subscription or financial privileges.
-Approval authority and combined User/Provider membership remain unresolved.
+Pilot approval authority and combined membership are resolved in DEC-023; live
+eligibility and publishing remain separate.
+
+
+## Administrator pilot approval
+
+Approval requires assigned Administrator membership plus both
+`provider_application_review` and `provider_application_approval` capabilities.
+Moderator membership never grants approval, even with the capability. Require the
+exact current submitted snapshot, deny self-review and bind the reviewer to the
+verified JWT. Current reviewer authority and applicant basic User membership are
+locked during the atomic approval/Provider-role insert. No User role is removed.
+
+Approval records expose only the applicant's own version/time to the applicant;
+reviewer identity stays protected. An approved intake record is historical evidence,
+not proof of current role assignment after subsequent trusted revocation. The browser
+cannot grant roles, assign staff capabilities or modify approval records directly.
+No identity/paid/publishing entitlement is granted by this pilot operation.

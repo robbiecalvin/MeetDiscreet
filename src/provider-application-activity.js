@@ -1,5 +1,5 @@
 import { loadProviderApplicationActivity } from './backend/provider-applications.js';
-const labels = { draft: 'Draft saved', submitted: 'Application submitted', withdrawn: 'Application withdrawn', changes_requested: 'Changes requested' };
+const labels = { draft: 'Draft saved', submitted: 'Application submitted', withdrawn: 'Application withdrawn', changes_requested: 'Changes requested', approved: 'Pilot Provider application approved' };
 function node(tag, text, className) {
   const element = document.createElement(tag);
   if (text) element.textContent = text;
@@ -8,7 +8,7 @@ function node(tag, text, className) {
 }
 export function renderProviderApplicationActivity(container, getOwner, isCurrent) {
   const section = node('section', null, 'application-activity');
-  section.append(node('h2', 'Application activity'), node('p', 'Your latest 20 saved status updates, newest first. These updates do not confirm Provider approval.', 'profile-small'));
+  section.append(node('h2', 'Application activity'), node('p', 'Your latest 20 saved status updates, newest first. Current account roles are shown in Account.', 'profile-small'));
   const button = node('button', 'Load application activity', 'button outline'); button.type = 'button';
   const status = node('p', '', 'profile-small'); status.setAttribute('role', 'status');
   const list = node('ol'); list.setAttribute('aria-label', 'Application activity');

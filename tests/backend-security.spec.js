@@ -32,10 +32,11 @@ test.beforeAll(async () => {
   expect((await db.query('select submission_id from public.provider_applications where owner_id=$1', [alice])).rows[0].submission_id).toBeTruthy();
   expect((await db.query('select introduction from public.provider_application_submissions')).rows[0].introduction).toBe('Submitted before the versioning upgrade.');
   await db.exec(await readFile(new URL('../supabase/migrations/202611090008_booking_plan_drafts.sql', import.meta.url), 'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/202611100001_provider_application_approval.sql', import.meta.url), 'utf8'));
 });
 test.afterAll(async () => { await db.close(); });
 test.beforeEach(async () => {
-  await db.exec('reset role; truncate public.booking_plan_drafts, public.listing_drafts, public.profile_drafts, public.experience_catalogue_drafts, public.availability_drafts, public.user_profile_drafts, public.provider_applications, public.provider_application_events, public.provider_application_submissions, public.provider_application_feedback, public.staff_capabilities, public.staff_capability_events, public.provider_review_access_events;');
+  await db.exec('reset role; truncate public.provider_application_approvals, public.booking_plan_drafts, public.listing_drafts, public.profile_drafts, public.experience_catalogue_drafts, public.availability_drafts, public.user_profile_drafts, public.provider_applications, public.provider_application_events, public.provider_application_submissions, public.provider_application_feedback, public.staff_capabilities, public.staff_capability_events, public.provider_review_access_events;');
   await asUser(alice);
 });
 
@@ -211,7 +212,7 @@ test('provider applications save, submit, lock editing, withdraw and record stat
   await expect(db.query('select * from public.submit_provider_application($1)', [alice])).rejects.toThrow(/complete application/i);
   await save('Provider introduction', 'Vancouver', 'A private introduction for the development intake queue.');
   expect((await db.query('select * from public.submit_provider_application($1)', [alice])).rows[0].state).toBe('submitted');
-  await expect(save('Changed', 'Toronto', 'Cannot edit a submitted request.')).rejects.toThrow(/withdraw/i);
+  await expect(save('Changed', 'Toronto', 'Cannot edit a submitted request.')).rejects.toThrow(/locked/i);
   await expect(db.query('select * from public.submit_provider_application($1)', [alice])).rejects.toThrow(/complete application/i);
   expect((await db.query('select * from public.withdraw_provider_application($1)', [alice])).rows[0].state).toBe('withdrawn');
   await save('Revised provider', 'Vancouver', 'A revised introduction.');
@@ -385,4 +386,82 @@ test('booking plan storage rejects malformed proposals and authority fields with
   ]) await expect(db.query('insert into public.booking_plan_drafts(plan) values($1)',[proposal])).rejects.toThrow(/check constraint/i);
   await db.query('insert into public.booking_plan_drafts(plan) values($1)',[{...partialPlan(),provider:'maya',activity:'Culture',date:'2030-06-15',time:'14:00',timeZone:'America/Vancouver',duration:'120'}]);
   expect((await db.query("select public.has_account_role('provider') as value")).rows[0].value).toBe(false);
+});
+
+
+test.describe('Administrator pilot Provider approval',()=>{
+  test.afterEach(async()=>{
+    await db.exec('reset role');
+    await db.exec("delete from public.account_roles where role<>'user'");
+    await db.query("insert into public.account_roles(user_id,role) values($1,'user'),($2,'user') on conflict do nothing",[alice,bob]);
+  });
+  async function pendingApplication() {
+    await asUser(bob);
+    await db.query('select * from public.save_provider_application($1,$2,$3,$4)',[bob,'Pilot applicant','Vancouver','A submitted introduction for pilot review.']);
+    const app=(await db.query('select * from public.submit_provider_application($1)',[bob])).rows[0];
+    await db.exec('reset role');
+    await db.query("insert into public.account_roles(user_id,role) values($1,'admin') on conflict do nothing",[alice]);
+    await db.query("insert into public.staff_capabilities(user_id,capability) values($1,'provider_application_review'),($1,'provider_application_approval')",[alice]);
+    await asUser(alice);return app;
+  }
+  const approve=(owner,version,reviewer=alice)=>db.query('select * from public.approve_provider_application($1,$2,$3)',[reviewer,owner,version]);
+  test('approval atomically records the reviewed version, grants Provider and retains User without self-grant APIs',async()=>{
+    const app=await pendingApplication();
+    expect((await db.query('select public.can_approve_provider_applications() as value')).rows[0].value).toBe(true);
+    expect((await approve(bob,app.submission_id)).rows[0].state).toBe('approved');
+    await expect(approve(bob,app.submission_id)).rejects.toThrow(/no longer pending/i);
+    await asUser(bob);
+    expect((await db.query('select role from public.account_roles order by role')).rows.map(row=>row.role)).toEqual(['provider','user']);
+    expect((await db.query('select submission_id,approved_at from public.provider_application_approvals')).rows[0].submission_id).toBe(app.submission_id);
+    await expect(db.query('select reviewer_id from public.provider_application_approvals')).rejects.toThrow(/permission denied/i);
+    await expect(db.query('insert into public.provider_application_approvals(owner_id,submission_id,reviewer_id) values($1,$2,$3)',[bob,app.submission_id,bob])).rejects.toThrow(/permission denied/i);
+    await expect(db.query('select * from public.save_provider_application($1,$2,$3,$4)',[bob,'Changed','Vancouver','Changed after approval'])).rejects.toThrow(/locked/i);
+    await expect(db.query('select * from public.withdraw_provider_application($1)',[bob])).rejects.toThrow();
+    await db.exec('reset role');
+    expect((await db.query("select actor_user_id from public.account_role_events where action='INSERT' and new_user_id=$1 and new_role='provider'",[bob])).rows.at(-1).actor_user_id).toBe(alice);
+    expect((await db.query('select count(*)::int as value from public.provider_application_approvals')).rows[0].value).toBe(1);
+    await asUser(alice,'service_role');
+    await expect(db.exec('delete from public.provider_application_approvals')).rejects.toThrow(/permission denied/i);
+    await expect(approve(bob,app.submission_id)).rejects.toThrow(/permission denied/i);
+  });
+  test('Moderator, metadata, missing review/approval scopes and actor mismatch cannot approve',async()=>{
+    const app=await pendingApplication();
+    await db.exec('reset role');await db.query("update public.account_roles set role='moderator' where user_id=$1 and role='admin'",[alice]);await asUser(alice);
+    await expect(approve(bob,app.submission_id)).rejects.toThrow(/administrator approval access/i);
+    await db.exec('reset role');await db.query("update public.account_roles set role='admin' where user_id=$1 and role='moderator'",[alice]);
+    await db.query("delete from public.staff_capabilities where user_id=$1 and capability='provider_application_approval'",[alice]);await asUser(alice);
+    await expect(approve(bob,app.submission_id)).rejects.toThrow(/administrator approval access/i);
+    await db.exec('reset role');await db.query("insert into public.staff_capabilities(user_id,capability) values($1,'provider_application_approval')",[alice]);await db.query("delete from public.staff_capabilities where user_id=$1 and capability='provider_application_review'",[alice]);await asUser(alice);
+    await expect(approve(bob,app.submission_id)).rejects.toThrow(/administrator approval access/i);
+    await expect(approve(bob,app.submission_id,bob)).rejects.toThrow(/account changed/i);
+    await db.exec('reset role');await db.query("delete from public.account_roles where user_id=$1 and role='admin'",[alice]);await db.query("update auth.users set raw_user_meta_data=$1 where id=$2",[{role:'admin',capabilities:['provider_application_approval']},alice]);await asUser(alice);
+    expect((await db.query('select public.can_approve_provider_applications() as value')).rows[0].value).toBe(false);
+    await expect(approve(bob,app.submission_id)).rejects.toThrow(/administrator approval access/i);
+    await db.exec('reset role');expect((await db.query('select count(*)::int as value from public.provider_application_approvals')).rows[0].value).toBe(0);
+  });
+  test('stale versions, withdrawn submissions, self-approval and revoked basic membership are denied',async()=>{
+    const app=await pendingApplication();await asUser(bob);
+    await db.query('select * from public.withdraw_provider_application($1)',[bob]);await asUser(alice);
+    await expect(approve(bob,app.submission_id)).rejects.toThrow(/no longer pending/i);
+    await asUser(bob);await db.query('select * from public.save_provider_application($1,$2,$3,$4)',[bob,'Revised','Vancouver','A revised submission for review.']);
+    const revised=(await db.query('select * from public.submit_provider_application($1)',[bob])).rows[0];await asUser(alice);
+    await expect(approve(bob,app.submission_id)).rejects.toThrow(/changed/i);
+    await db.exec('reset role');await db.query("delete from public.account_roles where user_id=$1 and role='user'",[bob]);await asUser(alice);
+    await expect(approve(bob,revised.submission_id)).rejects.toThrow(/basic User membership/i);
+    await db.query('select * from public.save_provider_application($1,$2,$3,$4)',[alice,'Reviewer','Vancouver','My own application cannot be self-approved.']);
+    const own=(await db.query('select * from public.submit_provider_application($1)',[alice])).rows[0];
+    await expect(approve(alice,own.submission_id)).rejects.toThrow(/independent administrator/i);
+    await db.exec('reset role');expect((await db.query('select count(*)::int as value from public.provider_application_approvals')).rows[0].value).toBe(0);
+  });
+  test('a failed role grant rolls back the approval record and application transition',async()=>{
+    const app=await pendingApplication();await db.exec('reset role');
+    await db.exec("create function public.test_reject_provider_grant() returns trigger language plpgsql as $$ begin raise exception 'Injected role grant failure'; end; $$; create trigger test_provider_grant_failure before insert on public.account_roles for each row when(new.role='provider') execute function public.test_reject_provider_grant();");
+    try {
+      await asUser(alice);await expect(approve(bob,app.submission_id)).rejects.toThrow(/Injected role grant failure/i);await db.exec('reset role');
+      expect((await db.query('select state from public.provider_applications where owner_id=$1',[bob])).rows[0].state).toBe('submitted');
+      expect((await db.query('select count(*)::int as value from public.provider_application_approvals')).rows[0].value).toBe(0);
+      expect((await db.query("select count(*)::int as value from public.account_roles where user_id=$1 and role='provider'",[bob])).rows[0].value).toBe(0);
+    } finally {await db.exec('reset role; drop trigger test_provider_grant_failure on public.account_roles; drop function public.test_reject_provider_grant();');}
+    await asUser(alice);expect((await approve(bob,app.submission_id)).rows[0].state).toBe('approved');
+  });
 });

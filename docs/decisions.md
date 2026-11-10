@@ -333,7 +333,7 @@ on unrelated provider decisions.
 
 | ID | Subject | Decision required |
 |---|---|---|
-| OPEN-013 | Combined roles | Whether one account can be user and companion |
+| OPEN-013 | Combined roles | Resolved: approved Providers retain User membership/features under one login (DEC-023) |
 | OPEN-014 | User-profile visibility | Public, member, owner, and operational fields |
 | OPEN-015 | Looking For detail | Visibility of full posts |
 | OPEN-016 | Publishing expiry | Effects on profiles, ads, subscribers, and bookings |
@@ -533,8 +533,9 @@ Basic User membership is initialized by a backend Auth trigger and backfill;
 Provider and operational roles require separate trusted assignments. Client-owned
 metadata never grants roles. Protected assignment-event records support future
 operations, with retention and administrative workflow still pending. This does
-not resolve combined-role policy, provider eligibility or publishing-plan rules,
-assign a real Provider role, enable public publishing, or grant paid access.
+not itself assign a real Provider role, enable public publishing or grant paid access.
+Combined-role policy was later confirmed in DEC-023; provider eligibility and
+publishing-plan rules remain separate.
 
 
 ## DEC-021 — Explicit Capability for Intake Inspection
@@ -552,5 +553,24 @@ no real staff assignment or hosted migration is performed by the code increment.
 Routine security implementation: preserve a text snapshot for each submission and
 require its exact ID for a separately scoped request for changes. Reject self-feedback,
 stale decisions and replay; expose owner feedback without reviewer identity. This
-implements revision handling only. Approval authority, eligibility and combined-role
-policy remain pending user decisions; no Provider grant is implied.
+implements revision handling only. Approval authority and combined roles were later
+confirmed in DEC-023; live eligibility remains unresolved. Feedback itself grants no role.
+
+
+## DEC-023 — Admin Pilot Approval and Additive Provider Membership
+
+Confirmed by Robbie: development-pilot Provider approval is limited to assigned
+Administrators with an explicit approval capability. Approved Providers keep User
+features under the same login, with both User and Provider membership roles.
+
+Implement approval after explicit submitted-version inspection using the existing
+review scope plus `provider_application_approval`. Retain the existing independent
+review guard: no self-approval. Atomically store the approval/version/reviewer/time,
+add Provider membership and transition the application. Require current basic User
+membership; do not restore a separately revoked role. Preserve protected role events.
+
+This is pilot access, separate from identity verification, paid plans, subscriber
+entitlements and public publishing. Live eligibility, staff provisioning, rejection,
+reapplication and operational retention remain separate work. Historical approval
+must not substitute for current assigned-role checks. No real staff capability has
+been provisioned and no hosted migration has been applied by this code increment.

@@ -73,9 +73,10 @@ manage availability, communicate, and respond to booking requests.
 
 Perform specifically authorized review and operational functions.
 
-Whether one account may hold both authoritative user and companion roles remains
-to be confirmed. Registration now records a revisitable User/Provider onboarding
-preference under one login; this choice does not assign production roles.
+An approved Provider keeps User membership/features under the same login (DEC-023).
+Pilot approval requires an assigned Administrator with explicit approval capability.
+Registration records a revisitable User/Provider onboarding preference; the preference
+itself never assigns roles, verification or paid/public access.
 
 ## 5. Core Product Structure
 

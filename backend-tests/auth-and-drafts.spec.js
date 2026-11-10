@@ -10,7 +10,7 @@ function session(profile = user) {
   return { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock_refresh_token', user: profile };
 }
 async function mockBackend(page, options = {}) {
-  const state = { bookingPlan: null, user: { ...user, user_metadata: {} }, providerApplication: null, applicationFeedback: [], applicationActivity: [], activityFailure: false, applicationSubmissions: [], historyFailure: false, applicationSubmissionCounter: 0, userProfile: null, roles: ['user'], capabilities: [], reviewApplications: [], reviewAccessEvents: [], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
+  const state = { bookingPlan: null, user: { ...user, user_metadata: {} }, providerApplication: null, applicationApprovals: [], targetRoles: ['user'], approvalFailure: false, applicationFeedback: [], applicationActivity: [], activityFailure: false, applicationSubmissions: [], historyFailure: false, applicationSubmissionCounter: 0, userProfile: null, roles: ['user'], capabilities: [], reviewApplications: [], reviewAccessEvents: [], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
   await page.route('https://backend-test.supabase.co/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -57,6 +57,22 @@ async function mockBackend(page, options = {}) {
       if (state.historyFailure) return respond({message:'History unavailable'},404);
       return respond(state.applicationSubmissions.filter(row => `eq.${row.owner_id}` === url.searchParams.get('owner_id')).slice(0,Number(url.searchParams.get('limit'))));
     }
+    if (url.pathname === '/rest/v1/provider_application_approvals') {
+      if(options.missingApprovalMigration)return respond({message:'Unavailable'},404);
+      return respond(state.applicationApprovals.filter(row=>row.owner_id===state.user.id && (!url.searchParams.has('submission_id') || url.searchParams.get('submission_id').includes(row.submission_id))).map(({owner_id,submission_id,approved_at})=>({owner_id,submission_id,approved_at})));
+    }
+    if(url.pathname==='/rest/v1/rpc/can_approve_provider_applications') {
+      if(options.missingApprovalMigration)return respond({message:'Unavailable'},404);
+      return respond(state.roles.includes('admin') && state.capabilities.includes('provider_application_review') && state.capabilities.includes('provider_application_approval'));
+    }
+    if(url.pathname==='/rest/v1/rpc/approve_provider_application') {
+      const allowed=state.roles.includes('admin') && state.capabilities.includes('provider_application_review') && state.capabilities.includes('provider_application_approval');
+      const row=state.reviewApplications.find(value=>value.owner_id===body.p_owner);
+      if(options.missingApprovalMigration || state.approvalFailure || !allowed || body.p_expected_reviewer!==state.user.id || body.p_owner===state.user.id || row?.state!=='submitted' || row.submission_id!==body.p_submission || !state.targetRoles.includes('user')) return respond({message:'Denied or stale approval'},409);
+      row.state='approved';if(!state.targetRoles.includes('provider'))state.targetRoles.push('provider');
+      state.applicationApprovals.push({owner_id:row.owner_id,submission_id:row.submission_id,reviewer_id:state.user.id,approved_at:'2026-11-10T18:00:00Z'});
+      return respond(row);
+    }
     if (url.pathname === '/rest/v1/provider_application_feedback') {
       if (url.searchParams.has('submission_id')) return respond(state.applicationFeedback.filter(row => row.owner_id === state.user.id && url.searchParams.get('submission_id').includes(row.submission_id)));
       return respond(state.applicationFeedback.filter(row => row.owner_id === state.user.id).slice(-1).map(({note,created_at}) => ({note,created_at})));
@@ -95,7 +111,7 @@ async function mockBackend(page, options = {}) {
       if (options.missingApplicationMigration || options.failApplicationMutation) return respond({ message: 'Unavailable' }, 400);
       if (body.p_expected_owner !== state.user.id) return respond({ message: 'Account changed' }, 403);
       if (url.pathname.endsWith('/save_provider_application')) {
-        if (state.providerApplication?.state === 'submitted') return respond({ message: 'Locked' }, 409);
+        if (['submitted','approved'].includes(state.providerApplication?.state)) return respond({ message: 'Locked' }, 409);
         state.providerApplication = { owner_id: userId, display_name: body.p_display_name.trim(), city: body.p_city.trim(), introduction: body.p_introduction.trim(), state: 'draft', submitted_at: null, withdrawn_at: null };
       } else if (url.pathname.endsWith('/submit_provider_application')) {
         if (!state.roles.includes('user') || state.providerApplication?.state !== 'draft') return respond({ message: 'Denied' }, 403);
@@ -1452,4 +1468,50 @@ test('draft download reads no saved tables until an explicit nonempty selection'
   await page.getByRole('button',{name:'Download selected saved drafts',exact:true}).click();
   await expect(page.locator('.backup-status')).toHaveText('Choose at least one draft type.');
   expect(state.requests.filter(row=>row.path.startsWith('/rest/v1/'))).toHaveLength(0);
+});
+
+
+test('authorized Admin approves the exact submitted version, retains User and refreshes the queue',async({page})=>{
+  const state=await mockBackend(page);state.roles=['user','admin'];state.capabilities=['provider_application_review','provider_application_approval','provider_application_feedback'];state.reviewApplications=reviewRows(1);state.reviewApplications[0].submission_id='66666666-6666-4666-8666-000000000001';
+  await signIn(page);await enter(page,'/?page=provider-review');await page.getByRole('button',{name:'Inspect Applicant 01',exact:true}).click();
+  const approve=page.getByRole('button',{name:'Approve Provider access',exact:true});await expect(approve).toBeVisible();
+  await page.setViewportSize({width:390,height:844});await page.locator('.review-approval').screenshot({path:'/tmp/provider-pilot-approval-mobile.png'});
+  state.reviewApplications[0].submission_id='66666666-6666-4666-8666-000000000002';page.once('dialog',dialog=>dialog.accept());await approve.click();
+  await expect(page.locator('.review-approval [role=status]')).toContainText('Unable to confirm approval');expect(state.targetRoles).toEqual(['user']);expect(state.applicationApprovals).toHaveLength(0);
+  await page.getByRole('button',{name:'Refresh review queue',exact:true}).click();await page.getByRole('button',{name:'Inspect Applicant 01',exact:true}).click();
+  page.once('dialog',dialog=>dialog.dismiss());await page.getByRole('button',{name:'Approve Provider access',exact:true}).click();expect(state.applicationApprovals).toHaveLength(0);
+  page.once('dialog',dialog=>dialog.accept());await page.getByRole('button',{name:'Approve Provider access',exact:true}).click();
+  await expect(page.locator('.review-card')).toHaveCount(0);await expect(page.locator('.review-status')).toContainText('approval recorded');expect(state.targetRoles).toEqual(['user','provider']);expect(state.applicationApprovals).toHaveLength(1);expect(state.applicationApprovals[0].submission_id).toBe('66666666-6666-4666-8666-000000000002');
+});
+for(const [label,roles,capabilities,missing] of [
+  ['Moderator with approval capability',['user','moderator'],['provider_application_review','provider_application_approval'],false],
+  ['Admin without approval capability',['user','admin'],['provider_application_review'],false],
+  ['Admin with missing approval migration',['user','admin'],['provider_application_review','provider_application_approval'],true],
+]) {
+  test(`${label} retains permitted inspection without an approval action`,async({page})=>{
+    const state=await mockBackend(page,{missingApprovalMigration:missing});state.roles=roles;state.capabilities=capabilities;state.reviewApplications=reviewRows(1);state.reviewApplications[0].submission_id='66666666-6666-4666-8666-000000000001';state.user.user_metadata={role:'admin',approval:true};
+    await signIn(page);await enter(page,'/?page=provider-review');await page.getByRole('button',{name:'Inspect Applicant 01',exact:true}).click();
+    await expect(page.locator('.review-introduction')).toBeVisible();await expect(page.getByRole('button',{name:'Approve Provider access',exact:true})).toHaveCount(0);
+    expect(state.requests.filter(row=>row.path.endsWith('/approve_provider_application'))).toHaveLength(0);
+  });
+}
+test('revoked Admin approval scope cannot turn an open inspection into a grant',async({page})=>{
+  const state=await mockBackend(page);state.roles=['user','admin'];state.capabilities=['provider_application_review','provider_application_approval'];state.reviewApplications=reviewRows(1);state.reviewApplications[0].submission_id='66666666-6666-4666-8666-000000000001';
+  await signIn(page);await enter(page,'/?page=provider-review');await page.getByRole('button',{name:'Inspect Applicant 01',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Approve Provider access',exact:true})).toBeVisible();state.capabilities=['provider_application_review'];
+  page.once('dialog',dialog=>dialog.accept());await page.getByRole('button',{name:'Approve Provider access',exact:true}).click();
+  await expect(page.locator('.review-approval [role=status]')).toContainText('Unable to confirm approval');expect(state.targetRoles).toEqual(['user']);expect(state.applicationApprovals).toHaveLength(0);
+});
+test('approved applicant sees immutable history and both roles while current role revocation remains distinct',async({page})=>{
+  const state=await mockBackend(page);state.roles=['user','provider'];const submission='66666666-6666-4666-8666-000000000001';
+  state.providerApplication={owner_id:userId,display_name:'Approved applicant',city:'Vancouver',introduction:'Approved version',state:'approved',submission_id:submission};
+  state.applicationSubmissions=[{id:submission,owner_id:userId,display_name:'Approved applicant',city:'Vancouver',introduction:'Approved version',submitted_at:'2026-11-10T17:00:00Z'}];
+  state.applicationApprovals=[{owner_id:userId,submission_id:submission,reviewer_id:'44444444-4444-4444-8444-000000000001',approved_at:'2026-11-10T18:00:00Z'}];
+  state.applicationActivity=[{event_id:1,owner_id:userId,state:'approved',occurred_at:'2026-11-10T18:00:00Z'}];
+  await signIn(page);await enter(page,'/?page=provider-application');await expect(page.locator('.application-state')).toContainText('approved');
+  await expect(page.getByLabel('Provider display name',{exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'Save application draft',exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'Withdraw application',exact:true})).toBeDisabled();
+  await page.getByRole('button',{name:'Load submission history',exact:true}).click();await page.locator('.application-history summary').click();await expect(page.locator('.application-history')).toContainText('Pilot access approval');
+  await page.getByRole('button',{name:'Load application activity',exact:true}).click();await expect(page.locator('.application-activity')).toContainText('Pilot Provider application approved');
+  await page.locator('[data-account-link]').click();await expect(page.locator('[data-account-permissions]')).toContainText('Assigned roles: User, Provider.');await expect(page.getByRole('link',{name:'Explore user setup',exact:true})).toBeVisible();await expect(page.getByRole('link',{name:'View approved application',exact:true})).toBeVisible();
+  state.roles=['user'];await page.getByRole('button',{name:'Refresh account permissions',exact:true}).click();await expect(page.locator('[data-account-permissions]')).toContainText('Provider role: Not assigned');await expect(page.locator('[data-application-status]')).toContainText('Application approved');
 });

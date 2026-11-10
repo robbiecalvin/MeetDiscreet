@@ -32,10 +32,12 @@ export function renderProviderApplicationHistory(container, getOwner, isCurrent)
         const detail = node('details');
         detail.append(node('summary', `Submitted ${date(row.submitted_at)}`), node('h3', row.display_name), node('p', row.city), node('p', row.introduction, 'application-history-text'));
         if (row.feedback) detail.append(node('h3', 'Requested changes'), node('p', row.feedback.note, 'application-history-text'), node('p', `Feedback received ${date(row.feedback.created_at)}`, 'profile-small'));
-        else detail.append(node('p', 'No requested changes recorded for this submission. This does not indicate approval.', 'profile-small'));
+        else detail.append(node('p', row.approval ? 'No requested changes recorded for this submission.' : 'No requested changes recorded for this submission. This does not indicate approval.', 'profile-small'));
+        if(row.approval) detail.append(node('h3','Pilot access approval'),node('p',`Approved ${date(row.approval.approved_at)}. See current roles in Account.`,'profile-small'));
         entries.append(detail);
       }
       status.textContent = rows.length ? `${rows.length} recent submission${rows.length === 1 ? '' : 's'} loaded.` : 'No submitted introductions found.';
+      if(rows.some(row=>row.approvalUnavailable))status.textContent+=' Approval details unavailable.';
       button.textContent = 'Refresh submission history';
     } catch {
       if (current()) { entries.replaceChildren(); status.textContent = 'Submission history unavailable. Check sign-in, connection and backend setup, then retry.'; }

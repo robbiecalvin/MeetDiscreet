@@ -757,3 +757,5 @@ underlying feature is operational.
 
 - `src/draft-backup.js`: gated, verified-account selection and explicit JSON reference download with stale-view guards and short-lived Blob URL.
 - `src/backend/draft-backup.js`: allowlisted owner draft reads, projected fields, count/completeness checks and actor revalidation; no application or Auth object export.
+
+- `supabase/migrations/202611100001_provider_application_approval.sql`: Admin-only explicit-scope, version-bound pilot approval with atomic additive Provider membership and protected approval records.

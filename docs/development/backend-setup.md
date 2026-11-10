@@ -15,7 +15,8 @@ Check the dashboard's plan and usage limits before changing settings.
 - Server-controlled membership-role foundation with basic User initialization;
   Provider/operational role assignment and live eligibility workflows remain separate.
 - Private provider application intake (save/submit/withdraw) with owner-bound
-  transitions; version-bound feedback is available after migration 007. Approval and notifications remain unimplemented.
+  transitions; version-bound feedback is available after migration 007. Pilot approval
+  is prepared in the later approval migration; notifications remain unimplemented.
 - No public publishing, paid entitlements, payments, messaging,
   real discovery data, uploads, or completed eligibility verification.
 - Private experience catalogue snapshots require the additional migration below.
@@ -103,9 +104,10 @@ The migration backfills basic `user` membership for existing auth users and adds
 Auth-user insert trigger assigning only `user` to future accounts. Signup metadata,
 including `onboarding_intent`, is never read by that trigger. This membership does
 not establish verified eligibility, provider status, posting allowances or any
-paid entitlement. Provider/moderator/admin roles are never automatically assigned.
-Structural support for several roles does not settle the pending combined-role
-product policy; this increment assigns no real Provider role.
+paid entitlement. The Auth-user trigger never assigns Provider/moderator/admin.
+DEC-023 confirms that normal approved Providers retain User membership. Pilot
+approval adds Provider through the separately scoped transaction described below;
+this foundational role migration alone assigns no real Provider role.
 
 `has_account_role(text)` checks the current authenticated user using invoker
 security and owner RLS. It is a building block for future backend policies, not a
@@ -137,20 +139,21 @@ service API clients have no direct row mutations. Authenticated owner-bound
 `withdraw_provider_application` RPCs implement draft/submitted/withdrawn transitions.
 Submitted applications cannot be edited without withdrawal or a staff request for changes. Submission requires
 assigned User membership and nonblank name/city/introduction; these are intake
-requirements, not approved provider eligibility criteria. No Provider role is granted.
+requirements, not approved provider eligibility criteria. Save/submit/withdraw grant no Provider role.
 
 The browser binds mutations to the verified account that loaded the editor; the
 server compares the expected owner with the actual JWT user and always writes
 using `auth.uid()`. This protects against changing accounts during asynchronous
 requests. Status events contain owner, state and server time rather than duplicated
-application content. They follow auth-account deletion; operational retention and
-approval records and operational retention still need definition before a live approval process.
+application content. They follow auth-account deletion. Later migrations add
+submitted snapshots and pilot approval records; operational audit retention still
+needs definition before live operations.
 
 A separately scoped staff inspection workspace is implemented below; migration 007 adds feedback.
-No approval/denial or role-assignment RPC, notifications,
-response deadline or public publishing is implemented. A future review operation
-must verify assigned operational roles and current submitted state/version before
-an authorized audited decision. This migration has not been applied remotely by
+Pilot approval and additive Provider assignment are implemented by the later
+approval migration below. Denial, notifications, response deadlines, identity/eligibility
+verification and public publishing remain separate work. Each approval verifies
+current authority and the exact submitted version before its atomic role change. This migration has not been applied remotely by
 the agent. Run only missing migrations; keep the existing schema intact.
 
 ## Add scoped staff review access
@@ -183,8 +186,9 @@ requirements. No immutable/compliance guarantee is implied.
 A trusted operator must provision staff role plus capability through a separately
 authorized administrative process before hosted review is usable. No account gets
 staff access automatically, and the agent has not assigned any real staff privileges
-or applied this migration. Approval/rejection, eligibility decisions, conflict rules,
-role granting and public publishing require separate implementation and authority.
+or applied this migration. Pilot approval now has the separate scoped transaction
+below; rejection, live eligibility, broader conflict rules and public publishing
+remain future implementation/policy.
 
 ## Registration starting preference
 
@@ -295,9 +299,9 @@ The resulting `changes_requested` state lets the applicant save revisions and
 explicitly resubmit a new version. Owners can read their feedback note/time, with
 no browser permission to read reviewer identity or rewrite feedback.
 
-This migration has not been applied to the hosted project by the agent. Approval,
-Provider-role grants and public publishing remain unavailable. Reviewer approval
-authority and whether an approved Provider retains User membership await answers.
+This migration has not been applied to the hosted project by the agent. DEC-023
+resolves pilot approval authority and combined User/Provider membership. Pilot
+approval requires the later migration below; public publishing remains unavailable.
 
 
 The applicant's submission-history control uses the same migration 007 snapshot
@@ -400,3 +404,39 @@ require all counted rows. Single-record drafts return zero or one record. The JS
 reference copy is limited to 10 MiB and is not an atomic account snapshot or import
 format. Existing RLS/ownership checks still require hosted validation; automated
 browser checks use synthetic data. No live user data was downloaded by the agent.
+
+
+## Add Administrator pilot approval
+
+Apply missing earlier role/intake/review/snapshot migrations first, then apply
+[202611100001_provider_application_approval.sql](../../supabase/migrations/202611100001_provider_application_approval.sql)
+once. This prepares the confirmed DEC-023 policy. The agent has not applied it to
+Supabase, assigned real staff roles/capabilities or granted a real Provider role.
+
+A trusted operator must separately provision the reviewer's assigned `admin` role,
+`provider_application_review` and `provider_application_approval` capabilities.
+Moderator membership cannot approve even with the approval scope. Approval uses
+ordinary verified staff sessions and protected RPCs; no service key belongs in the
+browser. Do not grant staff scopes from signup preferences or application metadata.
+No default staff grant, capability-assignment UI or broad admin credential is added.
+
+`approve_provider_application` compares expected/actual reviewer, denies self-approval,
+locks current authority and the exact pending application/version, and requires
+current basic User membership for the applicant. It records a version-bound approval,
+adds Provider without removing User, and changes the application to approved in one
+transaction. A failure rolls all three changes back. Replays, withdrawn/stale versions
+and independently revoked applicant membership are denied. Role assignments retain
+existing protected audit events. Approval records expose only owner/version/time
+to the owner, without reviewer identity; API clients cannot rewrite them.
+
+Approved intake is closed, while current role rows remain independently authoritative.
+Role revocation/reapplication interfaces and live eligibility requirements remain
+separate. Approval creates no identity-verification status, paid plan, subscription,
+booking or public content. Owner history can display the historical decision even
+if a Provider role is later revoked. Its absence/error is not a current-role decision.
+
+Local PostgreSQL/mocked-browser checks validate this code, not hosted JWT/runtime
+behavior. During the deferred walkthrough, use distinct test reviewer/applicant
+accounts, verify User + Provider membership, denied Moderator/self/stale calls, and
+rollback/error behavior. Staff identity provisioning and operational audit retention
+need their own authorized process; do not paste privileged credentials into chat.

@@ -39,3 +39,18 @@ export async function requestProviderChanges(reviewerId, ownerId, submissionId, 
   if (error || !data || data.owner_id !== ownerId || data.state !== 'changes_requested') throw new Error('Change request failed.');
   return data;
 }
+
+export async function loadProviderApprovalAccess(reviewerId) {
+  await verifyActor(reviewerId);
+  const { data, error } = await backendClient().rpc('can_approve_provider_applications');
+  if (error || typeof data !== 'boolean') throw new Error('Approval access unavailable.');
+  return data;
+}
+export async function approveProviderApplication(reviewerId, ownerId, submissionId) {
+  await verifyActor(reviewerId);
+  const { data, error } = await backendClient().rpc('approve_provider_application', {
+    p_expected_reviewer: reviewerId, p_owner: ownerId, p_submission: submissionId,
+  }).single();
+  if (error || !data || data.owner_id !== ownerId || data.state !== 'approved' || data.submission_id !== submissionId) throw new Error('Approval failed.');
+  return data;
+}

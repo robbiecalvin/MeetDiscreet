@@ -27,8 +27,8 @@ and server time; application text is not copied into logs. Capability assignment
 have protected change events. Operational audit retention/export remains pending.
 
 Inspection is extended by a separately scoped request-changes form after migration 007.
-No approval, rejection, financial operation, provider permission grant or publication
-is implemented. Approval authority and eligibility rules remain unresolved.
+Pilot approval is now implemented after the later approval migration under DEC-023.
+Rejection, identity verification, financial operations and publication remain separate.
 Backend-disabled mode shows no private fixtures; missing schema/permissions give
 explicit unavailable/denied states and retry. Hosted migration and actual staff
 provisioning remain later setup tasks, not completed production operations.
@@ -43,3 +43,22 @@ on failure preserve the note without claiming success. The server rejects stale
 versions and repeated requests. Applicants see the escaped note on their own intake,
 can save revisions and resubmit; the previous note is hidden during a new submission.
 No reviewer identity or feedback is exposed publicly.
+
+
+## Pilot Provider approval
+
+After inspecting a submitted version, show Approve Provider access only if the server
+confirms Administrator membership plus explicit review and approval capabilities.
+The feedback capability remains independent. No self-approval. Missing approval
+setup keeps permitted inspection/feedback usable without an approval action.
+
+Explain pilot scope, retained User features and separate identity/paid/publishing
+checks. Require confirmation bound to the inspected name/version. Lock both feedback
+and approval controls during a decision. A successful approval refreshes the queue;
+if refresh fails, preserve that distinction instead of claiming the queue refreshed.
+Errors say approval could not be confirmed and request a refresh/current-access check.
+The server rejects revoked authority, stale/replayed versions, withdrawn/nonpending
+records and applicants whose basic User membership was separately revoked.
+
+No real staff assignment or hosted migration is performed. Privileged keys never
+enter this UI. Actual Provider eligibility and publishing operations remain future.

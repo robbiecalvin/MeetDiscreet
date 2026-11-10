@@ -124,6 +124,7 @@ export function renderAccountOverview(container, navigate, onBack) {
               draft: ['Private application draft saved.', 'Continue application draft'],
               submitted: ['Application submitted for review. Provider access has not been approved.', 'View submitted application'],
               withdrawn: ['Application withdrawn. Save revisions before submitting again.', 'Revise application'],
+              approved: ['Application approved for the development pilot. Current role assignments are shown above.', 'View approved application'],
               changes_requested: ['Changes requested. Read your feedback, revise and resubmit.', 'Review requested changes'],
             };
             const [message, label] = states[value] || ['No provider application saved yet.', 'Start provider application'];
