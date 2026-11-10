@@ -170,7 +170,12 @@ async function mockBackend(page, options = {}) {
     }
     if (url.pathname === '/rest/v1/listing_drafts') {
       if (method === 'GET' && request.headers().prefer?.includes('count=exact')) return respond(state.listings.slice(0,1000),200,{'content-range':`0-${Math.max(0,state.listings.length-1)}/${options.backupListingCount ?? state.listings.length}`,'Access-Control-Expose-Headers':'content-range'});
-      if (method === 'HEAD') return route.fulfill({ status: 200, headers: { 'content-range': `0-0/${state.listings.length}`, 'Access-Control-Allow-Origin': '*', 'Access-Control-Expose-Headers': 'content-range' } });
+      if (method === 'HEAD') {
+        if (options.failListingSummary) return respond({message:'Denied'},403);
+        const kind = url.searchParams.get('kind')?.replace(/^eq\./,'');
+        const count = options.invalidListingSummaryCount ? '*' : state.listings.filter(row => !kind || row.kind === kind).length;
+        return route.fulfill({ status: 200, headers: { 'content-range': `0-0/${count}`, 'Access-Control-Allow-Origin': '*', 'Access-Control-Expose-Headers': 'content-range' } });
+      }
       if (method === 'POST') { const id = state.listings.some(row => row.id === listingId) ? `dddddddd-dddd-4ddd-8ddd-${String(state.listings.length + 1).padStart(12, '0')}` : listingId; state.listings.push({ ...body, id }); return respond({ id }, 201); }
       if (method === 'DELETE') {
         if (options.failDelete) return respond({ message: 'Denied' }, 403);
@@ -1683,4 +1688,51 @@ test('provider setup missing application schema is unavailable while draft tools
   await expect(status).toContainText('Changes requested');
   await page.getByRole('link',{name:'Review requested changes',exact:true}).click();
   await expect(page.locator('.application-state')).toContainText('changes requested');
+});
+
+
+test('User setup refreshes owner profile and Looking For counts without loading draft content or counting Offerings',async({page})=>{
+  const state=await mockBackend(page);
+  state.listings=[{id:'looking-one',owner_id:userId,kind:'looking',description:'PRIVATE LISTING TEXT'},{id:'offering-one',owner_id:userId,kind:'offering'}];
+  await signIn(page);await enter(page,'/?page=user-setup');
+  const profile=page.locator('[data-draft-summary=user-profile]');
+  const looking=page.locator('[data-draft-summary=looking-listings]');
+  await expect(profile).toHaveText('No saved User profile draft');
+  await expect(looking).toHaveText('1 saved private Looking For draft');
+  state.userProfile={owner_id:userId,display_name:'PRIVATE USER NAME'};
+  state.listings.push({id:'looking-two',owner_id:userId,kind:'looking'});
+  await page.getByRole('button',{name:'Refresh User profile saved status',exact:true}).click();
+  await page.getByRole('button',{name:'Refresh Looking For saved status',exact:true}).click();
+  await expect(profile).toHaveText('Private User profile draft saved');
+  await expect(looking).toHaveText('2 saved private Looking For drafts');
+  const countRequest=state.requests.find(r=>r.path==='/rest/v1/listing_drafts' && r.method==='HEAD');
+  const query=new URLSearchParams(countRequest.query);
+  expect(query.get('owner_id')).toBe(`eq.${userId}`);expect(query.get('kind')).toBe('eq.looking');expect(query.get('select')).toBe('id');
+  expect(state.requests.filter(r=>r.path==='/rest/v1/user_profile_drafts').every(r=>new URLSearchParams(r.query).get('select')==='owner_id')).toBe(true);
+  await expect(page.locator('.user-setup')).not.toContainText('PRIVATE USER NAME');
+  await expect(page.locator('.user-setup')).not.toContainText('PRIVATE LISTING TEXT');
+  await page.setViewportSize({width:390,height:844});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await looking.locator('..').screenshot({path:'/tmp/user-setup-looking-status-mobile.png'});
+  await page.getByRole('button',{name:'Sign out',exact:true}).click();
+  await expect(profile).toHaveCount(0);await expect(looking).toHaveCount(0);
+});
+
+test('User setup distinguishes unavailable draft summaries from empty records and retries independently',async({page})=>{
+  const options={missingUserProfileMigration:true,failListingSummary:true};
+  const state=await mockBackend(page,options);
+  await signIn(page);await enter(page,'/?page=user-setup');
+  const profile=page.locator('[data-draft-summary=user-profile]');const looking=page.locator('[data-draft-summary=looking-listings]');
+  await expect(profile).toContainText('Saved status unavailable');await expect(looking).toContainText('Saved status unavailable');
+  await expect(page.locator('[data-booking-plan-summary]')).toHaveText('No saved booking plan');
+  await expect(page.getByRole('link',{name:'Open my listing drafts',exact:true})).toBeVisible();
+  options.missingUserProfileMigration=false;
+  await page.getByRole('button',{name:'Refresh User profile saved status',exact:true}).click();
+  await expect(profile).toHaveText('No saved User profile draft');await expect(looking).toContainText('Saved status unavailable');
+  options.failListingSummary=false;options.invalidListingSummaryCount=true;
+  await page.getByRole('button',{name:'Refresh Looking For saved status',exact:true}).click();
+  await expect(looking).toContainText('Saved status unavailable');
+  options.invalidListingSummaryCount=false;state.listings=[];
+  await page.getByRole('button',{name:'Refresh Looking For saved status',exact:true}).click();
+  await expect(looking).toHaveText('0 saved private Looking For drafts');
 });

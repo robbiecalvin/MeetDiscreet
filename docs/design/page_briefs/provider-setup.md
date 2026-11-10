@@ -44,3 +44,18 @@ existence/counts only, not completeness or permission to publish. No percentage 
 automatic ready state is added. Identity changes remove private status; late
 responses cannot repopulate a detached view. Backend-disabled preview remains
 labelled and makes no private reads. Mobile uses the existing account-card style.
+
+## User starting-point saved status
+
+User setup now reads saved User-profile existence and the exact count of private
+Looking For drafts independently, alongside the existing booking-plan summary.
+Each summary has its own refresh/retry. Looking For counts filter both actual
+owner and listing kind; Offering drafts do not contribute. Only existence/count
+metadata is requested, never profile or listing content.
+
+Missing tables, denied reads or absent/invalid exact counts show unavailable status,
+not an empty draft state. Other navigation and saved-plan resume stay usable.
+Sign-out removes private summaries; detached views ignore late responses. No
+completion percentage, posting permission or public publication is inferred.
+Backend-disabled preview makes no saved-status reads. Existing card styling wraps
+on mobile; no new business requirement or account role is introduced.

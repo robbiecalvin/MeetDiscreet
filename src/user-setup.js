@@ -1,3 +1,4 @@
+import { loadPrivateDraftSummary } from './backend/drafts.js';
 import { hasSavedBookingPlan } from './backend/booking-plans.js';
 import { backendEnabled, backendClient } from './backend/client.js';
 function node(tag, text, className) {
@@ -31,6 +32,22 @@ export function renderUserSetup(container, navigate, onDiscover) {
       ['provider-setup', 'Interested in providing?', 'Explore the separate provider setup using the same login. This does not grant publishing access.', 'Explore provider setup'],
     ]) {
       const card = node('section', null, 'account-tool-card'); card.append(node('h2', title), node('p', copy), link(page, action));
+      if (connected && ['edit-user-profile', 'my-listings'].includes(page)) {
+        const kind = page === 'edit-user-profile' ? 'user-profile' : 'looking-listings';
+        const saved = node('p', 'Checking saved drafts…', 'account-draft-summary');
+        saved.setAttribute('role', 'status'); saved.dataset.draftSummary = kind;
+        const refresh = node('button', page === 'edit-user-profile' ? 'Refresh User profile saved status' : 'Refresh Looking For saved status', 'button quiet');
+        refresh.type = 'button';
+        let busy = false;
+        async function check() {
+          if (busy) return;
+          busy = true; refresh.disabled = true; saved.textContent = 'Checking saved drafts…';
+          try { const message = await loadPrivateDraftSummary(kind); if (current()) saved.textContent = message; }
+          catch { if (current()) saved.textContent = 'Saved status unavailable. Check sign-in, connection and backend setup, then retry.'; }
+          finally { busy = false; if (current()) refresh.disabled = false; }
+        }
+        refresh.addEventListener('click', check); card.append(saved, refresh); check();
+      }
       if (connected && page === 'booking-draft') {
         const saved = node('p', 'Checking saved plan…', 'account-draft-summary'); saved.setAttribute('role', 'status'); saved.dataset.bookingPlanSummary = '';
         const refresh = node('button', 'Refresh saved booking plan status', 'button quiet'); refresh.type = 'button';

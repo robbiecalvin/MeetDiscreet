@@ -85,6 +85,12 @@ export async function loadPrivateDraftSummary(kind) {
     failure(error);
     return data ? 'Private profile draft saved' : 'No saved profile draft';
   }
+  if (kind === 'looking-listings') {
+    const { count, error } = await backendClient().from('listing_drafts').select('id', { count: 'exact', head: true }).eq('owner_id', user.id).eq('kind', 'looking');
+    failure(error);
+    if (!Number.isSafeInteger(count) || count < 0) throw new Error('Draft count unavailable.');
+    return `${count} saved private Looking For ${count === 1 ? 'draft' : 'drafts'}`;
+  }
   if (kind === 'listings') {
     const { count, error } = await backendClient().from('listing_drafts').select('id', { count: 'exact', head: true }).eq('owner_id', user.id);
     failure(error);

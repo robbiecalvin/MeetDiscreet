@@ -1188,6 +1188,20 @@ If launch scope is reduced:
   text exclusion, missing setup/retry, independent draft refresh and sign-out cleanup.
   No migration or new role/capability assignment is introduced.
 
+### User Setup Saved-Draft Status
+
+- User setup now shows saved User-profile existence and private Looking For draft
+  counts with independent refresh/retry, alongside the existing saved-plan flow.
+  Counts filter actual owner and Looking For kind, excluding Offering drafts.
+- Reads request metadata only. Missing/denied setup or unusable exact counts show
+  unavailable status; independent summaries/navigation remain usable. Sign-out
+  removes private status and detached views ignore late responses. No publishing
+  or completion score is inferred.
+- Build, all 171 standard checks and 100 backend browser checks passed; mobile
+  card inspected. Coverage includes category/owner query bounds, metadata-only
+  reads, unavailable vs empty states, independent retry and sign-out cleanup.
+  Existing saved-plan resume checks pass. No database migration is added.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine
