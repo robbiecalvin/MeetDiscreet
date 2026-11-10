@@ -1217,6 +1217,23 @@ If launch scope is reduced:
   An older Provider intake test now waits for the settled start-application label
   instead of its transient loading label. No migration is introduced.
 
+### Saved Public-Field Review for Future Publishing
+
+- Provider setup now offers explicit private review of saved public profile-field
+  candidates. Unsaved edits and member biography/interests are excluded. Owners
+  can revisit missing draft fields and refresh saved values; no quality score or
+  ready-to-publish claim is made. Demo portraits remain labelled as fictional.
+- The owner-bound read projects only those fields and rechecks actor identity.
+  Missing/empty/denied states stay distinct, stale content clears before retry,
+  and sign-out prevents delayed responses from repopulating private fields.
+- Build, all 171 standard checks and 105 backend browser checks passed; mobile
+  preview inspected. Coverage includes explicit loading, public-only projection,
+  safe text rendering, saved-value refresh, missing fields, denied/cross-owner
+  responses, retry and sign-out during a delayed read. No publishing request/write,
+  migration or live plan is enabled.
+  Controlled public publishing still needs server-enforced eligibility/approval
+  and plan rules; this preview is an independent preparation step.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

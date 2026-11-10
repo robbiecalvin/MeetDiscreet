@@ -59,3 +59,23 @@ Sign-out removes private summaries; detached views ignore late responses. No
 completion percentage, posting permission or public publication is inferred.
 Backend-disabled preview makes no saved-status reads. Existing card styling wraps
 on mobile; no new business requirement or account role is introduced.
+
+## Saved public-field review before publishing
+
+Signed-in owners can explicitly load a saved-profile public-field preview from
+Provider setup. It reads saved display name, username, adult age, tagline, general
+location and demo photo selection only; unsaved editor changes, member biography
+and interests are excluded. The existing profile editor remains the editing path.
+
+Use the shared profile-card treatment, escaped text and a labelled fictional
+portrait. No online indicator, subscriber data, public URL or publishing button
+is supplied. Show missing core draft fields as “Fields to revisit” without a
+quality score or readiness declaration. Missing draft, denied/unavailable reads
+and loaded fields have distinct states; retry clears old content first. Explicit
+refresh rereads saved values. Keyboard focus moves to result status.
+
+This is private preparation for a future publishing workflow. It neither submits
+a request nor verifies identity, current role, username availability or payment.
+Publishing eligibility, approval and plan enforcement remain separate. Backend
+disabled/signed-out views expose no preview data. Sign-out/identity changes remove
+the workspace, and late reads cannot restore it. No new migration or public table.

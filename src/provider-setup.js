@@ -1,3 +1,4 @@
+import { savedPublicProfilePreview } from './saved-public-profile-preview.js';
 import { attachProviderApplicationStatus } from './provider-application-status.js';
 import { accountPermissions } from './account-permissions.js';
 import { backendEnabled, backendClient } from './backend/client.js';
@@ -57,6 +58,7 @@ export function renderProviderSetup(container, navigate) {
       }
       card.append(link(page, title.slice(3))); grid.append(card);
     }
+    if (connected) root.append(savedPublicProfilePreview(ownerId, current, link('edit-profile', 'Edit saved profile fields')));
     root.append(node('p', 'These steps prepare private drafts. Provider eligibility, publishing approval and any required plan remain separate; no profile becomes public here.', 'account-preview-note'));
   }
   if (!backendEnabled) { tools(false); return; }

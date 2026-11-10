@@ -768,3 +768,6 @@ underlying feature is operational.
 - `src/provider-application-status.js`: shared owner-only application summary and refresh/action labels for account overview and Provider setup; no private introduction reads or role inference.
 
 - Listing library uses `listListingDraftSummaries` in `src/backend/drafts.js` for bounded, count-checked owner card metadata; editor full-draft reads remain separate.
+
+- `src/saved-public-profile-preview.js`: explicit private saved-field review in Provider setup, with missing-field guidance, refresh/error states and text-only content rendering.
+- `src/backend/public-profile-preview.js`: owner-bound projection of saved public draft fields, with post-read actor verification; no member fields or publishing mutation.

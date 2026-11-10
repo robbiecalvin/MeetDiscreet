@@ -809,3 +809,18 @@ configured. Search text is neither placed in URLs nor persisted by the app.
 Existing identity-change cleanup and response-version checks apply to searched
 results. Permission denial removes displayed data; missing search setup is an
 explicit error with an unfiltered-queue fallback, never a fabricated empty result.
+
+
+## Saved public-field preparation preview
+
+The Provider setup preview is an owner-only read of the existing private profile
+draft. Its query and returned object project public-field candidates only, excluding
+biography/interests and Auth metadata. Expected/actual identity is checked before
+and after reading, and profile owner IDs must match. Existing RLS remains enforced;
+calling fields public candidates does not make the endpoint publicly readable.
+
+Rendering uses text nodes and a validated demo portrait index, with no arbitrary
+URLs or HTML. Explicit refresh clears previous data first. Failures, empty results
+and missing fields are distinct; detached/sign-out views ignore delayed results.
+No browser persistence, publication writes, role/identity/plan grants or public
+profile URL is introduced. Actual publishing needs its separate server policy.

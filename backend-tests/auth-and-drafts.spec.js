@@ -1778,3 +1778,59 @@ test('listing library refuses incomplete or other-owner metadata instead of pres
   await page.getByRole('button',{name:'Refresh drafts',exact:true}).click();await expect(status).toContainText('up to 1,000 drafts');await expect(cards).toHaveCount(0);
   options.backupListingCount=1;await page.getByRole('button',{name:'Refresh drafts',exact:true}).click();await expect(cards).toHaveCount(1);
 });
+
+test('Provider saved public preview loads explicitly, projects public fields and refreshes only saved values',async({page})=>{
+  const state=await mockBackend(page);
+  state.profile={owner_id:userId,display_name:'<img src=x onerror=alert(1)> Saved name',username:'saved-user',adult_age:28,tagline:'Saved introduction',city:'Vancouver',area:'Kitsilano',photo_index:2,biography:'PRIVATE MEMBER BIOGRAPHY',interests:'PRIVATE MEMBER INTERESTS'};
+  await signIn(page);await enter(page,'/?page=provider-setup');
+  const panel=page.locator('.saved-public-profile-preview');
+  await expect(panel.getByRole('button',{name:'Review saved public profile',exact:true})).toBeVisible();
+  expect(state.requests.some(r=>r.path==='/rest/v1/profile_drafts'&&new URLSearchParams(r.query).get('select')?.includes('adult_age'))).toBe(false);
+  await panel.getByRole('button',{name:'Review saved public profile',exact:true}).click();
+  await expect(panel.locator('[role=status]')).toContainText('Saved public fields loaded');
+  await expect(panel).toContainText('<img src=x onerror=alert(1)> Saved name');
+  await expect(panel).toContainText('@saved-user');await expect(panel).toContainText('Age 28');
+  await expect(panel.locator('img')).toHaveCount(0);await expect(panel).not.toContainText('PRIVATE MEMBER');
+  const request=state.requests.find(r=>r.path==='/rest/v1/profile_drafts'&&new URLSearchParams(r.query).get('select')?.includes('adult_age'));
+  const query=new URLSearchParams(request.query);expect(query.get('select')).toBe('owner_id,display_name,username,adult_age,tagline,city,area,photo_index');expect(query.get('owner_id')).toBe(`eq.${userId}`);
+  state.profile.display_name='Updated saved name';await expect(panel).not.toContainText('Updated saved name');
+  await panel.getByRole('button',{name:'Refresh saved public profile',exact:true}).click();await expect(panel).toContainText('Updated saved name');
+  await expect(panel.locator('[role=status]')).toBeFocused();
+  await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await panel.screenshot({path:'/tmp/saved-public-profile-mobile.png'});
+  expect(state.requests.filter(r=>r.method==='POST'&&r.path.startsWith('/rest/'))).toHaveLength(0);
+});
+
+test('Provider saved public preview distinguishes empty, incomplete and unavailable data and clears stale fields on failure',async({page})=>{
+  const state=await mockBackend(page);let denied=false;
+  await page.route('**/rest/v1/profile_drafts*',async route=>{
+    if(denied&&new URL(route.request().url()).searchParams.get('select')?.includes('adult_age'))return route.fulfill({status:403,contentType:'application/json',body:JSON.stringify({message:'Denied'})});
+    await route.fallback();
+  });
+  await signIn(page);await enter(page,'/?page=provider-setup');const panel=page.locator('.saved-public-profile-preview');
+  await panel.getByRole('button',{name:'Review saved public profile',exact:true}).click();await expect(panel.locator('[role=status]')).toContainText('No saved profile draft');
+  state.profile={owner_id:userId,display_name:'Saved partial profile',username:'',adult_age:null,city:'',photo_index:null};
+  await panel.getByRole('button',{name:'Review saved public profile',exact:true}).click();
+  await expect(panel.getByRole('heading',{name:'Fields to revisit',exact:true})).toBeVisible();
+  await expect(panel.locator('li')).toHaveText(['Username','Adult age','City','Main photo selection']);
+  await expect(panel.getByRole('img')).toHaveCount(0);
+  denied=true;await panel.getByRole('button',{name:'Refresh saved public profile',exact:true}).click();
+  await expect(panel.locator('[role=status]')).toContainText('Saved public preview unavailable');await expect(panel).not.toContainText('Saved partial profile');
+  denied=false;state.profile.owner_id='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+  await panel.getByRole('button',{name:'Refresh saved public profile',exact:true}).click();await expect(panel.locator('[role=status]')).toContainText('Saved public preview unavailable');
+  state.profile.owner_id=userId;await panel.getByRole('button',{name:'Refresh saved public profile',exact:true}).click();await expect(panel).toContainText('Saved partial profile');
+});
+
+test('sign-out while a saved public preview is loading cannot repopulate private fields',async({page})=>{
+  const state=await mockBackend(page);state.profile={owner_id:userId,display_name:'LATE PRIVATE SAVED NAME'};
+  let release,started;const gate=new Promise(resolve=>{release=resolve;});const requested=new Promise(resolve=>{started=resolve;});
+  await page.route('**/rest/v1/profile_drafts*',async route=>{
+    if(new URL(route.request().url()).searchParams.get('select')?.includes('adult_age')){started();await gate;}
+    await route.fallback();
+  });
+  await signIn(page);await enter(page,'/?page=provider-setup');
+  await page.getByRole('button',{name:'Review saved public profile',exact:true}).click();await requested;
+  await page.getByRole('button',{name:'Sign out',exact:true}).click();await expect(page.locator('.saved-public-profile-preview')).toHaveCount(0);
+  release();await page.waitForLoadState('networkidle');
+  await expect(page.locator('.provider-setup')).not.toContainText('LATE PRIVATE SAVED NAME');
+});
