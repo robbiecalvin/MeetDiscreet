@@ -1311,3 +1311,23 @@ presentation slot or enforcement of a future two-presentation publishing workflo
 Recorded public fields stay unchanged after draft edits. No biography, interests,
 private contacts, staff decision, notification, role grant or paid state is stored.
 OPEN-052/053 and actual eligibility/plan/public-activation policies remain pending.
+
+
+## Scoped inspection of private profile copies
+
+[Inspection migration](../../supabase/migrations/202611100005_profile_publication_review.sql)
+adds a pending time/UUID index and owner-history index, plus protected
+`profile_publication_review_access_events` containing reviewer, operation, optional
+copy ID and server time. As with intake read events, content is excluded and
+operational retention/deletion rules remain separate. No client audit reads/writes.
+
+Current Moderator/Admin plus `profile_publication_review` scope can invoke an
+actor-bound, bounded pending queue RPC and exact-copy inspection RPC. Scope names
+remain server-owned and assigned through the existing protected provisioning path;
+no real assignment occurs in this migration. Owner SELECT RLS is unchanged.
+
+Queue metadata excludes snapshot JSON; detail rebuilds only the seven public-field
+candidates from the immutable copy, never current private draft/member fields.
+Withdrawn copies are excluded, reads record protected metadata, and no public
+profile, feedback/decision state, role grant or entitlement is introduced.
+OPEN-052/053 still govern the future approval/visibility implementation.

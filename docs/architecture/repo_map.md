@@ -780,3 +780,6 @@ underlying feature is operational.
 - `src/messages-preview.js`: age-gated synthetic inbox/conversation UI with view-local composer drafts and preview bubbles; no messaging API, persistence or entitlement authority.
 
 - `src/photo-preview.js`: device-local test image validation, main-image/order preview and Blob URL lifecycle cleanup; no upload, saved profile mutation or persistence.
+
+- `src/profile-review.js` / `src/backend/profile-review.js`: independently scoped pending-copy inspection UI/RPC client, with keyset pages, immutable public-field detail and stale-response cleanup.
+- `supabase/migrations/202611100005_profile_publication_review.sql`: new explicit read-capability name, curated pending list/detail RPCs, protected read metadata and query indexes; no publication decisions/grants.

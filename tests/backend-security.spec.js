@@ -36,10 +36,11 @@ test.beforeAll(async () => {
   await db.exec(await readFile(new URL('../supabase/migrations/202611100002_provider_approval_history.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611100003_provider_review_search.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611100004_private_profile_submissions.sql', import.meta.url), 'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/202611100005_profile_publication_review.sql', import.meta.url), 'utf8'));
 });
 test.afterAll(async () => { await db.close(); });
 test.beforeEach(async () => {
-  await db.exec('reset role; truncate public.profile_publication_submissions, public.provider_application_approvals, public.booking_plan_drafts, public.listing_drafts, public.profile_drafts, public.experience_catalogue_drafts, public.availability_drafts, public.user_profile_drafts, public.provider_applications, public.provider_application_events, public.provider_application_submissions, public.provider_application_feedback, public.staff_capabilities, public.staff_capability_events, public.provider_review_access_events;');
+  await db.exec('reset role; truncate public.profile_publication_review_access_events, public.profile_publication_submissions, public.provider_application_approvals, public.booking_plan_drafts, public.listing_drafts, public.profile_drafts, public.experience_catalogue_drafts, public.availability_drafts, public.user_profile_drafts, public.provider_applications, public.provider_application_events, public.provider_application_submissions, public.provider_application_feedback, public.staff_capabilities, public.staff_capability_events, public.provider_review_access_events;');
   await asUser(alice);
 });
 
@@ -595,5 +596,48 @@ test.describe('private public-profile submission copies',()=>{
     await expect(db.query('select * from public.withdraw_private_profile_copy($1,$2)',[alice,row.id])).rejects.toThrow(/unavailable/i);
     expect((await db.query('select username from public.profile_drafts')).rows[0].username).toBe('alice-saved');await expect(submit(version)).rejects.toThrow(/membership/i);
     await db.exec('reset role');await db.query("insert into public.account_roles(user_id,role) values($1,'provider')",[alice]);await asUser(alice);await submit(version);expect((await db.query('select * from public.profile_publication_submissions where withdrawn_at is null')).rows).toHaveLength(1);
+  });
+});
+
+
+test.describe('separately scoped profile copy inspection',()=>{
+  const owner=index=>`99999999-aaaa-4bbb-8ccc-${String(index).padStart(12,'0')}`;
+  const copy=index=>`aaaaaaaa-bbbb-4ccc-8ddd-${String(index).padStart(12,'0')}`;
+  async function prepare(){
+    await db.exec('reset role');await db.query("delete from public.account_roles where user_id=$1 and role in ('moderator','admin')",[alice]);
+    await db.query("insert into public.account_roles(user_id,role) values($1,'moderator')",[alice]);await db.query("insert into public.staff_capabilities(user_id,capability) values($1,'profile_publication_review')",[alice]);
+    for(let index=1;index<=23;index++){
+      await db.query('insert into auth.users(id) values($1)',[owner(index)]);
+      await db.query("insert into public.profile_publication_submissions(id,owner_id,source_updated_at,public_fields,submitted_at,withdrawn_at) values($1,$2,'2026-11-10T19:00:00Z',$3,'2026-11-10T20:00:00Z',$4)",[copy(index),owner(index),{display_name:`Recorded owner ${index}`,username:'recorded-user',adult_age:28,city:'Vancouver',biography:'PRIVATE EXTRA MEMBER KEY'},index===23?'2026-11-10T21:00:00Z':null]);
+    }
+    await asUser(alice);
+  }
+  const list=(expected=alice,limit=21,time=null,id=null)=>db.query('select * from public.list_profile_publications_for_review($1,$2,$3,$4)',[expected,limit,time,id]);
+  test.afterEach(async()=>{await db.exec('reset role');await db.exec("delete from auth.users where id::text like '99999999-aaaa-4bbb-8ccc-%'");await db.query("delete from public.account_roles where user_id=$1 and role in ('moderator','admin')",[alice]);});
+  test('lists only pending metadata with stable keysets and projects detail fields without private extras',async()=>{
+    await prepare();expect((await db.query('select public.can_review_profile_publications() as allowed')).rows[0].allowed).toBe(true);
+    const rows=(await list()).rows;expect(rows).toHaveLength(21);expect(rows[0].id).toBe(copy(1));expect(Object.keys(rows[0]).sort()).toEqual(['id','owner_id','display_name','city','submitted_at','source_updated_at'].sort());
+    const next=(await list(alice,21,rows.at(-1).submitted_at,rows.at(-1).id)).rows;expect(next.map(row=>row.id)).toEqual([copy(22)]);
+    const detail=(await db.query('select * from public.get_profile_publication_for_review($1,$2)',[alice,copy(1)])).rows[0];expect(detail.public_fields.username).toBe('recorded-user');expect(detail.public_fields).not.toHaveProperty('biography');
+    expect((await db.query('select * from public.get_profile_publication_for_review($1,$2)',[alice,copy(23)])).rows).toEqual([]);
+    await db.exec('reset role');const events=(await db.query('select * from public.profile_publication_review_access_events')).rows;expect(events).toHaveLength(3);expect(JSON.stringify(events)).not.toContain('Recorded owner');expect(JSON.stringify(events)).not.toContain('PRIVATE EXTRA');
+  });
+  test('denies forged actors, missing staff role, metadata-only authority and anonymous inspection',async()=>{
+    await prepare();await expect(list(bob)).rejects.toThrow(/account changed/i);
+    await db.exec('reset role');await db.query("delete from public.account_roles where user_id=$1 and role='moderator'",[alice]);await db.query('update auth.users set raw_user_meta_data=$1 where id=$2',[{role:'admin',capability:'profile_publication_review'},alice]);await asUser(alice);await expect(list()).rejects.toThrow(/profile review access/i);
+    await asUser('','anon');await expect(list()).rejects.toThrow(/permission denied/i);await expect(db.exec('select * from public.profile_publication_submissions')).rejects.toThrow(/permission denied/i);
+  });
+  test('bounds queue inputs and protects read-audit metadata without granting direct applicant reads or writes',async()=>{
+    await prepare();await expect(list(alice,51)).rejects.toThrow(/page size/i);await expect(list(alice,0)).rejects.toThrow(/page size/i);await expect(list(alice,21,'2026-11-10T20:00:00Z')).rejects.toThrow(/page cursor/i);
+    expect((await db.query('select * from public.profile_publication_submissions')).rows).toEqual([]);await list();
+    for(const sql of ['select * from public.profile_publication_review_access_events',"insert into public.profile_publication_review_access_events(reviewer_id,action) values(auth.uid(),'queue_list')",'delete from public.profile_publication_review_access_events',"update public.profile_publication_review_access_events set action='copy_opened'"]){await expect(db.exec(sql)).rejects.toThrow(/permission denied/i);}
+    await db.exec('reset role');expect((await db.query('select count(*)::int as n from public.profile_publication_submissions where withdrawn_at is null')).rows[0].n).toBe(22);expect((await db.query("select * from public.account_roles where role='provider'")).rows).toEqual([]);
+  });
+  test('existing intake approval scopes never substitute for profile inspection and scope revocation takes effect on the next read',async()=>{
+    await prepare();await db.exec('reset role');await db.query("delete from public.staff_capabilities where user_id=$1",[alice]);await db.query("delete from public.account_roles where user_id=$1 and role='moderator'",[alice]);await db.query("insert into public.account_roles(user_id,role) values($1,'admin')",[alice]);
+    for(const capability of ['provider_application_review','provider_application_feedback','provider_application_approval'])await db.query('insert into public.staff_capabilities(user_id,capability) values($1,$2)',[alice,capability]);
+    await asUser(alice);expect((await db.query('select public.can_approve_provider_applications() as allowed')).rows[0].allowed).toBe(true);await expect(list()).rejects.toThrow(/profile review access/i);
+    await db.exec('reset role');await db.query("insert into public.staff_capabilities(user_id,capability) values($1,'profile_publication_review')",[alice]);await asUser(alice);await list();
+    await db.exec('reset role');await db.query("delete from public.staff_capabilities where user_id=$1 and capability='profile_publication_review'",[alice]);await asUser(alice);await expect(list()).rejects.toThrow(/profile review access/i);expect((await db.query('select public.can_approve_provider_applications() as allowed')).rows[0].allowed).toBe(true);
   });
 });

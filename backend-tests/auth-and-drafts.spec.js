@@ -10,7 +10,7 @@ function session(profile = user) {
   return { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock_refresh_token', user: profile };
 }
 async function mockBackend(page, options = {}) {
-  const state = { profilePublications:[], profilePublication:null, bookingPlan: null, user: { ...user, user_metadata: {} }, providerApplication: null, applicationApprovals: [], targetRoles: ['user'], approvalFailure: false, applicationFeedback: [], applicationActivity: [], activityFailure: false, applicationSubmissions: [], historyFailure: false, applicationSubmissionCounter: 0, userProfile: null, roles: ['user'], capabilities: [], reviewApplications: [], reviewAccessEvents: [], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
+  const state = { profileReviewEvents:[], profilePublications:[], profilePublication:null, bookingPlan: null, user: { ...user, user_metadata: {} }, providerApplication: null, applicationApprovals: [], targetRoles: ['user'], approvalFailure: false, applicationFeedback: [], applicationActivity: [], activityFailure: false, applicationSubmissions: [], historyFailure: false, applicationSubmissionCounter: 0, userProfile: null, roles: ['user'], capabilities: [], reviewApplications: [], reviewAccessEvents: [], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
   await page.route('https://backend-test.supabase.co/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -158,6 +158,19 @@ async function mockBackend(page, options = {}) {
       }
       if (method === 'POST') { state.catalogue = body.items; return respond(null, 201); }
       return respond(state.catalogue === null ? [] : [{ items: state.catalogue }]);
+    }
+    if (['/rest/v1/rpc/can_review_profile_publications','/rest/v1/rpc/list_profile_publications_for_review','/rest/v1/rpc/get_profile_publication_for_review'].includes(url.pathname)) {
+      if(options.missingProfileReviewMigration)return respond({message:'Missing'},404);
+      const allowed=state.roles.some(role=>['moderator','admin'].includes(role))&&state.capabilities.includes('profile_publication_review');
+      if(url.pathname.endsWith('/can_review_profile_publications'))return respond(allowed);
+      if(!allowed||body.p_expected_reviewer!==state.user.id)return respond({message:'Denied'},403);
+      const rows=state.profilePublications.filter(row=>!row.withdrawn_at).sort((a,b)=>a.submitted_at.localeCompare(b.submitted_at)||a.id.localeCompare(b.id));
+      if(url.pathname.endsWith('/get_profile_publication_for_review')) {
+        const row=rows.find(value=>value.id===body.p_submission);if(row)state.profileReviewEvents.push({action:'copy_opened',submission_id:row.id});
+        return respond(row?[{...row,public_fields:Object.fromEntries(['display_name','username','adult_age','tagline','city','area','photo_index'].map(key=>[key,row.public_fields[key]??null]))}]:[]);
+      }
+      state.profileReviewEvents.push({action:'queue_list'});
+      return respond(rows.filter(row=>!body.p_after_submitted_at||row.submitted_at>body.p_after_submitted_at||(row.submitted_at===body.p_after_submitted_at&&row.id>body.p_after_id)).slice(0,body.p_limit).map(({id,owner_id,public_fields,submitted_at,source_updated_at})=>({id,owner_id,display_name:public_fields.display_name,city:public_fields.city,submitted_at,source_updated_at})));
     }
     if (url.pathname === '/rest/v1/profile_publication_submissions') {
       if(options.missingProfileSubmissionMigration)return respond({message:'Missing'},404);
@@ -1964,4 +1977,40 @@ test('local photo workspace opens from Provider setup and sign-out removes devic
   await expect(page.locator('.photo-preview-card')).toHaveCount(1);
   await page.getByRole('button',{name:'Sign out',exact:true}).click();await expect(page.locator('.photo-preview img')).toHaveCount(0);await expect(page.getByRole('button',{name:'Clear photo workspace',exact:true})).toBeDisabled();
   expect(state.requests.filter(value=>value.path.startsWith('/storage/'))).toEqual([]);
+});
+
+function profileReviewRows(count=23){return profileCopyRows(count).map((row,index)=>({...row,owner_id:`99999999-aaaa-4bbb-8ccc-${String(index+1).padStart(12,'0')}`,withdrawn_at:index===count-1?'2026-11-10T21:00:00Z':null,public_fields:{...row.public_fields,display_name:index===count-2?'<img src=x> Recorded owner':`Recorded owner ${index+1}`}}));}
+test('assigned profile inspectors paginate recorded copies safely and clear private records after scope loss and sign-out',async({page})=>{
+  const state=await mockBackend(page);state.roles=['user','moderator'];state.capabilities=['profile_publication_review'];state.profilePublications=profileReviewRows();
+  await signIn(page);await page.locator('[data-account-link]').click();await page.getByRole('link',{name:'Open profile submission review',exact:true}).click();
+  await expect(page.locator('.profile-review-card')).toHaveCount(20);await page.getByRole('button',{name:'Next profile copies',exact:true}).click();await expect(page.locator('.profile-review-card')).toHaveCount(2);await page.getByRole('button',{name:'Previous profile copies',exact:true}).click();await expect(page.locator('.profile-review-card')).toHaveCount(20);
+  await page.locator('.profile-review-card').first().getByRole('button').click();const detail=page.locator('.profile-review-detail');await expect(detail).toContainText('<img src=x> Recorded owner');await expect(detail.locator('img')).toHaveCount(0);await expect(detail).not.toContainText('UNEXPECTED MEMBER FIELD');await expect(detail.getByRole('heading',{name:'Recorded public fields',exact:true})).toBeFocused();
+  await page.setViewportSize({width:390,height:900});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await detail.screenshot({path:'/tmp/profile-review-detail-mobile.png'});
+  expect(state.profileReviewEvents.some(value=>value.action==='copy_opened')).toBe(true);await page.getByRole('button',{name:'Close profile copy',exact:true}).click();await expect(page.getByRole('button',{name:'Refresh profile review queue',exact:true})).toBeFocused();
+  state.capabilities=[];await page.getByRole('button',{name:'Refresh profile review queue',exact:true}).click();await expect(page.locator('.profile-review > [role=status]')).toContainText('does not have assigned');await expect(page.locator('.profile-review-card')).toHaveCount(0);await expect(detail).toBeHidden();
+  state.capabilities=['profile_publication_review'];await page.getByRole('button',{name:'Refresh profile review queue',exact:true}).click();await expect(page.locator('.profile-review-card')).toHaveCount(20);await page.locator('.profile-review-card').first().getByRole('button').click();await expect(detail).toBeVisible();
+  await page.getByRole('button',{name:'Sign out',exact:true}).click();await expect(page.locator('.profile-review-card')).toHaveCount(0);await expect(page.locator('.profile-review-detail')).toBeHidden();expect(state.roles).toEqual(['user','moderator']);
+});
+for(const [label,roles,capabilities] of [
+  ['User with a capability only',['user'],['profile_publication_review']],
+  ['Moderator with intake review only',['user','moderator'],['provider_application_review']],
+  ['Admin with Provider approval only',['user','admin'],['provider_application_review','provider_application_approval']],
+])test(`${label} cannot inspect profile-publication copies`,async({page})=>{
+  const state=await mockBackend(page);state.roles=roles;state.capabilities=capabilities;state.user.user_metadata={role:'admin',capability:'profile_publication_review'};state.profilePublications=profileReviewRows(1).map(row=>({...row,withdrawn_at:null}));
+  await signIn(page);await enter(page,'/?page=profile-review');await expect(page.locator('.profile-review > [role=status]')).toContainText('does not have assigned');await expect(page.locator('.profile-review-card')).toHaveCount(0);
+  expect(state.requests.filter(value=>value.path.endsWith('/list_profile_publications_for_review'))).toHaveLength(0);
+});
+test('missing profile inspection setup leaves intake review usable and a withdrawn copy disappears on inspection',async({page})=>{
+  const options={missingProfileReviewMigration:true};const state=await mockBackend(page,options);state.roles=['user','moderator'];state.capabilities=['provider_application_review','profile_publication_review'];state.profilePublications=profileReviewRows(1).map(row=>({...row,withdrawn_at:null}));
+  await signIn(page);await page.locator('[data-account-link]').click();await expect(page.getByRole('link',{name:'Open provider review queue',exact:true})).toBeVisible();await expect(page.getByRole('link',{name:'Open profile submission review',exact:true})).toBeHidden();
+  await enter(page,'/?page=profile-review');await expect(page.locator('.profile-review > [role=status]')).toContainText('Unable to verify');
+  options.missingProfileReviewMigration=false;await page.getByRole('button',{name:'Refresh profile review queue',exact:true}).click();await expect(page.locator('.profile-review-card')).toHaveCount(1);
+  state.profilePublications[0].withdrawn_at='2026-11-10T21:00:00Z';await page.locator('.profile-review-card').getByRole('button').click();await expect(page.locator('.profile-review > [role=status]')).toHaveText('No pending profile copies on this page.');await expect(page.locator('.profile-review-detail')).toBeHidden();
+});
+test('a delayed profile inspection cannot repopulate private fields after sign-out',async({page})=>{
+  const state=await mockBackend(page);state.roles=['user','moderator'];state.capabilities=['profile_publication_review'];state.profilePublications=profileReviewRows(1).map(row=>({...row,withdrawn_at:null}));
+  let release,started;const gate=new Promise(resolve=>{release=resolve;});const requested=new Promise(resolve=>{started=resolve;});
+  await page.route('**/rest/v1/rpc/get_profile_publication_for_review',async route=>{started();await gate;await route.fallback();});
+  await signIn(page);await enter(page,'/?page=profile-review');await page.locator('.profile-review-card').getByRole('button').click();await requested;
+  await page.getByRole('button',{name:'Sign out',exact:true}).click();release();await page.waitForLoadState('networkidle');await expect(page.locator('.profile-review-card')).toHaveCount(0);await expect(page.locator('.profile-review-detail')).toBeHidden();
 });

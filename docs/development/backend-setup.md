@@ -517,3 +517,31 @@ Missing prior schema is unavailable rather than empty. Reads change no records,
 and pending-copy actions invalidate displayed history. Hosted JWT checks and
 production-scale query/index tuning remain separate; this introduces no retention
 policy, archive completeness claim or public review workflow.
+
+
+## Scoped profile-copy inspection
+
+After private submission copies, apply
+[202611100005_profile_publication_review.sql](../../supabase/migrations/202611100005_profile_publication_review.sql)
+once. The agent has not applied it remotely or provisioned real staff. The migration
+adds pending/history indexes, the new `profile_publication_review` capability name,
+curated inspection RPCs and protected metadata-only read events. It creates no
+public projection, decision endpoint or automatic scope assignment.
+
+Access requires current Moderator/Administrator membership and that exact assigned
+capability. Existing intake review/feedback/approval scopes remain independent.
+The new queue returns pending metadata with a paired time/UUID cursor and a maximum
+50-row limit; UI uses 21/20. Detail projects the seven recorded public-field
+candidates only and excludes withdrawn copies. Direct table access stays owner-only.
+
+`profile_publication_review_access_events` exposes SELECT only to trusted service
+operations; clients cannot read or rewrite it. Capability changes retain the
+existing protected event trail. No staff-content logs, operational retention
+policy or raw global applicant SELECT is added. Current role/eligibility/plan
+checks are still required before any future publication decision.
+
+Missing new schema hides only the profile-inspection navigation and gives an
+explicit unavailable state on direct visits. Authorized intake review remains
+usable. Verify hosted JWTs, actual assigned/revoked scope, owner isolation and
+withdrawn-copy behavior during the deferred walkthrough; local checks do not
+establish hosted enforcement or concurrent revocation guarantees.

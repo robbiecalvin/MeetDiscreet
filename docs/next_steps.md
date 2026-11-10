@@ -1322,6 +1322,23 @@ If launch scope is reduced:
   and identity change, and four viewport sizes. No migration or paid service. Real
   storage, processing, moderation, retention/deletion and quota choices remain open.
 
+### Scoped Staff Inspection of Profile Copies
+
+- Added a separate pending-profile-copy workspace with oldest-first keyset pages
+  and exact recorded public-field inspection. Current Moderator/Admin plus explicit
+  `profile_publication_review` scope is required; intake approval never substitutes.
+  Permissions navigation probes both scopes independently with safe missing setup.
+- Server responses exclude withdrawn copies, current private drafts/member fields
+  and arbitrary snapshot keys. Raw table access remains owner-only. Protected
+  read events contain metadata, and current authority is checked per RPC.
+- Build, all 196 standard checks (41 PostgreSQL/config/security cases) and 119
+  backend browser checks passed; mobile detail inspected. Coverage includes actor/
+  role/scope separation, keyset limits, withdrawn exclusion, safe projection and
+  audit protection, unavailable setup/retry, revocation and delayed sign-out cleanup.
+  No publishing decision, public profile, role grant, real staff provisioning or
+  hosted migration is performed. OPEN-052/053 remain unanswered; hosted JWT/
+  concurrency and operational retention checks remain pending.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

@@ -834,7 +834,8 @@ The source is read and projected on the server; arbitrary browser content cannot
 become the recorded copy. RLS permits only owner reads, with client direct writes
 and anonymous reads revoked. One pending copy is enforced by a unique index.
 Withdrawals bind actual owner and pending copy ID; they remain possible after role
-revocation and cannot mutate captured public fields. No staff/public grants exist.
+revocation and cannot mutate captured public fields. That private-copy migration
+adds no staff/public table grant; later scoped inspection uses curated RPCs.
 
 The UI renders text nodes, requires explicit confirmation, invalidates a reviewed
 source after attempted submission and on preview reload/failure, and removes old
@@ -896,3 +897,22 @@ account assignment or Storage API is used. Full document destruction retires its
 Blob URLs; device originals remain untouched. This is local UI only, not owner-RLS
 media storage, EXIF removal, secure server processing or public distribution.
 Actual media activation remains dependent on the unresolved product requirements.
+
+
+## Staff inspection of recorded profile copies
+
+This read scope is separate from intake approval: actual current Moderator/Admin
+plus assigned `profile_publication_review` is required. Expected/actual reviewer
+checks and current authority are repeated per RPC; metadata claims and unrelated
+capabilities cannot authorize inspection. Owner-only raw-table RLS stays unchanged.
+Only pending copies participate. List responses contain curated metadata, while
+detail reconstructs seven public-field candidates without private/arbitrary keys.
+
+Metadata-only queue/open events are protected from client read/write, and scope
+changes use the existing protected assignment-event trail. Input bounds and paired
+cursors limit reads. No publication/approval mutation or self-service provisioning
+is introduced. UI refresh clears private results, scope loss/errors never reuse
+cached cards, and identity cleanup/version checks discard delayed responses.
+Already-seen content is not erased by revocation; hosted JWT and concurrency checks
+remain pending. Missing this setup does not disable independently authorized intake
+review. Public activation still requires its separate confirmed server policy.
