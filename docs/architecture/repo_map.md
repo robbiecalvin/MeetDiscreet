@@ -778,3 +778,5 @@ underlying feature is operational.
 - `src/profile-submission-history.js`: explicit owner history of retained private profile copies, keyset pages, viewer-local timestamps and expandable allowlisted fields; shared field renderer for the pending-copy panel.
 
 - `src/messages-preview.js`: age-gated synthetic inbox/conversation UI with view-local composer drafts and preview bubbles; no messaging API, persistence or entitlement authority.
+
+- `src/photo-preview.js`: device-local test image validation, main-image/order preview and Blob URL lifecycle cleanup; no upload, saved profile mutation or persistence.

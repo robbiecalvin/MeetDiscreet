@@ -1307,6 +1307,21 @@ If launch scope is reduced:
   navigation, no-match context, composer preservation and per-example/reset scope.
   Existing auth cleanup checks pass. No migration or new business rule is added.
 
+### Device-Local Photo Workspace
+
+- Added local test-photo selection, tall main-image preview, ordering, individual
+  removal and confirmed clear-all from Provider setup. Nothing is uploaded, saved
+  to an account, assigned to a profile or published; device originals are untouched.
+- Local MIME/signature/size/decode/pixel checks produce explicit errors. Capacity
+  overflow preserves current photos. Blob URLs are revoked on removal, route exit
+  and identity change; retired async decodes cannot restore images. Prototype
+  bounds are technical only, not settled publishing/media allowances.
+- Build, all 191 standard checks and 113 backend browser checks passed; desktop
+  and mobile inspected. Coverage includes local selection/order/removal/reset,
+  format/size/decode rejection, capacity preservation, URL cleanup on route exit
+  and identity change, and four viewport sizes. No migration or paid service. Real
+  storage, processing, moderation, retention/deletion and quota choices remain open.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

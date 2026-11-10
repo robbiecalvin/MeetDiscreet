@@ -1956,3 +1956,12 @@ test('conversation preview opens from account and sign-out clears local messages
   await expect(page.getByRole('heading',{name:'Choose a conversation',exact:true})).toBeVisible();
   await page.getByRole('button',{name:'Open Maya preview',exact:true}).click();await expect(page.getByLabel('Try a preview message',{exact:true})).toHaveValue('');await expect(page.locator('.message-bubble')).toHaveCount(2);
 });
+
+test('local photo workspace opens from Provider setup and sign-out removes device previews without storage requests',async({page})=>{
+  const state=await mockBackend(page);await signIn(page);await enter(page,'/?page=provider-setup');
+  await page.getByRole('link',{name:'Try the local photo workspace',exact:true}).click();await expect(page).toHaveTitle('Photo workspace preview · MeetDiscreet');
+  await page.getByLabel('Choose test photos',{exact:true}).setInputFiles({name:'fictional-test-photo.png',mimeType:'image/png',buffer:await readFile(new URL('../public/images/demo-portraits.png',import.meta.url))});
+  await expect(page.locator('.photo-preview-card')).toHaveCount(1);
+  await page.getByRole('button',{name:'Sign out',exact:true}).click();await expect(page.locator('.photo-preview img')).toHaveCount(0);await expect(page.getByRole('button',{name:'Clear photo workspace',exact:true})).toBeDisabled();
+  expect(state.requests.filter(value=>value.path.startsWith('/storage/'))).toEqual([]);
+});

@@ -194,7 +194,7 @@ where companion and user workflows overlap.
 | COM-01 | Dashboard | Summarize companion activity | Relevant connected data |
 | COM-02 | Profile editor | Manage companion introduction and fields | Ownership and visibility |
 | COM-03 | Presentation management | Manage up to two presentations | Presentation rules |
-| COM-04 | Media manager | Upload and organize authorized media | Private storage and processing |
+| COM-04 | Media manager | Upload and organize authorized media; device-local layout preview implemented separately | Real private storage, processing and media policies pending |
 | COM-05 | Experiences/rates | Configure offerings and prices | Approved pricing inputs |
 | COM-06 | Availability/calendar | Manage offered times and conflicts | Scheduling model |
 | COM-07 | Publishing plan | Purchase and manage publishing | Billing and expiry policy |

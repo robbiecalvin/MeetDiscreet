@@ -880,3 +880,19 @@ highlights with DOM nodes. It searches only in-memory example/local message bodi
 without URL parameters, persistence, logs or service requests. Queries and match
 positions remain view-local and follow existing identity cleanup. This is not
 backend messaging search or entitlement enforcement.
+
+
+## Device-local photo workspace
+
+The photo-preview route consumes only explicitly chosen device files. Local MIME/
+magic-byte, size, decode and pixel checks bound the preview; they do not establish
+server trust, media moderation or production upload policy. SVG/unsupported and
+mislabelled content is rejected. Images render through temporary object URLs;
+file names/bytes are not interpolated into HTML, URL parameters or service requests.
+
+Object URLs are revoked on removal/reset, SPA route exit and identity changes.
+An epoch guard rejects pending decodes after cleanup. No custom browser persistence,
+account assignment or Storage API is used. Full document destruction retires its
+Blob URLs; device originals remain untouched. This is local UI only, not owner-RLS
+media storage, EXIF removal, secure server processing or public distribution.
+Actual media activation remains dependent on the unresolved product requirements.
