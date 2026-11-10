@@ -843,3 +843,18 @@ late responses. Errors do not claim success; current state must be checked befor
 retrying an ambiguous request. No public link, publishing entitlement, notification
 or approval/eligibility verification is implied. Hosted JWT/concurrency checks are
 still pending; local lock/index tests do not prove hosted concurrent execution.
+
+
+## Owner history of private profile copies
+
+History uses the existing owner RLS policy without new grants. Reads filter actual
+owner, verify identity before/after and reject other-owner rows. Validated paired
+timestamp/UUID cursors preserve microseconds while excluding PostgREST filter
+syntax; requests are bounded to 21 records. Cards render allowlisted recorded
+fields with text nodes, never arbitrary snapshot keys or HTML.
+
+Results are loaded explicitly and stored only in the current view. Failures clear
+old cards; pending-copy actions invalidate history before and after their request.
+Generation checks drop old responses, and sign-out removes the private workspace.
+Historical reads require no current Provider role and grant none. No public/staff
+read, new write, retention policy or guarantee about already-seen data is added.

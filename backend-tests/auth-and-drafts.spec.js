@@ -10,7 +10,7 @@ function session(profile = user) {
   return { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock_refresh_token', user: profile };
 }
 async function mockBackend(page, options = {}) {
-  const state = { profilePublication:null, bookingPlan: null, user: { ...user, user_metadata: {} }, providerApplication: null, applicationApprovals: [], targetRoles: ['user'], approvalFailure: false, applicationFeedback: [], applicationActivity: [], activityFailure: false, applicationSubmissions: [], historyFailure: false, applicationSubmissionCounter: 0, userProfile: null, roles: ['user'], capabilities: [], reviewApplications: [], reviewAccessEvents: [], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
+  const state = { profilePublications:[], profilePublication:null, bookingPlan: null, user: { ...user, user_metadata: {} }, providerApplication: null, applicationApprovals: [], targetRoles: ['user'], approvalFailure: false, applicationFeedback: [], applicationActivity: [], activityFailure: false, applicationSubmissions: [], historyFailure: false, applicationSubmissionCounter: 0, userProfile: null, roles: ['user'], capabilities: [], reviewApplications: [], reviewAccessEvents: [], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
   await page.route('https://backend-test.supabase.co/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -161,8 +161,15 @@ async function mockBackend(page, options = {}) {
     }
     if (url.pathname === '/rest/v1/profile_publication_submissions') {
       if(options.missingProfileSubmissionMigration)return respond({message:'Missing'},404);
-      const row=state.profilePublication;
-      return respond(row&&row.owner_id===state.user.id&&!row.withdrawn_at?[row]:[]);
+      if(url.searchParams.has('withdrawn_at')) {
+        const row=state.profilePublication;
+        return respond(row&&row.owner_id===state.user.id&&!row.withdrawn_at?[row]:[]);
+      }
+      let rows=state.profilePublications.length?state.profilePublications:(state.profilePublication?[state.profilePublication]:[]);
+      rows=rows.filter(row=>row.owner_id===state.user.id).sort((a,b)=>b.submitted_at.localeCompare(a.submitted_at)||b.id.localeCompare(a.id));
+      const cursor=url.searchParams.get('or');
+      if(cursor){const timestamp=cursor.match(/submitted_at\.lt\.([^,]+)/)[1];const id=cursor.match(/id\.lt\.([a-f0-9-]+)/i)[1];rows=rows.filter(row=>row.submitted_at<timestamp||(row.submitted_at===timestamp&&row.id<id));}
+      return respond(rows.slice(0,Number(url.searchParams.get('limit')||21)));
     }
     if (url.pathname === '/rest/v1/rpc/submit_private_profile_copy') {
       if(options.missingProfileSubmissionMigration)return respond({message:'Missing'},404);
@@ -1890,4 +1897,49 @@ test('missing private submission setup is unavailable while saved profile review
   await panel.getByRole('button',{name:'Check my private profile submission',exact:true}).click();await expect(panel.locator('[role=status]')).toContainText('Unable to confirm');
   await page.getByRole('button',{name:'Review saved public profile',exact:true}).click();await expect(page.locator('.saved-public-profile-content')).toContainText('Saved public name');
   options.missingProfileSubmissionMigration=false;await panel.getByRole('button',{name:'Check my private profile submission',exact:true}).click();await expect(panel.locator('[role=status]')).toHaveText('No pending private profile submission.');
+});
+
+function profileCopyRows(count=22) {
+  return Array.from({length:count},(_,index)=>({id:`ffffffff-ffff-4fff-8fff-${String(count-index).padStart(12,'0')}`,owner_id:userId,submitted_at:'2026-11-10T20:00:00.123456+00:00',source_updated_at:'2026-11-10T19:00:00Z',withdrawn_at:index?'2026-11-10T21:00:00Z':null,public_fields:{display_name:index?`Recorded copy ${index+1}`:'<img src=x onerror=alert(1)> Recorded copy',username:'recorded-user',adult_age:28,city:'Vancouver',biography:'UNEXPECTED MEMBER FIELD'}}));
+}
+test('owner profile copy history includes withdrawals, pages tied timestamps precisely and renders only recorded public fields',async({page})=>{
+  const state=await mockBackend(page);state.roles=['user'];state.profilePublications=profileCopyRows();
+  await signIn(page);await enter(page,'/?page=provider-setup');const history=page.locator('.profile-submission-history');
+  await expect(history.getByRole('button',{name:'Load my profile copy history',exact:true})).toBeVisible();
+  expect(state.requests.filter(r=>r.path==='/rest/v1/profile_publication_submissions')).toHaveLength(0);
+  await history.getByRole('button',{name:'Load my profile copy history',exact:true}).click();
+  await expect(history.locator('.staff-approval-card')).toHaveCount(20);await expect(history.locator('[role=status]')).toBeFocused();
+  await expect(history).toContainText('<img src=x onerror=alert(1)> Recorded copy');await expect(history.locator('img')).toHaveCount(0);
+  await history.locator('summary').first().click();await expect(history.locator('details').first()).toContainText('recorded-user');await expect(history).not.toContainText('UNEXPECTED MEMBER FIELD');
+  const local=await page.evaluate(value=>new Date(value).toLocaleString(undefined,{timeZoneName:'short'}),state.profilePublications[0].submitted_at);
+  await expect(history.locator('time').first()).toHaveText(local);await expect(history.locator('time').first()).toHaveAttribute('datetime',state.profilePublications[0].submitted_at);
+  await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await history.locator('.staff-approval-card').first().screenshot({path:'/tmp/profile-copy-history-mobile.png'});
+  await history.getByRole('button',{name:'Older profile copies',exact:true}).click();await expect(history.locator('.staff-approval-card')).toHaveCount(2);await expect(history.getByRole('button',{name:'Older profile copies',exact:true})).toBeDisabled();
+  const request=state.requests.filter(r=>r.path==='/rest/v1/profile_publication_submissions').at(-1);const query=new URLSearchParams(request.query);expect(query.get('owner_id')).toBe(`eq.${userId}`);expect(query.get('limit')).toBe('21');expect(query.get('or')).toContain('2026-11-10T20:00:00.123456+00:00');expect(query.get('or')).toContain('id.lt.ffffffff-ffff-4fff-8fff-000000000003');
+  await history.getByRole('button',{name:'Newer profile copies',exact:true}).click();await expect(history.locator('.staff-approval-card')).toHaveCount(20);
+  await history.getByRole('button',{name:'Refresh my profile copy history',exact:true}).click();await expect(history.locator('.staff-approval-card')).toHaveCount(20);
+  expect(state.roles).toEqual(['user']);
+});
+
+test('profile copy history distinguishes missing setup, empty results and wrong-owner responses with clean retry',async({page})=>{
+  const options={missingProfileSubmissionMigration:true};const state=await mockBackend(page,options);
+  await signIn(page);await enter(page,'/?page=provider-setup');const history=page.locator('.profile-submission-history');
+  await history.getByRole('button',{name:'Load my profile copy history',exact:true}).click();await expect(history.locator('[role=status]')).toContainText('history unavailable');
+  options.missingProfileSubmissionMigration=false;await history.getByRole('button',{name:'Retry my profile copy history',exact:true}).click();await expect(history.locator('[role=status]')).toHaveText('No private profile copies on this page.');
+  state.profilePublications=profileCopyRows(1);await history.getByRole('button',{name:'Refresh my profile copy history',exact:true}).click();await expect(history.locator('.staff-approval-card')).toHaveCount(1);
+  await page.route('**/rest/v1/profile_publication_submissions*',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{...profileCopyRows(1)[0],owner_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'}])}));
+  await history.getByRole('button',{name:'Refresh my profile copy history',exact:true}).click();await expect(history.locator('[role=status]')).toContainText('history unavailable');await expect(history.locator('.staff-approval-card')).toHaveCount(0);
+  await page.unroute('**/rest/v1/profile_publication_submissions*');await history.getByRole('button',{name:'Retry my profile copy history',exact:true}).click();await expect(history.locator('.staff-approval-card')).toHaveCount(1);
+});
+
+test('pending-copy refresh invalidates in-flight history and sign-out removes recorded copies',async({page})=>{
+  const state=await mockBackend(page);state.profilePublications=profileCopyRows(1);
+  let release,started,blocked=false;const gate=new Promise(resolve=>{release=resolve;});const requested=new Promise(resolve=>{started=resolve;});
+  await page.route('**/rest/v1/profile_publication_submissions*',async route=>{if(!blocked&&new URL(route.request().url()).searchParams.has('order')){blocked=true;started();await gate;}await route.fallback();});
+  await signIn(page);await enter(page,'/?page=provider-setup');const history=page.locator('.profile-submission-history');
+  await history.getByRole('button',{name:'Load my profile copy history',exact:true}).click();await requested;
+  await page.getByRole('button',{name:'Check my private profile submission',exact:true}).click();await expect(page.locator('.profile-submission > [role=status]')).toHaveText('No pending private profile submission.');
+  release();await page.waitForLoadState('networkidle');await expect(history.locator('.staff-approval-card')).toHaveCount(0);
+  await history.getByRole('button',{name:'Load my profile copy history',exact:true}).click();await expect(history.locator('.staff-approval-card')).toHaveCount(1);
+  await page.getByRole('button',{name:'Sign out',exact:true}).click();await expect(history).toHaveCount(0);
 });

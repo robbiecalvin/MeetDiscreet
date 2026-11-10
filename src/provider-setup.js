@@ -61,7 +61,7 @@ export function renderProviderSetup(container, navigate) {
     }
     if (connected) {
       const submission = profileSubmission(ownerId, current);
-      root.append(savedPublicProfilePreview(ownerId, current, link('edit-profile', 'Edit saved profile fields'), submission.setCandidate), submission.section);
+      root.append(savedPublicProfilePreview(ownerId, current, link('edit-profile', 'Edit saved profile fields'), submission.setCandidate), submission.section, submission.historySection);
     }
     root.append(node('p', 'These steps prepare private drafts. Provider eligibility, publishing approval and any required plan remain separate; no profile becomes public here.', 'account-preview-note'));
   }

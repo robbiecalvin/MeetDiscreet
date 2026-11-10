@@ -1264,6 +1264,22 @@ If launch scope is reduced:
   OPEN-052/053 remain unanswered; hosted JWT/concurrency and staff provisioning
   are unverified. This is the single-draft prototype, not a presentation rollout.
 
+### Owner Profile-Copy History
+
+- Owners can explicitly load retained private profile copies, including withdrawals,
+  with 20-record newest-first pages and expandable recorded public fields. Viewer
+  timestamps include the time zone; history is distinct from current membership
+  and public approval. Read access remains owner-only after Provider revocation.
+- Paired timestamp/UUID cursors preserve database precision, reads reverify actor,
+  and failures clear old results. Pending-copy actions invalidate history, late
+  responses are dropped, and sign-out clears the workspace. No new writes/grants.
+- Build, all 175 standard checks and 111 backend browser checks passed; mobile
+  history inspected. Coverage includes withdrawn records, tied timestamp paging
+  with microsecond precision, safe fields, missing/empty/other-owner reads, retry,
+  invalidated delayed responses and sign-out cleanup. No new migration; the prior
+  private-submission migration is still required and has not been applied remotely.
+  OPEN-052/053 remain unanswered.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

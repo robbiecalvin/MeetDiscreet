@@ -774,3 +774,5 @@ underlying feature is operational.
 
 - `src/profile-submission.js` / `src/backend/profile-submissions.js`: explicit owner-only check, version-bound private submit and confirmed withdrawal; no staff/public operations.
 - `supabase/migrations/202611100004_private_profile_submissions.sql`: protected immutable public-field candidates, one pending owner copy, source/role checks and owner withdrawal.
+
+- `src/profile-submission-history.js`: explicit owner history of retained private profile copies, keyset pages, viewer-local timestamps and expandable allowlisted fields; shared field renderer for the pending-copy panel.

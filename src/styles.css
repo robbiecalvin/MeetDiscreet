@@ -119,5 +119,5 @@ main.help-main{max-width:1300px;padding-bottom:70px}.help-controls{display:grid;
 
 .review-search{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:28px}.review-search label{width:100%;font-size:14px;font-weight:700}.review-search input{font:inherit;min-width:160px;flex:1;min-height:48px;padding:12px;color:var(--text);background:var(--surface);border:1px solid #536383;border-radius:4px}@media(max-width:700px){.review-search input{width:100%;flex-basis:100%;font-size:16px}}
 
-.profile-submission dt { color:var(--muted); font-size:.85rem; }
-.profile-submission dd { margin:0 0 .8rem; overflow-wrap:anywhere; }
+.profile-submission dt, .profile-submission-history dt { color:var(--muted); font-size:.85rem; }
+.profile-submission dd, .profile-submission-history dd { margin:0 0 .8rem; overflow-wrap:anywhere; }

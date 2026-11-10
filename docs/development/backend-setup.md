@@ -501,3 +501,19 @@ connected, and this records no eligibility, paid entitlement or public profile.
 Local PostgreSQL and mocked-browser checks do not establish hosted JWT/concurrency
 behavior. Verify hosted roles, owner isolation and version/duplicate rejection
 during the deferred walkthrough before connecting any real review operations.
+
+
+## Owner profile-copy history reads
+
+The explicit history panel uses the existing owner-only SELECT policy from
+`202611100004_private_profile_submissions.sql`; no additional migration or staff
+permission is required. It queries 21 retained records, ordered by submitted time
+and UUID descending, and renders 20 per page. Paired cursors preserve microseconds
+and are validated before constructing a PostgREST filter. Actual owner identity
+is checked before/after the read and every returned owner must match.
+
+Withdrawal history does not imply current Provider membership or public approval.
+Missing prior schema is unavailable rather than empty. Reads change no records,
+and pending-copy actions invalidate displayed history. Hosted JWT checks and
+production-scale query/index tuning remain separate; this introduces no retention
+policy, archive completeness claim or public review workflow.

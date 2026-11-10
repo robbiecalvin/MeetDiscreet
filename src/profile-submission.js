@@ -1,3 +1,4 @@
+import { profileSubmissionHistory, profileCopyFields } from './profile-submission-history.js';
 import { loadPendingProfileSubmission, submitPrivateProfileCopy, withdrawPrivateProfileCopy } from './backend/profile-submissions.js';
 function node(tag, text, className) { const item=document.createElement(tag); if(text)item.textContent=text;if(className)item.className=className;return item; }
 export function profileSubmission(owner, current) {
@@ -9,6 +10,7 @@ export function profileSubmission(owner, current) {
   const withdraw=node('button','Withdraw private profile copy','button quiet');withdraw.type='button';withdraw.hidden=true;
   const status=node('p','','profile-small');status.setAttribute('role','status');status.tabIndex=-1;
   const content=node('div');const actions=node('div',null,'editor-actions');actions.append(check,submit,withdraw);section.append(actions,status,content);
+  const history=profileSubmissionHistory(owner,current);
   let candidate=null,pending=null,busy=false;
   function sync() { check.disabled=busy;submit.disabled=busy||!candidate?.updated_at||!!pending;withdraw.disabled=busy;withdraw.hidden=!pending; }
   function setCandidate(value) { candidate=value;sync(); }
@@ -16,19 +18,16 @@ export function profileSubmission(owner, current) {
     pending=value;content.replaceChildren();
     if(value) {
       content.append(node('h3','Recorded public-field copy'));
-      const fields=value.public_fields||{};const list=node('dl');
-      for(const [key,label] of [['display_name','Display name'],['username','Username'],['adult_age','Age'],['city','City'],['area','General area'],['tagline','Tagline'],['photo_index','Demo photo selection']]) {
-        list.append(node('dt',label),node('dd',fields[key]===null||fields[key]===undefined||fields[key]===''?'Not supplied':String(fields[key])));
-      }
+      const list=profileCopyFields(value.public_fields||{});
       content.append(list,node('p','This recorded copy stays unchanged when you edit the draft. Withdraw it before submitting a replacement. No public URL or publishing entitlement is created.','profile-small'));
     }
     sync();
   }
   async function run(action) {
-    if(busy)return;busy=true;sync();content.replaceChildren();status.textContent='Checking private submission…';
+    if(busy)return;history.reset();busy=true;sync();content.replaceChildren();status.textContent='Checking private submission…';
     try { const value=await action();if(!current())return;paint(value);status.textContent=value?'Private profile copy recorded. Staff publication decisions are not connected yet.':'No pending private profile submission.'; }
     catch { if(current()){pending=null;content.replaceChildren();status.textContent='Unable to confirm private submission status. Check current Provider access, sign-in and setup, then check again before retrying.';} }
-    finally {busy=false;if(current()){sync();status.focus();}}
+    finally {busy=false;if(current()){history.reset();sync();status.focus();}}
   }
   check.addEventListener('click',()=>run(()=>loadPendingProfileSubmission(owner)));
   submit.addEventListener('click',()=>{
@@ -41,5 +40,5 @@ export function profileSubmission(owner, current) {
     if(!window.confirm('Withdraw this private profile copy? The saved profile draft is kept.'))return;
     const id=pending.id;run(async()=>{await withdrawPrivateProfileCopy(owner,id);return null;});
   });
-  return {section,setCandidate};
+  return {section,historySection:history.section,setCandidate};
 }

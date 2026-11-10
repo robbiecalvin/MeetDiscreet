@@ -94,3 +94,18 @@ revocation; no second pending copy is permitted. Re-review source after a failed
 submission or stale-version rejection. Missing setup differs from no pending copy;
 retry clears previous content and focuses the result. Sign-out clears the workspace.
 The existing single-draft prototype does not create additional presentations.
+
+## Owner profile-copy history
+
+An explicit history load shows the owner's retained private copies, including
+withdrawals, newest first. Use 20 visible records and one extra to detect another
+page, with Older/Newer controls and explicit refresh. Each card shows recorded and
+withdrawal times in the viewer's time zone, plus an expandable list of the exact
+recorded public fields. No member content, staff identity, current role or public
+approval is inferred. Owners retain read access after Provider role revocation.
+
+Timestamp/UUID keyset paging preserves database timestamp precision. Failures clear
+old cards and differ from an empty history. Pending-copy checks, submissions and
+withdrawals reset history so a fresh explicit load is required; late responses
+cannot restore invalidated results. Sign-out clears the workspace. No browser
+persistence, automatic polling, history deletion or restoration action is added.
