@@ -1089,7 +1089,9 @@ If launch scope is reduced:
 - Build, all 161 standard checks and 83 backend browser checks passed on stable
   sequential reruns. New cases cover selected-field JSON, omission of Auth/extra
   fields, missing-table retry, incomplete listing refusal, empty selection and
-  sign-out preventing a late file. Mobile download layout inspected. See the
+  sign-out preventing a late file. The download result now receives focus; all five
+  focused download cases and a final mobile visual/focus check passed after this
+  adjustment. Mobile download layout inspected. See the
   [brief](./design/page_briefs/draft-backup.md).
 
 ### Next Action

@@ -32,4 +32,5 @@ selected arrays keyed by draft type. Preserve saved text, date/time/zone and min
 amount fields without interpreting prices or availability. Exclude owner IDs and
 unselected top-level fields. File name is fixed and contains no account identity.
 Say download prepared/check browser downloads, not that the device saved the file.
+Move focus to the prepared-download result for a clear keyboard/screen-reader outcome.
 No permission grants, SQL migration, import, payment or publishing action.

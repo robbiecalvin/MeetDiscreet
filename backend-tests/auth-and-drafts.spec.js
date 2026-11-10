@@ -1395,6 +1395,7 @@ test('email change validates matching addresses and cancellation clears the pass
 
 function backupProfile() { return {owner_id:userId,username:'private-owner',adult_age:29,display_name:'Private backup name',tagline:'',city:'Vancouver',area:'',photo_index:2,biography:'Private saved introduction',interests:'Coffee',extra_secret:'DO NOT INCLUDE THIS EXTRA FIELD'}; }
 test('selected saved draft download contains projected owner records and no authentication or unselected data',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
   const state=await mockBackend(page);state.profile=backupProfile();state.bookingPlan={owner_id:userId,plan:{notes:'Private saved plan'}};
   await signIn(page);await enter(page,'/?page=draft-backup');
   await page.getByLabel('Provider profile draft',{exact:true}).check();await page.getByLabel('Unsent booking plan',{exact:true}).check();
@@ -1406,7 +1407,10 @@ test('selected saved draft download contains projected owner records and no auth
   expect(text).not.toContain(userId);expect(text).not.toContain('DO NOT INCLUDE');expect(text).not.toContain('mock_refresh_token');expect(text).not.toContain('access_token');
   expect(state.requests.filter(row=>row.path.startsWith('/rest/v1/')).every(row=>row.method==='GET')).toBe(true);
   await expect(page.locator('.backup-status')).toContainText('2 saved records');
-  await page.setViewportSize({width:390,height:844});await page.screenshot({path:'/tmp/draft-backup-mobile.png',fullPage:true});
+  await expect(page.locator('.backup-status')).toBeFocused();
+  expect(await page.locator('.skip-link').evaluate(link=>link.getBoundingClientRect().bottom<=0)).toBe(true);
+  await page.evaluate(()=>window.scrollTo(0,0));
+  await page.screenshot({path:'/tmp/draft-backup-mobile.png',fullPage:true});
 });
 test('a missing selected draft table prevents a partial file and supports retry',async({page})=>{
   const options={missingCatalogueMigration:true};const state=await mockBackend(page,options);state.profile=backupProfile();

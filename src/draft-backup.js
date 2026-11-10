@@ -34,6 +34,7 @@ export function renderDraftBackup(container,navigate) {
         try{download.click();}finally{download.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
         const records=Object.values(copy.drafts).reduce((sum,rows)=>sum+rows.length,0);
         status.textContent=`Download prepared with ${records} saved ${records===1?'record':'records'}. Check your browser downloads. Unselected and unsaved data are not included.`;
+        status.focus();
       }catch(error){if(current())status.textContent=error.message==='Sign in before saving or loading private drafts.'?'Sign in to download your saved drafts.':`${error.message} No new file was prepared.`;}
       finally{busy=false;submit.disabled=false;for(const input of choices)input.disabled=false;}
     });
