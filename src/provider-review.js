@@ -1,6 +1,13 @@
+import { trackDraft } from './draft-changes.js';
 import { providerApprovalHistory } from './provider-approval-history.js';
 import { backendEnabled } from './backend/client.js';
 import { loadProviderReviewAccess, listProviderReviewQueue, loadProviderReviewDetail, loadProviderFeedbackAccess, requestProviderChanges, loadProviderApprovalAccess, approveProviderApplication } from './backend/provider-review.js';
+// Read only the current visible form; the shared tracker must not retain a
+// detached staff workspace or its private feedback text after navigation/sign-out.
+trackDraft('provider-review-feedback', () => {
+  const input = document.querySelector('.provider-review .review-feedback-form textarea');
+  return input && !input.closest('[hidden]') ? input.value.trim() : '';
+}, backendEnabled);
 function node(tag, text, className) {
   const value = document.createElement(tag);
   if (text) value.textContent = text;
@@ -22,8 +29,10 @@ function submissionDate(value) {
 export function renderProviderReview(container, navigate) {
   container.replaceChildren();
   const root = node('section', null, 'provider-review');
+  let feedbackInput = null;
+  const confirmDiscard = () => !feedbackInput?.value.trim() || window.confirm('Discard this unsent feedback note? It has not been sent to the applicant.');
   const back = node('a', '← Back to account', 'profile-back'); back.href = '?page=account';
-  back.addEventListener('click', event => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate('account'); });
+  back.addEventListener('click', event => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); if (confirmDiscard()) navigate('account'); });
   root.append(back, node('p', 'STAFF WORKSPACE', 'eyebrow'), node('h1', 'Provider application queue.'), node('p', 'Inspect submitted introductions with explicitly assigned review access.', 'offering-lead'), node('p', 'Staff review workspace. Requesting changes and approving pilot Provider access require separate permissions. Identity checks, paid access and publishing remain separate.', 'editor-notice'));
   const status = node('p', '', 'review-status'); status.setAttribute('role', 'status');
   const refresh = node('button', 'Refresh review queue', 'button outline'); refresh.type = 'button';
@@ -50,8 +59,10 @@ export function renderProviderReview(container, navigate) {
   let version = 0;
   const current = request => root.parentNode === container && request === version;
   const ownApprovals = providerApprovalHistory(root, () => root.parentNode === container);
-  function clearData() { ownApprovals.setAccess(null,false); list.replaceChildren(); detail.replaceChildren(); detail.hidden = true; pages.hidden = true; rows = []; }
+  function clearData() { feedbackInput = null; ownApprovals.setAccess(null,false); list.replaceChildren(); detail.replaceChildren(); detail.hidden = true; pages.hidden = true; rows = []; }
   async function showDetail(ownerId) {
+    if (!confirmDiscard()) return;
+    feedbackInput = null;
     const request = ++version;
     detail.replaceChildren(); detail.hidden = true; status.textContent = 'Loading submitted application…';
     try {
@@ -60,7 +71,7 @@ export function renderProviderReview(container, navigate) {
       if (!value) { await load(true); return; }
       const heading = node('h2', value.display_name); heading.tabIndex = -1;
       const close = node('button', 'Close application details', 'button quiet'); close.type = 'button';
-      close.addEventListener('click', () => { version++; detail.replaceChildren(); detail.hidden = true; status.textContent = `${rows.length} submitted applications on this page.`; refresh.focus(); });
+      close.addEventListener('click', () => { if (!confirmDiscard()) return; feedbackInput = null; version++; detail.replaceChildren(); detail.hidden = true; status.textContent = `${rows.length} submitted applications on this page.`; refresh.focus(); });
       detail.append(heading, node('p', value.city, 'profile-small'), submissionDate(value.submitted_at), node('p', 'SUBMITTED INTRODUCTION', 'eyebrow'), node('p', value.introduction, 'review-introduction'), node('p', 'Inspect this submitted version before making a separately authorized decision.', 'profile-small'), close);
       if (value.submission_id && value.owner_id !== reviewerId) {
         const [feedbackAccess, approvalAccess] = await Promise.allSettled([loadProviderFeedbackAccess(reviewerId),loadProviderApprovalAccess(reviewerId)]);
@@ -74,7 +85,7 @@ export function renderProviderReview(container, navigate) {
         if (canGiveFeedback) {
           const form = node('form', null, 'review-feedback-form');
           const label = node('label', 'Changes the applicant should make'); label.htmlFor = 'provider-change-note';
-          const note = node('textarea'); note.id = 'provider-change-note'; note.rows = 4; note.maxLength = 1000; note.required = true;
+          const note = node('textarea'); note.id = 'provider-change-note'; note.rows = 4; note.maxLength = 1000; note.required = true; feedbackInput = note;
           const send = node('button', 'Request changes', 'button primary'); send.type = 'submit';
           const result = node('p', '', 'profile-small'); result.setAttribute('role', 'status');
           form.append(label, note, send, result);
@@ -147,11 +158,11 @@ export function renderProviderReview(container, navigate) {
     } catch { if (current(request)) { clearData(); searchForm.hidden=!verifiedAccess; status.textContent = verifiedAccess && query ? 'Unable to load matching applications. Clear the search or retry.' : 'Unable to verify review access or load the queue. Check sign-in, connection and setup, then retry.'; } }
     finally { if (current(request)) refresh.disabled = false; }
   }
-  searchForm.addEventListener('submit',event=>{event.preventDefault();query=search.value.trim();search.value=query;clearSearch.disabled=!query;load(true);});
+  searchForm.addEventListener('submit',event=>{event.preventDefault();if(!confirmDiscard())return;query=search.value.trim();search.value=query;clearSearch.disabled=!query;load(true);});
   search.addEventListener('input',()=>{clearSearch.disabled=!search.value && !query;});
-  clearSearch.addEventListener('click',()=>{query='';search.value='';clearSearch.disabled=true;load(true);search.focus();});
-  refresh.addEventListener('click', () => load(true));
-  next.addEventListener('click', () => { if (!hasNext || !rows.length) return; cursors[page + 1] = rows.at(-1); page++; load(); });
-  previous.addEventListener('click', () => { if (page === 0) return; page--; load(); });
+  clearSearch.addEventListener('click',()=>{if(!confirmDiscard())return;query='';search.value='';clearSearch.disabled=true;load(true);search.focus();});
+  refresh.addEventListener('click', () => { if (confirmDiscard()) load(true); });
+  next.addEventListener('click', () => { if (!hasNext || !rows.length || !confirmDiscard()) return; cursors[page + 1] = rows.at(-1); page++; load(); });
+  previous.addEventListener('click', () => { if (page === 0 || !confirmDiscard()) return; page--; load(); });
   load(true);
 }

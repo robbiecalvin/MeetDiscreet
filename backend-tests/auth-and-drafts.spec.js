@@ -1009,6 +1009,7 @@ test('scoped staff can request changes to the inspected version but cannot decid
   await page.getByRole('button', { name: 'Request changes', exact: true }).click();
   await expect(page.locator('.review-feedback-form [role=status]')).toContainText('Unable to request changes');
   expect(state.applicationFeedback).toHaveLength(0);
+  page.once('dialog', dialog => dialog.accept());
   await page.getByRole('button', { name: 'Refresh review queue' }).click();
   await page.getByRole('button', { name: 'Inspect Applicant 01', exact: true }).click();
   await page.getByLabel('Changes the applicant should make', { exact: true }).fill('Please clarify your offered experiences.');
@@ -1595,4 +1596,40 @@ test('a slower earlier queue search cannot overwrite a newer query result',async
   const input=page.getByLabel('Search pending applications',{exact:true});const button=page.getByRole('button',{name:'Search queue',exact:true});
   await input.fill('Slow City');await button.click();await started;await input.fill('Fast City');await button.click();await expect(page.locator('.review-card')).toHaveCount(1);await expect(page.locator('.review-card')).toContainText('Fast City');
   release();await page.waitForLoadState('networkidle');await expect(page.locator('.review-card')).toHaveCount(1);await expect(page.locator('.review-card')).toContainText('Fast City');
+});
+
+
+test('unsent staff feedback is preserved when queue actions are cancelled and cleared on confirmed discard or sign-out', async ({page}) => {
+  const state = await mockBackend(page); state.roles=['user','moderator'];
+  state.capabilities=['provider_application_review','provider_application_feedback'];
+  state.reviewApplications=reviewRows(23);
+  for (const row of state.reviewApplications) row.submission_id='66666666-6666-4666-8666-000000000001';
+  await signIn(page); await enter(page,'/?page=provider-review');
+  await page.getByRole('button',{name:'Inspect Applicant 01',exact:true}).click();
+  const note=page.getByLabel('Changes the applicant should make',{exact:true});
+  await note.fill('Keep this unsent note.');
+  expect(await page.evaluate(() => { const event=new Event('beforeunload',{cancelable:true});window.dispatchEvent(event);return event.defaultPrevented; })).toBe(true);
+  await page.getByLabel('Search pending applications',{exact:true}).fill('Applicant 02');
+  const requests=state.requests.length;
+  for (const name of ['Close application details','Refresh review queue','Next applications','Search queue','Clear queue search','Inspect Applicant 02']) {
+    page.once('dialog',dialog=>dialog.dismiss());
+    await page.getByRole('button',{name,exact:true}).click();
+    await expect(note).toHaveValue('Keep this unsent note.');
+  }
+  page.once('dialog',dialog=>dialog.dismiss());
+  await page.getByRole('link',{name:'Back to account',exact:false}).click();
+  await expect(note).toHaveValue('Keep this unsent note.');
+  expect(state.requests.length).toBe(requests);
+  expect(state.applicationFeedback).toHaveLength(0);
+  page.once('dialog',dialog=>dialog.accept());
+  await page.getByRole('button',{name:'Search queue',exact:true}).click();
+  await expect(page.locator('.review-card')).toHaveCount(1);
+  await expect(note).toHaveCount(0);
+  await page.getByRole('button',{name:'Inspect Applicant 02',exact:true}).click();
+  await expect(note).toHaveValue('');
+  expect(await page.evaluate(() => { const event=new Event('beforeunload',{cancelable:true});window.dispatchEvent(event);return event.defaultPrevented; })).toBe(false);
+  await note.fill('Clear on sign-out without a discard prompt.');
+  await page.getByRole('button',{name:'Sign out',exact:true}).click();
+  await expect(note).toHaveCount(0);
+  expect(state.applicationFeedback).toHaveLength(0);
 });

@@ -108,3 +108,17 @@ element retains the exact instant. Missing or malformed timestamps show
 “Submission date unavailable” rather than inventing a date. This is submission
 time, not an approval deadline, elapsed-time promise or last-profile-edit time.
 Existing oldest-first ordering and authorization remain unchanged.
+
+
+## Unsent feedback protection
+
+Nonblank feedback notes require a discard confirmation before queue refresh,
+search/clear, pagination, inspection of another application, closing detail, or
+the workspace's Back to account link. Cancel preserves the detail, note and applied
+queue state without a request. Successful feedback submission refreshes directly;
+failed submission preserves the note. Browser reload/close uses the existing native
+unsaved-draft warning where supported. Notes remain in memory only.
+
+Sign-out, identity changes and authorization failures clear private text without
+a discard prompt. This does not add recovery or a global guard for unrelated
+header links/history navigation; those can still leave the workspace.

@@ -1162,6 +1162,20 @@ If launch scope is reduced:
   Mobile detail inspected. This presentation change needs no new migration; earlier
   hosted migration and real staff-provisioning checks remain pending.
 
+### Unsent Staff Feedback Protection
+
+- Queue refresh/search/clear, pagination, switching or closing an application and
+  the workspace Back link ask before discarding a nonblank feedback note. Cancel
+  preserves text and sends no request; failed submission still keeps the note.
+- The existing native unload warning covers active review notes where supported.
+  Notes are never persisted. Sign-out/identity loss clears private text immediately.
+  Unrelated header/history navigation has no new global SPA guard or recovery.
+- Build, all 171 standard checks and 96 backend browser checks passed. The native
+  unload tracker reads the current visible form without retaining detached private
+  DOM; its final binding adjustment passed the build and three focused staff checks.
+  Cancellation preserves notes without requests, confirmed discard removes them,
+  and sign-out clears the form. No migration is added.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine
