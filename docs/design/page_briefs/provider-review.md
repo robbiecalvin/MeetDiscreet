@@ -98,3 +98,13 @@ Search is limited to 100 characters and remains in page memory, outside URLs and
 browser persistence. Missing search setup shows an unavailable state, with Clear
 providing access to the existing queue. Late responses cannot replace a newer
 search. The mobile form wraps within the existing staff workspace.
+
+
+## Submission timing
+
+Queue cards and inspected detail show the server-supplied submission timestamp
+in the viewer's browser time zone, including its abbreviation. A semantic time
+element retains the exact instant. Missing or malformed timestamps show
+“Submission date unavailable” rather than inventing a date. This is submission
+time, not an approval deadline, elapsed-time promise or last-profile-edit time.
+Existing oldest-first ordering and authorization remain unchanged.

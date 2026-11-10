@@ -1151,6 +1151,17 @@ If launch scope is reduced:
   and out-of-order responses. The migration has not been applied remotely, and
   hosted staff/JWT checks remain pending.
 
+### Staff Submission Dates
+
+- Review queue cards and application detail show the submitted instant in the
+  viewer's browser time zone, with semantic machine-readable timestamps and an
+  explicit unavailable state for missing/malformed dates. No deadline or new
+  staff permission is introduced; existing server ordering remains authoritative.
+- Build and all 95 backend browser checks passed, including assertions that queue
+  and detail show the same browser-local instant and exact machine-readable time.
+  Mobile detail inspected. This presentation change needs no new migration; earlier
+  hosted migration and real staff-provisioning checks remain pending.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

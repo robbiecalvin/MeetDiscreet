@@ -7,6 +7,18 @@ function node(tag, text, className) {
   if (className) value.className = className;
   return value;
 }
+function submissionDate(value) {
+  const line = node('p', null, 'review-submitted profile-small');
+  const parsed = typeof value === 'string' && value.trim() ? new Date(value) : null;
+  if (!parsed || Number.isNaN(parsed.getTime())) {
+    line.textContent = 'Submission date unavailable.';
+    return line;
+  }
+  const time = node('time', parsed.toLocaleString(undefined, { timeZoneName: 'short' }));
+  time.dateTime = parsed.toISOString();
+  line.append('Submitted ', time);
+  return line;
+}
 export function renderProviderReview(container, navigate) {
   container.replaceChildren();
   const root = node('section', null, 'provider-review');
@@ -49,7 +61,7 @@ export function renderProviderReview(container, navigate) {
       const heading = node('h2', value.display_name); heading.tabIndex = -1;
       const close = node('button', 'Close application details', 'button quiet'); close.type = 'button';
       close.addEventListener('click', () => { version++; detail.replaceChildren(); detail.hidden = true; status.textContent = `${rows.length} submitted applications on this page.`; refresh.focus(); });
-      detail.append(heading, node('p', value.city, 'profile-small'), node('p', 'SUBMITTED INTRODUCTION', 'eyebrow'), node('p', value.introduction, 'review-introduction'), node('p', 'Inspect this submitted version before making a separately authorized decision.', 'profile-small'), close);
+      detail.append(heading, node('p', value.city, 'profile-small'), submissionDate(value.submitted_at), node('p', 'SUBMITTED INTRODUCTION', 'eyebrow'), node('p', value.introduction, 'review-introduction'), node('p', 'Inspect this submitted version before making a separately authorized decision.', 'profile-small'), close);
       if (value.submission_id && value.owner_id !== reviewerId) {
         const [feedbackAccess, approvalAccess] = await Promise.allSettled([loadProviderFeedbackAccess(reviewerId),loadProviderApprovalAccess(reviewerId)]);
         const canGiveFeedback = feedbackAccess.status==='fulfilled' && feedbackAccess.value;
@@ -128,7 +140,7 @@ export function renderProviderReview(container, navigate) {
       for (const value of rows) {
         const card = node('article', null, 'review-card');
         const open = node('button', `Inspect ${value.display_name}`, 'button outline'); open.type = 'button'; open.addEventListener('click', () => showDetail(value.owner_id));
-        card.append(node('h2', value.display_name), node('p', value.city, 'profile-small'), open); list.append(card);
+        card.append(node('h2', value.display_name), node('p', value.city, 'profile-small'), submissionDate(value.submitted_at), open); list.append(card);
       }
       previous.disabled = page === 0; next.disabled = !hasNext; pages.hidden = !rows.length && page === 0;
       return true;

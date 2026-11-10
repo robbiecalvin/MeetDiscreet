@@ -938,6 +938,12 @@ test('assigned staff review access paginates, escapes introductions and clears o
   await page.getByRole('button', { name: 'Previous applications', exact: true }).click();
   await expect(page.locator('.review-card')).toHaveCount(20);
   await page.getByRole('button', { name: 'Inspect Applicant 01', exact: true }).click();
+  const submitted = state.reviewApplications[0].submitted_at;
+  const localDate = await page.evaluate(value => new Date(value).toLocaleString(undefined, { timeZoneName: 'short' }), submitted);
+  await expect(page.locator('.review-card').first().locator('time')).toHaveAttribute('datetime', new Date(submitted).toISOString());
+  await expect(page.locator('.review-card').first().locator('.review-submitted')).toHaveText(`Submitted ${localDate}`);
+  await expect(page.locator('.review-detail time')).toHaveAttribute('datetime', new Date(submitted).toISOString());
+  await expect(page.locator('.review-detail .review-submitted')).toHaveText(`Submitted ${localDate}`);
   await expect(page.locator('.review-introduction')).toContainText('<img src=x onerror=alert(1)>');
   await expect(page.locator('.review-detail img')).toHaveCount(0);
   await page.setViewportSize({ width: 390, height: 1000 });
