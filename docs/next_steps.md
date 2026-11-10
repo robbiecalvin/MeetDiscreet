@@ -1202,6 +1202,21 @@ If launch scope is reduced:
   reads, unavailable vs empty states, independent retry and sign-out cleanup.
   Existing saved-plan resume checks pass. No database migration is added.
 
+### Saved Listing Library Pages
+
+- Saved listing cards now use 12-item local pages, range/count status and accessible
+  Previous/Next actions. Search/type/sort/clear/refresh reset the page; refresh
+  retains filters. Deletion clamps remaining pages and locks paging while pending.
+- Dedicated owner metadata reads omit full descriptions, check exact completeness
+  and reverify identity. Missing counts, incomplete/cross-owner results or a library
+  above the technical 1,000-row view bound show unavailable status, not partial
+  search results. This bound grants or limits no product posting entitlement.
+- Build, all 171 standard checks and 102 backend browser checks passed; mobile
+  controls inspected. Coverage includes paging/filter/sort resets, exact-count
+  completeness, other-owner denial and retry, plus existing edit/copy/delete flows.
+  An older Provider intake test now waits for the settled start-application label
+  instead of its transient loading label. No migration is introduced.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

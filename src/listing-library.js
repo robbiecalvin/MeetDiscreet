@@ -1,5 +1,5 @@
 import { backendEnabled } from './backend/client.js';
-import { listListingDrafts, deleteListingDraft } from './backend/drafts.js';
+import { listListingDraftSummaries, deleteListingDraft } from './backend/drafts.js';
 import { detachSavedListing } from './listing-editor.js';
 
 function node(tag, text, className) {
@@ -66,12 +66,19 @@ export function renderListingLibrary(container, navigate, initialKind = 'all') {
   }
   controls.append(reset);
   const list = node('div', null, 'library-list');
-  root.append(controls, list);
+  const pages = node('div', null, 'editor-actions'); pages.hidden = true;
+  const previous = node('button', 'Previous draft page', 'button quiet'); previous.type = 'button';
+  const next = node('button', 'Next draft page', 'button outline'); next.type = 'button';
+  pages.append(previous, next);
+  root.append(controls, list, pages);
+  const pageSize = 12;
+  let page = 0;
   let rows = [];
   let loaded = false;
   let deleting = false;
   const current = () => root.parentNode === container;
-  function paint() {
+  function paint(resetPage = false) {
+    if (resetPage) page = 0;
     updateCreate();
     if (!loaded) return;
     const query = search.value.trim().toLocaleLowerCase();
@@ -79,9 +86,14 @@ export function renderListingLibrary(container, navigate, initialKind = 'all') {
     if (sort.value === 'title') matches.sort((a, b) => a.title.localeCompare(b.title));
     else if (sort.value === 'oldest') matches.reverse();
     list.replaceChildren();
-    status.textContent = `${matches.length} of ${rows.length} saved drafts`;
+    page = Math.min(page, Math.max(0, Math.ceil(matches.length / pageSize) - 1));
+    const start = page * pageSize;
+    const visible = matches.slice(start, start + pageSize);
+    status.textContent = `${matches.length} of ${rows.length} saved drafts${matches.length ? ` · Showing ${start + 1}–${start + visible.length}` : ''}`;
+    previous.disabled = page === 0; next.disabled = start + pageSize >= matches.length;
+    pages.hidden = matches.length <= pageSize;
     if (!matches.length) list.append(node('p', rows.length ? 'No drafts match these filters.' : 'No saved listing drafts yet. Start a new listing to create one.', 'catalogue-empty'));
-    for (const row of matches) {
+    for (const row of visible) {
       const card = node('article', null, 'library-card');
       card.append(node('p', `${row.kind === 'offering' ? 'OFFERING' : 'LOOKING FOR'} · PRIVATE DRAFT`, 'eyebrow'), node('h2', row.title), node('p', [row.area, row.city, row.activity].filter(Boolean).join(' · ')));
       const cardActions = node('div', null, 'library-card-actions');
@@ -90,7 +102,7 @@ export function renderListingLibrary(container, navigate, initialKind = 'all') {
       const result = node('p', '', 'profile-small'); result.setAttribute('role', 'status');
       remove.addEventListener('click', async () => {
         if (deleting || !window.confirm(`Delete the saved private draft “${row.title}”? This cannot be undone.`)) return;
-        deleting = true; refresh.disabled = true; controls.inert = true; cardActions.inert = true;
+        deleting = true; refresh.disabled = true; controls.inert = true; pages.inert = true; cardActions.inert = true;
         result.textContent = 'Deleting…';
         try {
           await deleteListingDraft(row.id);
@@ -102,7 +114,7 @@ export function renderListingLibrary(container, navigate, initialKind = 'all') {
         } catch {
           if (current()) result.textContent = 'Unable to delete this draft. Check sign-in and connection, then retry.';
         } finally {
-          deleting = false; refresh.disabled = false; controls.inert = false; cardActions.inert = false;
+          deleting = false; refresh.disabled = false; controls.inert = false; pages.inert = false; cardActions.inert = false;
         }
       });
       cardActions.append(link('create-listing', `Edit ${row.title}`, row.id), link('create-listing', `Duplicate ${row.title}`, row.id, true), remove);
@@ -112,26 +124,29 @@ export function renderListingLibrary(container, navigate, initialKind = 'all') {
   }
   async function load() {
     if (deleting) return;
-    refresh.disabled = true; loaded = false; list.replaceChildren();
+    refresh.disabled = true; loaded = false; rows = []; list.replaceChildren(); pages.hidden = true;
     status.textContent = 'Loading your saved drafts…';
     try {
-      const result = await listListingDrafts();
+      const result = await listListingDraftSummaries();
       if (!current()) return;
-      rows = result; loaded = true; paint();
+      rows = result; loaded = true; paint(true);
     } catch {
       if (!current()) return;
-      status.textContent = 'Unable to load saved drafts. Check sign-in and connection, then refresh.';
+      status.textContent = 'Unable to load saved drafts completely. Check sign-in and connection, then refresh. This view supports up to 1,000 drafts.';
       list.append(link('sign-in', 'Sign in'));
     } finally { refresh.disabled = false; }
   }
-  search.addEventListener('input', paint); type.addEventListener('change', () => {
+  search.addEventListener('input', () => paint(true)); type.addEventListener('change', () => {
     filterKind = type.value;
     const url = new URL(location.href);
     if (url.searchParams.get('page') === 'my-listings') { url.searchParams.set('kind', filterKind); history.replaceState(history.state, '', url); }
-    paint();
-  }); sort.addEventListener('change', paint);
+    paint(true);
+  }); sort.addEventListener('change', () => paint(true));
   reset.addEventListener('click', () => { search.value = ''; type.value = 'all'; filterKind = 'all'; sort.value = 'recent';
-    const url = new URL(location.href); url.searchParams.delete('kind'); history.replaceState(history.state, '', url); paint(); search.focus(); });
+    const url = new URL(location.href); url.searchParams.delete('kind'); history.replaceState(history.state, '', url); paint(true); search.focus(); });
+  previous.addEventListener('click', () => { if (page > 0) { page--; paint(); status.focus(); } });
+  next.addEventListener('click', () => { page++; paint(); status.focus(); });
+  status.tabIndex = -1;
   refresh.addEventListener('click', load);
   load();
 }

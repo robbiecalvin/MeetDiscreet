@@ -766,3 +766,5 @@ underlying feature is operational.
 - `supabase/migrations/202611100003_provider_review_search.sql`: bounded actor-bound pending name/city search and protected read-event action; original list RPC preserved.
 
 - `src/provider-application-status.js`: shared owner-only application summary and refresh/action labels for account overview and Provider setup; no private introduction reads or role inference.
+
+- Listing library uses `listListingDraftSummaries` in `src/backend/drafts.js` for bounded, count-checked owner card metadata; editor full-draft reads remain separate.

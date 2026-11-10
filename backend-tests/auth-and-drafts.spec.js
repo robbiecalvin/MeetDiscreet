@@ -859,7 +859,7 @@ test('provider application saves, submits, locks, withdraws and preserves roles'
   const state = await mockBackend(page);
   await signIn(page);
   await enter(page, '/?page=provider-setup');
-  await page.getByRole('link', { name: 'Prepare provider application', exact: true }).click();
+  await page.getByRole('link', { name: 'Start provider application', exact: true }).click();
   await expect(page.locator('.application-state')).toHaveText('No saved application.');
   await page.getByLabel('Provider display name', { exact: true }).fill('  Test Provider  ');
   await page.getByLabel('General city', { exact: true }).fill('Vancouver');
@@ -1735,4 +1735,46 @@ test('User setup distinguishes unavailable draft summaries from empty records an
   options.invalidListingSummaryCount=false;state.listings=[];
   await page.getByRole('button',{name:'Refresh Looking For saved status',exact:true}).click();
   await expect(looking).toHaveText('0 saved private Looking For drafts');
+});
+
+
+test('listing library pages complete metadata, resets pages for filters/sort/refresh and keeps selected filters', async ({page})=>{
+  const state=await mockBackend(page);
+  state.listings=Array.from({length:25},(_,index)=>({id:`dddddddd-dddd-4ddd-8ddd-${String(index+1).padStart(12,'0')}`,owner_id:userId,kind:index%2?'offering':'looking',title:`Draft ${String(index+1).padStart(2,'0')}`,city:'Vancouver',area:'',activity:'Coffee',description:'SECRET FULL LISTING CONTENT',updated_at:new Date(Date.UTC(2026,10,10,18,60-index)).toISOString()}));
+  await signIn(page);await enter(page,'/?page=my-listings');
+  const cards=page.locator('.library-card');const status=page.locator('.listing-library > [role=status]');
+  await expect(cards).toHaveCount(12);await expect(status).toContainText('Showing 1–12');
+  await page.getByRole('button',{name:'Next draft page',exact:true}).click();
+  await expect(cards.first()).toContainText('Draft 13');await expect(status).toBeFocused();
+  await page.getByRole('button',{name:'Next draft page',exact:true}).click();
+  await expect(cards).toHaveCount(1);await expect(cards.first()).toContainText('Draft 25');
+  await expect(page.getByRole('button',{name:'Next draft page',exact:true})).toBeDisabled();
+  await page.getByRole('button',{name:'Previous draft page',exact:true}).click();await expect(cards.first()).toContainText('Draft 13');
+  await page.getByLabel('Sort drafts',{exact:true}).selectOption('oldest');await expect(cards.first()).toContainText('Draft 25');
+  await page.getByLabel('Search saved drafts',{exact:true}).fill('Draft 0');await expect(cards).toHaveCount(9);
+  await expect(page.getByRole('button',{name:'Next draft page',exact:true})).toBeHidden();
+  await page.getByRole('button',{name:'Clear filters',exact:true}).click();await expect(cards.first()).toContainText('Draft 01');
+  await page.getByLabel('Listing type',{exact:true}).selectOption('looking');await expect(cards).toHaveCount(12);
+  await page.getByRole('button',{name:'Next draft page',exact:true}).click();await expect(cards).toHaveCount(1);
+  await page.getByRole('button',{name:'Refresh drafts',exact:true}).click();await expect(cards).toHaveCount(12);
+  await expect(page.getByLabel('Listing type',{exact:true})).toHaveValue('looking');await expect(status).toContainText('13 of 25 saved drafts');
+  const request=state.requests.find(r=>r.path==='/rest/v1/listing_drafts'&&r.method==='GET');const query=new URLSearchParams(request.query);
+  expect(query.get('select')).toBe('id,owner_id,kind,title,city,area,activity,updated_at');expect(query.get('owner_id')).toBe(`eq.${userId}`);expect(query.get('limit')).toBe('1000');
+  await expect(page.locator('.listing-library')).not.toContainText('SECRET FULL LISTING CONTENT');
+  await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.locator('.listing-library > .editor-actions').last().screenshot({path:'/tmp/listing-library-pagination-mobile.png'});
+});
+
+test('listing library refuses incomplete or other-owner metadata instead of presenting partial search results',async({page})=>{
+  const options={backupListingCount:2};const state=await mockBackend(page,options);
+  state.listings=[{id:listingId,owner_id:userId,kind:'looking',title:'Private test plan',city:'Vancouver',area:'',activity:'Coffee'}];
+  await signIn(page);await enter(page,'/?page=my-listings');
+  const cards=page.locator('.library-card');const status=page.locator('.listing-library > [role=status]');
+  await expect(status).toContainText('Unable to load saved drafts completely');await expect(cards).toHaveCount(0);
+  options.backupListingCount=1;await page.getByRole('button',{name:'Refresh drafts',exact:true}).click();await expect(cards).toHaveCount(1);
+  state.listings[0].owner_id='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+  await page.getByRole('button',{name:'Refresh drafts',exact:true}).click();await expect(status).toContainText('Unable to load saved drafts completely');await expect(cards).toHaveCount(0);
+  state.listings[0].owner_id=userId;options.backupListingCount=1001;
+  await page.getByRole('button',{name:'Refresh drafts',exact:true}).click();await expect(status).toContainText('up to 1,000 drafts');await expect(cards).toHaveCount(0);
+  options.backupListingCount=1;await page.getByRole('button',{name:'Refresh drafts',exact:true}).click();await expect(cards).toHaveCount(1);
 });

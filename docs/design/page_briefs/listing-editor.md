@@ -76,3 +76,20 @@ address bar. `from=library` enables a same-origin return link that restores the
 kind filter; no arbitrary return URLs are accepted. Invalid kinds fall back to
 normal defaults. Existing saved records retain their actual category; context
 must not rewrite them. Account library navigation can show both kinds.
+
+## Library pages and complete summary reads
+
+The library displays 12 matching cards per page, with Previous/Next draft page
+controls and visible range/count status. Paging focuses that status for keyboard
+users. Search, type, sort, Clear and refresh reset to page one; refresh retains
+filters. Deleting the last item on a later page clamps to the remaining last page.
+Pagination is locked with other controls during deletion.
+
+A dedicated owner-only read requests card metadata without full descriptions,
+orders by updated time then ID and checks its exact count before filtering locally.
+Missing counts, incomplete responses, another-owner rows or more than 1,000 records
+show an unavailable state with no partial cards. This is a technical display bound,
+not a posting allowance. The editor/source-loading behavior stays separate.
+Account identity is rechecked after reading; detached views ignore responses.
+No snapshot consistency across concurrent writes is claimed. No new database
+permissions, public publishing or backend migration is introduced.

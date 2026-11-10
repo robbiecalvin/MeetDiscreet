@@ -25,6 +25,20 @@ export async function listListingDrafts() {
   failure(error);
   return data;
 }
+// The library needs card metadata, not descriptions or a partial search corpus.
+export async function listListingDraftSummaries() {
+  const user = await requireUser();
+  const { data, count, error } = await backendClient().from('listing_drafts')
+    .select('id,owner_id,kind,title,city,area,activity,updated_at', { count: 'exact' })
+    .eq('owner_id', user.id).order('updated_at', { ascending: false }).order('id', { ascending: false }).limit(1000);
+  failure(error);
+  if (!Array.isArray(data) || !Number.isSafeInteger(count) || count < 0 || count > 1000 || data.length !== count || data.some(row => row.owner_id !== user.id)) {
+    throw new Error('Complete listing summary unavailable.');
+  }
+  const verified = await requireUser();
+  if (verified.id !== user.id) throw new Error('Account changed.');
+  return data;
+}
 export async function saveListingDraft(draft, id) {
   const user = await requireUser();
   const payload = { owner_id: user.id, kind: draft.category, title: draft.title.trim(), description: draft.description.trim(), city: draft.city, area: draft.area.trim(), activity: draft.activity };
