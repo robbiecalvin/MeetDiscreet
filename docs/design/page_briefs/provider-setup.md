@@ -79,3 +79,18 @@ a request nor verifies identity, current role, username availability or payment.
 Publishing eligibility, approval and plan enforcement remain separate. Backend
 disabled/signed-out views expose no preview data. Sign-out/identity changes remove
 the workspace, and late reads cannot restore it. No new migration or public table.
+
+## Private profile submission copy
+
+After explicit saved-field review, owners can confirm submission of that exact
+saved version. Current User + Provider membership is required on the server. The
+UI explains that staff publication decisions are not connected and nothing is
+public. It records a private candidate, not an operational review promise.
+
+An explicit check loads the pending copy with its recorded public fields. Later
+draft edits cannot change it. Show no member content or staff identity. Owners
+can confirm withdrawal without losing their saved draft, even after Provider role
+revocation; no second pending copy is permitted. Re-review source after a failed
+submission or stale-version rejection. Missing setup differs from no pending copy;
+retry clears previous content and focuses the result. Sign-out clears the workspace.
+The existing single-draft prototype does not create additional presentations.

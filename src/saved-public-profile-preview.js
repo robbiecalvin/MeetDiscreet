@@ -5,7 +5,7 @@ function node(tag, text, className) {
   if (className) item.className = className;
   return item;
 }
-export function savedPublicProfilePreview(ownerId, current, editLink) {
+export function savedPublicProfilePreview(ownerId, current, editLink, onLoaded = () => {}) {
   const section = node('section', null, 'saved-public-profile-preview account-permissions');
   section.append(node('h2', 'Review your saved public fields'), node('p', 'Private preview of your saved profile draft. Unsaved editor changes are not included. Nothing becomes public here.', 'profile-small'));
   const load = node('button', 'Review saved public profile', 'button outline'); load.type = 'button';
@@ -15,11 +15,13 @@ export function savedPublicProfilePreview(ownerId, current, editLink) {
   let busy = false;
   load.addEventListener('click', async () => {
     if (busy) return;
+    onLoaded(null);
     busy = true; load.disabled = true; content.replaceChildren(); status.textContent = 'Loading saved public fields…';
     try {
       const value = await loadSavedPublicProfilePreview(ownerId);
       if (!current()) return;
       if (!value) { status.textContent = 'No saved profile draft. Save a profile draft before reviewing its public fields.'; return; }
+      onLoaded(value);
       const text = key => typeof value[key] === 'string' ? value[key].trim() : '';
       const ageValid = Number.isSafeInteger(value.adult_age) && value.adult_age >= 18;
       const photoValid = Number.isInteger(value.photo_index) && value.photo_index >= 0 && value.photo_index <= 11;

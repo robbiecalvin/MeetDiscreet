@@ -1261,8 +1261,8 @@ search text. No entities, role grants or application mutations are introduced.
 
 ## Controlled profile publishing — next increment contract
 
-Status: design preparation only. No publishing schema, public record or endpoint
-is implemented by this contract. Existing owner drafts and the saved public-field
+Status: public publishing remains design preparation only. The private-copy
+implementation below adds no public record or approval endpoint. Existing owner drafts and the saved public-field
 preview remain private. Staff authority and revision visibility await OPEN-052/053;
 DEC-023 approves Provider membership only and cannot answer either question.
 
@@ -1290,3 +1290,24 @@ reviewed is intentionally unresolved. No default is enacted here. Demo portrait
 selection is not an approved uploaded-media pipeline. The two-presentation limit
 and existing unresolved commercial rules remain unchanged; no payment exception
 or live publication rollout is authorized by this design note.
+
+
+## Private profile submission copies
+
+[Private-copy migration](../../supabase/migrations/202611100004_private_profile_submissions.sql)
+adds `profile_publication_submissions`: ID, owner, source timestamp, curated JSON
+public-field candidates, submitted time and nullable withdrawal time. Existing
+owner SELECT is the only client table grant; direct writes and anonymous reads
+are denied. No staff/public projection or approval state is added.
+
+Submit binds actual actor, locks current User/Provider membership and source draft,
+checks its expected timestamp, validates saved username/adult age and copies only
+allowlisted fields from the server row. A partial unique index enforces one pending
+copy per owner. Withdrawal changes only its withdrawal timestamp and requires the
+actual owner/version ID; owners can withdraw after role revocation. Copies cascade
+on account deletion. This is the existing single profile draft, not a second
+presentation slot or enforcement of a future two-presentation publishing workflow.
+
+Recorded public fields stay unchanged after draft edits. No biography, interests,
+private contacts, staff decision, notification, role grant or paid state is stored.
+OPEN-052/053 and actual eligibility/plan/public-activation policies remain pending.

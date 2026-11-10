@@ -10,7 +10,7 @@ function session(profile = user) {
   return { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock_refresh_token', user: profile };
 }
 async function mockBackend(page, options = {}) {
-  const state = { bookingPlan: null, user: { ...user, user_metadata: {} }, providerApplication: null, applicationApprovals: [], targetRoles: ['user'], approvalFailure: false, applicationFeedback: [], applicationActivity: [], activityFailure: false, applicationSubmissions: [], historyFailure: false, applicationSubmissionCounter: 0, userProfile: null, roles: ['user'], capabilities: [], reviewApplications: [], reviewAccessEvents: [], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
+  const state = { profilePublication:null, bookingPlan: null, user: { ...user, user_metadata: {} }, providerApplication: null, applicationApprovals: [], targetRoles: ['user'], approvalFailure: false, applicationFeedback: [], applicationActivity: [], activityFailure: false, applicationSubmissions: [], historyFailure: false, applicationSubmissionCounter: 0, userProfile: null, roles: ['user'], capabilities: [], reviewApplications: [], reviewAccessEvents: [], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
   await page.route('https://backend-test.supabase.co/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -158,6 +158,24 @@ async function mockBackend(page, options = {}) {
       }
       if (method === 'POST') { state.catalogue = body.items; return respond(null, 201); }
       return respond(state.catalogue === null ? [] : [{ items: state.catalogue }]);
+    }
+    if (url.pathname === '/rest/v1/profile_publication_submissions') {
+      if(options.missingProfileSubmissionMigration)return respond({message:'Missing'},404);
+      const row=state.profilePublication;
+      return respond(row&&row.owner_id===state.user.id&&!row.withdrawn_at?[row]:[]);
+    }
+    if (url.pathname === '/rest/v1/rpc/submit_private_profile_copy') {
+      if(options.missingProfileSubmissionMigration)return respond({message:'Missing'},404);
+      if(body.p_expected_owner!==state.user.id||!state.roles.includes('user')||!state.roles.includes('provider'))return respond({message:'Denied'},403);
+      const profile=state.profile;
+      if(!profile||!body.p_source_updated_at||profile.updated_at!==body.p_source_updated_at||!profile.username||!profile.adult_age||(state.profilePublication&&!state.profilePublication.withdrawn_at))return respond({message:'Source changed or pending'},409);
+      state.profilePublication={id:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',owner_id:state.user.id,source_updated_at:profile.updated_at,submitted_at:'2026-11-10T20:00:00Z',withdrawn_at:null,public_fields:Object.fromEntries(['display_name','username','adult_age','tagline','city','area','photo_index'].map(key=>[key,profile[key]??null]))};
+      return respond(state.profilePublication);
+    }
+    if (url.pathname === '/rest/v1/rpc/withdraw_private_profile_copy') {
+      if(options.missingProfileSubmissionMigration)return respond({message:'Missing'},404);
+      if(body.p_expected_owner!==state.user.id||!state.profilePublication||state.profilePublication.owner_id!==state.user.id||body.p_submission!==state.profilePublication.id||state.profilePublication.withdrawn_at)return respond({message:'Denied'},403);
+      state.profilePublication.withdrawn_at='2026-11-10T21:00:00Z';return respond(state.profilePublication);
     }
     if (url.pathname === '/rest/v1/profile_drafts') {
       if (method === 'DELETE') {
@@ -1792,7 +1810,7 @@ test('Provider saved public preview loads explicitly, projects public fields and
   await expect(panel).toContainText('@saved-user');await expect(panel).toContainText('Age 28');
   await expect(panel.locator('img')).toHaveCount(0);await expect(panel).not.toContainText('PRIVATE MEMBER');
   const request=state.requests.find(r=>r.path==='/rest/v1/profile_drafts'&&new URLSearchParams(r.query).get('select')?.includes('adult_age'));
-  const query=new URLSearchParams(request.query);expect(query.get('select')).toBe('owner_id,display_name,username,adult_age,tagline,city,area,photo_index');expect(query.get('owner_id')).toBe(`eq.${userId}`);
+  const query=new URLSearchParams(request.query);expect(query.get('select')).toBe('owner_id,display_name,username,adult_age,tagline,city,area,photo_index,updated_at');expect(query.get('owner_id')).toBe(`eq.${userId}`);
   state.profile.display_name='Updated saved name';await expect(panel).not.toContainText('Updated saved name');
   await panel.getByRole('button',{name:'Refresh saved public profile',exact:true}).click();await expect(panel).toContainText('Updated saved name');
   await expect(panel.locator('[role=status]')).toBeFocused();
@@ -1833,4 +1851,43 @@ test('sign-out while a saved public preview is loading cannot repopulate private
   await page.getByRole('button',{name:'Sign out',exact:true}).click();await expect(page.locator('.saved-public-profile-preview')).toHaveCount(0);
   release();await page.waitForLoadState('networkidle');
   await expect(page.locator('.provider-setup')).not.toContainText('LATE PRIVATE SAVED NAME');
+});
+
+
+function savedSubmissionProfile() { return {owner_id:userId,display_name:'Saved public name',username:'saved-provider',adult_age:28,tagline:'Coffee and galleries',city:'Vancouver',area:'Kitsilano',photo_index:2,biography:'SECRET MEMBER BIOGRAPHY',updated_at:'2026-11-10T19:00:00Z'}; }
+test('private profile submission captures the reviewed version, survives draft edits and permits withdrawal after role revocation',async({page})=>{
+  const state=await mockBackend(page);state.roles=['user','provider'];state.profile=savedSubmissionProfile();
+  await signIn(page);await enter(page,'/?page=provider-setup');const panel=page.locator('.profile-submission');
+  const submit=panel.getByRole('button',{name:'Submit private profile copy',exact:true});await expect(submit).toBeDisabled();
+  await page.getByRole('button',{name:'Review saved public profile',exact:true}).click();await expect(submit).toBeEnabled();
+  page.once('dialog',dialog=>dialog.dismiss());await submit.click();expect(state.profilePublication).toBeNull();
+  page.once('dialog',dialog=>dialog.accept());await submit.click();await expect(panel.locator('[role=status]')).toContainText('Private profile copy recorded');
+  expect(state.profilePublication.public_fields.display_name).toBe('Saved public name');expect(state.profilePublication.public_fields).not.toHaveProperty('biography');
+  const request=state.requests.find(r=>r.path.endsWith('/submit_private_profile_copy'));expect(request.body).toEqual({p_expected_owner:userId,p_source_updated_at:'2026-11-10T19:00:00Z'});
+  state.profile.display_name='Later private name';state.profile.updated_at='2026-11-10T19:30:00Z';
+  await page.getByRole('button',{name:'Refresh saved public profile',exact:true}).click();await expect(submit).toBeDisabled();
+  await panel.getByRole('button',{name:'Check my private profile submission',exact:true}).click();await expect(panel).toContainText('Saved public name');await expect(panel).not.toContainText('Later private name');await expect(panel).not.toContainText('SECRET MEMBER');
+  await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await panel.screenshot({path:'/tmp/private-profile-submission-mobile.png'});
+  state.roles=['user'];page.once('dialog',dialog=>dialog.accept());await panel.getByRole('button',{name:'Withdraw private profile copy',exact:true}).click();
+  await expect(panel.locator('[role=status]')).toHaveText('No pending private profile submission.');expect(state.profilePublication.withdrawn_at).toBeTruthy();expect(state.profile.display_name).toBe('Later private name');
+  await page.getByRole('button',{name:'Sign out',exact:true}).click();await expect(panel).toHaveCount(0);
+});
+
+test('private profile submission rejects changed saved versions and metadata-only Provider claims without reporting success',async({page})=>{
+  const state=await mockBackend(page);state.roles=['user','provider'];state.profile=savedSubmissionProfile();
+  await signIn(page);await enter(page,'/?page=provider-setup');const panel=page.locator('.profile-submission');
+  await page.getByRole('button',{name:'Review saved public profile',exact:true}).click();await expect(panel.getByRole('button',{name:'Submit private profile copy',exact:true})).toBeEnabled();state.profile.updated_at='2026-11-10T19:30:00Z';
+  page.once('dialog',dialog=>dialog.accept());await panel.getByRole('button',{name:'Submit private profile copy',exact:true}).click();await expect(panel.locator('[role=status]')).toContainText('Unable to confirm');expect(state.profilePublication).toBeNull();
+  await expect(panel.getByRole('button',{name:'Submit private profile copy',exact:true})).toBeDisabled();
+  state.roles=['user'];state.user.user_metadata={role:'provider'};
+  await page.getByRole('button',{name:'Refresh saved public profile',exact:true}).click();page.once('dialog',dialog=>dialog.accept());await panel.getByRole('button',{name:'Submit private profile copy',exact:true}).click();await expect(panel.locator('[role=status]')).toContainText('Unable to confirm');expect(state.profilePublication).toBeNull();
+  state.roles=['user','provider'];await page.getByRole('button',{name:'Refresh saved public profile',exact:true}).click();page.once('dialog',dialog=>dialog.accept());await panel.getByRole('button',{name:'Submit private profile copy',exact:true}).click();await expect(panel.locator('[role=status]')).toContainText('Private profile copy recorded');
+});
+
+test('missing private submission setup is unavailable while saved profile review stays usable',async({page})=>{
+  const options={missingProfileSubmissionMigration:true};const state=await mockBackend(page,options);state.profile=savedSubmissionProfile();
+  await signIn(page);await enter(page,'/?page=provider-setup');const panel=page.locator('.profile-submission');
+  await panel.getByRole('button',{name:'Check my private profile submission',exact:true}).click();await expect(panel.locator('[role=status]')).toContainText('Unable to confirm');
+  await page.getByRole('button',{name:'Review saved public profile',exact:true}).click();await expect(page.locator('.saved-public-profile-content')).toContainText('Saved public name');
+  options.missingProfileSubmissionMigration=false;await panel.getByRole('button',{name:'Check my private profile submission',exact:true}).click();await expect(panel.locator('[role=status]')).toHaveText('No pending private profile submission.');
 });

@@ -771,3 +771,6 @@ underlying feature is operational.
 
 - `src/saved-public-profile-preview.js`: explicit private saved-field review in Provider setup, with missing-field guidance, refresh/error states and text-only content rendering.
 - `src/backend/public-profile-preview.js`: owner-bound projection of saved public draft fields, with post-read actor verification; no member fields or publishing mutation.
+
+- `src/profile-submission.js` / `src/backend/profile-submissions.js`: explicit owner-only check, version-bound private submit and confirmed withdrawal; no staff/public operations.
+- `supabase/migrations/202611100004_private_profile_submissions.sql`: protected immutable public-field candidates, one pending owner copy, source/role checks and owner withdrawal.

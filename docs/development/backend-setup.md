@@ -477,3 +477,27 @@ and allow at most 50, with paired timestamp/owner cursors. Protected read events
 record `queue_search` without the query text. The original list RPC is unchanged.
 Missing search setup is explicitly unavailable; Clear returns to that original
 queue. Hosted JWT and actual staff-account checks remain pending.
+
+
+## Private profile submission copies
+
+After the existing migrations, apply
+[202611100004_private_profile_submissions.sql](../../supabase/migrations/202611100004_private_profile_submissions.sql)
+once. The agent has not applied it remotely. It creates owner-only profile copies
+and submit/withdraw RPCs, with no staff/public read policy or publishing approval.
+No real roles or capabilities are provisioned.
+
+Submission requires current User + Provider membership, a saved username/adult age
+and the exact source timestamp from explicit saved-field review. The server copies
+only public-field candidates from the saved draft; client content is not accepted.
+One pending copy per owner is enforced by a partial unique index. Withdrawal
+remains available to the owner after role revocation. Copies retain their public
+fields and source version after draft edits; account deletion cascades them.
+
+Provider setup exposes explicit check, submit and confirmed withdrawal actions.
+Missing setup is unavailable, not empty. Failures require rechecking pending state;
+changed source requires reviewing it again. Staff publication decisions are not
+connected, and this records no eligibility, paid entitlement or public profile.
+Local PostgreSQL and mocked-browser checks do not establish hosted JWT/concurrency
+behavior. Verify hosted roles, owner isolation and version/duplicate rejection
+during the deferred walkthrough before connecting any real review operations.

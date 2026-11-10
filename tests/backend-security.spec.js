@@ -35,10 +35,11 @@ test.beforeAll(async () => {
   await db.exec(await readFile(new URL('../supabase/migrations/202611100001_provider_application_approval.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611100002_provider_approval_history.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611100003_provider_review_search.sql', import.meta.url), 'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/202611100004_private_profile_submissions.sql', import.meta.url), 'utf8'));
 });
 test.afterAll(async () => { await db.close(); });
 test.beforeEach(async () => {
-  await db.exec('reset role; truncate public.provider_application_approvals, public.booking_plan_drafts, public.listing_drafts, public.profile_drafts, public.experience_catalogue_drafts, public.availability_drafts, public.user_profile_drafts, public.provider_applications, public.provider_application_events, public.provider_application_submissions, public.provider_application_feedback, public.staff_capabilities, public.staff_capability_events, public.provider_review_access_events;');
+  await db.exec('reset role; truncate public.profile_publication_submissions, public.provider_application_approvals, public.booking_plan_drafts, public.listing_drafts, public.profile_drafts, public.experience_catalogue_drafts, public.availability_drafts, public.user_profile_drafts, public.provider_applications, public.provider_application_events, public.provider_application_submissions, public.provider_application_feedback, public.staff_capabilities, public.staff_capability_events, public.provider_review_access_events;');
   await asUser(alice);
 });
 
@@ -549,5 +550,50 @@ test.describe('scoped pending application search',()=>{
   test('search bounds text/pages and rejects incomplete cursors without mutating intake or roles',async()=>{
     await queue();await expect(search('x'.repeat(101))).rejects.toThrow(/search text/i);await expect(search(' ')).rejects.toThrow(/search text/i);await expect(search('Van',alice,51)).rejects.toThrow(/page size/i);await expect(search('Van',alice,21,'2030-01-01T00:00:00Z')).rejects.toThrow(/page cursor/i);
     await search('Coastal');await db.exec('reset role');expect((await db.query("select count(*)::int as value from public.provider_applications where state='submitted'")).rows[0].value).toBe(3);expect((await db.query("select count(*)::int as value from public.account_roles where role='provider'")).rows[0].value).toBe(0);
+  });
+});
+
+
+test.describe('private public-profile submission copies',()=>{
+  async function prepare() {
+    await db.exec('reset role');
+    await db.query("insert into public.account_roles(user_id,role) values($1,'user'),($1,'provider') on conflict do nothing",[alice]);
+    await asUser(alice);await db.exec("insert into public.profile_drafts(display_name,username,adult_age,city,biography,interests) values('Saved Alice','alice-saved',28,'Vancouver','PRIVATE BIOGRAPHY','PRIVATE INTERESTS')");
+    return (await db.query('select updated_at from public.profile_drafts')).rows[0].updated_at;
+  }
+  const submit=(version,owner=alice)=>db.query('select * from public.submit_private_profile_copy($1,$2)',[owner,version]);
+  test.afterEach(async()=>{await db.exec('reset role');await db.query("delete from public.account_roles where user_id=$1 and role='provider'",[alice]);await db.query("insert into public.account_roles(user_id,role) values($1,'user') on conflict do nothing",[alice]);});
+  test('captures only saved public fields and keeps the recorded version immutable after draft edits',async()=>{
+    const version=await prepare();const row=(await submit(version)).rows[0];
+    expect(row.public_fields.username).toBe('alice-saved');expect(Object.keys(row.public_fields).sort()).toEqual(['display_name','username','adult_age','tagline','city','area','photo_index'].sort());
+    await db.exec("update public.profile_drafts set display_name='Later private edit',biography='Later private biography'");
+    expect((await db.query('select public_fields from public.profile_publication_submissions')).rows[0].public_fields.display_name).toBe('Saved Alice');
+    await expect(db.exec("update public.profile_publication_submissions set public_fields='{}'")).rejects.toThrow(/permission denied/i);
+    await expect(db.exec('delete from public.profile_publication_submissions')).rejects.toThrow(/permission denied/i);
+    await expect(db.exec("insert into public.profile_publication_submissions(owner_id,source_updated_at,public_fields) values(auth.uid(),now(),'{}')")).rejects.toThrow(/permission denied/i);
+    await expect(submit(version)).rejects.toThrow(/changed|unique/i);
+    await db.exec('reset role');expect((await db.query('select count(*)::int as n from public.profile_publication_submissions')).rows[0].n).toBe(1);
+  });
+  test('rejects forged actors, anonymous reads and cross-owner reads/withdrawal',async()=>{
+    const version=await prepare();const row=(await submit(version)).rows[0];
+    await expect(submit(version,bob)).rejects.toThrow(/account changed/i);
+    await asUser(bob);expect((await db.query('select * from public.profile_publication_submissions')).rows).toEqual([]);
+    await expect(db.query('select * from public.withdraw_private_profile_copy($1,$2)',[bob,row.id])).rejects.toThrow(/unavailable/i);
+    await asUser('','anon');await expect(db.exec('select * from public.profile_publication_submissions')).rejects.toThrow(/permission denied/i);await expect(submit(version)).rejects.toThrow(/permission denied/i);
+  });
+  test('requires current actual User and Provider membership, a current source version and saved core identity',async()=>{
+    const version=await prepare();await expect(submit(null)).rejects.toThrow(/changed/i);await expect(submit('2000-01-01T00:00:00Z')).rejects.toThrow(/changed/i);
+    await db.exec('reset role');await db.query("delete from public.account_roles where user_id=$1 and role='provider'",[alice]);await db.query('update auth.users set raw_user_meta_data=$1 where id=$2',[{role:'provider'},alice]);await asUser(alice);await expect(submit(version)).rejects.toThrow(/membership/i);
+    await db.exec('reset role');await db.query("insert into public.account_roles(user_id,role) values($1,'provider')",[alice]);await db.query("delete from public.account_roles where user_id=$1 and role='user'",[alice]);await asUser(alice);await expect(submit(version)).rejects.toThrow(/membership/i);
+    await db.exec('reset role');await db.query("insert into public.account_roles(user_id,role) values($1,'user')",[alice]);await asUser(alice);await db.exec("update public.profile_drafts set username='',adult_age=null");const latest=(await db.query('select updated_at from public.profile_drafts')).rows[0].updated_at;await expect(submit(latest)).rejects.toThrow(/username and adult age/i);
+    expect((await db.query('select * from public.profile_publication_submissions')).rows).toEqual([]);
+  });
+  test('bounds pending copies and allows owner withdrawal after Provider revocation without changing the saved draft',async()=>{
+    const version=await prepare();const row=(await submit(version)).rows[0];await expect(submit(version)).rejects.toThrow(/unique/i);
+    await db.exec('reset role');await db.query("delete from public.account_roles where user_id=$1 and role='provider'",[alice]);await asUser(alice);
+    const withdrawn=(await db.query('select * from public.withdraw_private_profile_copy($1,$2)',[alice,row.id])).rows[0];expect(withdrawn.withdrawn_at).toBeTruthy();expect(withdrawn.public_fields.username).toBe('alice-saved');
+    await expect(db.query('select * from public.withdraw_private_profile_copy($1,$2)',[alice,row.id])).rejects.toThrow(/unavailable/i);
+    expect((await db.query('select username from public.profile_drafts')).rows[0].username).toBe('alice-saved');await expect(submit(version)).rejects.toThrow(/membership/i);
+    await db.exec('reset role');await db.query("insert into public.account_roles(user_id,role) values($1,'provider')",[alice]);await asUser(alice);await submit(version);expect((await db.query('select * from public.profile_publication_submissions where withdrawn_at is null')).rows).toHaveLength(1);
   });
 });

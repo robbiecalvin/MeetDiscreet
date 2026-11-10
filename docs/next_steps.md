@@ -1247,6 +1247,23 @@ If launch scope is reduced:
   Independent private/frontend work can continue without unrelated business rules.
 - Documentation-only increment; no migration, application change or public data.
 
+### Private Profile Submission Copies
+
+- Provider setup can record an exact private copy after explicit saved-field
+  review, inspect pending public-field candidates and confirm withdrawal without
+  deleting the source draft. Staff publication decisions remain disconnected.
+- Server RPCs bind actual owner, current User + Provider membership and source
+  version; copy fields come from the server draft, not browser input. One pending
+  copy is enforced; later draft edits cannot mutate it. Owners can still withdraw
+  after role revocation. No staff/public read or publishing entitlement is added.
+- Build, all 175 standard checks (37 PostgreSQL/config/security cases) and 108
+  backend browser checks passed; mobile inspected. Coverage includes owner/RLS
+  isolation, server-only field copies, role/version/duplicate rejection, immutable
+  content, revocation-safe withdrawal and missing setup/retry.
+  The new migration is not applied remotely.
+  OPEN-052/053 remain unanswered; hosted JWT/concurrency and staff provisioning
+  are unverified. This is the single-draft prototype, not a presentation rollout.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

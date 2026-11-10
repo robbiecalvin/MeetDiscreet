@@ -824,3 +824,22 @@ URLs or HTML. Explicit refresh clears previous data first. Failures, empty resul
 and missing fields are distinct; detached/sign-out views ignore delayed results.
 No browser persistence, publication writes, role/identity/plan grants or public
 profile URL is introduced. Actual publishing needs its separate server policy.
+
+
+## Private profile copies for publication preparation
+
+Submission is a security-definer owner-bound RPC requiring current server-owned
+User and Provider roles, with membership locks and a source draft version check.
+The source is read and projected on the server; arbitrary browser content cannot
+become the recorded copy. RLS permits only owner reads, with client direct writes
+and anonymous reads revoked. One pending copy is enforced by a unique index.
+Withdrawals bind actual owner and pending copy ID; they remain possible after role
+revocation and cannot mutate captured public fields. No staff/public grants exist.
+
+The UI renders text nodes, requires explicit confirmation, invalidates a reviewed
+source after attempted submission and on preview reload/failure, and removes old
+record content before failed refresh. Detached/identity-changed views cannot render
+late responses. Errors do not claim success; current state must be checked before
+retrying an ambiguous request. No public link, publishing entitlement, notification
+or approval/eligibility verification is implied. Hosted JWT/concurrency checks are
+still pending; local lock/index tests do not prove hosted concurrent execution.
