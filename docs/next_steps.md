@@ -1073,6 +1073,25 @@ If launch scope is reduced:
   own-draft navigation and 320/390/1440px layouts. Mobile/desktop screenshots
   inspected. See the [brief](./design/page_briefs/looking-for-summary.md).
 
+### Selected Saved Draft Reference Downloads
+
+- Account has an explicit download page for selected Provider/User profile, listing,
+  catalogue, availability and unsent-plan drafts. Nothing is queried until selected;
+  Auth/session objects, application history and unsaved input are excluded.
+- Owner/projected-field checks, actor revalidation and stale-view guards prevent
+  wrong-account or late downloads. Missing selected tables and incomplete listing
+  counts abort the entire file. Existing migrations/RLS are reused without new grants.
+- The JSON reference file has no import action or full-account/atomic snapshot claim.
+  Technical bounds are 1,000 listings and 10 MiB; existing posting/pricing rules are
+  unchanged. Keep the file private; free-form saved text is preserved.
+- Provider approval authority and combined User/Provider roles still await answers
+  to the pending policy questions. No approval or role grant has been assumed.
+- Build, all 161 standard checks and 83 backend browser checks passed on stable
+  sequential reruns. New cases cover selected-field JSON, omission of Auth/extra
+  fields, missing-table retry, incomplete listing refusal, empty selection and
+  sign-out preventing a late file. Mobile download layout inspected. See the
+  [brief](./design/page_briefs/draft-backup.md).
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

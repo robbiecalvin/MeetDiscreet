@@ -464,3 +464,8 @@ operations, notifications and role assignment remain separate future work.
 Staff intake inspection is implemented at `/?page=provider-review`; see
 [review brief](./page_briefs/provider-review.md). Assigned staff membership and
 review capability are required. Approval/rejection and publishing remain absent.
+
+
+Account also includes a saved-draft reference download at `/?page=draft-backup`;
+see [brief](./page_briefs/draft-backup.md). It is not a full account export or import
+workflow and grants no additional record access.

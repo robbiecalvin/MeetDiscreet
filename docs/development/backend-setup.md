@@ -385,3 +385,18 @@ If the provider updates the address immediately, later security forms use that n
 current address. Failed verification/update and cancellation send no fake success.
 Automated checks use the real SDK with mocked HTTP; actual inbox and callback
 completion need hosted validation with test addresses later.
+
+
+## Saved draft reference download
+
+Account's download page reuses existing owner-only draft tables and adds no migration.
+Users select types before any private table read. Every selected table must be
+available; missing migrations fail the download without a partial file. Deselect
+unconfigured types or apply their existing migrations during setup. Booking plans
+require migration 008. No Auth/session data or application history is exported.
+
+Listings use an exact owner-filtered count with a 1,000-row technical limit and
+require all counted rows. Single-record drafts return zero or one record. The JSON
+reference copy is limited to 10 MiB and is not an atomic account snapshot or import
+format. Existing RLS/ownership checks still require hosted validation; automated
+browser checks use synthetic data. No live user data was downloaded by the agent.

@@ -761,3 +761,20 @@ view. Server confirmation settings and email rate limits remain authoritative;
 no custom mail sender, service credential, untrusted redirect or email-address
 availability lookup is introduced. Hosted inbox confirmation and callback behavior
 remain unverified, despite mocked SDK coverage.
+
+
+## Saved draft reference downloads
+
+An explicitly selected set of existing owner-only draft tables can be copied into
+an on-device JSON reference file. Queries use allowlisted projections and owner
+filters, reject foreign/malformed records and incomplete listing counts, and verify
+the actor again after reads. A detached or changed-account view cannot start a late
+Blob download. No Auth/session object, application/audit history, private media or
+unselected table is serialized. No new grant, server export job or recipient.
+
+This is not a complete account archive, legal-rights implementation or transactional
+snapshot. Listing downloads support at most 1,000 rows and files at most 10 MiB;
+truncation/read failures abort rather than download a misleading partial copy.
+Free-form text is preserved without secret detection: keep the file private.
+Only explicit downloads create a device file; no custom browser data cache is added,
+and temporary Blob URLs are revoked. Existing RLS remains the authorization boundary.

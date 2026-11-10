@@ -754,3 +754,6 @@ underlying feature is operational.
 - `src/account-email.js`: password-confirmed current/pending email changes through the existing Auth callback and shared security-operation lock.
 
 - `src/looking-for.js`: dedicated public-card-only Looking For summary renderer, sharing the ad query route/container with Offering details and preserving own-draft navigation.
+
+- `src/draft-backup.js`: gated, verified-account selection and explicit JSON reference download with stale-view guards and short-lived Blob URL.
+- `src/backend/draft-backup.js`: allowlisted owner draft reads, projected fields, count/completeness checks and actor revalidation; no application or Auth object export.

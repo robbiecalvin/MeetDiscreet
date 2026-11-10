@@ -1,4 +1,5 @@
 // Real SDK + mocked HTTP service. Hosted auth/email behaviour is not validated here.
+import { readFile } from 'node:fs/promises';
 import { test, expect } from '@playwright/test';
 const userId = '11111111-1111-4111-8111-111111111111';
 const listingId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
@@ -16,7 +17,7 @@ async function mockBackend(page, options = {}) {
     const method = request.method();
     const body = request.postDataJSON();
     state.requests.push({ path: url.pathname, query: url.searchParams.toString(), method, body });
-    const respond = (data, status = 200) => route.fulfill({ status, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' }, body: JSON.stringify(data) });
+    const respond = (data, status = 200, extraHeaders = {}) => route.fulfill({ status, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*', ...extraHeaders }, body: JSON.stringify(data) });
     if (method === 'OPTIONS') return respond({});
     if (url.pathname === '/auth/v1/token') {
       if (options.failSignIn || (options.failReauthentication && state.requests.filter(r => r.path === '/auth/v1/token').length > 1)) return respond({ code: 'invalid_credentials', msg: 'Invalid credentials' }, 400);
@@ -141,6 +142,7 @@ async function mockBackend(page, options = {}) {
       return respond(state.profile ? [state.profile] : []);
     }
     if (url.pathname === '/rest/v1/listing_drafts') {
+      if (method === 'GET' && request.headers().prefer?.includes('count=exact')) return respond(state.listings.slice(0,1000),200,{'content-range':`0-${Math.max(0,state.listings.length-1)}/${options.backupListingCount ?? state.listings.length}`,'Access-Control-Expose-Headers':'content-range'});
       if (method === 'HEAD') return route.fulfill({ status: 200, headers: { 'content-range': `0-0/${state.listings.length}`, 'Access-Control-Allow-Origin': '*', 'Access-Control-Expose-Headers': 'content-range' } });
       if (method === 'POST') { const id = state.listings.some(row => row.id === listingId) ? `dddddddd-dddd-4ddd-8ddd-${String(state.listings.length + 1).padStart(12, '0')}` : listingId; state.listings.push({ ...body, id }); return respond({ id }, 201); }
       if (method === 'DELETE') {
@@ -1388,4 +1390,62 @@ test('email change validates matching addresses and cancellation clears the pass
   await expect(page.getByLabel('Current password for email change',{exact:true})).toHaveValue('');
   expect(state.requests.filter(row=>row.path==='/auth/v1/token')).toHaveLength(1);
   expect(state.requests.filter(row=>row.path==='/auth/v1/user' && row.method==='PUT')).toHaveLength(0);
+});
+
+
+function backupProfile() { return {owner_id:userId,username:'private-owner',adult_age:29,display_name:'Private backup name',tagline:'',city:'Vancouver',area:'',photo_index:2,biography:'Private saved introduction',interests:'Coffee',extra_secret:'DO NOT INCLUDE THIS EXTRA FIELD'}; }
+test('selected saved draft download contains projected owner records and no authentication or unselected data',async({page})=>{
+  const state=await mockBackend(page);state.profile=backupProfile();state.bookingPlan={owner_id:userId,plan:{notes:'Private saved plan'}};
+  await signIn(page);await enter(page,'/?page=draft-backup');
+  await page.getByLabel('Provider profile draft',{exact:true}).check();await page.getByLabel('Unsent booking plan',{exact:true}).check();
+  const ready=page.waitForEvent('download');await page.getByRole('button',{name:'Download selected saved drafts',exact:true}).click();const download=await ready;
+  expect(download.suggestedFilename()).toBe('meetdiscreet-saved-drafts.json');
+  const text=await readFile(await download.path(),'utf8');const copy=JSON.parse(text);
+  expect(copy.format).toBe('meetdiscreet-saved-drafts');expect(copy.version).toBe(1);expect(Object.keys(copy.drafts)).toEqual(['provider-profile','booking-plan']);
+  expect(copy.drafts['provider-profile'][0].display_name).toBe('Private backup name');expect(copy.drafts['booking-plan'][0].plan.notes).toBe('Private saved plan');
+  expect(text).not.toContain(userId);expect(text).not.toContain('DO NOT INCLUDE');expect(text).not.toContain('mock_refresh_token');expect(text).not.toContain('access_token');
+  expect(state.requests.filter(row=>row.path.startsWith('/rest/v1/')).every(row=>row.method==='GET')).toBe(true);
+  await expect(page.locator('.backup-status')).toContainText('2 saved records');
+  await page.setViewportSize({width:390,height:844});await page.screenshot({path:'/tmp/draft-backup-mobile.png',fullPage:true});
+});
+test('a missing selected draft table prevents a partial file and supports retry',async({page})=>{
+  const options={missingCatalogueMigration:true};const state=await mockBackend(page,options);state.profile=backupProfile();
+  const downloads=[];page.on('download',value=>downloads.push(value));await signIn(page);await enter(page,'/?page=draft-backup');
+  await page.getByLabel('Provider profile draft',{exact:true}).check();await page.getByLabel('Experience catalogue',{exact:true}).check();
+  await page.getByRole('button',{name:'Download selected saved drafts',exact:true}).click();
+  await expect(page.locator('.backup-status')).toContainText('No new file was prepared');expect(downloads).toHaveLength(0);
+  await expect(page.locator('.draft-backup')).not.toContainText('Private saved introduction');
+  options.missingCatalogueMigration=false;
+  const ready=page.waitForEvent('download');await page.getByRole('button',{name:'Download selected saved drafts',exact:true}).click();await ready;
+  await expect(page.locator('.backup-status')).toContainText('1 saved record');
+});
+test('listing download refuses incomplete counts and exports complete owner listing rows on retry',async({page})=>{
+  const options={backupListingCount:2};const state=await mockBackend(page,options);
+  state.listings=[{owner_id:userId,id:listingId,kind:'looking',title:'Private plan',description:'An unpriced saved plan',city:'Vancouver',area:'',activity:'Coffee'}];
+  const downloads=[];page.on('download',value=>downloads.push(value));await signIn(page);await enter(page,'/?page=draft-backup');
+  await page.getByLabel('Listing drafts',{exact:true}).check();await page.getByRole('button',{name:'Download selected saved drafts',exact:true}).click();
+  await expect(page.locator('.backup-status')).toContainText('Not all saved listings were returned');expect(downloads).toHaveLength(0);
+  options.backupListingCount=1;
+  const ready=page.waitForEvent('download');await page.getByRole('button',{name:'Download selected saved drafts',exact:true}).click();const download=await ready;
+  const copy=JSON.parse(await readFile(await download.path(),'utf8'));expect(copy.drafts.listings).toHaveLength(1);expect(copy.drafts.listings[0].id).toBe(listingId);expect(copy.drafts.listings[0].owner_id).toBeUndefined();
+});
+test('sign-out during a saved draft read prevents a late private download',async({page})=>{
+  const state=await mockBackend(page);state.profile=backupProfile();await signIn(page);await enter(page,'/?page=draft-backup');
+  await page.getByLabel('Provider profile draft',{exact:true}).check();
+  const downloads=[];page.on('download',value=>downloads.push(value));
+  let release;const gate=new Promise(resolve=>{release=resolve;});let requested;const started=new Promise(resolve=>{requested=resolve;});
+  await page.route('**/rest/v1/profile_drafts*',async route=>{requested();await gate;await route.fallback();});
+  await page.getByRole('button',{name:'Download selected saved drafts',exact:true}).click();await started;
+  await page.getByRole('button',{name:'Sign out',exact:true}).click();
+  await expect(page.locator('.backup-status')).toHaveText('Sign in to download your saved drafts.');
+  release();await page.waitForLoadState('networkidle');expect(downloads).toHaveLength(0);
+});
+
+test('draft download reads no saved tables until an explicit nonempty selection',async({page})=>{
+  const state=await mockBackend(page);await signIn(page);await enter(page,'/?page=draft-backup');
+  await expect(page.getByRole('button',{name:'Download selected saved drafts',exact:true})).toBeVisible();
+  expect(state.requests.filter(row=>row.path.startsWith('/rest/v1/'))).toHaveLength(0);
+  await page.getByRole('button',{name:'Download selected saved drafts',exact:true}).click();
+  await expect(page.locator('.backup-status')).toHaveText('Choose at least one draft type.');
+  expect(state.requests.filter(row=>row.path.startsWith('/rest/v1/'))).toHaveLength(0);
 });
