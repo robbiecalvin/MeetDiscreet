@@ -29,3 +29,21 @@ Real messaging still requires authenticated membership, per-companion entitlemen
 blocking/restriction checks, secure history and realtime channels. Attachment,
 receipt, retention and post-expiry access decisions remain unresolved. Existing
 subscription/profile actions do not gain a messaging bypass from this preview.
+
+## Search within a conversation
+
+A Search this conversation disclosure contains an explicitly labelled text search
+and Previous/Next matching-message controls. Search highlights literal text in
+message bodies without hiding context or searching author labels. It counts
+matching messages, not individual occurrences. Status distinguishes empty query,
+no matches and the current match position; navigation is bounded at either end.
+
+Pattern/HTML characters remain literal and safe: construct mark/text nodes rather
+than interpreting markup. Search is case-insensitive, with a local 100-character
+input bound. The selected message has a visible outline and aria-current state.
+Jumping scrolls the message log only, keeping search controls in place. Clear
+returns focus to the search input and leaves composer text untouched.
+
+Queries stay with each example while switching; reset/reload/identity cleanup
+clears them with the rest of the view. Local preview additions recompute highlights.
+Search makes no backend request and gives no access to real message history.

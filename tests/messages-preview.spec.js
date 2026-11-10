@@ -32,3 +32,30 @@ for(const width of [320,390,700,1024,1440]) {
     if(mobile){await page.getByRole('button',{name:'Back to conversations',exact:false}).click();await expect(page.locator('.messages-sidebar')).toBeVisible();await expect(page.getByLabel('Find an example conversation',{exact:true})).toBeFocused();}
   });
 }
+
+
+test('conversation text search highlights matching messages, navigates results and leaves composer text unchanged',async({page})=>{
+  await open(page);await page.getByRole('button',{name:'Open Maya preview',exact:true}).click();
+  await page.getByLabel('Try a preview message',{exact:true}).fill('Keep my composer draft');
+  await page.locator('.message-search summary').click();const find=page.getByLabel('Find text in preview messages',{exact:true});
+  await find.fill('AFTERNOON');const status=page.locator('[data-message-search-status]');
+  await expect(status).toHaveText('1 of 2 matching messages');await expect(page.locator('.message-log mark')).toHaveCount(2);
+  await expect(page.locator('.message-bubble').first()).toHaveAttribute('aria-current','true');
+  await page.getByRole('button',{name:'Next match',exact:true}).click();await expect(status).toHaveText('2 of 2 matching messages');await expect(page.locator('.message-bubble').last()).toHaveAttribute('aria-current','true');
+  await expect(page.getByRole('button',{name:'Next match',exact:true})).toBeDisabled();
+  await page.getByRole('button',{name:'Previous match',exact:true}).click();await expect(status).toHaveText('1 of 2 matching messages');
+  await page.getByRole('button',{name:'Clear message search',exact:true}).click();await expect(find).toHaveValue('');await expect(find).toBeFocused();await expect(page.locator('.message-log mark')).toHaveCount(0);
+  await expect(page.getByLabel('Try a preview message',{exact:true})).toHaveValue('Keep my composer draft');
+  await find.fill('not present');await expect(status).toHaveText('No messages match this search.');await expect(page.locator('.message-bubble')).toHaveCount(2);await expect(page.getByRole('button',{name:'Next match',exact:true})).toBeDisabled();
+});
+
+test('mobile conversation search treats pattern/HTML characters literally and keeps queries within their own example',async({page})=>{
+  await page.setViewportSize({width:390,height:900});await open(page);await page.getByRole('button',{name:'Open Maya preview',exact:true}).click();
+  await page.getByLabel('Try a preview message',{exact:true}).fill('[coffee]* <img src=x> A fictional example.');await page.getByRole('button',{name:'Preview message',exact:true}).click();
+  await page.locator('.message-search summary').click();const find=page.getByLabel('Find text in preview messages',{exact:true});await find.fill('[coffee]* <img src=x>');
+  await expect(page.locator('[data-message-search-status]')).toHaveText('1 of 1 matching messages');await expect(page.locator('.message-log mark')).toHaveText('[coffee]* <img src=x>');await expect(page.locator('.message-log img')).toHaveCount(0);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:'/tmp/conversation-text-search-mobile.png',fullPage:true});
+  await page.getByRole('button',{name:'Back to conversations',exact:false}).click();await page.getByRole('button',{name:'Open James preview',exact:true}).click();await page.locator('.message-search summary').click();await expect(find).toHaveValue('');await expect(page.locator('.message-log mark')).toHaveCount(0);
+  await page.getByRole('button',{name:'Back to conversations',exact:false}).click();await page.getByRole('button',{name:'Open Maya preview',exact:true}).click();await expect(find).toHaveValue('[coffee]* <img src=x>');await expect(page.locator('[data-message-search-status]')).toHaveText('1 of 1 matching messages');
+  page.once('dialog',dialog=>dialog.accept());await page.getByRole('button',{name:'Reset conversation preview',exact:true}).click();await expect(find).toHaveValue('');await expect(page.locator('.message-log mark')).toHaveCount(0);await expect(page.locator('.message-bubble')).toHaveCount(2);
+});

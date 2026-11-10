@@ -1294,6 +1294,19 @@ If launch scope is reduced:
   includes gate/search, escaped local composition, switching/reset/reload, five
   viewport sizes and Auth cleanup. No migration, public publishing or payments.
 
+### Conversation Preview Text Search
+
+- Added a per-conversation search disclosure, safe literal highlighting and
+  Previous/Next matching-message navigation. Status reports current/empty/no-match
+  states; matches preserve full message context. Clear keeps composer drafts.
+- Queries are scoped to each example and reset with the conversation/view. Search
+  scrolls only the message log, interprets no HTML/pattern syntax and makes no
+  service request. Real message search/access enforcement remains unimplemented.
+- Build, all 184 standard checks and 112 backend browser checks passed; mobile
+  search inspected. Coverage includes literal HTML/pattern text, bounded match
+  navigation, no-match context, composer preservation and per-example/reset scope.
+  Existing auth cleanup checks pass. No migration or new business rule is added.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

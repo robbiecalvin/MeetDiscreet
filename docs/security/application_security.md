@@ -873,3 +873,10 @@ Actual messaging remains unimplemented: its backend must enforce participants,
 per-companion entitlement, blocks/restrictions and authorized history/realtime
 reads. This public demo is not evidence of those controls, delivery, read receipts
 or real conversation privacy. Existing subscription actions remain separate.
+
+
+Conversation-preview search escapes regex metacharacters and builds literal text
+highlights with DOM nodes. It searches only in-memory example/local message bodies,
+without URL parameters, persistence, logs or service requests. Queries and match
+positions remain view-local and follow existing identity cleanup. This is not
+backend messaging search or entitlement enforcement.
