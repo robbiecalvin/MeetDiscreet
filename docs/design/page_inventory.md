@@ -59,8 +59,9 @@ when those distinctions matter.
 ## Current Implemented Surfaces
 
 PUB-01 discovery and SH-01 entrance gate are implemented as frontend prototypes
-in index.html and src/. PUB-02/PUB-03 are in-page demo ad categories. Profile/ad
-details and policy notices are limited dialogs, not completed standalone pages.
+in index.html and src/. PUB-02/PUB-03 are in-page demo ad categories. Profile and Offering details use dedicated frontend routes; PUB-04 now has a
+Looking For public-summary page while full-post access remains pending. Policy
+notices remain limited summaries. See the [Looking For brief](./page_briefs/looking-for-summary.md).
 See [discovery brief](./page_briefs/discovery.md). Visual review pending; no real
 integrations or production deployment. PUB-06 now has a public frontend profile at `/?profile=<id>`, documented in
 [the profile brief](./page_briefs/companion-profile.md); member/subscriber sections
@@ -121,7 +122,7 @@ on individual pages.
 | PUB-01 | Homepage/discovery | Introduce the service and begin discovery | Initial visual direction and discovery rules |
 | PUB-02 | Looking For results | Browse user activity requests | Listing visibility and filters |
 | PUB-03 | Offering results | Browse companion ads | Publishing and public listing rules |
-| PUB-04 | Looking For detail | Read a specific request | Full-post visibility decision |
+| PUB-04 | Looking For detail | Public summary implemented; full request pending | Full-post visibility decision |
 | PUB-05 | Offering detail | Read a specific companion ad | Public-field restrictions |
 | PUB-06 | Companion profile | Present public/member/subscriber views | Access matrix and media rules |
 | PUB-07 | User profile view | Display permitted user information | User-profile visibility decision |

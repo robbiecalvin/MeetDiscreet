@@ -108,3 +108,5 @@ main.help-main{max-width:1300px;padding-bottom:70px}.help-controls{display:grid;
 .session-notice{margin:18px 5%;padding:16px 20px;border:1px solid #38476b;border-radius:5px;font-size:13px;line-height:1.8;overflow-wrap:anywhere}
 
 .account-email{border-top:1px solid #38476b;margin-top:32px;padding-top:28px}.account-email h2{font-size:24px;margin-bottom:16px}.account-email>p{line-height:1.8;margin-bottom:20px;overflow-wrap:anywhere}.account-email .email-current{font-size:14px}.account-email [role=status]{margin-top:18px;line-height:1.8;overflow-wrap:anywhere}
+
+.looking-for-detail h1{font-size:clamp(30px,4vw,48px);line-height:1.15;letter-spacing:-1px;margin:16px 0 28px;overflow-wrap:anywhere}.looking-poster{font-size:22px;font-weight:700;margin:8px 0}.looking-draft-action{margin-top:24px;width:100%;white-space:normal;text-align:center}.looking-for-detail .offering-provider{margin-top:24px}.looking-for-detail .offering-lead{font-size:18px;line-height:1.8}@media(max-width:700px){.looking-for-detail .offering-provider{flex-wrap:wrap}.looking-for-detail .access-label{margin-left:0}.looking-for-detail .offering-lead{font-size:16px}}

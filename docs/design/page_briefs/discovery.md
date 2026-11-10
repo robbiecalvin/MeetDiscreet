@@ -51,7 +51,9 @@ All names, ages, interests, ads, photos, and online statuses are fictional.
 The portrait sheet is AI generated and stored locally. The preview uses Vancouver
 as an explicitly synthetic default city, with Toronto and Montréal as filter examples.
 No device-location permission is requested. Only public-style fixture fields reach
-the page. Profile/ad dialogs are limited previews, not completed product pages.
+the page. Profiles and Offering ads have dedicated preview pages; Looking For ads
+now open [public-summary pages](./looking-for-summary.md), with full-post access still
+unresolved. No private User profile or full-post data is added to discovery.
 Legal notices are clearly labelled prototype summaries, not final policies.
 
 ## Accessibility and responsive behaviour

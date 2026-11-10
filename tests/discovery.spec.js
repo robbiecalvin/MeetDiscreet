@@ -86,8 +86,8 @@ test('ads switch, category, search, and chronological fixture order', async ({ p
   await page.getByRole('searchbox').fill('music');
   await expect(page.locator('.ad-card')).toHaveCount(1);
   await page.getByRole('button', { name: 'View ad' }).click();
-  await expect(page.locator('#detail-dialog')).toBeVisible();
-  await page.keyboard.press('Escape');
+  await expect(page.getByRole('region',{name:'Looking For public summary',exact:true})).toBeVisible();
+  await page.getByRole('link',{name:'Back to Looking For ads',exact:false}).click();
   await page.getByRole('searchbox').fill('');
   await page.getByRole('button', { name: 'Back to people' }).click();
   await expect(page.locator('.provider-card')).toHaveCount(10);

@@ -15,7 +15,8 @@ This README describes the intended product. It does not establish that
 any feature, payment integration, or deployment is operational.
 
 The Netlify frontend prototype includes age confirmation, discovery, fictional
-profiles and ads, account forms, private draft editors, and experience previews.
+profiles, Offering ads and Looking For public summaries, account forms, private draft
+editors, and experience previews.
 Supabase Free was selected for development authentication and owner-only profile
 and listing drafts. This integration is disabled by default; the existing demo
 continues to work without a backend. Private experience catalogue saving requires the additional catalogue migration.

@@ -1058,6 +1058,21 @@ If launch scope is reduced:
   session checks also verify the shared lock and email-password clearing. Mobile
   email form inspected. Hosted inbox/callback completion remains unverified.
 
+### Dedicated Looking For Public Summaries
+
+- Looking For titles and View ad now open a dedicated age-gated `?ad=<id>` page
+  instead of the short dialog. It shows only existing public card fields, without
+  companion-role claims, private User profiles, full posts or contact tools.
+- Back navigation retains Looking For category, search and list focus; browser
+  history and refresh preserve the destination. Own-draft navigation opens only the
+  viewer's private Looking For library and does not overwrite or publish a post.
+- Full-post visibility remains unresolved. No migration, publishing, contact,
+  subscription entitlement or booking action is introduced.
+- Build, all 160 standard checks and 78 backend browser checks passed. New cases
+  cover gated visits, refresh, limited public fields, list/history/focus return,
+  own-draft navigation and 320/390/1440px layouts. Mobile/desktop screenshots
+  inspected. See the [brief](./design/page_briefs/looking-for-summary.md).
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine
@@ -1070,8 +1085,9 @@ Backend/access-policy choices remain prerequisites only for dependent real featu
 Agrandir font assets are not present. Browser referrer policy can omit the prior
 page or reduce its URL; Exit uses the available external source and falls back
 to Google. When storage is blocked, age confirmation applies only to the visit.
-Terms/Privacy notices, real authentication, actual publishing, subscription actions, and Looking For detail previews remain
-explicit prototype summaries rather than complete services or legal documents.
+Terms/Privacy notices remain prototype policy summaries. Actual publishing,
+subscription actions and full Looking For posts remain unavailable. Development
+authentication is integrated; hosted confirmation and operational checks remain pending.
 The public profile is implemented with fictional data and labelled locked previews.
 
 Earlier cloud configuration saves returned INVALID_ARGUMENT. Robbie subsequently

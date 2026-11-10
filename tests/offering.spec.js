@@ -52,7 +52,7 @@ test('related ads and browser history open the correct provider', async ({ page 
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Make a dinner reservation worth keeping');
 });
 
-for (const id of ['missing', 'concert']) {
+for (const id of ['missing']) {
   test(`unknown or non-Offering ad ${id} recovers without exposing a full post`, async ({ page }) => {
     await enter(page, `/?ad=${id}`);
     await expect(page.getByRole('heading', { name: 'This Offering ad isn’t here.' })).toBeVisible();

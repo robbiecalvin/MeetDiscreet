@@ -12,6 +12,7 @@ import { renderAccountSecurity } from './account-security.js';
 import { renderAccountOverview } from './account-overview.js';
 import { providers, ads } from './data.js';
 import { renderProfile } from './profile.js';
+import { renderLookingFor } from './looking-for.js';
 import { renderOffering } from './offering.js';
 import { renderHowItWorks } from './how-it-works.js';
 import { renderListingEditor, clearListingDraftState } from './listing-editor.js';
@@ -141,17 +142,19 @@ function renderRoute() {
   if (isProfile) {
     const provider = providers.find((item) => item.id === id);
     const sourceAd = ads.find((item) => item.id === params.get('fromAd') && item.category === 'offering' && item.provider === id);
-    renderProfile($('#profile-view'), provider, sourceAd ? () => showOffering(sourceAd) : backToDiscovery, (person) => {
+    renderProfile($('#profile-view'), provider, sourceAd ? () => showAd(sourceAd) : backToDiscovery, (person) => {
       openDetail(`Connect with ${person.name}`, `The reference subscription is ${formatReferencePrice(referencePrices.companionSubscriptionMonthly)}/month for this companion. It unlocks subscriber media, detailed experiences, messages, calls, and booking requests. Booked companionship time is priced separately. Currency, renewal, and cancellation terms still need confirmation. This is a preview: no payment is taken and no access is granted.`);
     }, sourceAd ? '← Back to ad' : '← Back to discovery', person => navigateAccount('booking-draft', { provider: person.id, offering: sourceAd?.id }));
     document.title = `${provider ? provider.name : 'Profile unavailable'} · MeetDiscreet`;
   } else if (isOffering) {
-    const ad = ads.find((item) => item.id === adId && item.category === 'offering');
+    const ad = ads.find((item) => item.id === adId);
     const provider = ad && providers.find((item) => item.id === ad.provider);
     const related = provider ? ads.filter((item) => item.category === 'offering' && item.id !== ad.id)
       .map((item) => ({ ad: item, provider: providers.find((person) => person.id === item.provider) }))
       .filter((item) => item.provider?.city === provider.city).slice(0, 3) : [];
-    renderOffering($('#offering-view'), ad, provider, related, backToAds, showProfile, showOffering, (person, source) => navigateAccount('booking-draft', { provider: person.id, offering: source.id }));
+    $('#offering-view').setAttribute('aria-label',ad?.category === 'looking' ? 'Looking For public summary' : 'Offering ad');
+    if (ad?.category === 'looking' && provider) renderLookingFor($('#offering-view'),ad,provider,()=>backToAds('looking'),()=>navigateAccount('my-listings',{kind:'looking'}));
+    else renderOffering($('#offering-view'), ad, provider, related, backToAds, showProfile, showAd, (person, source) => navigateAccount('booking-draft', { provider: person.id, offering: source.id }));
     document.title = `${ad ? ad.title : 'Ad unavailable'} · MeetDiscreet`;
   } else if (isHow) {
     renderHowItWorks($('#how-view'), backToDiscovery);
@@ -166,7 +169,7 @@ function renderRoute() {
     else if (accountMode === 'provider-application') renderProviderApplication($('#account-view'), navigateAccount);
     else if (accountMode === 'booking-draft') {
       const resumeSaved = hasAgeConfirmation && params.get('resume') === '1';
-      renderBookingDraft($('#account-view'), navigateAccount, params.get('provider'), showProfile, { offeringId: params.get('offering'), onViewOffering: showOffering, resumeSaved, onResumeConsumed: consumeBookingResume });
+      renderBookingDraft($('#account-view'), navigateAccount, params.get('provider'), showProfile, { offeringId: params.get('offering'), onViewOffering: showAd, resumeSaved, onResumeConsumed: consumeBookingResume });
     }
     else if (accountMode === 'edit-user-profile') renderUserProfileEditor($('#account-view'), navigateAccount);
     else if (accountMode === 'user-setup') renderUserSetup($('#account-view'), navigateAccount, backToDiscovery);
@@ -230,13 +233,13 @@ function showProfile(provider, sourceAd) {
   window.scrollTo({ top: 0, behavior: 'instant' });
   $('#main').focus({ preventScroll: true });
 }
-function backToAds() {
+function backToAds(category = 'offering') {
   state.view = 'ads';
-  state.category = 'offering';
+  state.category = category === 'looking' ? 'looking' : 'offering';
   render();
   backToDiscovery();
 }
-function showOffering(ad) {
+function showAd(ad) {
   const params = new URL(location.href).searchParams;
   if (!params.has('profile') && !params.has('ad')) discoveryScroll = window.scrollY;
   selectedAdId = ad.id;
@@ -311,17 +314,15 @@ function render() {
       body.append(text('span', provider.interest, 'ad-interest'), text('h3', ad.title), text('p', ad.description, 'ad-copy'), meta);
       const button = text('button', 'View ad', 'ad-action');
       button.dataset.ad = ad.id;
-      button.addEventListener('click', () => ad.category === 'offering' ? showOffering(ad) : openDetail(ad.title, `${ad.description} Fictional Looking For preview. Contact, pricing, and booking are not connected.`, provider));
-      if (ad.category === 'offering') {
-        const title = body.querySelector('h3');
-        const link = text('a', ad.title);
-        link.href = `?ad=${encodeURIComponent(ad.id)}`;
-        link.addEventListener('click', (event) => {
-          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-          event.preventDefault(); showOffering(ad);
-        });
-        title.replaceChildren(link);
-      }
+      button.addEventListener('click', () => showAd(ad));
+      const title = body.querySelector('h3');
+      const link = text('a', ad.title);
+      link.href = `?ad=${encodeURIComponent(ad.id)}`;
+      link.addEventListener('click', event => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault(); showAd(ad);
+      });
+      title.replaceChildren(link);
       article.append(portrait(provider, 'ad-portrait'), body, button);
       results.append(article);
       count++;

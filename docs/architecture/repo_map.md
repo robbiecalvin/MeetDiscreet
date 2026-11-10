@@ -752,3 +752,5 @@ underlying feature is operational.
 - `src/account-sessions.js`: reauthenticated, confirmed revocation of other session refresh capability with error-preserving user-JWT logout.
 
 - `src/account-email.js`: password-confirmed current/pending email changes through the existing Auth callback and shared security-operation lock.
+
+- `src/looking-for.js`: dedicated public-card-only Looking For summary renderer, sharing the ad query route/container with Offering details and preserving own-draft navigation.
