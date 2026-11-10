@@ -1943,3 +1943,16 @@ test('pending-copy refresh invalidates in-flight history and sign-out removes re
   await history.getByRole('button',{name:'Load my profile copy history',exact:true}).click();await expect(history.locator('.staff-approval-card')).toHaveCount(1);
   await page.getByRole('button',{name:'Sign out',exact:true}).click();await expect(history).toHaveCount(0);
 });
+
+
+test('conversation preview opens from account and sign-out clears local messages and composer text',async({page})=>{
+  await mockBackend(page);await signIn(page);await page.locator('[data-account-link]').click();
+  await page.getByRole('link',{name:'Preview conversations',exact:true}).click();
+  await expect(page).toHaveTitle('Conversation preview · MeetDiscreet');await page.getByRole('button',{name:'Open Maya preview',exact:true}).click();
+  await page.getByLabel('Try a preview message',{exact:true}).fill('LOCAL TEXT TO REMOVE ON SIGNOUT');await page.getByRole('button',{name:'Preview message',exact:true}).click();
+  await page.getByLabel('Try a preview message',{exact:true}).fill('UNSENT COMPOSER TO REMOVE');
+  await page.getByRole('button',{name:'Sign out',exact:true}).click();
+  await expect(page.locator('.messages-preview')).not.toContainText('LOCAL TEXT TO REMOVE ON SIGNOUT');
+  await expect(page.getByRole('heading',{name:'Choose a conversation',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Open Maya preview',exact:true}).click();await expect(page.getByLabel('Try a preview message',{exact:true})).toHaveValue('');await expect(page.locator('.message-bubble')).toHaveCount(2);
+});

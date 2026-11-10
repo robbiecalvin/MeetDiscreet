@@ -1280,6 +1280,20 @@ If launch scope is reduced:
   private-submission migration is still required and has not been applied remotely.
   OPEN-052/053 remain unanswered.
 
+### Fictional Conversation Frontend
+
+- Added a searchable example inbox and text conversation layout, side by side on
+  desktop and one panel at a time on mobile. Explicit local Preview message bubbles
+  preserve per-example composer text while switching, with confirmed reset.
+- All content is fictional/view-local, with no messaging requests or persistence.
+  Leaving/reloading and identity changes clear local edits. Real entitlement,
+  membership, blocking, history, receipts, calls and attachments remain separate.
+- Build, all 182 standard checks and 112 backend browser checks passed. Desktop/
+  mobile inspected; avatar positioning and shared heading spacing corrected. The
+  final scoped presentation passed all seven conversation checks again. Coverage
+  includes gate/search, escaped local composition, switching/reset/reload, five
+  viewport sizes and Auth cleanup. No migration, public publishing or payments.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

@@ -776,3 +776,5 @@ underlying feature is operational.
 - `supabase/migrations/202611100004_private_profile_submissions.sql`: protected immutable public-field candidates, one pending owner copy, source/role checks and owner withdrawal.
 
 - `src/profile-submission-history.js`: explicit owner history of retained private profile copies, keyset pages, viewer-local timestamps and expandable allowlisted fields; shared field renderer for the pending-copy panel.
+
+- `src/messages-preview.js`: age-gated synthetic inbox/conversation UI with view-local composer drafts and preview bubbles; no messaging API, persistence or entitlement authority.

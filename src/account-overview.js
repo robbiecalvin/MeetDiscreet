@@ -79,6 +79,7 @@ export function renderAccountOverview(container, navigate, onBack) {
       ['booking-draft', 'Booking request preview', 'Prepare, privately save and review a fictional plan without sending, reserving or paying.', 'Build a booking draft'],
       ['edit-user-profile', 'User profile draft', 'Prepare your personal introduction separately from provider profile drafts.', 'Edit User profile draft'],
       ['availability', 'Availability draft', 'Sketch weekly time windows in an explicit time zone. Connected mode supports private draft saving.', 'Edit availability draft'],
+      ['messages-preview', 'Conversation preview', 'Try the fictional inbox and local message layout. No messages are sent or saved.', 'Preview conversations'],
       ['draft-backup', 'Download saved drafts', 'Keep a private JSON reference copy of selected saved drafts. Unsaved edits and application history are excluded.', 'Download a draft copy'],
       ['account-security', 'Account security', 'Manage your email, password and other sessions with current-password verification.', 'Change password'],
       ['edit-profile', 'Provider profile draft', 'Edit your provider introduction and load or save your private provider profile draft.', 'Edit provider profile draft'],

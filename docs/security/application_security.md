@@ -858,3 +858,18 @@ old cards; pending-copy actions invalidate history before and after their reques
 Generation checks drop old responses, and sign-out removes the private workspace.
 Historical reads require no current Provider role and grant none. No public/staff
 read, new write, retention policy or guarantee about already-seen data is added.
+
+
+## Fictional conversation preview
+
+The messages-preview route contains synthetic fixtures and locally composed text
+only. It makes no messaging requests and grants no real membership, entitlement
+or private-history access. Rendering uses text nodes, with a technical local
+length bound. No HTML/media URL is interpreted from entered text. No message
+content is stored in custom local/session storage or logs. Identity-change cleanup
+removes the view and local edits before a fresh fixture render.
+
+Actual messaging remains unimplemented: its backend must enforce participants,
+per-companion entitlement, blocks/restrictions and authorized history/realtime
+reads. This public demo is not evidence of those controls, delivery, read receipts
+or real conversation privacy. Existing subscription actions remain separate.

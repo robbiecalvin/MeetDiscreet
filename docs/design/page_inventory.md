@@ -170,7 +170,7 @@ does not use passwords.
 | USR-04 | Premium membership | Purchase and manage posting benefits | Premium rules |
 | USR-05 | Looking For editor | Draft, preview, and submit a post | Posting rules and design brief |
 | USR-06 | Looking For management | Manage posts, expiry, and boosts | Allowance and expiry enforcement |
-| USR-07 | Messages | Browse and use authorized conversations | Messaging and subscription rules |
+| USR-07 | Messages | Browse and use authorized conversations; fictional frontend preview implemented separately | Real messaging and subscription enforcement pending |
 | USR-08 | Call interface | Handle audio/video sessions | Calling infrastructure |
 | USR-09 | Booking request | Propose a companion experience | Subscription and booking rules |
 | USR-10 | Booking detail | View agreement, payment, and available actions | Booking lifecycle |
