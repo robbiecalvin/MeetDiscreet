@@ -1176,6 +1176,18 @@ If launch scope is reduced:
   Cancellation preserves notes without requests, confirmed discard removes them,
   and sign-out clears the form. No migration is added.
 
+### Provider Setup Status and Retry
+
+- Provider setup now shows the shared owner-only application summary and next
+  action, with independent refresh. Approved application history does not imply
+  present Provider membership; current roles stay in the separate permissions panel.
+- Each saved-draft card now supports independent refresh/retry. Missing setup is
+  unavailable rather than empty; no completeness score or publishing grant is added.
+- Build, all 171 standard checks and 98 backend browser checks passed; mobile
+  summary inspected. Coverage includes application states, role separation, private
+  text exclusion, missing setup/retry, independent draft refresh and sign-out cleanup.
+  No migration or new role/capability assignment is introduced.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

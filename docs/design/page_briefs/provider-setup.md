@@ -22,10 +22,25 @@ not imply an empty record or completed setup. No completion percentage, approval
 badge, identity verification, publishing, or payment status is invented. Signed-out
 visits require sign-in; backend-disabled visits show a labelled preview.
 
-Full account role combinations, provider eligibility/approval, public publishing,
-and commercial access remain separate backend/product work. This increment does
-not claim those policies were resolved by choosing an onboarding preference.
+Provider eligibility, public publishing and commercial access remain separate
+backend/product work. DEC-023 establishes scoped Administrator pilot approval and
+retained User + Provider roles; an onboarding preference alone grants neither.
 
 User setup opens the Looking For library context and Provider setup opens Offering.
 New listing actions preselect that type; the shared owner library remains able to
 show both. This navigation does not grant posting access or assign account roles.
+
+## Application and saved-draft status
+
+Signed-in Provider setup now includes the same owner-only application status/action
+as the account overview: start, continue draft, view submitted, revise withdrawn,
+review requested changes or view historical pilot approval. Refresh reads metadata
+only and never includes introduction/feedback text. Missing setup is unavailable,
+not an empty application; draft tools remain usable independently. The current role
+panel remains authoritative for present membership, separately from past approval.
+
+Each saved-draft card has an independent refresh and retry. Reads indicate saved
+existence/counts only, not completeness or permission to publish. No percentage or
+automatic ready state is added. Identity changes remove private status; late
+responses cannot repopulate a detached view. Backend-disabled preview remains
+labelled and makes no private reads. Mobile uses the existing account-card style.

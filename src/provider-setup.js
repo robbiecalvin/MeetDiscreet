@@ -1,3 +1,4 @@
+import { attachProviderApplicationStatus } from './provider-application-status.js';
 import { accountPermissions } from './account-permissions.js';
 import { backendEnabled, backendClient } from './backend/client.js';
 import { loadPrivateDraftSummary } from './backend/drafts.js';
@@ -24,8 +25,14 @@ export function renderProviderSetup(container, navigate) {
   status.setAttribute('role', 'status'); root.append(status);
   const grid = node('div', null, 'account-tool-grid'); root.append(grid); container.append(root);
   const current = () => root.parentNode === container;
-  function tools(connected) {
-    root.insertBefore(link('provider-application', 'Prepare provider application'), grid);
+  function tools(connected, ownerId = null) {
+    if (connected) {
+      const application = node('section', null, 'provider-application-summary account-permissions');
+      application.append(node('h2', 'Your provider application'));
+      const open = link('provider-application', 'Prepare provider application');
+      attachProviderApplicationStatus(application, open, ownerId, current);
+      application.append(open); root.insertBefore(application, grid);
+    } else root.insertBefore(link('provider-application', 'Prepare provider application'), grid);
     for (const [page, title, copy, kind] of [
       ['edit-profile', '1. Introduce yourself', 'Prepare your profile draft and audience previews.', 'profile'],
       ['experiences', '2. Shape your experiences', 'Describe included experiences and optional draft extras.', 'experiences'],
@@ -37,7 +44,16 @@ export function renderProviderSetup(container, navigate) {
       if (connected) {
         const summary = node('p', 'Checking saved drafts…', 'account-draft-summary'); summary.setAttribute('role', 'status');
         card.append(summary);
-        loadPrivateDraftSummary(kind).then(value => { if (current()) summary.textContent = value; }).catch(() => { if (current()) summary.textContent = 'Saved status unavailable. Check database setup and your connection.'; });
+        const refresh = node('button', `Refresh ${kind} saved status`, 'button quiet'); refresh.type = 'button';
+        let busy = false;
+        async function check() {
+          if (busy) return;
+          busy = true; refresh.disabled = true; summary.textContent = 'Checking saved drafts…';
+          try { const value = await loadPrivateDraftSummary(kind); if (current()) summary.textContent = value; }
+          catch { if (current()) summary.textContent = 'Saved status unavailable. Check database setup and your connection, then retry.'; }
+          finally { busy = false; if (current()) refresh.disabled = false; }
+        }
+        refresh.addEventListener('click', check); card.append(refresh); check();
       }
       card.append(link(page, title.slice(3))); grid.append(card);
     }
@@ -53,7 +69,7 @@ export function renderProviderSetup(container, navigate) {
     }
     status.textContent = 'Your provider workspace. Choosing Provider is a starting preference, not verification or permission to publish.';
     root.insertBefore(accountPermissions(current, navigate), grid);
-    tools(true);
+    tools(true, data.user.id);
   }).catch(() => {
     if (current()) { status.textContent = 'Unable to verify your account. Check your connection or sign in again.'; root.append(link('sign-in', 'Sign in')); }
   });

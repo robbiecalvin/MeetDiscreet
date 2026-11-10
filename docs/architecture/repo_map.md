@@ -764,3 +764,5 @@ underlying feature is operational.
 - `supabase/migrations/202611100002_provider_approval_history.sql`: current-scope actor-only history RPC, reviewer index and protected access-event action; no role grants.
 
 - `supabase/migrations/202611100003_provider_review_search.sql`: bounded actor-bound pending name/city search and protected read-event action; original list RPC preserved.
+
+- `src/provider-application-status.js`: shared owner-only application summary and refresh/action labels for account overview and Provider setup; no private introduction reads or role inference.

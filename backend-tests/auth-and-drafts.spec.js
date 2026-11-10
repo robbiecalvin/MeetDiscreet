@@ -1633,3 +1633,54 @@ test('unsent staff feedback is preserved when queue actions are cancelled and cl
   await expect(note).toHaveCount(0);
   expect(state.applicationFeedback).toHaveLength(0);
 });
+
+
+test('provider setup follows application state with independent saved status refresh and no inferred Provider role', async ({page}) => {
+  const state=await mockBackend(page);
+  await signIn(page);await enter(page,'/?page=provider-setup');
+  const status=page.locator('.provider-application-summary [data-application-status]');
+  await expect(status).toHaveText('No provider application saved yet.');
+  await expect(page.getByRole('link',{name:'Start provider application',exact:true})).toBeVisible();
+  for (const [value,label,message] of [
+    ['draft','Continue application draft','Private application draft saved.'],
+    ['submitted','View submitted application','Application submitted for review.'],
+    ['changes_requested','Review requested changes','Changes requested.'],
+    ['withdrawn','Revise application','Application withdrawn.'],
+    ['approved','View approved application','Application approved for the development pilot.'],
+  ]) {
+    state.providerApplication={owner_id:userId,state:value,introduction:'SECRET APPLICATION INTRODUCTION'};
+    await page.getByRole('button',{name:'Refresh application status',exact:true}).click();
+    await expect(status).toContainText(message);
+    await expect(page.getByRole('link',{name:label,exact:true})).toHaveAttribute('href','?page=provider-application');
+  }
+  await expect(page.locator('[data-account-permissions]')).toContainText('Provider role: Not assigned');
+  await expect(page.locator('.provider-setup')).not.toContainText('SECRET APPLICATION INTRODUCTION');
+  const profile=page.locator('.account-tool-card').filter({has:page.getByRole('heading',{name:'1. Introduce yourself',exact:true})});
+  await expect(profile.locator('[role=status]')).toHaveText('No saved profile draft');
+  state.profile={owner_id:userId,display_name:'SECRET PROFILE NAME'};
+  await profile.getByRole('button',{name:'Refresh profile saved status',exact:true}).click();
+  await expect(profile.locator('[role=status]')).toHaveText('Private profile draft saved');
+  await expect(page.locator('.provider-setup')).not.toContainText('SECRET PROFILE NAME');
+  await page.setViewportSize({width:390,height:844});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.locator('.provider-application-summary').screenshot({path:'/tmp/provider-setup-application-mobile.png'});
+  await page.getByRole('button',{name:'Sign out',exact:true}).click();
+  await expect(status).toHaveCount(0);
+  await expect(page.locator('.provider-setup .account-tool-card')).toHaveCount(0);
+});
+
+test('provider setup missing application schema is unavailable while draft tools remain usable and retry recovers', async ({page}) => {
+  const options={missingApplicationMigration:true};const state=await mockBackend(page,options);
+  await signIn(page);await enter(page,'/?page=provider-setup');
+  const status=page.locator('.provider-application-summary [data-application-status]');
+  await expect(status).toContainText('Application status unavailable');
+  await expect(page.getByRole('link',{name:'Prepare provider application',exact:true})).toBeVisible();
+  await expect(page.locator('.account-tool-card')).toHaveCount(4);
+  await expect(page.getByRole('button',{name:'Refresh profile saved status',exact:true})).toBeEnabled();
+  options.missingApplicationMigration=false;
+  state.providerApplication={owner_id:userId,state:'changes_requested'};
+  await page.getByRole('button',{name:'Refresh application status',exact:true}).click();
+  await expect(status).toContainText('Changes requested');
+  await page.getByRole('link',{name:'Review requested changes',exact:true}).click();
+  await expect(page.locator('.application-state')).toContainText('changes requested');
+});
