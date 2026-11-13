@@ -159,6 +159,7 @@ conflict with approved MeetDiscreet decisions.
 - src/photo-preview.css: scoped local photo chooser, main preview and selection-card presentation.
 - src/how-it-works.css: scoped public journey, reference-plan and FAQ presentation.
 - src/age-gate.css: scoped entrance dialog, backdrop and responsive presentation.
+- src/public-readers.css: scoped Help search/answers and Community Guidelines reader presentation.
 - src/styles.css: shared tokens, portrait grid, single-column ads, responsive layout.
 - src/discovery.css: scoped editorial discovery treatment and its view dock, including reduced-motion overrides.
 - src/data.js: synthetic public profile and ad fixtures; no live presence.

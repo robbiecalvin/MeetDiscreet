@@ -1,3 +1,4 @@
+import './public-readers.css';
 import { backendEnabled } from './backend/client.js';
 const questions = [
   { topic: 'getting-started', question: 'How do I find company?', answer: 'Browse the people grid or switch to ads. Use the city selector, search, online filter, and interest filter to narrow the fictional demo results. A selected city is not your device location.' },

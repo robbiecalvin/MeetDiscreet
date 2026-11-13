@@ -1,0 +1,36 @@
+/* Public help/policy reading treatment; no acceptance or reporting actions. */
+:is(#help-shell, #guidelines-shell) .policy-return { color: #d9b4c0; }
+:is(#help-shell, #guidelines-shell) .policy-intro { padding-top: 34px; }
+:is(#help-shell, #guidelines-shell) .policy-intro .eyebrow { color: #dba5b3; letter-spacing: 2.5px; }
+:is(#help-shell, #guidelines-shell) .policy-intro h1 { font-size: clamp(40px, 5vw, 64px); letter-spacing: -.055em; line-height: 1.08; margin: 24px 0; }
+:is(#help-shell, #guidelines-shell) .policy-intro .offering-lead { color: #e3c6cd; }
+:is(#help-shell, #guidelines-shell) .policy-preview-note { border-left-color: #b87c8b80; color: #bcbcca; }
+:is(#help-shell, #guidelines-shell) .button { border-radius: 30px; white-space: normal; line-height: 1.5; }
+:is(#help-shell, #guidelines-shell) .primary { background: linear-gradient(110deg, #b6192e, #8e1b35); }
+:is(#help-shell, #guidelines-shell) .primary:hover { background: #c1223e; }
+:is(#help-shell, #guidelines-shell) .quiet { color: #dfb7c4; }
+:is(#help-shell, #guidelines-shell) :is(button, a, input, select):focus-visible { outline-color: #e4b0bf; }
+#help-shell .help-controls { border-radius: 16px; border-color: #ffffff20; background: linear-gradient(135deg, #24283a, #1b1e2e); padding: 26px; }
+#help-shell .help-controls :is(input, select) { border-radius: 10px; border-color: #ffffff30; background: #121521b3; }
+#help-shell .help-result-count { color: #bcbcca; }
+#help-shell .help-results details { border: 1px solid #ffffff18; border-radius: 14px; padding: 12px 22px; margin-top: 12px; background: #1b1e2e; }
+#help-shell .help-results summary { color: #e3c6cd; }
+#help-shell .help-results details .profile-copy { color: #bcbcca; }
+#help-shell .help-link-card { border-radius: 14px; border-color: #ffffff18; background: linear-gradient(135deg, #24283a, #1b1e2e); padding: 25px 22px; }
+#help-shell .help-link-card:hover { border-color: #d58a99; }
+#help-shell .help-link-card h3 { color: #e3c6cd; font-weight: 300; font-size: 19px; }
+#help-shell :is(.help-empty, .help-support-note) { border: 1px solid #bb7d9140; border-radius: 16px; background: #1b1e2e; }
+#help-shell .help-support-note h2 { color: #e3c6cd; }
+#guidelines-shell .policy-contents { border-radius: 16px; border-color: #ffffff20; background: linear-gradient(135deg, #24283a, #1b1e2e); padding: 26px 22px; }
+#guidelines-shell .policy-contents h2 { color: #e3c6cd; }
+#guidelines-shell .policy-contents a { color: #c4bdcd; }
+#guidelines-shell .policy-article section > .eyebrow { color: #dba5b3; }
+#guidelines-shell .policy-article h2 { color: #e3c6cd; font-weight: 300; font-size: 29px; letter-spacing: -.7px; }
+#guidelines-shell .policy-article :is(section > p:not(.eyebrow), li) { color: #bcbcca; }
+@media (max-width: 700px) {
+  :is(#help-shell, #guidelines-shell) .policy-intro h1 { font-size: 40px; }
+  #help-shell .help-controls { padding: 24px 20px; border-radius: 14px; }
+  #help-shell .help-results details { padding: 10px 18px; }
+  #guidelines-shell .policy-contents { padding: 24px 20px; border-radius: 14px; }
+  #guidelines-shell .policy-article h2 { font-size: 26px; }
+}

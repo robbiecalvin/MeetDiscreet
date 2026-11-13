@@ -1,3 +1,4 @@
+import './public-readers.css';
 // Working public policy summary of docs/product/content_and_boundaries.md.
 const sections = [
   { id: 'shared-experiences', title: 'Company for shared experiences', intro: 'MeetDiscreet’s current scope is paid platonic dates and social experiences: coffee, dinner, galleries, concerts, celebrations, and other agreed social activities.', points: ['Profiles, listings, media, messages, and bookings must stay within that scope.', 'No sexual-service advertising, erotic add-ons, prices tied to intimate contact, or negotiation of sexual services.', 'An outing does not promise romance, affection, attraction, or guaranteed chemistry.'] },

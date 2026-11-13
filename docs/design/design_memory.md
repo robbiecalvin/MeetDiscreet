@@ -521,3 +521,10 @@ Exact rendering awaits review.
 Matched the age gate to the editorial site styling after “next”. Preserve its
 concise confirmation, accessible Exit, thirty-day retention and public policy links.
 Short screens use native dialog scrolling. Exact rendering awaits review.
+
+## 2026-11-13 — Public readers continuation
+
+Styled Help and Community Guidelines after “next”. Use matching panels and
+headings while keeping long policy text readable; preserve pre-confirmation
+access and avoid implying agreement or a functioning report/support channel.
+Exact rendering awaits review.

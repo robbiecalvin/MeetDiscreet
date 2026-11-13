@@ -26,3 +26,17 @@ after correcting the topic select’s label association. The final full suite pa
 70 checks, including ten Help checks for search/filter/reset, keyboard access,
 nested public-page history, age boundaries, and five responsive widths.
 Safari, licensed Agrandir, and live Netlify verification remain outstanding.
+
+## 2026-11-13 — Public reader visual continuation
+
+Continued Robbie’s refresh after “next”. Shared scoped `src/public-readers.css`
+adds editorial headings, blush accents, rounded Help search/answer panels and
+clearer guidelines jump navigation. Body content, policy meaning, public access
+and return/Exit behaviour are unchanged. No acceptance, report or support
+integration was added. Exact rendering awaits Robbie’s review.
+
+Validation: production build and 31 Help/guidelines/discovery checks passed.
+Inspected mobile Help and desktop guidelines renders; 320/390/1440px overflow
+checks passed. Direct public visits create no age-confirmation flag. Existing
+tests cover search, topics, keyboard disclosures, jumps and navigation boundaries.
+Safari and licensed Agrandir remain unverified.
