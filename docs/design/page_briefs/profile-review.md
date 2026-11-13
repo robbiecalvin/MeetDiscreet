@@ -63,3 +63,18 @@ Scope loss or withdrawal is rechecked on the server. Sign-out/identity changes
 clear private UI without waiting for a draft prompt; this does not promise an
 already-issued server request was cancelled. Staff reads/writes record protected
 operation metadata without note content. No actual scope assignment is performed.
+
+## 2026-11-13 — Staff workspace visual continuation
+
+Continued Robbie’s refresh after “next”. Shared scoped `src/staff-review.css`
+adds rounded search/queue/detail panels, blush headings and matching feedback
+form controls. Inspection, feedback and pilot Provider approval remain separate
+actions under their existing capabilities. No permissions, default assignments,
+recorded content, public publication or state-transition logic changed.
+Exact rendering awaits Robbie’s review.
+
+Validation: production build, two backend-disabled review-route checks and 36
+focused mocked backend review/feedback/approval/preview checks passed. Inspected
+fictional scoped-staff mobile/desktop queues and details; no overflow at
+320/390/1440px. No real staff account/capability was assigned. Hosted setup, Safari
+and licensed Agrandir remain unverified by this presentation increment.

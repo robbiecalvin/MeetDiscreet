@@ -1,3 +1,4 @@
+import './staff-review.css';
 import {trackDraft} from './draft-changes.js';
 import {loadProfileFeedbackAccess} from './backend/profile-feedback.js';
 import {profileFeedbackForm} from './profile-feedback-form.js';

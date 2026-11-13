@@ -554,3 +554,9 @@ remains in the relevant page briefs.
 Matched the saved-draft download page to the refreshed account tools after “next”.
 Keep the scope note and explicit checkbox selection clear; no default selection or
 extra data reads. Exact rendering awaits review.
+
+## 2026-11-13 — Staff review continuation
+
+Matched staff review queues to the refreshed visual system after “next”, while
+keeping operational actions distinct and preserving capability checks. Staff
+fixtures are test-only, never a private-data fallback. Rendering awaits review.

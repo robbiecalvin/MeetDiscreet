@@ -1,0 +1,29 @@
+/* Operational review presentation; scope checks and consequential actions unchanged. */
+#account-view .provider-review > .profile-back { color: #d9b4c0; }
+#account-view .provider-review > .eyebrow { color: #dba5b3; letter-spacing: 2.3px; }
+#account-view .provider-review > h1 { font-size: clamp(40px, 5vw, 64px); letter-spacing: -.055em; line-height: 1.08; margin: 22px 0; }
+#account-view .provider-review > .offering-lead { color: #e3c6cd; }
+#account-view .provider-review .editor-notice { border-radius: 14px; border-color: #bb7d9140; background: #1b1e2e; color: #c4bdcd; }
+#account-view .provider-review .review-search { border: 1px solid #ffffff18; border-radius: 16px; padding: 24px; background: #1b1e2e; }
+#account-view .provider-review :is(input, textarea) { border-radius: 10px; border-color: #ffffff30; background: #121521b3; min-width: 0; font-family: var(--font); }
+#account-view .provider-review .profile-review-queue { display: grid; gap: 16px; margin: 24px 0; }
+#account-view .provider-review .review-card { border-radius: 16px; border-color: #ffffff18; padding: 26px; background: linear-gradient(135deg, #24283a, #1b1e2e); }
+#account-view .provider-review .review-card h2 { color: #e3c6cd; font-size: 25px; font-weight: 300; letter-spacing: -.6px; }
+#account-view .provider-review .review-detail { border-radius: 18px; border-color: #c17a9040; padding: 28px; background: #1b1e2e; }
+#account-view .provider-review .review-detail h2 { color: #e3c6cd; font-size: 28px; font-weight: 300; letter-spacing: -.7px; }
+#account-view .provider-review .profile-small { color: #bcbcca; }
+#account-view .provider-review .button { border-radius: 30px; white-space: normal; line-height: 1.5; text-align: center; }
+#account-view .provider-review .primary { background: linear-gradient(110deg, #b6192e, #8e1b35); }
+#account-view .provider-review .primary:hover { background: #c1223e; }
+#account-view .provider-review .outline { border-color: #ffffff30; }
+#account-view .provider-review .quiet { color: #dfb7c4; }
+#account-view .provider-review .review-approval { border-top-color: #ffffff30; }
+#account-view .provider-review .review-approval h3 { color: #e3c6cd; }
+#account-view .provider-review .profile-review-detail dt { color: #d2a3b3; }
+#account-view .provider-review .profile-review-detail dd { line-height: 1.7; }
+#account-view .provider-review .profile-feedback-form { padding-top: 22px; border-top: 1px solid #ffffff20; }
+@media (max-width: 700px) {
+  #account-view .provider-review > h1 { font-size: 40px; }
+  #account-view .provider-review :is(.review-search, .review-card, .review-detail) { padding: 24px 20px; border-radius: 14px; }
+  #account-view .provider-review .review-feedback-form > .button { align-self: stretch; }
+}

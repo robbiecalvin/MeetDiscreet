@@ -163,6 +163,7 @@ conflict with approved MeetDiscreet decisions.
 - src/provider-application.css: scoped private intake form, state/history and activity presentation.
 - src/navigation.css: shared narrow-screen signed-in header, disabled controls and keyboard focus.
 - src/draft-backup.css: scoped saved-draft download selections and status presentation.
+- src/staff-review.css: shared scoped Provider intake/profile-copy inspection and feedback presentation.
 - src/styles.css: shared tokens, portrait grid, single-column ads, responsive layout.
 - src/discovery.css: scoped editorial discovery treatment and its view dock, including reduced-motion overrides.
 - src/data.js: synthetic public profile and ad fixtures; no live presence.

@@ -122,3 +122,18 @@ unsaved-draft warning where supported. Notes remain in memory only.
 Sign-out, identity changes and authorization failures clear private text without
 a discard prompt. This does not add recovery or a global guard for unrelated
 header links/history navigation; those can still leave the workspace.
+
+## 2026-11-13 — Staff workspace visual continuation
+
+Continued Robbie’s refresh after “next”. Shared scoped `src/staff-review.css`
+adds rounded search/queue/detail panels, blush headings and matching feedback
+form controls. Inspection, feedback and pilot Provider approval remain separate
+actions under their existing capabilities. No permissions, default assignments,
+recorded content, public publication or state-transition logic changed.
+Exact rendering awaits Robbie’s review.
+
+Validation: production build, two backend-disabled review-route checks and 36
+focused mocked backend review/feedback/approval/preview checks passed. Inspected
+fictional scoped-staff mobile/desktop queues and details; no overflow at
+320/390/1440px. No real staff account/capability was assigned. Hosted setup, Safari
+and licensed Agrandir remain unverified by this presentation increment.

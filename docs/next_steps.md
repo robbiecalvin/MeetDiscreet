@@ -20,8 +20,8 @@ Current activity:
 Complete the shared visual consistency pass following Robbie’s requested sexier
 look and feel. The public discovery/profile/ad pages, account entry/security,
 User/Provider setup and profile editors, listing tools, experience catalogue,
-availability, photo workspace, conversation/booking previews, Help, guidelines
-entrance gate and saved-draft download have matching editorial styling. Exact rendering remains for
+availability, photo workspace, conversation/booking previews, Help, guidelines,
+entrance gate, saved-draft download and staff review have matching editorial styling. Exact rendering remains for
 Robbie’s review. The selected palette, three-column mobile portrait grid and
 compact ads remain intact. Relevant page briefs record per-increment validation.
 
@@ -34,6 +34,9 @@ unverified.
 Saved-draft download visual follow-up: production build and five focused checks
 passed; mocked signed-in 320/390/1440px renders inspected with no overflow and
 all selection options initially unchecked. No download data scope changed.
+Staff-review visual follow-up: production build, two review-route checks and 36
+focused mocked backend checks passed. Fictional scoped-staff 320/390/1440px queue/
+detail renders inspected without overflow. No permission or workflow logic changed.
 The combined manual walkthrough remains deferred at Robbie’s request.
 Discovery is synthetic; conversations/bookings/photos remain explicitly labelled
 previews. Visual polish does not establish live marketplace readiness.
