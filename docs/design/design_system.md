@@ -493,3 +493,12 @@ reachable across routes. Disabled buttons retain native disabled semantics and
 have subdued presentation; keyboard focus uses a visible blush outline. Page
 styles may specialize focus contrast. No account, state or entitlement is inferred
 from these styles. Exact visual rendering remains subject to Robbie’s review.
+
+## History scroll/focus consistency
+
+Confirmed discovery returns restore the existing discovery offset/card focus.
+Other app routes start at the top and focus main. Public readers scroll/focus valid
+local fragments or start at the reader top. Canceled staff departures retain their
+current viewport, field focus and caret; explicit manual history restoration keeps
+browser automatic restoration from overriding these choices. No new scroll data
+is stored outside the existing in-memory discovery offset. Safari remains unverified.

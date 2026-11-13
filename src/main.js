@@ -277,14 +277,22 @@ window.addEventListener('popstate', event => {
   renderRoute();
   if (['guidelines', 'help'].includes(new URL(location.href).searchParams.get('page'))) {
     const main = new URL(location.href).searchParams.get('page') === 'help' ? $('#help-main') : $('#guidelines-main');
-    (document.getElementById(location.hash.slice(1)) || main).focus({ preventScroll: true });
+    const fragment = document.getElementById(location.hash.slice(1));
+    const target = fragment && main.contains(fragment) ? fragment : main;
+    if (target === main) window.scrollTo({ top: 0, behavior: 'instant' });
+    else target.scrollIntoView({ block: 'start', behavior: 'instant' });
+    target.focus({ preventScroll: true });
     return;
   }
-  if (!new URL(location.href).searchParams.has('profile') && !new URL(location.href).searchParams.has('ad') && !['how-it-works', 'create-listing', 'sign-in', 'register', 'recover-account', 'edit-profile', 'experiences', 'auth-callback', 'reset-password'].includes(new URL(location.href).searchParams.get('page'))) {
+  if (app.hidden) return;
+  if (!$('#discovery-view').hidden) {
     window.scrollTo({ top: discoveryScroll, behavior: 'instant' });
     const card = state.view === 'ads' ? (selectedAdId && document.querySelector(`[data-ad="${selectedAdId}"]`)) : (selectedCardId && document.querySelector(`[data-provider="${selectedCardId}"]`));
     (card || $('#main')).focus({ preventScroll: true });
-  } else $('#main').focus({ preventScroll: true });
+  } else {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    $('#main').focus({ preventScroll: true });
+  }
 });
 function matches(provider, additional = '') {
   return (state.city === 'all' || provider.city === state.city)

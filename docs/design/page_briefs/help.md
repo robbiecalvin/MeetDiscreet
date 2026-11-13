@@ -40,3 +40,8 @@ Inspected mobile Help and desktop guidelines renders; 320/390/1440px overflow
 checks passed. Direct public visits create no age-confirmation flag. Existing
 tests cover search, topics, keyboard disclosures, jumps and navigation boundaries.
 Safari and licensed Agrandir remain unverified.
+
+History focus now scrolls a valid fragment within the active public reader into
+view and focuses it. Without a valid reader fragment, return to the reader’s top
+and main landmark. Fragments cannot select hidden application content. Public
+access and age-confirmation boundaries are unchanged.

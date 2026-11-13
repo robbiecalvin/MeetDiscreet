@@ -1,5 +1,7 @@
 // History metadata is navigation-only. It never authorizes a user or stores draft text.
 const stateKey = 'meetdiscreetNavigation';
+// The router restores confirmed destinations; canceled history keeps the current viewport.
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 const newScope = () => crypto.randomUUID();
 function marker(state) {
   const value = state?.[stateKey];

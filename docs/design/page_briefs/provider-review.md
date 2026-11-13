@@ -180,3 +180,7 @@ an additional sign-out-during-restoration race case. Repeated Back/Forward,
 multi-entry moves, unknown entries, skip/fragment focus, in-flight blocking and
 confirmed discard were exercised in Chromium. Safari/native cross-document
 unload behaviour remains unverified; no immediate erasure guarantee is implied.
+
+Canceled history traversals also preserve viewport position, focused note field
+and caret selection. Confirmed departures to other account pages use the normal
+page-top/main-focus behaviour. No extra scroll or draft data is persisted.

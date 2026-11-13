@@ -216,3 +216,18 @@ Validation: production build, 13 account-screen checks and 17 mocked password/
 email/session/overview checks passed. Signed-in mobile/desktop renders inspected
 with fictional accounts; no overflow at 320/390/1440px. Hosted email/authentication,
 Safari and licensed Agrandir remain unverified.
+
+## History scroll and focus
+
+Confirmed Back/Forward navigation to account pages now opens at the page top and
+focuses the main landmark. The router checks the rendered discovery view rather
+than a stale list of route names, so new account screens cannot inherit discovery’s
+scroll offset. Discovery still restores its existing in-memory scroll and selected
+card focus. App history uses explicit scroll restoration instead of relying on
+browser automatic restoration to counteract route-level scroll changes.
+
+Scroll/focus validation: production build, all 224 standard checks and all 142
+mocked backend browser checks passed. New coverage reproduces account Forward
+using discovery’s offset with automatic restoration disabled, verifies account
+top/main focus and discovery return, and checks canceled staff viewport/caret
+retention. Safari/native cross-document restoration remain unverified.

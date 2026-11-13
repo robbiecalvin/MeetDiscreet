@@ -17,15 +17,15 @@ in their dedicated documents.
 Current phase: Frontend development with an initial Supabase development backend.
 
 Current activity:
-Extend staff feedback protection to managed browser Back, Forward and multi-entry
-history traversal. Cancel restores the original entry without rerendering or
-adding history; confirmed departures discard once. Older/unindexed entries use
-an in-place review-URL restore/new branch instead of guessing a traversal distance.
-Skip-link and fragment focus preserve drafts. Sign-out/account changes remain able
-to clear private forms during restoration. Production build, full 224 standard
-and 140 mocked backend checks passed, plus six focused history checks including
-an additional sign-out/restoration race. Chromium history behaviour is verified;
-Safari/native cross-document unload behaviour remains unverified.
+Make Back/Forward scroll and focus deterministic across account and public reader
+pages. Removed the stale discovery-route exclusion list, set explicit app history
+restoration and retained discovery’s existing scroll/card return. Account routes
+start at the top/main landmark; public readers focus valid local fragments.
+Canceled staff history preserves viewport, focused field and caret. Reproduced
+the legacy forward-scroll error with automatic restoration disabled, then passed
+six focused navigation/history checks after the fix. Production build, all 224
+standard checks and all 142 mocked backend browser checks passed. Safari and native
+cross-document restoration remain unverified.
 
 Read-only recorded-copy comparison is implemented and verified separately.
 Publishing decisions OPEN-052/053 remain unanswered; do not infer policy from “next”.
