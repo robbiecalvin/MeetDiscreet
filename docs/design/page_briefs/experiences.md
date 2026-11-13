@@ -46,3 +46,18 @@ Saved catalogue deletion requires confirmation, preserves the current local item
 and shares the save/load busy state. A missing record is reported separately from
 a failed request. No account or public data is deleted; saving again recreates
 the owner’s private snapshot.
+
+## 2026-11-13 — Provider draft-tool visual continuation
+
+Continued Robbie’s refresh after “next”. Shared scoped
+`src/provider-draft-tools.css` adds rounded navy forms, blush headings, matching
+inputs, burgundy actions and softly tinted catalogue/window cards. Signed-in
+headers stack below 450px on these routes. Existing currency-pending labels,
+amount parsing, explicit schedule zones, overlap validation, preview boundaries
+and owner-only save/load/delete behaviour are unchanged. No charge, reservation
+or public availability is created. Exact rendering awaits Robbie’s review.
+
+Validation: production build, 16 catalogue/availability checks and eight mocked
+catalogue/schedule checks passed. Inspected mocked signed-in mobile/desktop
+renders; no overflow at 320/390/1440px. Hosted storage, Safari and licensed
+Agrandir remain unverified by this presentation increment.

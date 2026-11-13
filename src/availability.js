@@ -1,3 +1,4 @@
+import './provider-draft-tools.css';
 import { saveAvailabilityDraft, loadAvailabilityDraft, deleteAvailabilityDraft } from './backend/drafts.js';
 import { privateDraftControls } from './backend/draft-controls.js';
 import { weekdays, validTimeZone, windowError, orderedWindows } from './weekly-schedule.js';

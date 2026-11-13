@@ -34,3 +34,18 @@ edits remain unsaved. Load restores local IDs and clears composer edits. Confirm
 deletion removes only the stored sketch and preserves the editor and auth account.
 Account summary shows the saved window count and time zone, independently of
 other draft status. Storage does not make the sketch bookable or public.
+
+## 2026-11-13 — Provider draft-tool visual continuation
+
+Continued Robbie’s refresh after “next”. Shared scoped
+`src/provider-draft-tools.css` adds rounded navy forms, blush headings, matching
+inputs, burgundy actions and softly tinted catalogue/window cards. Signed-in
+headers stack below 450px on these routes. Existing currency-pending labels,
+amount parsing, explicit schedule zones, overlap validation, preview boundaries
+and owner-only save/load/delete behaviour are unchanged. No charge, reservation
+or public availability is created. Exact rendering awaits Robbie’s review.
+
+Validation: production build, 16 catalogue/availability checks and eight mocked
+catalogue/schedule checks passed. Inspected mocked signed-in mobile/desktop
+renders; no overflow at 320/390/1440px. Hosted storage, Safari and licensed
+Agrandir remain unverified by this presentation increment.

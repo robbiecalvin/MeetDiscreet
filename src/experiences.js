@@ -1,3 +1,4 @@
+import './provider-draft-tools.css';
 import { trackDraft } from './draft-changes.js';
 import { parseDraftAmount } from './draft-amount.js';
 import { backendEnabled } from './backend/client.js';

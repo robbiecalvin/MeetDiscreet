@@ -496,3 +496,9 @@ Exact rendering awaits review.
 Styled the private listing editor/library after “next”. Keep type and private-draft
 labels prominent and preserve separate edit, duplicate and confirmed-delete actions.
 Apply the compact signed-in header on narrow listing screens. Rendering awaits review.
+
+## 2026-11-13 — Catalogue and availability continuation
+
+Styled the remaining Provider draft tools after “next”, retaining currency-pending
+extra labels and explicit schedule zones. Do not let polished cards imply live
+prices, publication or bookable availability. Exact rendering awaits review.
