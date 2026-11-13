@@ -1,3 +1,4 @@
+import './listing-workspace.css';
 import { backendEnabled } from './backend/client.js';
 import { listListingDraftSummaries, deleteListingDraft } from './backend/drafts.js';
 import { detachSavedListing } from './listing-editor.js';

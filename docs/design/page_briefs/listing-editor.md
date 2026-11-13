@@ -93,3 +93,20 @@ not a posting allowance. The editor/source-loading behavior stays separate.
 Account identity is rechecked after reading; detached views ignore responses.
 No snapshot consistency across concurrent writes is claimed. No new database
 permissions, public publishing or backend migration is introduced.
+
+## 2026-11-13 — Listing workspace visual continuation
+
+Continued Robbie’s requested refresh after “next”. Shared scoped
+`src/listing-workspace.css` adds rounded navy forms/library filters, blush headings,
+burgundy actions and matching private draft cards. Edit/duplicate/delete controls
+stack on mobile. Signed-in listing screens use a two-row header below 450px to
+keep account and sign-out actions reachable. Existing private ownership, filter,
+sort, pagination, deletion confirmation and preview behaviour remain unchanged.
+No public posting, allowance, pricing or eligibility rule changed.
+Exact rendering awaits Robbie’s review.
+
+Validation: production build, 17 listing-editor/Looking For checks and 10 mocked
+listing-management checks passed. Inspected desktop editor and mobile library
+renders; final signed-in editor/library overflow checks passed at 320px.
+Fixtures were fictional; hosted ownership, Safari and licensed Agrandir remain
+unverified by this presentation increment.

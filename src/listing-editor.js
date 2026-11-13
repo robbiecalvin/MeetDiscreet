@@ -1,3 +1,4 @@
+import './listing-workspace.css';
 import { trackDraft } from './draft-changes.js';
 import { backendEnabled } from './backend/client.js';
 import { listListingDrafts, saveListingDraft, deleteListingDraft, loadListingDraft } from './backend/drafts.js';

@@ -490,3 +490,9 @@ profile editors after “next”. Keep audience preview labels explicit; preserv
 User non-disclosure controls and separate private draft records. Use the shared
 font for biographies rather than the browser’s default monospace textarea font.
 Exact rendering awaits review.
+
+## 2026-11-13 — Listing workspace continuation
+
+Styled the private listing editor/library after “next”. Keep type and private-draft
+labels prominent and preserve separate edit, duplicate and confirmed-delete actions.
+Apply the compact signed-in header on narrow listing screens. Rendering awaits review.
