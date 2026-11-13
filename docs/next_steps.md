@@ -1355,6 +1355,22 @@ If launch scope is reduced:
   responses. The new migration is not applied remotely; staff provisioning and
   hosted JWT checks remain pending.
 
+### Fictional Booking Inbox and Read-only Detail
+
+- Added clearly labelled User/Provider example inboxes with title/person/area search,
+  status filtering and read-only request details. Desktop uses list/detail columns;
+  mobile shows one panel with back navigation. Revision comparison preserves
+  original/proposed example terms without recording any agreement.
+- Accepted awaiting deposit remains distinct from confirmed. No quote, deposit
+  amount, deadline, live request/action, participant grant or payment is created.
+  View state resets on reload/identity change and the unsent-plan editor stays
+  separate; its existing draft must not be overwritten by fixture navigation.
+- Build, all 207 standard checks and 123 backend browser checks passed; desktop/
+  mobile inspected. Coverage includes gate/perspective/filter behavior, deposit-
+  vs-confirmed distinction, original/revised terms, five viewport sizes, preserved
+  unsent-plan edits and identity cleanup. No migration. Real booking enforcement
+  and unresolved lifecycle rules remain open.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

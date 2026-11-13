@@ -173,7 +173,7 @@ does not use passwords.
 | USR-07 | Messages | Browse and use authorized conversations; fictional frontend preview implemented separately | Real messaging and subscription enforcement pending |
 | USR-08 | Call interface | Handle audio/video sessions | Calling infrastructure |
 | USR-09 | Booking request | Propose a companion experience | Subscription and booking rules |
-| USR-10 | Booking detail | View agreement, payment, and available actions | Booking lifecycle |
+| USR-10 | Booking detail | View agreement/payment/actions; read-only fictional detail preview implemented separately | Live booking lifecycle and participant enforcement pending |
 | USR-11 | Booking history | Find past and current bookings | Participant authorization |
 | USR-12 | Billing and receipts | Review own charges and refunds | Verified financial records |
 | USR-13 | Notifications | Review important activity | Notification model |
@@ -201,7 +201,7 @@ where companion and user workflows overlap.
 | COM-08 | Offering editor | Draft and preview an ad | Publishing and public-field rules |
 | COM-09 | Ad management | Manage ads, boosts, and upgrades | Advertising policies |
 | COM-10 | Subscriber management | View minimum necessary subscriber information | Subscriber visibility rules |
-| COM-11 | Booking inbox | Review requests and revisions | Booking lifecycle |
+| COM-11 | Booking inbox | Fictional inbox and read-only revision comparison implemented | Live booking lifecycle and participant enforcement pending |
 | COM-12 | Booking detail | Manage a participating booking | Booking and payment records |
 | COM-13 | Earnings/payouts | Distinguish allocations and actual payouts | Financial reconciliation |
 | COM-14 | Reviews | Read and respond where permitted | Review policy |

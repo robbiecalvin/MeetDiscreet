@@ -29,6 +29,7 @@ export function renderUserSetup(container, navigate, onDiscover) {
       [null, 'Discover providers', 'Browse the provider grid or compact ads view. Current profiles and online statuses are fictional.', 'Explore discovery'],
       ['my-listings', 'Plan an outing', 'Manage your private Looking For drafts and describe a plan you want company for.', 'Open my listing drafts'],
       ['booking-draft', 'Shape a booking plan', 'Try the request layout with a fictional provider. No request is sent or time reserved.', 'Preview a booking request'],
+      ['booking-inbox-preview', 'Booking inbox preview', 'Explore fictional request statuses, details and a proposed revision. No booking is created.', 'Explore example requests'],
       ['messages-preview', 'Conversation preview', 'Try fictional conversations and a local message composer. Nothing is sent or saved.', 'Preview conversations'],
       ['provider-setup', 'Interested in providing?', 'Explore the separate provider setup using the same login. This does not grant publishing access.', 'Explore provider setup'],
     ]) {

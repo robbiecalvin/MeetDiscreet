@@ -785,3 +785,5 @@ underlying feature is operational.
 - `supabase/migrations/202611100005_profile_publication_review.sql`: new explicit read-capability name, curated pending list/detail RPCs, protected read metadata and query indexes; no publication decisions/grants.
 
 - `supabase/migrations/202611130001_profile_review_search.sql`: bounded, actor-bound literal search of pending profile-copy names/cities with metadata-only read events; default list RPC preserved.
+
+- `src/booking-inbox-preview.js`: view-local fictional User/Provider inbox, search/status filters, read-only request detail and original/proposed revision comparison; separate from saved/unsaved booking plans.

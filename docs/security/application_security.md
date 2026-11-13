@@ -926,3 +926,18 @@ are enforced before the read; protected access events omit query text/content.
 Infrastructure request logging remains separately configured. The UI keeps queries
 out of URLs/storage, drops old responses, and distinguishes missing search setup
 from empty matches while retaining the unchanged default-queue fallback.
+
+
+## Fictional booking inbox
+
+The booking-inbox-preview route contains synthetic participants, general meeting
+areas and illustrative states only. Example perspective switches grant no roles,
+participant access, subscription or staff privileges. The module makes no booking
+read/write request and records no payment/agreement/reservation. DOM text/semantic
+tables render examples without HTML interpretation. Queries stay in view memory.
+
+Identity changes remove/recreate the view, and reloading clears its filters/detail.
+Opening the unsent-plan editor passes no fixture terms into an existing draft.
+Actual booking records still need participant/entitlement/block enforcement,
+immutable accepted terms, trusted payment verification and concurrency controls;
+this layout demonstrates none of those backend guarantees.

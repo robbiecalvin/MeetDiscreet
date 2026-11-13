@@ -2044,3 +2044,11 @@ test('a slow profile search cannot replace a newer search result',async({page})=
   await input.fill('Fast City');await page.getByRole('button',{name:'Search profile copies',exact:true}).click();await expect(page.locator('.profile-review-card')).toHaveCount(1);await expect(page.locator('.profile-review-card')).toContainText('Fast City');
   release();await page.waitForLoadState('networkidle');await expect(page.locator('.profile-review-card')).toHaveCount(1);await expect(page.locator('.profile-review-card')).toContainText('Fast City');
 });
+
+test('booking inbox preview is linked from User setup and resets example context after sign-out without booking writes',async({page})=>{
+  const state=await mockBackend(page);await signIn(page);await enter(page,'/?page=user-setup');
+  await page.getByRole('link',{name:'Explore example requests',exact:true}).click();await expect(page).toHaveTitle('Booking inbox preview · MeetDiscreet');
+  await page.getByRole('button',{name:'Provider example',exact:true}).click();await page.getByRole('button',{name:'View example: Coffee and a catch-up',exact:true}).click();await expect(page.locator('.booking-example-detail')).toContainText('distinct from confirmed');
+  await page.getByRole('button',{name:'Sign out',exact:true}).click();await expect(page.getByRole('button',{name:'User example',exact:true})).toHaveAttribute('aria-pressed','true');await expect(page.getByRole('heading',{name:'Choose an example request',exact:true})).toBeVisible();
+  expect(state.requests.filter(value=>value.method==='POST'&&value.path.startsWith('/rest/'))).toEqual([]);
+});
