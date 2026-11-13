@@ -449,3 +449,9 @@ Applied the public-page editorial styling to account-entry forms after “next�
 Keep form labels, errors and explicit User/Provider choices prominent; constrain
 the new styles to entry layouts so private account tools keep their existing UI.
 Exact rendering awaits review.
+
+## 2026-11-13 — Account overview continuation
+
+Styled the account overview after “next”, preserving explicit permission and saved
+status labels. Use a calmer tablet two-column grid instead of squeezing three tool
+cards into narrow columns. Exact rendering remains provisional for review.

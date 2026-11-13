@@ -1,3 +1,4 @@
+import './account-overview.css';
 import { attachProviderApplicationStatus } from './provider-application-status.js';
 import { accountPermissions } from './account-permissions.js';
 import { loadPrivateDraftSummary } from './backend/drafts.js';

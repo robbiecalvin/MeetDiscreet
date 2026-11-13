@@ -182,3 +182,23 @@ browser checks passed. Inspected 390px registration and 1440px sign-in renders;
 320px registration overflow check passed. Existing account checks cover recovery
 and responsive widths. Hosted Supabase/email, Safari and licensed Agrandir were
 not verified by this presentation change.
+
+## 2026-11-13 — Account overview visual continuation
+
+Continued the requested editorial styling onto the account overview after “next”.
+`src/account-overview.css` scopes the starting-point panel, permission summary
+and tool cards to this workspace, with blush headings, rounded actions and a
+restrained burgundy glow. Tools use three columns on wide screens, two on tablets
+and one on mobile. Saved-status labels and all owner-bound reads remain unchanged.
+Signed-in renders use fictional mocked backend data for visual inspection; this
+does not verify a hosted user account. Exact rendering awaits Robbie’s review.
+
+On the account overview below 450px, the header wraps into two rows to keep
+account, posting, session and sign-out controls inside the viewport. Other routes
+keep their existing header layout. Signed-in 320/390px renders were inspected
+after this correction; initial 1024/1440px dashboard renders were also inspected.
+
+Validation: 13 account-screen and 131 mocked backend checks passed for the
+overview styling. After the narrow-header correction, production build and 11
+targeted account/role/starting-point checks passed. Hosted authentication, Safari
+and licensed Agrandir remain unverified.

@@ -1,0 +1,61 @@
+/* Account dashboard presentation only; owner-bound reads remain unchanged. */
+.account-overview > .eyebrow { color: #dba5b3; letter-spacing: 2.5px; }
+.account-overview > h1 { font-size: clamp(42px, 5vw, 66px); letter-spacing: -.055em; line-height: 1.08; margin: 22px 0; }
+.account-overview > .offering-lead { color: #e3c6cd; }
+.account-overview > .profile-back { color: #d9b4c0; }
+.account-overview .account-starting-point {
+  border-radius: 18px;
+  border-color: #c17a9040;
+  padding: 30px;
+  background: radial-gradient(ellipse at 100% 0, #b6192e22, transparent 65%), #1b1e2e;
+}
+.account-overview .account-starting-point h2 { color: #e3c6cd; font-size: 28px; font-weight: 300; letter-spacing: -.7px; }
+.account-overview .account-permissions { border-radius: 16px; border-color: #ffffff1a; background: #1b1e2e; padding: 28px; }
+.account-overview .account-permissions h2 { font-size: 24px; letter-spacing: -.7px; }
+.account-overview .profile-small { color: #bcbcca; }
+.account-overview .button { border-radius: 30px; line-height: 1.5; }
+.account-overview .outline { border-color: #ffffff30; }
+.account-overview .button[aria-pressed=true] { border-color: #d58a99; background: #b6192e20; }
+.account-overview .primary { background: linear-gradient(110deg, #b6192e, #8e1b35); }
+.account-overview .primary:hover { background: #c1223e; }
+.account-overview .quiet { color: #dfb7c4; }
+.account-overview .account-tool-grid { gap: 18px; margin: 36px 0; }
+.account-overview .account-tool-card {
+  padding: 28px;
+  border-radius: 16px;
+  border-color: #ffffff18;
+  background: linear-gradient(135deg, #24283a, #1b1e2e);
+  box-shadow: 0 8px 28px #07091320;
+  overflow-wrap: anywhere;
+}
+.account-overview .account-tool-card h2 { font-size: 22px; line-height: 1.25; letter-spacing: -.6px; }
+.account-overview .account-tool-card p { color: #bcbcca; }
+.account-overview .account-tool-card .account-draft-summary { color: #e3c6cd; }
+.account-overview .account-tool-card > .outline { width: 100%; text-align: center; }
+.account-overview .account-preview-note { border-left-color: #b87c8b80; }
+@media (min-width: 701px) and (max-width: 1100px) {
+  .account-overview .account-tool-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  .account-overview > h1 { font-size: 43px; }
+  .account-overview .account-starting-point,
+  .account-overview .account-permissions,
+  .account-overview .account-tool-card { padding: 24px 20px; border-radius: 14px; }
+  .account-overview .account-starting-point h2 { font-size: 26px; }
+  .account-overview .account-starting-point .editor-actions { align-items: stretch; }
+  .account-overview .account-starting-point .editor-actions > .button { width: 100%; }
+}
+@media (max-width: 450px) {
+  #app:has(#account-view:not([hidden]) > .account-overview) .site-header {
+    height: auto;
+    min-height: 66px;
+    padding: 14px 0;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  #app:has(#account-view:not([hidden]) > .account-overview) .account-actions {
+    flex-basis: 100%;
+    justify-content: space-between;
+    gap: 12px;
+  }
+}
