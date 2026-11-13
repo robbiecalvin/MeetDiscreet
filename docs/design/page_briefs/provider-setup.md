@@ -122,3 +122,19 @@ A note does not automatically approve, withdraw or change the copy's state. To
 replace a copy, the owner uses existing withdrawal, saved-profile editing/review
 and new submission actions. New copies do not inherit old-version feedback.
 Nothing is published, notified by email or granted by reading feedback.
+
+## 2026-11-13 — Setup visual continuation
+
+After Robbie’s “next”, extended the shared account-overview styling to User and
+Provider setup through scoped `:is()` selectors in `src/account-overview.css`.
+Both use editorial headings, blush accents, rounded status panels/cards and
+rounded actions, with three wide-screen/two tablet/one mobile tool columns.
+The header stacks below 450px so signed-in controls remain reachable. Provider
+permissions, application state, private public-field preview and copy-history
+labels remain separate; no completion percentage, access or publishing is implied.
+No backend, draft logic or content-policy changes. Exact rendering awaits review.
+
+Validation: production build, 21 focused account/User profile/provider application
+checks and all 131 mocked backend browser checks passed. Inspected signed-in
+User/Provider setup renders at 320/390/1440px with fictional test accounts; no
+horizontal overflow. Hosted Supabase, Safari and licensed Agrandir remain unverified.

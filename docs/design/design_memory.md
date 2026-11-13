@@ -455,3 +455,10 @@ Exact rendering awaits review.
 Styled the account overview after “next”, preserving explicit permission and saved
 status labels. Use a calmer tablet two-column grid instead of squeezing three tool
 cards into narrow columns. Exact rendering remains provisional for review.
+
+## 2026-11-13 — User and Provider setup continuation
+
+Reused the account dashboard treatment for both setup pages after “next”.
+Keep saved-draft status distinct from role, approval and publication state.
+Retain the compact narrow-screen header and tablet two-column tool layout.
+Exact rendering remains provisional for review.
