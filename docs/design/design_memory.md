@@ -476,3 +476,9 @@ Extended the editorial treatment to the fictional booking inbox/calendar after
 “next”. Keep state labels and original/proposed terms clear; visual emphasis must
 not imply a request was sent, payment verified or reservation made.
 Exact rendering remains provisional for review.
+
+## 2026-11-13 — Booking-plan editor continuation
+
+Applied the editorial treatment to the unsent booking-plan form after “next”.
+Keep proposed terms, explicit time zone and uncalculated pricing clear in review.
+Retain the mobile companion snapshot above the form. Rendering awaits review.

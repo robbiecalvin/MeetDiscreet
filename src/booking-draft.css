@@ -1,0 +1,47 @@
+/* Booking-plan form presentation only; proposed terms remain an unsent draft. */
+#account-view .booking-draft > .profile-back { color: #d9b4c0; }
+#account-view .booking-draft > .eyebrow { color: #dba5b3; letter-spacing: 2.5px; }
+#account-view .booking-draft > h1 { font-size: clamp(40px, 5vw, 64px); letter-spacing: -.055em; line-height: 1.08; margin: 22px 0; }
+#account-view .booking-draft > .offering-lead { color: #e3c6cd; }
+#account-view .booking-draft .editor-notice { border-radius: 14px; border-color: #bb7d9140; background: #1b1e2e; color: #c4bdcd; }
+#account-view .booking-draft .booking-layout { gap: 30px; margin-top: 36px; }
+#account-view .booking-draft .booking-form {
+  padding: 28px;
+  border: 1px solid #ffffff18;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #24283a, #1b1e2e);
+  min-width: 0;
+}
+#account-view .booking-draft .editor-field > label { color: #e0dbe5; line-height: 1.6; }
+#account-view .booking-draft :is(input, select, textarea) { border-radius: 10px; border-color: #ffffff30; background: #121521b3; }
+#account-view .booking-draft :is(input, select, textarea):focus-visible { outline: 2px solid #e4b0bf; outline-offset: 3px; }
+#account-view .booking-draft [aria-invalid=true] { border-color: #f395a7; }
+#account-view .booking-draft .booking-provider {
+  border-radius: 18px;
+  border-color: #c17a9040;
+  padding: 28px;
+  background: radial-gradient(ellipse at 100% 0, #b6192e24, transparent 65%), #1b1e2e;
+}
+#account-view .booking-draft .booking-provider .eyebrow { color: #dba5b3; }
+#account-view .booking-draft .booking-provider h2 { color: #e3c6cd; font-size: 30px; font-weight: 300; letter-spacing: -.8px; }
+#account-view .booking-draft .booking-provider p { color: #bcbcca; }
+#account-view .booking-draft .booking-provider-photo { border-radius: 12px; }
+#account-view .booking-draft .button { border-radius: 30px; white-space: normal; line-height: 1.5; text-align: center; }
+#account-view .booking-draft .primary { background: linear-gradient(110deg, #b6192e, #8e1b35); }
+#account-view .booking-draft .primary:hover { background: #c1223e; }
+#account-view .booking-draft .outline { border-color: #ffffff30; }
+#account-view .booking-draft .quiet { color: #dfb7c4; }
+#account-view .booking-draft .booking-review,
+#account-view .booking-draft .private-draft-controls { border-radius: 18px; border-color: #ffffff20; background: #1b1e2e; padding: 28px; }
+#account-view .booking-draft .booking-review > h2 { color: #e3c6cd; font-weight: 300; letter-spacing: -.8px; }
+#account-view .booking-draft .booking-summary dt { color: #d2a3b3; line-height: 1.7; }
+#account-view .booking-draft .booking-summary dd { line-height: 1.7; }
+@media (max-width: 700px) {
+  #account-view .booking-draft > h1 { font-size: 40px; }
+  #account-view .booking-draft .booking-form,
+  #account-view .booking-draft .booking-provider,
+  #account-view .booking-draft .booking-review,
+  #account-view .booking-draft .private-draft-controls { padding: 24px 20px; border-radius: 14px; }
+  #account-view .booking-draft .booking-form > .editor-actions { align-items: stretch; }
+  #account-view .booking-draft .booking-form > .editor-actions > .button { width: 100%; }
+}

@@ -92,3 +92,18 @@ one-time query action after account verification or cancellation so later route
 renders do not repeat a completed or cancelled load. A cached session's startup
 identity event must not consume the action before its active view can load. No
 payment, reservation, recipient notification or additional persistence is implied.
+
+## 2026-11-13 — Plan editor visual continuation
+
+Continued the requested visual refresh after “next”. Scoped `src/booking-draft.css`
+adds a rounded navy form, burgundy-tinted provider snapshot, blush headings and
+review labels, softer inputs and rounded actions. Mobile keeps the companion
+snapshot above the form and stacks actions; the unsent review retains its semantic
+summary and all proposed terms. Private save controls share the panel treatment.
+No validation, draft ownership, quote, scheduling or submission logic changed.
+Exact rendering awaits Robbie’s review.
+
+Validation: production build, 30 focused booking-draft/profile/Offering checks and
+eight mocked private-plan/restore/cleanup checks passed. Form renders inspected at
+320/390/1440px with no horizontal overflow; narrow review summary also inspected.
+Hosted private-plan operations, Safari and licensed Agrandir remain unverified.

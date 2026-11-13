@@ -1,3 +1,4 @@
+import './booking-draft.css';
 import { providers, ads } from './data.js';
 import { saveBookingPlan, loadBookingPlan, deleteBookingPlan } from './backend/booking-plans.js';
 import { privateDraftControls } from './backend/draft-controls.js';
