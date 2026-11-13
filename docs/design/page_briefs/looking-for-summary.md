@@ -26,3 +26,17 @@ All text uses text nodes. The ad region's accessible label identifies a Looking 
 public summary. Check direct/gated visits, refresh, history, list return/focus and
 own-draft navigation, plus responsive widths and mobile/desktop screenshots. Actual
 Agrandir and macOS Safari remain unverified; full post/contact actions remain future.
+
+## 2026-11-13 — Visual continuation
+
+Continued Robbie’s requested visual refresh after “next”. Shared public ad styles
+in `src/offering.css` provide the rounded poster header, larger title and burgundy
+sidebar. Looking For-specific rules add a blush-accented idea panel, poster byline
+and rounded draft action. The draft action remains in the normal page flow on
+mobile; no contact action, Provider role or full-post access is inferred.
+Exact rendering awaits Robbie’s review.
+
+Validation: production build and 36 focused Looking For, Offering, profile and
+discovery checks passed. Inspected 390px and 1440px renders; automated responsive
+checks include 320px and public-data/navigation boundaries. Safari and licensed
+Agrandir remain unverified.

@@ -435,3 +435,10 @@ Applied the same provisional editorial style to Offering detail after Robbie’s
 “next”: stronger title, blush accents, navy cards, burgundy primary action.
 Keep the provider header compact and the experience description prominent;
 retain general-rate and availability empty states rather than inventing details.
+
+## 2026-11-13 — Looking For continuation
+
+Extended the public ad visual treatment to Looking For summaries after “next”,
+using a focused idea panel and matching rounded draft action. Keep the poster
+byline separate from a companion-profile link; full-post visibility is unresolved.
+Exact rendering remains provisional for review.

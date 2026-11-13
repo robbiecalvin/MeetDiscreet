@@ -72,3 +72,41 @@
   #offering-view .offering-profile-action { box-shadow: 0 0 0 14px #121521f5, 0 20px 0 18px #121521f5; }
   #offering-view .related-offerings > h2 { font-size: 25px; }
 }
+
+/* Looking For shares public ad structure, with its own idea and draft treatments. */
+#offering-view .looking-poster { font-size: 24px; letter-spacing: -.8px; margin: 6px 0; }
+#offering-view .looking-for-detail .offering-provider { margin-top: 0; }
+#offering-view .looking-for-detail .offering-provider-identity .eyebrow {
+  color: #dba5b3;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+}
+#offering-view .looking-for-detail .offering-section:first-of-type {
+  border: 1px solid #ffffff18;
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 28px;
+  background: radial-gradient(ellipse at 100% 0, #b6192e16, transparent 70%), #1b1e2e;
+}
+#offering-view .looking-for-detail .offering-section:first-of-type h2 {
+  color: #dba5b3;
+  font-size: 12px;
+  letter-spacing: 1.4px;
+  font-weight: 500;
+}
+#offering-view .looking-for-detail .offering-lead { margin-bottom: 0; color: #e3c6cd; }
+#offering-view .looking-draft-action {
+  border-radius: 30px;
+  background: linear-gradient(110deg, #b6192e, #8e1b35);
+  box-shadow: inset 0 1px #ffffff20;
+  line-height: 1.5;
+}
+#offering-view .looking-draft-action:hover { background: #c1223e; }
+@media (max-width: 700px) {
+  #offering-view .looking-poster { font-size: 21px; }
+  #offering-view .looking-for-detail .offering-section:first-of-type {
+    padding: 23px 20px;
+    border-radius: 14px;
+    margin-bottom: 24px;
+  }
+}
