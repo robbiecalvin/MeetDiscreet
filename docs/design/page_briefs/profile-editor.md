@@ -46,3 +46,17 @@ the authentication account, listings, or editor text. Disable save/load/delete
 while an operation is pending. Distinguish deleted, no saved record, and failed
 operations; a failure must allow retry without claiming success. Demo mode has
 no delete action or database request.
+
+## 2026-11-13 — Provider editor visual continuation
+
+Continued Robbie’s visual refresh after “next”. Shared scoped
+`src/profile-editors.css` adds rounded navy forms, blush headings, matching input
+typography, softer controls and a burgundy-tinted draft preview. Existing fields,
+privacy choices, audience labels, validation and private save/load/delete behaviour
+are unchanged. User and Provider draft data remain separate; no public profile
+is published by the preview. Exact rendering awaits Robbie’s review.
+
+Validation: production build, 14 User/Provider editor checks and six mocked
+private-profile/save/delete/cleanup checks passed. Inspected form and preview
+renders on mobile and desktop; 320/390/1440px overflow checks passed.
+Hosted Supabase, Safari and licensed Agrandir remain unverified.

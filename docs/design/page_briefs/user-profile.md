@@ -27,3 +27,17 @@ migration and failed operations must offer retry without claiming success.
 State survives internal navigation, resets on identity changes, and uses existing
 connected-mode unload warnings. Successful saves mark only the sent snapshot as
 saved. Hosted migration application and end-to-end validation remain later setup.
+
+## 2026-11-13 — User editor visual continuation
+
+Continued Robbie’s visual refresh after “next”. Shared scoped
+`src/profile-editors.css` adds rounded navy forms, blush headings, matching input
+typography, softer controls and a burgundy-tinted draft preview. Existing fields,
+privacy choices, audience labels, validation and private save/load/delete behaviour
+are unchanged. User and Provider draft data remain separate; no public profile
+is published by the preview. Exact rendering awaits Robbie’s review.
+
+Validation: production build, 14 User/Provider editor checks and six mocked
+private-profile/save/delete/cleanup checks passed. Inspected form and preview
+renders on mobile and desktop; 320/390/1440px overflow checks passed.
+Hosted Supabase, Safari and licensed Agrandir remain unverified.

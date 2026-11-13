@@ -19,7 +19,7 @@ Current phase: Frontend development with an initial Supabase development backend
 Current activity:
 Robbie requested a sexier look and feel. Discovery has an editorial visual refresh
 for review, followed by matching companion-profile, Offering detail, Looking For summary
-and account-entry/overview, User/Provider setup, conversation, booking inbox and booking-plan editor
+and account-entry/overview, User/Provider setup, conversation, booking inbox/plan editor and User/Provider profile-editor
 presentation.
 These preserve the
 selected palette; discovery retains its three-column mobile portrait grid,
@@ -53,6 +53,9 @@ and comparison renders inspected. No booking, payment or schedule logic changed.
 Booking-plan editor refresh: production build, 30 focused frontend checks and eight
 mocked plan-save/restore/cleanup checks passed. Form/review renders inspected,
 including narrow mobile layouts. No booking or quote logic changed.
+User/Provider profile-editor refresh: production build, 14 editor checks and six
+mocked private-profile/save/delete/cleanup checks passed. Mobile/desktop forms and
+previews inspected, with no overflow at 320/390/1440px. Draft logic is unchanged.
 Licensed Agrandir files and macOS Safari verification remain outstanding.
 
 Known status:

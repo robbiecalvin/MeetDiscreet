@@ -1,3 +1,4 @@
+import './profile-editors.css';
 import { trackDraft } from './draft-changes.js';
 import { backendEnabled } from './backend/client.js';
 import { loadProfileDraft, saveProfileDraft, deleteProfileDraft } from './backend/drafts.js';

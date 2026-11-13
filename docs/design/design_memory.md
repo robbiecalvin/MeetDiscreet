@@ -482,3 +482,11 @@ Exact rendering remains provisional for review.
 Applied the editorial treatment to the unsent booking-plan form after “next”.
 Keep proposed terms, explicit time zone and uncalculated pricing clear in review.
 Retain the mobile companion snapshot above the form. Rendering awaits review.
+
+## 2026-11-13 — Profile editor continuation
+
+Applied matching form and preview styling to the separate User and Provider
+profile editors after “next”. Keep audience preview labels explicit; preserve
+User non-disclosure controls and separate private draft records. Use the shared
+font for biographies rather than the browser’s default monospace textarea font.
+Exact rendering awaits review.

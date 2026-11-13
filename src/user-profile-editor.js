@@ -1,3 +1,4 @@
+import './profile-editors.css';
 import { backendEnabled } from './backend/client.js';
 import { saveUserProfileDraft, loadUserProfileDraft, deleteUserProfileDraft } from './backend/drafts.js';
 import { privateDraftControls } from './backend/draft-controls.js';
