@@ -1,3 +1,4 @@
+import './offering.css';
 function element(tag, content, className) {
   const node = document.createElement(tag);
   if (content) node.textContent = content;

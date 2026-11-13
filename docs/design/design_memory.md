@@ -428,3 +428,10 @@ Continued the discovery refresh onto the public profile after Robbie’s “next
 Retained the full-width photo above identity and all labelled access previews;
 used blush typography, softly rounded panels and burgundy primary actions.
 This is an implementation for review, not approval of additional visual preferences.
+
+## 2026-11-13 — Offering detail continuation
+
+Applied the same provisional editorial style to Offering detail after Robbie’s
+“next”: stronger title, blush accents, navy cards, burgundy primary action.
+Keep the provider header compact and the experience description prominent;
+retain general-rate and availability empty states rather than inventing details.

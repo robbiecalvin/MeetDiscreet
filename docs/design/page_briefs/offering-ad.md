@@ -45,3 +45,18 @@ and provider IDs, with concise copy stating that no date, price or booking acces
 confirmed. No commercial terms, subscription controls or live requests are added.
 Existing plan replacement and source handling follow the
 [booking preview brief](./booking-draft.md#source-offering-continuity).
+
+## 2026-11-13 — Visual continuation
+
+Following Robbie’s “next”, continued the discovery/profile editorial treatment
+onto Offering detail. Scoped `src/offering.css` adds a rounded provider header,
+larger balanced title, blush introduction/location accents, a burgundy sidebar
+and pill-shaped actions, plus rounded related-ad cards. Approved content order,
+fictional-data labels, empty rates/dates, profile links and unsent-plan behaviour
+remain unchanged. Mobile retains its fixed primary action. No new imagery, motion,
+commercial rules or integrations were added. Exact rendering awaits visual review.
+
+Validation: production build and 41 focused Offering/profile/discovery/booking
+preview checks passed. Desktop and mobile renders inspected at 320, 390 and
+1440px with no horizontal overflow; fixed mobile action covered by existing tests.
+Safari and licensed Agrandir remain unverified.
