@@ -989,3 +989,13 @@ clears UI immediately and cannot guarantee cancellation of an issued request.
 No publishing decision, automatic state/role change, email or privileged browser
 key is introduced. Copy/account cascades apply; hosted JWT/concurrency and broader
 operational retention remain unverified.
+
+## Owner profile-copy comparison
+
+Comparison reuses the existing owner-verified public-field projection and repeats
+actor verification before/after reads. Only display name, username, adult age,
+city, area, tagline and demo photo index enter the diff; timestamps identify loaded
+snapshots. No member biography/interests or owner identifiers render in the table.
+Reads start only on explicit action. Failed/missing reads clear previous results;
+detached views cannot render late responses. No client write, publication or
+permission change is introduced. The comparison is not a live consistency lock.

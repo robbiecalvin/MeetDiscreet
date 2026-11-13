@@ -2100,7 +2100,7 @@ test('owners read version-bound feedback without reviewer identity and can revis
  const request=state.requests.find(row=>row.path==='/rest/v1/profile_publication_feedback');expect(new URLSearchParams(request.query).get('select')).toBe('submission_id,note,created_at');await expect(pending).not.toContainText('bbbbbbbb-bbbb');
  old.withdrawn_at='2026-11-13T21:00:00Z';const next={...old,id:'ffffffff-ffff-4fff-8fff-ffffffffffff',public_fields:{display_name:'New copy'},submitted_at:'2026-11-13T22:00:00Z',withdrawn_at:null};state.profilePublication=next;state.profilePublications=[old,next];
  await page.getByRole('button',{name:'Check my private profile submission',exact:true}).click();await pending.getByRole('button',{name:'Check feedback for this copy',exact:true}).click();await expect(pending.locator('output')).toHaveText('No revision feedback recorded for this copy.');await expect(pending.locator('.profile-feedback-note')).toHaveText('');
- await page.getByRole('button',{name:'Load my profile copy history',exact:true}).click();const card=page.locator('.profile-submission-history .staff-approval-card').filter({has:page.getByRole('heading',{name:'Original copy',exact:true})});await card.locator('summary').click();await card.getByRole('button',{name:'Check feedback for this copy',exact:true}).click();await expect(card.locator('.profile-feedback-note')).toContainText('Please revise');
+ await page.getByRole('button',{name:'Load my profile copy history',exact:true}).click();const card=page.locator('.profile-submission-history .staff-approval-card').filter({has:page.getByRole('heading',{name:'Original copy',exact:true})});await card.getByText('View recorded public fields',{exact:true}).click();await card.getByRole('button',{name:'Check feedback for this copy',exact:true}).click();await expect(card.locator('.profile-feedback-note')).toContainText('Please revise');
 });
 for(const failure of ['withdrawn','revoked'])test(`profile feedback ${failure} failure preserves the note without success and refresh clears it after confirmation`,async({page})=>{
  const state=await mockBackend(page);state.roles=['user','moderator'];state.capabilities=['profile_publication_review','profile_publication_feedback'];state.profilePublications=profileReviewRows(2);
@@ -2111,4 +2111,32 @@ for(const failure of ['withdrawn','revoked'])test(`profile feedback ${failure} f
 test('staff cannot give profile feedback to their own copy',async({page})=>{
  const state=await mockBackend(page);state.roles=['user','provider','moderator'];state.capabilities=['profile_publication_review','profile_publication_feedback'];state.profilePublications=profileReviewRows(2);state.profilePublications[0].owner_id=userId;
  await signIn(page);await enter(page,'/?page=profile-review');await page.locator('.profile-review-card').getByRole('button').click();await expect(page.locator('.profile-review-detail')).toBeVisible();await expect(page.getByRole('button',{name:'Record revision feedback',exact:true})).toHaveCount(0);
+});
+
+test('owner compares a recorded profile copy with explicitly loaded saved public fields without writes',async({page})=>{
+ const state=await mockBackend(page);state.roles=['user','provider'];
+ const recorded={display_name:'Recorded name',username:'recorded-user',adult_age:28,city:'Vancouver',area:'Kitsilano',tagline:'Original tagline',photo_index:0};
+ state.profilePublication={id:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',owner_id:userId,submitted_at:'2026-11-10T20:00:00Z',source_updated_at:'2026-11-10T19:00:00Z',withdrawn_at:null,public_fields:recorded};
+ state.profile={owner_id:userId,...recorded,display_name:'<img src=x onerror=alert(1)> Saved name',photo_index:2,updated_at:'2026-11-13T20:00:00Z',biography:'PRIVATE BIOGRAPHY',interests:'PRIVATE INTERESTS'};
+ await signIn(page);await enter(page,'/?page=provider-setup');await page.getByRole('button',{name:'Check my private profile submission',exact:true}).click();
+ const compare=page.locator('.profile-submission .profile-copy-comparison');await compare.locator('summary').click();
+ const reads=()=>state.requests.filter(r=>r.path==='/rest/v1/profile_drafts'&&new URLSearchParams(r.query).get('select')?.includes('adult_age'));
+ expect(reads()).toHaveLength(0);await compare.getByRole('button',{name:'Load saved fields for comparison',exact:true}).click();
+ await expect(compare.locator('[aria-live=polite]')).toContainText('2 of 7 public fields differ');await expect(compare.locator('tbody tr')).toHaveCount(7);
+ await expect(compare).toContainText('<img src=x onerror=alert(1)> Saved name');await expect(compare.locator('img')).toHaveCount(0);await expect(compare).not.toContainText('PRIVATE');await expect(compare.locator('[data-changed=true]')).toHaveCount(2);
+ expect(new URLSearchParams(reads()[0].query).get('select')).toBe('owner_id,display_name,username,adult_age,tagline,city,area,photo_index,updated_at');expect(new URLSearchParams(reads()[0].query).get('owner_id')).toBe(`eq.${userId}`);
+ state.profile={owner_id:userId,...recorded,updated_at:'2026-11-13T21:00:00Z'};await expect(compare).not.toContainText('All seven public fields match');await compare.getByRole('button',{name:'Refresh saved-field comparison',exact:true}).click();await expect(compare.locator('[aria-live=polite]')).toContainText('All seven public fields match');
+ for(const width of [320,390,1440]){await page.setViewportSize({width,height:1000});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);if(width!==320)await compare.screenshot({path:`/tmp/profile-comparison-${width}.png`});}
+ state.profile.owner_id='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';await compare.getByRole('button',{name:'Refresh saved-field comparison',exact:true}).click();await expect(compare.locator('[aria-live=polite]')).toContainText('Comparison unavailable');await expect(compare.locator('table')).toHaveCount(0);
+ state.profile=null;await compare.getByRole('button',{name:'Refresh saved-field comparison',exact:true}).click();await expect(compare).toContainText('No saved profile draft to compare');await expect(compare.locator('table')).toHaveCount(0);
+ expect(state.requests.filter(r=>['POST','PATCH','DELETE'].includes(r.method)&&r.path.startsWith('/rest/'))).toHaveLength(0);
+});
+
+test('history comparison is bound to its recorded copy and a late load cannot restore it after sign-out',async({page})=>{
+ const state=await mockBackend(page);state.roles=['user','provider'];state.profilePublications=[{id:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',owner_id:userId,submitted_at:'2026-11-10T20:00:00Z',source_updated_at:'2026-11-10T19:00:00Z',withdrawn_at:'2026-11-11T20:00:00Z',public_fields:{display_name:'Withdrawn record',photo_index:0}}];state.profile={owner_id:userId,display_name:'Saved fields',updated_at:'2026-11-13T20:00:00Z'};
+ await signIn(page);await enter(page,'/?page=provider-setup');await page.getByRole('button',{name:'Load my profile copy history',exact:true}).click();const card=page.locator('.profile-submission-history .staff-approval-card').first();await card.locator('summary').first().click();const comparison=card.locator('.profile-copy-comparison');await comparison.locator('summary').click();
+ await comparison.getByRole('button',{name:'Load saved fields for comparison',exact:true}).click();await expect(comparison).toContainText('Withdrawn record');await expect(comparison).toContainText('Saved fields');
+ let release;const wait=new Promise(resolve=>release=resolve);let started;const seen=new Promise(resolve=>started=resolve);
+ await page.route('**/rest/v1/profile_drafts*',async route=>{if(new URL(route.request().url()).searchParams.get('select')?.includes('adult_age')){started();await wait;}await route.fallback();});
+ await comparison.getByRole('button',{name:'Refresh saved-field comparison',exact:true}).click();await seen;await page.getByRole('button',{name:'Sign out',exact:true}).click();const finished=page.waitForResponse(response=>response.url().includes('/rest/v1/profile_drafts')&&response.request().method()==='GET');release();await finished;await page.waitForLoadState('networkidle');await expect(page.locator('.profile-copy-comparison')).toHaveCount(0);await expect(page.locator('#account-view')).not.toContainText('Withdrawn record');
 });

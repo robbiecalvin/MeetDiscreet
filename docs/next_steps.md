@@ -17,13 +17,17 @@ in their dedicated documents.
 Current phase: Frontend development with an initial Supabase development backend.
 
 Current activity:
-Complete the shared visual consistency pass following Robbie’s requested sexier
-look and feel. The public discovery/profile/ad pages, account entry/security,
-User/Provider setup and profile editors, listing tools, experience catalogue,
-availability, photo workspace, conversation/booking previews, Help, guidelines,
-entrance gate, saved-draft download and staff review have matching editorial styling. Exact rendering remains for
-Robbie’s review. The selected palette, three-column mobile portrait grid and
-compact ads remain intact. Relevant page briefs record per-increment validation.
+Added read-only comparison of saved public profile fields against pending and
+historical recorded copies. Providers explicitly load a snapshot, inspect seven
+fields with change labels/timestamps, and refresh it after saving edits. This does
+not submit, withdraw, approve or publish a copy. Production build, all 224 standard checks and all 133 mocked backend browser
+checks passed. Changed/matching comparisons were inspected on mobile/desktop. Two publishing-policy questions (OPEN-052/053) were presented again;
+no publishing implementation may assume their answers.
+
+The visual refresh covers public pages, account/setup/editor tools and staff
+review; exact rendering remains for Robbie’s review. The selected palette,
+three-column mobile portrait grid and compact ads remain intact. Page briefs
+record per-increment validation and outstanding Safari/Agrandir checks.
 
 Shared signed-in navigation now uses one narrow-screen layout across routes,
 with consistent disabled-control and keyboard-focus feedback. Production build,

@@ -1,9 +1,11 @@
+import {profileCopyComparison} from './profile-copy-comparison.js';
+import {profileCopyFieldDefinitions} from './profile-copy-differences.js';
 import {profileCopyFeedback} from './profile-copy-feedback.js';
 import { loadProfileSubmissionHistory } from './backend/profile-submissions.js';
 function node(tag,text,className) {const item=document.createElement(tag);if(text)item.textContent=text;if(className)item.className=className;return item;}
 export function profileCopyFields(fields = {}) {
   const list=node('dl');
-  for(const [key,label] of [['display_name','Display name'],['username','Username'],['adult_age','Age'],['city','City'],['area','General area'],['tagline','Tagline'],['photo_index','Demo photo selection']]) {
+  for(const [key,label] of profileCopyFieldDefinitions) {
     list.append(node('dt',label),node('dd',fields[key]===null||fields[key]===undefined||fields[key]===''?'Not supplied':String(fields[key])));
   }
   return list;
@@ -35,7 +37,7 @@ export function profileSubmissionHistory(owner,isCurrent) {
         const fields=value.public_fields||{};const card=node('article',null,'staff-approval-card');
         card.append(node('h3',typeof fields.display_name==='string'&&fields.display_name.trim()?fields.display_name:'Unnamed profile copy'),node('p',value.withdrawn_at?'Withdrawn private copy':'Pending private copy','eyebrow'),timestamp('Recorded',value.submitted_at));
         if(value.withdrawn_at)card.append(timestamp('Withdrawn',value.withdrawn_at));
-        const details=node('details');details.append(node('summary','View recorded public fields'),profileCopyFields(fields),profileCopyFeedback(owner,value.id,()=>current(request)));card.append(details);list.append(card);
+        const details=node('details');details.append(node('summary','View recorded public fields'),profileCopyFields(fields),profileCopyFeedback(owner,value.id,()=>current(request)),profileCopyComparison(owner,value,()=>current(request)));card.append(details);list.append(card);
       }
       status.textContent=rows.length?`${rows.length} private profile copies on this page. Newest first.`:'No private profile copies on this page.';
       newer.disabled=page===0;older.disabled=!hasOlder;pages.hidden=!rows.length&&page===0;refresh.textContent='Refresh my profile copy history';

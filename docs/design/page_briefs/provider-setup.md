@@ -138,3 +138,24 @@ Validation: production build, 21 focused account/User profile/provider applicati
 checks and all 131 mocked backend browser checks passed. Inspected signed-in
 User/Provider setup renders at 320/390/1440px with fictional test accounts; no
 horizontal overflow. Hosted Supabase, Safari and licensed Agrandir remain unverified.
+
+## Recorded-copy comparison
+
+Pending copies and each owner history entry now offer Compare with saved profile
+draft. An explicit Load saved fields for comparison action uses the existing
+owner-bound public-field projection, not the unsaved editor or member fields.
+Show seven fields side by side, with Same/Changed text as well as highlighting,
+recorded-copy and saved-version timestamps, and a changed-field count.
+Refresh replaces the loaded snapshot; missing/error results clear old comparisons.
+Navigation, history refresh, withdrawal or identity changes retire detached views.
+
+This is read-only. It neither updates the candidate used for submitting another
+copy nor withdraws, submits, approves, grants access or publishes anything.
+The photo value is a demo index. Public approval authority and edited-version
+visibility remain unresolved; comparison does not decide either policy.
+
+Comparison validation: production build, all 224 standard checks and all 133
+mocked backend browser checks passed. Added pure field-allowlist/value tests and
+owner-projection, safe-text, refresh/error/absence, history and late sign-out checks.
+Changed/matching tables inspected on mobile/desktop; responsive checks include
+320px. No hosted migration, publishing or private-data policy change is required.
