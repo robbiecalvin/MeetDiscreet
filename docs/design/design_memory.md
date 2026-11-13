@@ -502,3 +502,9 @@ Apply the compact signed-in header on narrow listing screens. Rendering awaits r
 Styled the remaining Provider draft tools after “next”, retaining currency-pending
 extra labels and explicit schedule zones. Do not let polished cards imply live
 prices, publication or bookable availability. Exact rendering awaits review.
+
+## 2026-11-13 — Photo workspace continuation
+
+Styled the device-local photo workspace after “next”. Make the current main
+preview visually distinct while retaining explicit local-only labels and the tall
+photo crop. No upload or profile assignment is implied. Rendering awaits review.

@@ -1,3 +1,4 @@
+import './photo-preview.css';
 const maxBytes=5*1024*1024,maxPhotos=4,maxPixels=20_000_000;
 const urls=new Set();let epoch=0;
 export function clearPhotoPreviewState(){epoch++;for(const url of urls)URL.revokeObjectURL(url);urls.clear();}

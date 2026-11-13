@@ -26,3 +26,19 @@ A full reload discards the document's preview state. Device originals are not
 modified or deleted. No EXIF stripping, public moderation, secure upload service
 or saved-photo selection is implied. Native file controls, descriptive alt text,
 status/error messages and focus follow the existing accessible-form approach.
+
+## 2026-11-13 — Photo workspace visual continuation
+
+Continued Robbie’s visual refresh after “next”. Scoped `src/photo-preview.css`
+adds a burgundy file chooser, a softly tinted main-preview panel, rounded selection
+cards and a clear accent border for the current main preview. Preserve the existing
+3:4 crop, one/two/four-column responsive grid, local technical bounds and native
+file control. Signed-in headers stack below 450px on this route. No file handling,
+object URL cleanup, upload, storage or profile assignment logic changed.
+Exact rendering awaits Robbie’s review.
+
+Validation: production build, seven local-photo checks and one mocked sign-out
+cleanup check passed. Mocked signed-in renders inspected with screenshots of
+existing fictional demo portraits as local test files; no overflow at 320/390/1440px.
+No private user media was used. Actual uploads, Safari and licensed Agrandir remain
+unverified or unimplemented as tracked elsewhere.

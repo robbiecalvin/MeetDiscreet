@@ -1,0 +1,33 @@
+/* Local photo workspace styling; image lifecycle and upload boundaries unchanged. */
+#account-view .photo-preview > .profile-back { color: #d9b4c0; }
+#account-view .photo-preview > .eyebrow { color: #dba5b3; letter-spacing: 2.3px; }
+#account-view .photo-preview > h1 { font-size: clamp(40px, 5vw, 64px); letter-spacing: -.055em; line-height: 1.08; margin: 22px 0; }
+#account-view .photo-preview > .editor-notice { border-radius: 14px; border-color: #bb7d9140; background: #1b1e2e; color: #c4bdcd; }
+#account-view .photo-preview > label { color: #e0dbe5; margin-top: 30px; }
+#account-view .photo-preview input[type=file] { width: 100%; border: 1px solid #ffffff26; border-radius: 12px; padding: 12px; background: #1b1e2e; color: #c4bdcd; }
+#account-view .photo-preview input[type=file]::file-selector-button { border: 1px solid #b87c8b80; border-radius: 30px; padding: 12px 18px; margin-right: 14px; font: inherit; background: #6e2439; color: #f3f1ee; cursor: pointer; }
+#account-view .photo-preview input[type=file]:focus-visible { outline: 2px solid #e4b0bf; outline-offset: 3px; }
+#account-view .photo-preview .photo-main-preview { margin: 28px 0; padding: 28px; border: 1px solid #c17a9040; border-radius: 18px; background: radial-gradient(ellipse at 100% 0, #b6192e20, transparent 65%), #1b1e2e; }
+#account-view .photo-preview .photo-main-preview:not(:has(img)) { min-height: 200px; display: flex; flex-direction: column; justify-content: center; }
+#account-view .photo-preview .photo-main-preview h2 { color: #e3c6cd; font-size: 28px; font-weight: 300; letter-spacing: -.7px; }
+#account-view .photo-preview .photo-main-preview > img { border-radius: 14px; box-shadow: 0 12px 30px #07091340; }
+#account-view .photo-preview .photo-preview-grid { gap: 18px; }
+#account-view .photo-preview .photo-preview-card { padding: 18px; border-radius: 16px; border-color: #ffffff1a; background: linear-gradient(135deg, #24283a, #1b1e2e); }
+#account-view .photo-preview .photo-preview-card:has([aria-pressed=true]) { border-color: #d58a99; }
+#account-view .photo-preview .photo-preview-card > img { border-radius: 10px; }
+#account-view .photo-preview .photo-preview-card h3 { color: #e3c6cd; font-size: 22px; font-weight: 300; letter-spacing: -.5px; }
+#account-view .photo-preview .profile-small { color: #bcbcca; line-height: 1.8; }
+#account-view .photo-preview .button { border-radius: 30px; white-space: normal; line-height: 1.5; text-align: center; }
+#account-view .photo-preview .quiet { color: #dfb7c4; }
+#account-view .photo-preview .outline { border-color: #ffffff30; }
+#account-view .photo-preview [aria-pressed=true] { border-color: #d58a99; background: #6e2439; }
+@media (max-width: 700px) {
+  #account-view .photo-preview > h1 { font-size: 40px; }
+  #account-view .photo-preview .photo-main-preview { padding: 24px 20px; border-radius: 14px; }
+  #account-view .photo-preview .photo-preview-card { padding: 14px; border-radius: 14px; }
+  #account-view .photo-preview .photo-preview-grid { gap: 12px; }
+}
+@media (max-width: 450px) {
+  #app:has(#account-view:not([hidden]) > .photo-preview) .site-header:has(.backend-session-actions button:not([hidden])) { height: auto; min-height: 66px; padding: 14px 0; flex-wrap: wrap; gap: 12px; }
+  #app:has(#account-view:not([hidden]) > .photo-preview) .site-header:has(.backend-session-actions button:not([hidden])) .account-actions { flex-basis: 100%; justify-content: space-between; gap: 12px; }
+}
