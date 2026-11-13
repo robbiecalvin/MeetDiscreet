@@ -19,7 +19,7 @@ Current phase: Frontend development with an initial Supabase development backend
 Current activity:
 Robbie requested a sexier look and feel. Discovery has an editorial visual refresh
 for review, followed by matching companion-profile, Offering detail, Looking For summary
-and account-entry/overview plus User/Provider setup presentation.
+and account-entry/overview, User/Provider setup and conversation-preview presentation.
 These preserve the
 selected palette; discovery retains its three-column mobile portrait grid,
 compact ads and existing functionality. Discovery remains synthetic. The combined
@@ -43,6 +43,9 @@ without overflow. Earlier public-page presentation increments did not rerun back
 User/Provider setup refresh: production build, 21 focused frontend checks and 131
 mocked backend browser checks passed. Signed-in 320/390/1440px renders inspected
 using fictional data; no horizontal overflow. No draft or authorization logic changed.
+Conversation refresh: production build, nine conversation checks and one mocked
+backend conversation/sign-out cleanup check passed. Mobile/desktop renders inspected;
+messages remain fictional/local-only, with no delivery or storage integration.
 Licensed Agrandir files and macOS Safari verification remain outstanding.
 
 Known status:

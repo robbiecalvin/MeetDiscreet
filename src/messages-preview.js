@@ -1,3 +1,4 @@
+import './messages-preview.css';
 import { providers } from './data.js';
 const examples = [
   {id:'maya',messages:[['incoming','A gallery afternoon sounds lovely. Is there an exhibition you have in mind?'],['outgoing','I’m putting together a few ideas for a relaxed afternoon.']]},

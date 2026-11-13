@@ -1,0 +1,44 @@
+/* Visual treatment for the fictional, local-only conversation workspace. */
+.messages-preview > .profile-back { color: #d9b4c0; }
+.messages-preview > .eyebrow { color: #dba5b3; letter-spacing: 2.5px; }
+#account-view .messages-preview > h1 { font-size: clamp(40px, 5vw, 64px); letter-spacing: -.055em; line-height: 1.08; margin: 22px 0; }
+.messages-preview > .editor-notice { border-radius: 14px; border-color: #bb7d9140; background: #1b1e2e; color: #c4bdcd; }
+.messages-preview .messages-layout { gap: 22px; margin-top: 32px; }
+.messages-preview .messages-sidebar,
+.messages-preview .messages-thread { border-radius: 18px; border-color: #ffffff18; padding: 28px; background: linear-gradient(135deg, #24283a, #1b1e2e); }
+.messages-preview .messages-thread { background: radial-gradient(ellipse at 100% 0, #b6192e16, transparent 60%), #191d2b; min-height: 300px; }
+.messages-preview .messages-thread > h2 { font-size: 30px; letter-spacing: -.8px; color: #e3c6cd; font-weight: 300; }
+.messages-preview .message-conversation { border-radius: 12px; padding: 14px; border-color: #ffffff1a; background: #12152160; }
+.messages-preview .message-conversation[aria-pressed=true] { border-color: #d58a99; background: #b6192e18; }
+.messages-preview .message-conversation strong { font-size: 17px; }
+.messages-preview .message-avatar { border-radius: 9px; }
+.messages-preview .messages-list { gap: 12px; margin-top: 20px; }
+.messages-preview .messages-sidebar input,
+.messages-preview .message-compose textarea,
+.messages-preview .message-search input { border-radius: 10px; border-color: #ffffff30; background: #121521b3; }
+.messages-preview :is(input, textarea):focus-visible { outline: 2px solid #e4b0bf; outline-offset: 3px; }
+.messages-preview .message-log { padding: 8px 4px; gap: 16px; }
+.messages-preview .message-bubble { background: #262c40; border-color: #ffffff12; border-radius: 18px 18px 18px 5px; padding: 18px 20px; }
+.messages-preview .message-bubble.outgoing { background: linear-gradient(120deg, #6e2439, #4c263d); border-color: #d58a9930; border-radius: 18px 18px 5px 18px; }
+.messages-preview .message-author { color: #d0bac8; font-size: 11px; line-height: 1.6; }
+.messages-preview .message-text { font-size: 14px; line-height: 1.75; }
+.messages-preview .message-match-current { box-shadow: 0 0 0 2px #e4b0bf; }
+.messages-preview .message-text mark { background: #edbdc9; color: #121521; }
+.messages-preview .message-compose { border-top: 1px solid #ffffff18; margin-top: 26px; padding-top: 24px; }
+.messages-preview .message-search { border-radius: 12px; border-color: #ffffff20; }
+.messages-preview .message-search summary { color: #dfb7c4; }
+.messages-preview .button { border-radius: 30px; white-space: normal; line-height: 1.5; }
+.messages-preview .primary { background: linear-gradient(110deg, #b6192e, #8e1b35); }
+.messages-preview .primary:hover { background: #c1223e; }
+.messages-preview .quiet { color: #dfb7c4; }
+.messages-preview .outline { border-color: #ffffff30; }
+.messages-preview .profile-small { color: #bcbcca; }
+@media (max-width: 700px) {
+  #account-view .messages-preview > h1 { font-size: 40px; }
+  .messages-preview .messages-sidebar,
+  .messages-preview .messages-thread { border-radius: 14px; padding: 22px 18px; }
+  .messages-preview .message-bubble { padding: 14px 16px; }
+  .messages-preview .message-text { font-size: 13px; }
+  .messages-preview .message-compose .editor-actions { align-items: stretch; }
+  .messages-preview .message-compose .button { width: 100%; }
+}

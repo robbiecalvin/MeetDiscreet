@@ -462,3 +462,10 @@ Reused the account dashboard treatment for both setup pages after “next”.
 Keep saved-draft status distinct from role, approval and publication state.
 Retain the compact narrow-screen header and tablet two-column tool layout.
 Exact rendering remains provisional for review.
+
+## 2026-11-13 — Conversation continuation
+
+Applied the editorial style to the fictional conversation workspace after “next”.
+Use distinct navy incoming and burgundy outgoing bubbles while keeping example
+and unsent labels readable. Preserve the mobile list-to-thread flow.
+Exact rendering remains provisional for review.

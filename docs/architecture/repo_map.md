@@ -150,6 +150,7 @@ conflict with approved MeetDiscreet decisions.
 - src/profile.css: scoped public companion profile editorial presentation.
 - src/account-entry.css: scoped sign-in, registration and recovery form presentation.
 - src/account-overview.css: shared account overview/User setup/Provider setup presentation and narrow-screen workspace header layout.
+- src/messages-preview.css: scoped fictional inbox, thread, search and composer presentation.
 - src/styles.css: shared tokens, portrait grid, single-column ads, responsive layout.
 - src/discovery.css: scoped editorial discovery treatment and its view dock, including reduced-motion overrides.
 - src/data.js: synthetic public profile and ad fixtures; no live presence.

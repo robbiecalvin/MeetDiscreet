@@ -47,3 +47,19 @@ returns focus to the search input and leaves composer text untouched.
 Queries stay with each example while switching; reset/reload/identity cleanup
 clears them with the rest of the view. Local preview additions recompute highlights.
 Search makes no backend request and gives no access to real message history.
+
+## 2026-11-13 — Conversation visual continuation
+
+Continued Robbie’s requested styling after “next”. Scoped `src/messages-preview.css`
+adds rounded inbox/thread panels, a blush selected-conversation treatment, navy
+incoming and burgundy outgoing bubbles, and softer search/composer controls.
+The active search result has a high-contrast outline. Existing mobile list/thread
+switching, native focus flow, local-only message labels and search logic remain.
+No messaging service, delivery status, new imagery or motion was introduced.
+Exact rendering awaits visual review.
+
+Validation: production build, nine conversation checks and one mocked backend
+conversation/sign-out cleanup check passed. Inspected mobile and desktop renders;
+responsive tests cover 320/390/700/1024/1440px, literal search, focus, local drafts
+and reset. No real message delivery or hosted messaging was tested or introduced.
+Safari and licensed Agrandir remain unverified.
