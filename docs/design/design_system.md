@@ -267,6 +267,11 @@ prototype remains subject to visual review. Unselected details stay provisional.
 | Motion | Restrained feedback; respect reduced-motion preferences | Provisional |
 | Mobile navigation | Compact header, filter drawer, fixed people/ads switch | Approved direction |
 
+Discovery’s 2026-11-13 refresh adds provisional blush typography, rounded portrait
+cards and controls, a burgundy/navy glow and a pill-shaped view switch in response
+to Robbie’s request for a sexier look. These scoped treatments do not restyle
+account tools.
+
 Page-specific behaviour is recorded in [the discovery brief](./page_briefs/discovery.md).
 Update this register as actual decisions are made.
 

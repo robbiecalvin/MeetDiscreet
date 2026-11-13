@@ -414,3 +414,10 @@ Remember what helps the next design decision.
 
 Keep preferences revisable, observations evidence-based,
 and lessons limited to their actual scope.
+
+## 2026-11-13 — Discovery visual direction
+
+Robbie asked for a sexier look and feel. Implemented a more intimate editorial
+treatment within the selected dark palette; exact rendering awaits his review.
+Keep portrait photography prominent, mobile density at three columns, and names,
+ages, locations and online labels legible. Do not infer new content requirements.

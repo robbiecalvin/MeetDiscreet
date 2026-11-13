@@ -147,6 +147,7 @@ conflict with approved MeetDiscreet decisions.
 - src/draft-tools.js: shared navigation between implemented companion draft tools.
 - src/experiences.js: in-memory experience catalogue, exact draft-amount parsing, and labelled audience previews; no billing authority.
 - src/styles.css: shared tokens, portrait grid, single-column ads, responsive layout.
+- src/discovery.css: scoped editorial discovery treatment and its view dock, including reduced-motion overrides.
 - src/data.js: synthetic public profile and ad fixtures; no live presence.
 - public/images/demo-portraits.png: locally served AI-generated fictional portrait sheet.
 - package.json, package-lock.json, .nvmrc: pinned npm/Vite development workflow.

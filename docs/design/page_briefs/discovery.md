@@ -3,11 +3,11 @@
 ## Identity and status
 
 - Inventory: PUB-01, with SH-01 entrance gate and PUB-02/PUB-03 ad previews.
-- URL: `/`; source: index.html, src/main.js, src/styles.css, src/data.js.
+- URL: `/`; source: index.html, src/main.js, src/styles.css, src/discovery.css, src/data.js.
 - Implementation: frontend prototype using synthetic fixtures.
 - Visual direction: selected by Robbie on 2026-11-08; rendered version awaits review.
-- Integration: no backend, live geolocation, accounts, presence, messages, bookings, or payments.
-- Delivery: prepared for authorized GitHub source delivery; no production deployment.
+- Integration: discovery fixtures have no live geolocation, presence, messaging, bookings, or payments. Account entry points connect to the separately configured development authentication flow.
+- Delivery: frontend hosted on Netlify; marketplace services remain development work.
 
 ## Approved direction
 
@@ -28,7 +28,7 @@ Ads use newest-first fixture ordering. No paid boosts or placements are simulate
 
 Desktop uses public navigation, location/search, sign-in, and posting entry points.
 Mobile uses compact header actions and a filter drawer. Account and posting entry
-points explain that integration is unavailable rather than showing fake success.
+points lead to the existing account and private draft flows.
 
 ## Entrance behaviour
 
@@ -71,7 +71,17 @@ Fixed bottom controls reserve page space and account for mobile safe areas.
 - Switching views and ad category works; profile/ad previews open and close.
 - Three aligned portrait cards per row on mobile; ads in one column.
 - No horizontal overflow at 320, 390, 700, 1024, and 1440px.
-- Production build passed and 11 Chromium tests passed; desktop/mobile screenshots inspected.
+- Latest visual refresh: production build and all 223 standard checks passed; desktop/mobile renders and compact ads inspected.
 - macOS Safari and actual Agrandir rendering remain unverified in this Linux environment.
 
 See [the roadmap](../../next_steps.md) for current verification outcomes and next work.
+
+## 2026-11-13 visual refresh
+
+Robbie requested a sexier look and feel. Discovery now uses an editorial two-line
+headline, a restrained burgundy/navy glow, blush secondary typography, rounded
+portrait cards with deeper gradients, subtle hover motion, and a pill-shaped
+burgundy view switch. This is a reviewable interpretation, not additional approved
+product scope. Existing photos and all fictional-data disclosures remain.
+Three portrait cards per mobile row and single-column compact ads are preserved.
+Reduced-motion settings disable photo zoom; hovering never lifts a card out of its row. Agrandir still needs licensed files.

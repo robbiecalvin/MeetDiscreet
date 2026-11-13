@@ -17,8 +17,14 @@ in their dedicated documents.
 Current phase: Frontend development with an initial Supabase development backend.
 
 Current activity:
-Continue private account/draft tools and frontend pages, with a combined manual
-walkthrough deferred at Robbie’s request. Discovery remains synthetic. Routine visual choices remain provisional under Robbie’s request to keep building and revise later.
+Robbie requested a sexier look and feel. Discovery has an editorial visual refresh
+for review, preserving the selected palette, three-column mobile portrait grid,
+compact ads and existing functionality. Discovery remains synthetic. The combined
+manual walkthrough is still deferred; backend pilot work remains on the roadmap.
+Visual refresh verification: production build and all 223 standard checks passed;
+Chromium renders inspected at 320, 390 and 1440px, including the compact ads view.
+Backend-specific suites were not rerun for this scoped presentation change.
+Licensed Agrandir files and macOS Safari verification remain outstanding.
 
 Known status:
 
