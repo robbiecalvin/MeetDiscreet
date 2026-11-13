@@ -958,3 +958,11 @@ calendar date/time format, safe positive minute values and local text bounds, no
 real availability, DST feasibility, entitlements or financial approval. Comparison
 uses text nodes (including user-entered markup). Edits invalidate old comparisons;
 reset requires explicit confirmation and never claims agreement or submission.
+
+
+Booking activity in the preview is synthetic presentation data only. Local
+revision actions cannot insert events; no audit/payment/reservation endpoint is
+called. Text nodes and semantic time elements display fixed example actors and
+timestamps. Oldest/Newest ordering is view-local per example/perspective and
+resets after identity change/reload. This supplies no evidence of delivery,
+agreement, payment verification or actual booking authorization.

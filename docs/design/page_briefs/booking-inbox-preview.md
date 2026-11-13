@@ -73,3 +73,18 @@ example requests retains local drafts within that perspective. Reset confirmatio
 restores original example terms for that context only. Perspective isolation,
 reload and identity cleanup prevent local drafts from appearing in another context.
 Original fixture/calendar dates and the separate unsent booking plan never change.
+
+## Fictional activity preview
+
+View example activity expands an ordered list of synthetic events for the selected
+request. Show fictional actor, explicit example timestamp in America/Vancouver,
+and a concise explanation. Oldest/Newest first toggles reorder presentation only,
+preserving that example/perspective preference while the view remains open.
+These are fixtures, not a saved booking history, backend audit trail or evidence
+of payment/delivery. Unknown example IDs produce no fixture events.
+
+The accepted example stops at accepted-awaiting-deposit. The confirmed illustration
+still explicitly states no payment was processed and no time reserved. No fee,
+quote, deadline, receipt or verification ID is invented. Local revision reviews
+never append events to this history. No event actions, API calls or persistence
+are added. Identity cleanup/reload resets activity display state with the inbox.

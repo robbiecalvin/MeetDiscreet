@@ -1400,6 +1400,20 @@ If launch scope is reduced:
   revision disclosure. No migration, live state restriction, eligibility/availability
   enforcement, payment rule or booking mutation is added.
 
+### Fictional Booking Activity Preview
+
+- Example request detail now includes an activity disclosure with fictional actor/
+  timestamp entries and oldest/newest ordering. Events illustrate request, revision,
+  acceptance and confirmed states without claiming actual transactions or records.
+- Accepted stays distinct from confirmed; no deposit/fee/receipt is invented.
+  Local revision reviews do not create events. Activity state stays within each
+  example/perspective and resets with identity/reload; no backend log is added.
+- Build, all 219 standard checks and 124 backend browser checks passed; mobile
+  inspected. Coverage includes timestamp/order presentation, accepted-vs-confirmed
+  distinction, no events from local revision reviews, per-example ordering and
+  identity reset. No migration, live booking transition, payment verification or
+  operational retention policy is added.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

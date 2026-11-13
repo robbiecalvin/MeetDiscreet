@@ -791,3 +791,5 @@ underlying feature is operational.
 - `src/booking-calendar.js`: UTC Gregorian month-grid and bounded month-navigation helpers for the fictional booking inbox; no availability or reservation authority.
 
 - `src/booking-revision-preview.js`: per-example local revision form, date/time/duration/text checks and safe original/local comparison; no agreement, pricing or request mutation.
+
+- `src/booking-activity-preview.js`: synthetic per-example activity disclosure, fictional actor/time display and local ordering preference; never a saved booking audit or payment log.
