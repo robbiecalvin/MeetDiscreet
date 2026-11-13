@@ -85,3 +85,19 @@ burgundy view switch. This is a reviewable interpretation, not additional approv
 product scope. Existing photos and all fictional-data disclosures remain.
 Three portrait cards per mobile row and single-column compact ads are preserved.
 Reduced-motion settings disable photo zoom; hovering never lifts a card out of its row. Agrandir still needs licensed files.
+
+## 2026-11-13 — Entrance visual continuation
+
+Continued Robbie’s refresh after “next”. Scoped `src/age-gate.css` adds a
+burgundy/navy backdrop, rounded panel/actions, blush secondary headline and
+clear keyboard focus. The headline text and all gate actions are unchanged.
+The native modal still blocks underlying interaction; overflow scrolls inside
+the dialog on short screens. Thirty-day retention, direct-route preservation,
+external-referrer Exit and Google fallback remain unchanged.
+Exact rendering awaits Robbie’s review.
+
+Validation: production build and 31 discovery/guidelines/help checks passed,
+including gate blocking, retention, storage fallback, policies and Exit behaviour.
+Inspected 320×568, 390×844 and 1440×1000 renders; no horizontal dialog/document
+overflow and Exit remains reachable on the short screen. Safari/Agrandir remain
+unverified.

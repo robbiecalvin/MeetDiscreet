@@ -515,3 +515,9 @@ Styled How it works after “next”. Keep reference plans visually equal rather
 implying a recommended purchase; preserve exact amounts and unresolved terms.
 Journey cards and FAQ disclosures follow the editorial public-page treatment.
 Exact rendering awaits review.
+
+## 2026-11-13 — Entrance continuation
+
+Matched the age gate to the editorial site styling after “next”. Preserve its
+concise confirmation, accessible Exit, thirty-day retention and public policy links.
+Short screens use native dialog scrolling. Exact rendering awaits review.

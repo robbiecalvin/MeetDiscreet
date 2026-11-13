@@ -19,7 +19,7 @@ Current phase: Frontend development with an initial Supabase development backend
 Current activity:
 Robbie requested a sexier look and feel. Discovery has an editorial visual refresh
 for review, followed by matching companion-profile, Offering detail, Looking For summary
-and account-entry/overview, User/Provider setup, conversation, booking inbox/plan editor and User/Provider profile-editor, listing-workspace, experience catalogue, availability, local photo-workspace and How it works
+and account-entry/overview, User/Provider setup, conversation, booking inbox/plan editor and User/Provider profile-editor, listing-workspace, experience catalogue, availability, local photo-workspace, How it works and entrance-gate
 presentation.
 These preserve the
 selected palette; discovery retains its three-column mobile portrait grid,
@@ -68,6 +68,9 @@ with fictional test images; no overflow at 320/390/1440px. Files remain device-l
 How it works refresh: production build and 20 public-page/discovery checks passed.
 Mobile intro/journey and desktop plan renders inspected; 320/390/1440px overflow
 checks passed. Reference prices, entitlement distinctions and pending policies are unchanged.
+Entrance refresh: production build and 31 discovery/guidelines/help checks passed.
+320×568/mobile/desktop gate renders inspected; no horizontal overflow, with Exit
+reachable on the short screen. Thirty-day retention and Exit navigation are unchanged.
 Licensed Agrandir files and macOS Safari verification remain outstanding.
 
 Known status:
