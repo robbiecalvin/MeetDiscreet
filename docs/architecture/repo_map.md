@@ -162,6 +162,7 @@ conflict with approved MeetDiscreet decisions.
 - src/public-readers.css: scoped Help search/answers and Community Guidelines reader presentation.
 - src/provider-application.css: scoped private intake form, state/history and activity presentation.
 - src/navigation.css: shared narrow-screen signed-in header, disabled controls and keyboard focus.
+- src/draft-backup.css: scoped saved-draft download selections and status presentation.
 - src/styles.css: shared tokens, portrait grid, single-column ads, responsive layout.
 - src/discovery.css: scoped editorial discovery treatment and its view dock, including reduced-motion overrides.
 - src/data.js: synthetic public profile and ad fixtures; no live presence.

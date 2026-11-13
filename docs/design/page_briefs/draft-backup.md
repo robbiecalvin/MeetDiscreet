@@ -34,3 +34,18 @@ unselected top-level fields. File name is fixed and contains no account identity
 Say download prepared/check browser downloads, not that the device saved the file.
 Move focus to the prepared-download result for a clear keyboard/screen-reader outcome.
 No permission grants, SQL migration, import, payment or publishing action.
+
+## 2026-11-13 — Download workspace visual continuation
+
+Continued Robbie’s refresh after “next”. Scoped `src/draft-backup.css` adds
+rounded selection cards, a distinct status panel and matching typography/actions.
+Selected checkboxes retain their native checked state plus an accent border;
+keyboard focus also outlines the option card. All options still start unchecked.
+No data projections, owner checks, file scope, download timing or storage rules
+changed. This remains a selected saved-draft reference copy, not an account archive.
+Exact rendering awaits Robbie’s review.
+
+Validation: production build, one backend-disabled route check and four mocked
+download/ownership/completeness/cleanup checks passed. Mocked signed-in mobile/
+desktop renders inspected; no overflow at 320/390/1440px and no initial selections.
+Hosted access, Safari and licensed Agrandir remain unverified.

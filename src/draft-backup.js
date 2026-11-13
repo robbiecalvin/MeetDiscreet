@@ -1,3 +1,4 @@
+import './draft-backup.css';
 import { backendEnabled, requireUser } from './backend/client.js';
 import { draftBackupKinds, readSavedDraftCopy } from './backend/draft-backup.js';
 function node(tag,text,className) {

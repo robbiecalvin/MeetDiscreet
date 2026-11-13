@@ -21,7 +21,7 @@ Complete the shared visual consistency pass following Robbie’s requested sexie
 look and feel. The public discovery/profile/ad pages, account entry/security,
 User/Provider setup and profile editors, listing tools, experience catalogue,
 availability, photo workspace, conversation/booking previews, Help, guidelines
-and entrance gate have matching editorial styling. Exact rendering remains for
+entrance gate and saved-draft download have matching editorial styling. Exact rendering remains for
 Robbie’s review. The selected palette, three-column mobile portrait grid and
 compact ads remain intact. Relevant page briefs record per-increment validation.
 
@@ -31,6 +31,9 @@ all 223 standard checks and all 131 mocked backend browser checks passed.
 Mocked signed-in 320px overflow checks passed across 14 routes; discovery, profile
 and conversation renders were inspected. Hosted integrations remain separately
 unverified.
+Saved-draft download visual follow-up: production build and five focused checks
+passed; mocked signed-in 320/390/1440px renders inspected with no overflow and
+all selection options initially unchecked. No download data scope changed.
 The combined manual walkthrough remains deferred at Robbie’s request.
 Discovery is synthetic; conversations/bookings/photos remain explicitly labelled
 previews. Visual polish does not establish live marketplace readiness.

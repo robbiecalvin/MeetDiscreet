@@ -548,3 +548,9 @@ styles after “next”. Apply the same layout on discovery, profile and draft r
 keep disabled states and keyboard focus visible. Per-page polish is not launch
 readiness. The current-work roadmap now summarizes the pass; detailed validation
 remains in the relevant page briefs.
+
+## 2026-11-13 — Draft download continuation
+
+Matched the saved-draft download page to the refreshed account tools after “next”.
+Keep the scope note and explicit checkbox selection clear; no default selection or
+extra data reads. Exact rendering awaits review.
