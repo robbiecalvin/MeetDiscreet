@@ -165,3 +165,20 @@ and clears entered password fields across forms. No roles or eligibility are gra
 Email confirmation settings and delivery remain server authoritative and require
 hosted verification. No SMTP provider, service secret, paid plan, database migration,
 custom email sending or new final verification policy is introduced.
+
+## 2026-11-13 — Entry visual refresh
+
+Continued Robbie’s requested visual style onto sign-in, registration and recovery
+forms after “next”. `account-entry-layout` scopes `src/account-entry.css` to these
+forms, leaving account/private workspaces unchanged. Larger editorial headings,
+blush accents, a rounded burgundy-tinted panel and rounded actions follow the public
+pages. User/Provider intent choices remain explicit; selected options use an accent
+border in addition to the native radio. Labelled inputs retain visible error borders
+and keyboard focus. No authentication logic, policy, role grants or storage changed.
+The rendering is provisional for Robbie’s review; licensed Agrandir remains absent.
+
+Validation: production build, 13 account-screen checks and 131 mocked backend
+browser checks passed. Inspected 390px registration and 1440px sign-in renders;
+320px registration overflow check passed. Existing account checks cover recovery
+and responsive widths. Hosted Supabase/email, Safari and licensed Agrandir were
+not verified by this presentation change.

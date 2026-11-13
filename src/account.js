@@ -1,3 +1,4 @@
+import './account-entry.css';
 import { backendEnabled, backendClient, authRedirect } from './backend/client.js';
 const modes = {
   'sign-in': { title: 'Good to see you again.', intro: 'A familiar face. A new plan.', action: 'Check sign-in preview' },
@@ -24,7 +25,7 @@ export function renderAccount(container, mode, onMode, onBack) {
     event.preventDefault(); onBack();
   });
   container.append(back);
-  const layout = element('div', null, 'account-layout');
+  const layout = element('div', null, 'account-layout account-entry-layout');
   const intro = element('div', null, 'account-intro');
   intro.append(element('p', 'YOUR NEXT SHARED MOMENT', 'eyebrow'), element('h1', config.title), element('p', config.intro, 'offering-lead'), element('p', backendEnabled ? 'Development authentication is connected. Use test accounts while eligibility, final policies, and launch operations are being completed. Saving a private draft does not publish it.' : 'Account screen preview. Use fictional details only. Authentication is not connected; nothing is sent or saved.', 'account-preview-note'));
   const panel = element('div', null, 'account-panel');
