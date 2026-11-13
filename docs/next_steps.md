@@ -1414,6 +1414,24 @@ If launch scope is reduced:
   identity reset. No migration, live booking transition, payment verification or
   operational retention policy is added.
 
+### Version-Bound Private Profile Feedback
+
+- Separately scoped profile reviewers can record one immutable owner-visible note
+  for an exact pending copy. Current staff role + inspection + new feedback scope
+  are required; self/withdrawn/duplicate writes fail. The note/audit transaction
+  changes no publication state, copy withdrawal, role or entitlement.
+- Owners explicitly read feedback on pending/history copies without reviewer ID;
+  withdrawal retains version feedback while a new copy starts separately. No email.
+  Missing feedback setup preserves existing inspection and copy operations.
+- Draft discard guards, in-flight workspace lock, safe text, failed-note preservation
+  and stale-response checks protect the UI. Protected read/write logs contain
+  metadata only. Build, all 223 standard checks (48 database/config/security cases)
+  and 131 backend browser checks passed; mobile inspected. Coverage includes scope/
+  actor/version boundaries, owner column privacy, self/duplicate/withdrawn denial,
+  audit rollback, draft guards/commit lock, missing setup and retained history.
+  Migration/scopes are not applied remotely; hosted JWT/concurrency, operational
+  retention and public publishing remain pending.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

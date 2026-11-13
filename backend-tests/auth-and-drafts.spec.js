@@ -10,7 +10,7 @@ function session(profile = user) {
   return { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock_refresh_token', user: profile };
 }
 async function mockBackend(page, options = {}) {
-  const state = { profileReviewEvents:[], profilePublications:[], profilePublication:null, bookingPlan: null, user: { ...user, user_metadata: {} }, providerApplication: null, applicationApprovals: [], targetRoles: ['user'], approvalFailure: false, applicationFeedback: [], applicationActivity: [], activityFailure: false, applicationSubmissions: [], historyFailure: false, applicationSubmissionCounter: 0, userProfile: null, roles: ['user'], capabilities: [], reviewApplications: [], reviewAccessEvents: [], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
+  const state = { profileFeedback:[], profileReviewEvents:[], profilePublications:[], profilePublication:null, bookingPlan: null, user: { ...user, user_metadata: {} }, providerApplication: null, applicationApprovals: [], targetRoles: ['user'], approvalFailure: false, applicationFeedback: [], applicationActivity: [], activityFailure: false, applicationSubmissions: [], historyFailure: false, applicationSubmissionCounter: 0, userProfile: null, roles: ['user'], capabilities: [], reviewApplications: [], reviewAccessEvents: [], availability: null, profile: options.savedSummaries ? { owner_id: userId } : null, catalogue: options.savedSummaries ? [{ title: 'Coffee' }] : null, listings: options.savedSummaries ? [{ id: listingId }] : [], requests: [], recoveryRedirect: null };
   await page.route('https://backend-test.supabase.co/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -158,6 +158,24 @@ async function mockBackend(page, options = {}) {
       }
       if (method === 'POST') { state.catalogue = body.items; return respond(null, 201); }
       return respond(state.catalogue === null ? [] : [{ items: state.catalogue }]);
+    }
+    if(url.pathname==='/rest/v1/rpc/can_give_profile_publication_feedback') {
+      if(options.missingProfileFeedbackMigration)return respond({message:'Missing'},404);
+      return respond(state.roles.some(role=>['moderator','admin'].includes(role))&&state.capabilities.includes('profile_publication_review')&&state.capabilities.includes('profile_publication_feedback'));
+    }
+    if(['/rest/v1/rpc/get_profile_revision_feedback','/rest/v1/rpc/record_profile_revision_feedback'].includes(url.pathname)) {
+      if(options.missingProfileFeedbackMigration)return respond({message:'Missing'},404);
+      const allowed=state.roles.some(role=>['moderator','admin'].includes(role))&&state.capabilities.includes('profile_publication_review')&&state.capabilities.includes('profile_publication_feedback');
+      if(!allowed||body.p_expected_reviewer!==state.user.id)return respond({message:'Denied'},403);
+      const copy=state.profilePublications.find(row=>row.id===body.p_submission&&!row.withdrawn_at);
+      if(url.pathname.endsWith('/get_profile_revision_feedback')){state.profileReviewEvents.push({action:'feedback_opened',submission_id:body.p_submission});return respond(copy?state.profileFeedback.filter(row=>row.submission_id===copy.id).map(({submission_id,note,created_at})=>({submission_id,note,created_at})):[]);}
+      if(!copy||copy.owner_id===state.user.id||!body.p_note?.trim()||body.p_note.trim().length>1000||state.profileFeedback.some(row=>row.submission_id===copy.id))return respond({message:'Unavailable or duplicate'},409);
+      const feedback={submission_id:copy.id,reviewer_id:state.user.id,note:body.p_note.trim(),created_at:'2026-11-13T20:00:00Z'};state.profileFeedback.push(feedback);state.profileReviewEvents.push({action:'feedback_recorded',submission_id:copy.id});const {submission_id,note,created_at}=feedback;return respond({submission_id,note,created_at});
+    }
+    if(url.pathname==='/rest/v1/profile_publication_feedback') {
+      if(options.missingProfileFeedbackMigration)return respond({message:'Missing'},404);
+      const id=url.searchParams.get('submission_id')?.replace('eq.','');const copy=[...state.profilePublications,...(state.profilePublication?[state.profilePublication]:[])].find(row=>row.id===id&&row.owner_id===state.user.id);
+      return respond(copy?state.profileFeedback.filter(row=>row.submission_id===id).map(({submission_id,note,created_at})=>({submission_id,note,created_at})):[]);
     }
     if (['/rest/v1/rpc/can_review_profile_publications','/rest/v1/rpc/list_profile_publications_for_review','/rest/v1/rpc/search_profile_publications_for_review','/rest/v1/rpc/get_profile_publication_for_review'].includes(url.pathname)) {
       if(options.missingProfileReviewMigration)return respond({message:'Missing'},404);
@@ -2060,4 +2078,37 @@ test('sign-out clears local booking revision drafts without saving or submitting
   await page.locator('.booking-example-activity summary').click();await page.locator('.booking-example-activity').getByRole('button',{name:'Newest first',exact:true}).click();
   await page.getByRole('button',{name:'Sign out',exact:true}).click();await expect(page.locator('.booking-local-revision')).toHaveCount(0);await page.getByRole('button',{name:'View example: A gallery afternoon',exact:true}).click();await page.locator('.booking-local-revision summary').click();await expect(page.getByLabel('Local revision notes (optional)',{exact:true})).not.toHaveValue('LOCAL PROPOSAL TO CLEAR');await page.locator('.booking-example-activity summary').click();await expect(page.locator('.booking-example-activity').getByRole('button',{name:'Oldest first',exact:true})).toHaveAttribute('aria-pressed','true');
   expect(state.requests.filter(value=>value.method==='POST'&&value.path.startsWith('/rest/'))).toEqual([]);
+});
+
+test('scoped profile staff record immutable private feedback with discard protection and an in-flight queue lock',async({page})=>{
+ const state=await mockBackend(page);state.roles=['user','moderator'];state.capabilities=['profile_publication_review','profile_publication_feedback'];state.profilePublications=profileReviewRows(2);
+ await signIn(page);await enter(page,'/?page=profile-review');await page.locator('.profile-review-card').getByRole('button').click();const note=page.getByLabel('Revision feedback for this profile copy',{exact:true});await note.fill('Please clarify <img src=x> the public tagline.');
+ const before=state.requests.length;page.once('dialog',dialog=>dialog.dismiss());await page.getByRole('button',{name:'Refresh profile review queue',exact:true}).click();await expect(note).toHaveValue('Please clarify <img src=x> the public tagline.');expect(state.requests.length).toBe(before);
+ await page.setViewportSize({width:390,height:900});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.locator('.profile-feedback').screenshot({path:'/tmp/profile-feedback-form-mobile.png'});
+ page.once('dialog',dialog=>dialog.dismiss());await page.getByRole('button',{name:'Record revision feedback',exact:true}).click();expect(state.profileFeedback).toHaveLength(0);
+ let release,started;const gate=new Promise(resolve=>{release=resolve;});const requested=new Promise(resolve=>{started=resolve;});await page.route('**/rest/v1/rpc/record_profile_revision_feedback',async route=>{started();await gate;await route.fallback();});
+ page.once('dialog',dialog=>dialog.accept());await page.getByRole('button',{name:'Record revision feedback',exact:true}).click();await requested;await page.getByRole('button',{name:'Refresh profile review queue',exact:true}).click();await expect(page.locator('.profile-review > [role=status]')).toContainText('Wait for the feedback operation');await expect(note).toBeDisabled();release();
+ await expect(page.locator('.profile-feedback > [role=status]')).toContainText('Revision feedback recorded');await expect(page.locator('.profile-feedback-note')).toContainText('<img src=x>');await expect(page.locator('.profile-feedback img')).toHaveCount(0);await expect(note).toHaveCount(0);expect(state.profileFeedback).toHaveLength(1);expect(state.profilePublications[0].withdrawn_at).toBeNull();expect(state.roles).toEqual(['user','moderator']);
+});
+for(const missing of [false,true])test(`profile inspection remains usable ${missing?'without feedback setup':'without feedback capability'}`,async({page})=>{
+ const state=await mockBackend(page,{missingProfileFeedbackMigration:missing});state.roles=['user','moderator'];state.capabilities=['profile_publication_review',...(missing?['profile_publication_feedback']:[])];state.profilePublications=profileReviewRows(2);
+ await signIn(page);await enter(page,'/?page=profile-review');await page.locator('.profile-review-card').getByRole('button').click();await expect(page.locator('.profile-review-detail')).toBeVisible();await expect(page.getByRole('button',{name:'Record revision feedback',exact:true})).toHaveCount(0);expect(state.requests.filter(row=>row.path.endsWith('/record_profile_revision_feedback'))).toEqual([]);
+});
+test('owners read version-bound feedback without reviewer identity and can revisit a withdrawn copy in history',async({page})=>{
+ const state=await mockBackend(page);const old={id:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',owner_id:userId,source_updated_at:'2026-11-10T19:00:00Z',submitted_at:'2026-11-10T20:00:00Z',withdrawn_at:null,public_fields:{display_name:'Original copy'}};state.profilePublication=old;state.profileFeedback=[{submission_id:old.id,reviewer_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',note:'Please revise <script> the tagline.',created_at:'2026-11-13T20:00:00Z'}];
+ await signIn(page);await enter(page,'/?page=provider-setup');await page.getByRole('button',{name:'Check my private profile submission',exact:true}).click();const pending=page.locator('.profile-submission');await pending.getByRole('button',{name:'Check feedback for this copy',exact:true}).click();await expect(pending.locator('output')).toContainText('Revision feedback for this recorded copy');await expect(pending.locator('.profile-feedback-note')).toHaveText('Please revise <script> the tagline.');await expect(pending.locator('script')).toHaveCount(0);
+ const request=state.requests.find(row=>row.path==='/rest/v1/profile_publication_feedback');expect(new URLSearchParams(request.query).get('select')).toBe('submission_id,note,created_at');await expect(pending).not.toContainText('bbbbbbbb-bbbb');
+ old.withdrawn_at='2026-11-13T21:00:00Z';const next={...old,id:'ffffffff-ffff-4fff-8fff-ffffffffffff',public_fields:{display_name:'New copy'},submitted_at:'2026-11-13T22:00:00Z',withdrawn_at:null};state.profilePublication=next;state.profilePublications=[old,next];
+ await page.getByRole('button',{name:'Check my private profile submission',exact:true}).click();await pending.getByRole('button',{name:'Check feedback for this copy',exact:true}).click();await expect(pending.locator('output')).toHaveText('No revision feedback recorded for this copy.');await expect(pending.locator('.profile-feedback-note')).toHaveText('');
+ await page.getByRole('button',{name:'Load my profile copy history',exact:true}).click();const card=page.locator('.profile-submission-history .staff-approval-card').filter({has:page.getByRole('heading',{name:'Original copy',exact:true})});await card.locator('summary').click();await card.getByRole('button',{name:'Check feedback for this copy',exact:true}).click();await expect(card.locator('.profile-feedback-note')).toContainText('Please revise');
+});
+for(const failure of ['withdrawn','revoked'])test(`profile feedback ${failure} failure preserves the note without success and refresh clears it after confirmation`,async({page})=>{
+ const state=await mockBackend(page);state.roles=['user','moderator'];state.capabilities=['profile_publication_review','profile_publication_feedback'];state.profilePublications=profileReviewRows(2);
+ await signIn(page);await enter(page,'/?page=profile-review');await page.locator('.profile-review-card').getByRole('button').click();const note=page.getByLabel('Revision feedback for this profile copy',{exact:true});await note.fill('Keep this draft after an unconfirmed write.');
+ if(failure==='withdrawn')state.profilePublications[0].withdrawn_at='2026-11-13T20:00:00Z';else state.capabilities=['profile_publication_review'];page.once('dialog',dialog=>dialog.accept());await page.getByRole('button',{name:'Record revision feedback',exact:true}).click();await expect(page.locator('.profile-feedback > [role=status]')).toContainText('Unable to confirm');await expect(note).toHaveValue('Keep this draft after an unconfirmed write.');expect(state.profileFeedback).toHaveLength(0);
+ page.once('dialog',dialog=>dialog.accept());await page.getByRole('button',{name:'Refresh profile review queue',exact:true}).click();await expect(note).toHaveCount(0);
+});
+test('staff cannot give profile feedback to their own copy',async({page})=>{
+ const state=await mockBackend(page);state.roles=['user','provider','moderator'];state.capabilities=['profile_publication_review','profile_publication_feedback'];state.profilePublications=profileReviewRows(2);state.profilePublications[0].owner_id=userId;
+ await signIn(page);await enter(page,'/?page=profile-review');await page.locator('.profile-review-card').getByRole('button').click();await expect(page.locator('.profile-review-detail')).toBeVisible();await expect(page.getByRole('button',{name:'Record revision feedback',exact:true})).toHaveCount(0);
 });

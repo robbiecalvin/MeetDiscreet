@@ -1,6 +1,6 @@
 # Private Profile Submission Inspection
 
-Status: staff inspection implemented, not publication approval. Use the existing
+Status: staff inspection and separately scoped revision feedback implemented, not publication approval. Use the existing
 staff queue layout and provisional routine styling under Robbie's build-now
 instruction. Public approval authority/edited-version visibility remain OPEN-052/053.
 
@@ -24,9 +24,8 @@ record disappears before opening. Errors and denied access differ from an empty
 queue, clear private cards and allow retry. Sign-out/identity changes remove the
 workspace; version guards discard late responses. No cached/private demo fallback.
 
-Read operations record protected metadata only. No approval/rejection/feedback,
-role grant, public profile, payment/eligibility claim or staff provisioning is
-introduced. Inspection cannot promise immediate revocation of already-seen data.
+Read operations record protected metadata only. No public approval/rejection, role grant, public profile, payment/eligibility
+claim or staff provisioning is introduced. Revision feedback is described below. Inspection cannot promise immediate revocation of already-seen data.
 
 ## Pending-copy search
 
@@ -42,3 +41,25 @@ Missing search setup gives an unavailable state, with Clear available to use the
 unchanged default listing RPC. No-match results remain distinct. Lost access
 hides the form and clears records; late results cannot replace a newer query.
 The shared review-search form wraps on mobile. No approval action is added.
+
+
+## Version-bound owner-visible revision feedback
+
+Current Moderator/Admin plus both `profile_publication_review` and the independent
+`profile_publication_feedback` scope can record one immutable note for an inspected
+pending copy. Hide the form without feedback scope/migration, retaining authorized
+inspection. Do not offer self-feedback. Check existing feedback before showing a
+form, and render a recorded note without an overwrite control.
+
+Require nonblank text (1,000-character technical bound) and explicit confirmation.
+Tell staff that the owner can read it, no email is sent and no publication/withdrawal
+decision is made. Lock workspace actions during the write. Cancelled discard
+keeps a note and sends no request; failed writes preserve it and require checking
+recorded feedback before retry. Workspace refresh/search/page/close/back actions
+ask before discarding draft text. Native unload warning follows the shared tracker;
+unrelated header/history navigation has no new global SPA guard.
+
+Scope loss or withdrawal is rechecked on the server. Sign-out/identity changes
+clear private UI without waiting for a draft prompt; this does not promise an
+already-issued server request was cancelled. Staff reads/writes record protected
+operation metadata without note content. No actual scope assignment is performed.

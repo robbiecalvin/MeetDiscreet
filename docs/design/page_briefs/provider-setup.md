@@ -109,3 +109,16 @@ old cards and differ from an empty history. Pending-copy checks, submissions and
 withdrawals reset history so a fresh explicit load is required; late responses
 cannot restore invalidated results. Sign-out clears the workspace. No browser
 persistence, automatic polling, history deletion or restoration action is added.
+
+## Feedback on a private profile copy
+
+Pending copies and expandable history cards provide an explicit Check feedback
+for this copy action. Read only that owner/version's note and timestamp metadata,
+without exposing reviewer identity. Distinguish no feedback from unavailable
+setup and clear old text before retry. Existing copy actions remain usable if
+feedback setup is absent. History includes feedback retained after withdrawal.
+
+A note does not automatically approve, withdraw or change the copy's state. To
+replace a copy, the owner uses existing withdrawal, saved-profile editing/review
+and new submission actions. New copies do not inherit old-version feedback.
+Nothing is published, notified by email or granted by reading feedback.

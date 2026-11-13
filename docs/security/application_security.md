@@ -966,3 +966,26 @@ called. Text nodes and semantic time elements display fixed example actors and
 timestamps. Oldest/Newest ordering is view-local per example/perspective and
 resets after identity change/reload. This supplies no evidence of delivery,
 agreement, payment verification or actual booking authorization.
+
+
+## Private profile revision feedback
+
+Feedback needs actual current Moderator/Admin plus inspection and a separate
+`profile_publication_feedback` scope. Actor binding and server-derived copy ownership
+prevent forged/self notes; pending checks, row locks and a unique copy key reject
+withdrawn targets and duplicate writes. Note/audit writes share a transaction.
+Current authority is rechecked; metadata claims and unrelated scopes cannot grant it.
+
+Owners read only submission ID/note/time via parent ownership RLS. Reviewer ID
+is not granted to authenticated clients, and raw unrelated reads/DML are denied.
+Staff RPCs expose no reviewer identity. Free-form owner-visible text may of course
+contain names entered by its author; this is not anonymization. Protected access
+events record operation IDs, never note text; infrastructure logging is separate.
+
+UI uses text nodes, drops detached responses, preserves failed drafts and checks
+existing records before retry. Workspace discard guards/native unload tracking
+protect draft notes; pending writes lock workspace navigation, while sign-out
+clears UI immediately and cannot guarantee cancellation of an issued request.
+No publishing decision, automatic state/role change, email or privileged browser
+key is introduced. Copy/account cascades apply; hosted JWT/concurrency and broader
+operational retention remain unverified.

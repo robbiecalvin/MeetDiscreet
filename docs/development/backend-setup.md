@@ -560,3 +560,30 @@ substrings. Length 1–100, page size 1–50 and paired time/UUID cursor are val
 Protected read metadata adds `queue_search` without query text or candidate content.
 The old list RPC remains intact; missing search schema is explicitly unavailable
 and Clear uses that old listing path. Hosted JWT checks remain pending.
+
+
+## Version-bound private profile feedback
+
+After profile search, apply
+[202611130002_profile_revision_feedback.sql](../../supabase/migrations/202611130002_profile_revision_feedback.sql)
+once. The agent has not applied it remotely or assigned real scopes. The new
+`profile_publication_feedback` capability is independent; staff need current
+Moderator/Admin plus both inspection and feedback scopes. Existing intake
+feedback/approval scopes do not substitute.
+
+The migration creates one immutable owner-visible note per copy, with reviewer
+ID retained privately. Authenticated owners receive column-level reads of only
+submission ID, note and creation time through parent ownership RLS. Client direct
+writes/reviewer-column reads are denied. Scoped staff RPCs return only note/time
+metadata for pending copies; record rejects self, withdrawn/missing copies and
+duplicates, locks current authority/copy rows, and atomically records protected
+operation metadata. Audit failure rolls back the note. No note text enters that
+access-event table. Copy/account deletion cascades feedback; retention policy
+otherwise remains separate.
+
+No publication or intake state is changed. Owners withdraw/edit/resubmit to
+replace a copy; new IDs do not inherit earlier feedback. No email is sent. Missing
+feedback setup preserves inspection and copy actions while showing feedback as
+unavailable. Check recorded feedback after an ambiguous response before retrying.
+Hosted JWT, real staff provisioning and concurrent revocation/withdrawal behavior
+remain to verify during the deferred walkthrough; local tests do not establish them.

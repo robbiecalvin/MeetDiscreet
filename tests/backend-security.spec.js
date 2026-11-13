@@ -38,10 +38,11 @@ test.beforeAll(async () => {
   await db.exec(await readFile(new URL('../supabase/migrations/202611100004_private_profile_submissions.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611100005_profile_publication_review.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611130001_profile_review_search.sql', import.meta.url), 'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/202611130002_profile_revision_feedback.sql', import.meta.url), 'utf8'));
 });
 test.afterAll(async () => { await db.close(); });
 test.beforeEach(async () => {
-  await db.exec('reset role; truncate public.profile_publication_review_access_events, public.profile_publication_submissions, public.provider_application_approvals, public.booking_plan_drafts, public.listing_drafts, public.profile_drafts, public.experience_catalogue_drafts, public.availability_drafts, public.user_profile_drafts, public.provider_applications, public.provider_application_events, public.provider_application_submissions, public.provider_application_feedback, public.staff_capabilities, public.staff_capability_events, public.provider_review_access_events;');
+  await db.exec('reset role; truncate public.profile_publication_feedback, public.profile_publication_review_access_events, public.profile_publication_submissions, public.provider_application_approvals, public.booking_plan_drafts, public.listing_drafts, public.profile_drafts, public.experience_catalogue_drafts, public.availability_drafts, public.user_profile_drafts, public.provider_applications, public.provider_application_events, public.provider_application_submissions, public.provider_application_feedback, public.staff_capabilities, public.staff_capability_events, public.provider_review_access_events;');
   await asUser(alice);
 });
 
@@ -670,4 +671,35 @@ test.describe('scoped pending profile-copy search',()=>{
     await prepare();await expect(search(null)).rejects.toThrow(/search text/i);await expect(search(' ')).rejects.toThrow(/search text/i);await expect(search('x'.repeat(101))).rejects.toThrow(/search text/i);await expect(search('Van',alice,51)).rejects.toThrow(/page size/i);await expect(search('Van',alice,21,'2026-11-13T12:00:00Z')).rejects.toThrow(/page cursor/i);
     await search('Van');await db.exec('reset role');expect((await db.query('select count(*)::int as n from public.profile_publication_submissions where withdrawn_at is null')).rows[0].n).toBe(2);expect((await db.query("select * from public.account_roles where role='provider'")).rows).toEqual([]);
   });
+});
+
+
+test.describe('version-bound private profile revision feedback',()=>{
+ const id='abcdefab-1111-4111-8111-111111111111';
+ async function prepare(){await db.exec('reset role');await db.query("delete from public.account_roles where user_id=$1 and role in ('moderator','admin')",[alice]);await db.query("insert into public.account_roles(user_id,role) values($1,'moderator')",[alice]);for(const capability of ['profile_publication_review','profile_publication_feedback'])await db.query('insert into public.staff_capabilities(user_id,capability) values($1,$2)',[alice,capability]);await db.query("insert into public.profile_publication_submissions(id,owner_id,source_updated_at,public_fields) values($1,$2,now(),$3)",[id,bob,{display_name:'Recorded Bob',username:'bob',adult_age:28}]);await asUser(alice);}
+ const write=(note='Please clarify the public tagline.',actor=alice,copy=id)=>db.query('select * from public.record_profile_revision_feedback($1,$2,$3)',[actor,copy,note]);
+ test.afterEach(async()=>{await db.exec('reset role');await db.query("delete from public.account_roles where user_id=$1 and role in ('moderator','admin')",[alice]);});
+ test('records one exact-copy note, exposes owner columns without staff identity and leaves publication/roles unchanged',async()=>{
+  await prepare();const result=(await write()).rows[0];expect(result.submission_id).toBe(id);expect(result).not.toHaveProperty('reviewer_id');
+  await asUser(bob);expect((await db.query('select submission_id,note,created_at from public.profile_publication_feedback')).rows[0].note).toContain('clarify');await expect(db.exec('select reviewer_id from public.profile_publication_feedback')).rejects.toThrow(/permission denied/i);
+  await db.exec('reset role');await db.query('insert into public.profile_drafts(owner_id,display_name) values($1,$2)',[bob,'Later private edit']);await asUser(alice);await expect(write('Overwrite')).rejects.toThrow(/unique/i);
+  await db.exec('reset role');expect((await db.query('select withdrawn_at from public.profile_publication_submissions where id=$1',[id])).rows[0].withdrawn_at).toBeNull();expect((await db.query("select * from public.account_roles where role='provider'")).rows).toEqual([]);const events=(await db.query("select * from public.profile_publication_review_access_events where action='feedback_recorded'")).rows;expect(events).toHaveLength(1);expect(JSON.stringify(events)).not.toContain('clarify');
+ });
+ test('requires both scopes/current staff role, rejects forged actor and self/withdrawn/missing copy or replay',async()=>{
+  await prepare();await expect(write('Note',bob)).rejects.toThrow(/account changed/i);await db.exec('reset role');await db.query("delete from public.staff_capabilities where user_id=$1 and capability='profile_publication_feedback'",[alice]);await asUser(alice);await expect(write()).rejects.toThrow(/feedback access/i);
+  await db.exec('reset role');await db.query("insert into public.staff_capabilities(user_id,capability) values($1,'profile_publication_feedback')",[alice]);await db.query("delete from public.staff_capabilities where user_id=$1 and capability='profile_publication_review'",[alice]);await asUser(alice);await expect(write()).rejects.toThrow(/feedback access/i);
+  await db.exec('reset role');await db.query("insert into public.staff_capabilities(user_id,capability) values($1,'profile_publication_review')",[alice]);await db.query('update public.profile_publication_submissions set owner_id=$1 where id=$2',[alice,id]);await asUser(alice);await expect(write()).rejects.toThrow(/self feedback/i);
+  await db.exec('reset role');await db.query('update public.profile_publication_submissions set owner_id=$1,withdrawn_at=clock_timestamp() where id=$2',[bob,id]);await asUser(alice);await expect(write()).rejects.toThrow(/pending profile copy/i);await expect(write('Note',alice,'ffffffff-ffff-4fff-8fff-ffffffffffff')).rejects.toThrow(/pending profile copy/i);
+ });
+ test('denies raw unrelated reads/client writes and enforces text limits; owners retain feedback on a withdrawn version',async()=>{
+  await prepare();await expect(write(' ')).rejects.toThrow(/1 to 1000/i);await expect(write('\t\n')).rejects.toThrow(/1 to 1000/i);await expect(write('x'.repeat(1001))).rejects.toThrow(/1 to 1000/i);await write();expect((await db.query('select note from public.profile_publication_feedback')).rows).toEqual([]);
+  for(const sql of ["insert into public.profile_publication_feedback(submission_id,reviewer_id,note) values('abcdefab-1111-4111-8111-111111111111',auth.uid(),'Forged')",'delete from public.profile_publication_feedback',"update public.profile_publication_feedback set note='Rewritten'"])await expect(db.exec(sql)).rejects.toThrow(/permission denied/i);
+  await asUser(bob);await db.query('select * from public.withdraw_private_profile_copy($1,$2)',[bob,id]);expect((await db.query('select note from public.profile_publication_feedback')).rows).toHaveLength(1);await asUser(alice);expect((await db.query('select * from public.get_profile_revision_feedback($1,$2)',[alice,id])).rows).toEqual([]);
+  await asUser('','anon');await expect(write()).rejects.toThrow(/permission denied/i);await expect(db.exec('select note from public.profile_publication_feedback')).rejects.toThrow(/permission denied/i);
+ });
+ test('audit failure rolls back the note, and revoked role/metadata claims cannot authorize staff feedback',async()=>{
+  await prepare();await db.exec('reset role');await db.exec("create function public.test_feedback_audit_failure() returns trigger language plpgsql as $$ begin if new.action='feedback_recorded' then raise exception 'audit failure'; end if; return new; end $$;create trigger test_feedback_audit_failure before insert on public.profile_publication_review_access_events for each row execute function public.test_feedback_audit_failure();");await asUser(alice);
+  try{await expect(write()).rejects.toThrow(/audit failure/i);}finally{await db.exec('reset role;drop trigger test_feedback_audit_failure on public.profile_publication_review_access_events;drop function public.test_feedback_audit_failure();');}
+  expect((await db.query('select * from public.profile_publication_feedback')).rows).toEqual([]);await db.query("delete from public.account_roles where user_id=$1 and role='moderator'",[alice]);await db.query('update auth.users set raw_user_meta_data=$1 where id=$2',[{role:'admin'},alice]);await asUser(alice);await expect(write()).rejects.toThrow(/feedback access/i);
+ });
 });

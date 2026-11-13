@@ -1,3 +1,4 @@
+import {profileCopyFeedback} from './profile-copy-feedback.js';
 import { profileSubmissionHistory, profileCopyFields } from './profile-submission-history.js';
 import { loadPendingProfileSubmission, submitPrivateProfileCopy, withdrawPrivateProfileCopy } from './backend/profile-submissions.js';
 function node(tag, text, className) { const item=document.createElement(tag); if(text)item.textContent=text;if(className)item.className=className;return item; }
@@ -20,6 +21,7 @@ export function profileSubmission(owner, current) {
       content.append(node('h3','Recorded public-field copy'));
       const list=profileCopyFields(value.public_fields||{});
       content.append(list,node('p','This recorded copy stays unchanged when you edit the draft. Withdraw it before submitting a replacement. No public URL or publishing entitlement is created.','profile-small'));
+      content.append(profileCopyFeedback(owner,value.id,current));
     }
     sync();
   }

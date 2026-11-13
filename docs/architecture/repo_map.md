@@ -793,3 +793,7 @@ underlying feature is operational.
 - `src/booking-revision-preview.js`: per-example local revision form, date/time/duration/text checks and safe original/local comparison; no agreement, pricing or request mutation.
 
 - `src/booking-activity-preview.js`: synthetic per-example activity disclosure, fictional actor/time display and local ordering preference; never a saved booking audit or payment log.
+
+- `src/backend/profile-feedback.js`: independent staff feedback scope/read/write helpers and owner-only projected note reads.
+- `src/profile-feedback-form.js` / `src/profile-copy-feedback.js`: immutable staff note entry and explicit owner/version feedback display, with safe text and stale-view cleanup.
+- `supabase/migrations/202611130002_profile_revision_feedback.sql`: one protected note per profile copy, owner column/RLS reads, actor-bound scoped staff operations and atomic audit metadata.

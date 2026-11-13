@@ -1339,3 +1339,20 @@ returns the same curated metadata and keyset ordering as the original queue,
 leaving that RPC unchanged. Current inspection scope, query/page/cursor bounds
 and withdrawal exclusion are enforced. Protected read events record `queue_search`
 without search text. No new entity, staff decision or publication state is added.
+
+
+## Private profile revision feedback
+
+[Feedback migration](../../supabase/migrations/202611130002_profile_revision_feedback.sql)
+adds `profile_publication_feedback`: submission PK/FK, protected reviewer ID, note
+and server timestamp. Copy deletion cascades the note. One record per immutable
+copy is enforced; client overwrites/deletes are denied. Owner RLS follows actual
+parent ownership, with column grants excluding reviewer ID. Trusted operations
+retain SELECT only; writes occur through the curated staff RPC.
+
+Current Moderator/Admin + inspection + new feedback scope authorize pending-copy
+note reads/writes. Writes bind actual actor, reject self/withdrawn/missing/replayed
+targets, bound/trim note text, lock authority and copy, and record protected
+metadata atomically. Feedback creates no approval/withdrawal/publication state or
+role/paid entitlement. Owner reads persist after Provider revocation/withdrawal;
+new copies have separate IDs and notes. Existing publishing choices remain open.
