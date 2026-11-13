@@ -528,3 +528,9 @@ Styled Help and Community Guidelines after “next”. Use matching panels and
 headings while keeping long policy text readable; preserve pre-confirmation
 access and avoid implying agreement or a functioning report/support channel.
 Exact rendering awaits review.
+
+## 2026-11-13 — Account security continuation
+
+Reused the account-entry visual treatment for security after “next”. Keep password,
+email and session actions distinct and their existing confirmation language clear.
+No security guarantees are inferred from presentation. Rendering awaits review.

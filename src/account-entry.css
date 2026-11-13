@@ -1,17 +1,17 @@
-/* Scope entry styling to authentication forms, leaving private workspaces alone. */
-.account-entry-layout { gap: 76px; padding-top: 38px; }
-.account-entry-layout .account-intro { padding-top: 24px; }
-.account-entry-layout .account-intro .eyebrow { color: #dba5b3; letter-spacing: 2.5px; }
-.account-entry-layout .account-intro h1 {
+/* Shared authentication/security form presentation, scoped away from draft tools. */
+:is(.account-entry-layout, .account-security-layout) { gap: 76px; padding-top: 38px; }
+:is(.account-entry-layout, .account-security-layout) .account-intro { padding-top: 24px; }
+:is(.account-entry-layout, .account-security-layout) .account-intro .eyebrow { color: #dba5b3; letter-spacing: 2.5px; }
+:is(.account-entry-layout, .account-security-layout) .account-intro h1 {
   font-size: clamp(40px, 4.8vw, 66px);
   letter-spacing: -.055em;
   line-height: 1.07;
   text-wrap: balance;
   margin: 24px 0;
 }
-.account-entry-layout .account-intro .offering-lead { color: #e3c6cd; font-weight: 300; }
-.account-entry-layout .account-preview-note { border-left-color: #b87c8b80; color: #bcbcca; }
-.account-entry-layout .account-panel {
+:is(.account-entry-layout, .account-security-layout) .account-intro .offering-lead { color: #e3c6cd; font-weight: 300; }
+:is(.account-entry-layout, .account-security-layout) .account-preview-note { border-left-color: #b87c8b80; color: #bcbcca; }
+:is(.account-entry-layout, .account-security-layout) .account-panel {
   border-radius: 20px;
   padding: 32px;
   border-color: #c17a9040;
@@ -19,39 +19,50 @@
   box-shadow: 0 18px 55px #07091335;
   min-width: 0;
 }
-.account-entry-layout .account-tabs { border-bottom-color: #ffffff18; gap: 28px; }
-.account-entry-layout .account-tabs a { color: #bdb6c9; }
-.account-entry-layout .account-tabs a[aria-current=page] { color: #f3f1ee; border-bottom-color: #df677c; }
-.account-entry-layout .account-field > label { color: #e0dbe5; }
-.account-entry-layout .account-field > input {
+:is(.account-entry-layout, .account-security-layout) .account-tabs { border-bottom-color: #ffffff18; gap: 28px; }
+:is(.account-entry-layout, .account-security-layout) .account-tabs a { color: #bdb6c9; }
+:is(.account-entry-layout, .account-security-layout) .account-tabs a[aria-current=page] { color: #f3f1ee; border-bottom-color: #df677c; }
+:is(.account-entry-layout, .account-security-layout) .account-field > label { color: #e0dbe5; }
+:is(.account-entry-layout, .account-security-layout) .account-field > input {
   background: #121521b3;
   border-color: #ffffff30;
   border-radius: 10px;
   min-height: 50px;
 }
-.account-entry-layout .account-field > input:focus-visible { outline: 2px solid #e4b0bf; outline-offset: 3px; }
-.account-entry-layout .account-field > input[aria-invalid=true] { border-color: #f395a7; }
-.account-entry-layout .account-form > .primary {
+:is(.account-entry-layout, .account-security-layout) .account-field > input:focus-visible { outline: 2px solid #e4b0bf; outline-offset: 3px; }
+:is(.account-entry-layout, .account-security-layout) .account-field > input[aria-invalid=true] { border-color: #f395a7; }
+:is(.account-entry-layout, .account-security-layout) .account-form > .primary {
   background: linear-gradient(110deg, #b6192e, #8e1b35);
   border-radius: 30px;
   box-shadow: inset 0 1px #ffffff20;
   min-height: 50px;
 }
-.account-entry-layout .account-form > .primary:hover { background: #c1223e; }
-.account-entry-layout .account-form > .outline { border-radius: 30px; border-color: #ffffff30; }
-.account-entry-layout .password-toggle,
-.account-entry-layout .account-recovery-link,
-.account-entry-layout .account-panel > a { color: #dfb7c4; }
-.account-entry-layout .account-intent-option { border-radius: 12px; border-color: #ffffff26; background: #12152180; }
-.account-entry-layout .account-intent-option:has(input:checked) { border-color: #d58a99; background: #b6192e18; }
-.account-entry-layout .account-preview-result { border-radius: 12px; background: #12152180; }
+:is(.account-entry-layout, .account-security-layout) .account-form > .primary:hover { background: #c1223e; }
+:is(.account-entry-layout, .account-security-layout) .account-form > .outline { border-radius: 30px; border-color: #ffffff30; }
+:is(.account-entry-layout, .account-security-layout) .password-toggle,
+:is(.account-entry-layout, .account-security-layout) .account-recovery-link,
+:is(.account-entry-layout, .account-security-layout) .account-panel > a { color: #dfb7c4; }
+:is(.account-entry-layout, .account-security-layout) .account-intent-option { border-radius: 12px; border-color: #ffffff26; background: #12152180; }
+:is(.account-entry-layout, .account-security-layout) .account-intent-option:has(input:checked) { border-color: #d58a99; background: #b6192e18; }
+:is(.account-entry-layout, .account-security-layout) .account-preview-result { border-radius: 12px; background: #12152180; }
 @media (max-width: 1000px) {
-  .account-entry-layout { gap: 40px; }
+  :is(.account-entry-layout, .account-security-layout) { gap: 40px; }
 }
 @media (max-width: 700px) {
-  .account-entry-layout { padding: 16px 5px 15px; gap: 28px; }
-  .account-entry-layout .account-intro { padding-top: 0; }
-  .account-entry-layout .account-intro h1 { font-size: 40px; margin: 20px 0; }
-  .account-entry-layout .account-intro .eyebrow { font-size: 8px; letter-spacing: 2px; }
-  .account-entry-layout .account-panel { padding: 26px 20px; border-radius: 16px; }
+  :is(.account-entry-layout, .account-security-layout) { padding: 16px 5px 15px; gap: 28px; }
+  :is(.account-entry-layout, .account-security-layout) .account-intro { padding-top: 0; }
+  :is(.account-entry-layout, .account-security-layout) .account-intro h1 { font-size: 40px; margin: 20px 0; }
+  :is(.account-entry-layout, .account-security-layout) .account-intro .eyebrow { font-size: 8px; letter-spacing: 2px; }
+  :is(.account-entry-layout, .account-security-layout) .account-panel { padding: 26px 20px; border-radius: 16px; }
+}
+
+.account-security-layout .account-email,
+.account-security-layout .account-sessions { border-top-color: #ffffff20; padding-top: 30px; margin-top: 34px; }
+.account-security-layout :is(.account-email, .account-sessions, .account-form) > h2 { color: #e3c6cd; font-size: 25px; font-weight: 300; letter-spacing: -.6px; }
+.account-security-layout .account-preview-result { overflow-wrap: anywhere; }
+.account-security-layout .account-panel .profile-small { color: #bcbcca; }
+.account-security-layout .account-field > label { line-height: 1.6; }
+@media (max-width: 450px) {
+  #app:has(#account-view:not([hidden]) > .account-security-layout) .site-header:has(.backend-session-actions button:not([hidden])) { height: auto; min-height: 66px; padding: 14px 0; flex-wrap: wrap; gap: 12px; }
+  #app:has(#account-view:not([hidden]) > .account-security-layout) .site-header:has(.backend-session-actions button:not([hidden])) .account-actions { flex-basis: 100%; justify-content: space-between; gap: 12px; }
 }

@@ -148,7 +148,7 @@ conflict with approved MeetDiscreet decisions.
 - src/experiences.js: in-memory experience catalogue, exact draft-amount parsing, and labelled audience previews; no billing authority.
 - src/offering.css: scoped public ad presentation, including Offering detail/related ads and Looking For summary accents.
 - src/profile.css: scoped public companion profile editorial presentation.
-- src/account-entry.css: scoped sign-in, registration and recovery form presentation.
+- src/account-entry.css: shared scoped sign-in, registration, recovery and account-security form presentation.
 - src/account-overview.css: shared account overview/User setup/Provider setup presentation and narrow-screen workspace header layout.
 - src/messages-preview.css: scoped fictional inbox, thread, search and composer presentation.
 - src/booking-inbox-preview.css: scoped fictional request list, detail, calendar and revision presentation.

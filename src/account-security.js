@@ -1,3 +1,4 @@
+import './account-entry.css';
 import { emailChangeControls } from './account-email.js';
 import { otherSessionControls } from './account-sessions.js';
 import { backendEnabled, backendClient } from './backend/client.js';
@@ -10,7 +11,7 @@ function node(tag, text, className) {
 }
 export function renderAccountSecurity(container, navigate) {
   container.replaceChildren();
-  const root = node('div', null, 'account-layout');
+  const root = node('div', null, 'account-layout account-security-layout');
   const intro = node('div', null, 'account-intro');
   const back = node('a', '← Back to account', 'profile-back');
   back.href = '?page=account';

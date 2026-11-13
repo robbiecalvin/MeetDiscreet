@@ -202,3 +202,17 @@ Validation: 13 account-screen and 131 mocked backend checks passed for the
 overview styling. After the narrow-header correction, production build and 11
 targeted account/role/starting-point checks passed. Hosted authentication, Safari
 and licensed Agrandir remain unverified.
+
+## 2026-11-13 — Account security visual continuation
+
+Continued Robbie’s refresh after “next”. The new `account-security-layout` class
+reuses `src/account-entry.css` for rounded inputs, blush headings and a matching
+form panel. Password, email and other-session sections retain clear separators
+and existing action labels. The signed-in header stacks below 450px on this route.
+Authentication, confirmations, reauthentication, field clearing and revocation
+semantics are unchanged. Exact rendering awaits Robbie’s review.
+
+Validation: production build, 13 account-screen checks and 17 mocked password/
+email/session/overview checks passed. Signed-in mobile/desktop renders inspected
+with fictional accounts; no overflow at 320/390/1440px. Hosted email/authentication,
+Safari and licensed Agrandir remain unverified.
