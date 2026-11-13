@@ -7,7 +7,7 @@ is introduction, interests, experiences, general rates, and availability.
 Use the existing dark palette and Agrandir preference (system fallback until
 licensed assets are supplied). Primary action: “Subscribe to connect”; fixed
 at the bottom on mobile. Show labelled previews of locked sections.
-Discovery needs no visual changes in this increment.
+The profile follows the discovery visual direction; page-specific treatments remain provisional for review.
 
 ## Scope and access
 
@@ -52,3 +52,19 @@ public fixture selected. Concise copy identifies it as a preview granting no boo
 access or reservation. Actual subscriber-only requests remain unimplemented.
 Existing drafts are protected on provider changes; see the
 [booking preview brief](./booking-draft.md#public-profile-to-plan-preview-continuity).
+
+## 2026-11-13 — Editorial visual refresh
+
+Continued Robbie’s requested sexier look and feel from discovery. Scoped styles
+in `src/profile.css` give the full-width hero softer corners, a subtle warm overlay
+and deeper backdrop; name/tagline typography is larger, with blush accents.
+Presence and access labels use restrained pills, locked previews use rounded
+navy cards, and the subscription panel has a burgundy glow and rounded actions.
+The mobile subscription action remains fixed and the approved section order stays
+intact. Existing pricing, protected-content boundaries, data and actions are unchanged.
+No new motion or imagery was introduced. Exact rendering awaits Robbie’s review.
+
+Validation: production build and 41 focused profile, discovery, Offering and booking
+preview checks passed. Profile renders inspected at 320, 390 and 1440px with no
+horizontal overflow. No backend integration changes; Safari and licensed Agrandir
+remain unverified.

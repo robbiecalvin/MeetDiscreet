@@ -1,3 +1,4 @@
+import './profile.css';
 import { referencePrices, formatReferencePrice } from './pricing.js';
 // Public-only profile rendering. Locked sections never receive private content.
 const svgNamespace = 'http://www.w3.org/2000/svg';

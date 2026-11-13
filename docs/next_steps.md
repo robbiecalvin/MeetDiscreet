@@ -18,12 +18,15 @@ Current phase: Frontend development with an initial Supabase development backend
 
 Current activity:
 Robbie requested a sexier look and feel. Discovery has an editorial visual refresh
-for review, preserving the selected palette, three-column mobile portrait grid,
+for review, followed by matching companion-profile presentation. Both preserve the
+selected palette; discovery retains its three-column mobile portrait grid,
 compact ads and existing functionality. Discovery remains synthetic. The combined
 manual walkthrough is still deferred; backend pilot work remains on the roadmap.
-Visual refresh verification: production build and all 223 standard checks passed;
+Discovery refresh verification: production build and all 223 standard checks passed;
 Chromium renders inspected at 320, 390 and 1440px, including the compact ads view.
-Backend-specific suites were not rerun for this scoped presentation change.
+Profile refresh: production build and all 41 focused profile/discovery/Offering/booking
+preview checks passed. Profile renders inspected at 320, 390 and 1440px.
+Backend-specific suites were not rerun for these scoped presentation changes.
 Licensed Agrandir files and macOS Safari verification remain outstanding.
 
 Known status:

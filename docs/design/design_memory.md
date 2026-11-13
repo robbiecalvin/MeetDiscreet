@@ -421,3 +421,10 @@ Robbie asked for a sexier look and feel. Implemented a more intimate editorial
 treatment within the selected dark palette; exact rendering awaits his review.
 Keep portrait photography prominent, mobile density at three columns, and names,
 ages, locations and online labels legible. Do not infer new content requirements.
+
+## 2026-11-13 — Companion profile continuation
+
+Continued the discovery refresh onto the public profile after Robbie’s “next”.
+Retained the full-width photo above identity and all labelled access previews;
+used blush typography, softly rounded panels and burgundy primary actions.
+This is an implementation for review, not approval of additional visual preferences.

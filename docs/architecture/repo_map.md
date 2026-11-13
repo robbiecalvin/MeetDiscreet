@@ -146,6 +146,7 @@ conflict with approved MeetDiscreet decisions.
 - src/profile-editor.js: in-memory companion draft, validation, and owner-style audience previews; no persisted profile or access grant.
 - src/draft-tools.js: shared navigation between implemented companion draft tools.
 - src/experiences.js: in-memory experience catalogue, exact draft-amount parsing, and labelled audience previews; no billing authority.
+- src/profile.css: scoped public companion profile editorial presentation.
 - src/styles.css: shared tokens, portrait grid, single-column ads, responsive layout.
 - src/discovery.css: scoped editorial discovery treatment and its view dock, including reduced-motion overrides.
 - src/data.js: synthetic public profile and ad fixtures; no live presence.

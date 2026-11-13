@@ -1,0 +1,94 @@
+/* Public profile presentation; access labels and preview behaviour stay explicit. */
+#profile-view .profile-back { color: #d9b4c0; }
+#profile-view .profile-hero {
+  height: 500px;
+  border-radius: 18px;
+  border: 1px solid #ffffff1a;
+  background: #191e2d;
+  box-shadow: 0 22px 65px #06081340;
+}
+#profile-view .profile-photo-backdrop { filter: blur(35px) brightness(.35) saturate(.8); }
+#profile-view .profile-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 55%, #12152180),
+    linear-gradient(100deg, #38476b20, transparent 45%, #b6192e14);
+}
+#profile-view .profile-photo-label {
+  z-index: 1;
+  left: 22px;
+  bottom: 22px;
+  border-radius: 30px;
+  background: #121521b8;
+  backdrop-filter: blur(10px);
+  padding: 9px 13px;
+}
+#profile-view .profile-identity { padding: 36px 0; gap: 24px; }
+#profile-view .profile-location { color: #c2b4c7; letter-spacing: .4px; }
+#profile-view .profile-identity h1 {
+  font-size: clamp(42px, 5vw, 68px);
+  letter-spacing: -.055em;
+  line-height: 1.08;
+  margin: 12px 0 16px;
+}
+#profile-view .profile-tagline { color: #e3c6cd; font-size: 21px; font-weight: 300; }
+#profile-view .profile-presence {
+  padding: 10px 14px;
+  border: 1px solid #ffffff1a;
+  border-radius: 30px;
+  background: #191e2d;
+  color: #c8c7d2;
+  flex-shrink: 0;
+}
+#profile-view .profile-layout { gap: 56px; padding-top: 42px; }
+#profile-view .profile-section { padding-bottom: 36px; margin-bottom: 26px; }
+#profile-view .profile-section h2 { font-size: 26px; line-height: 1.25; letter-spacing: -.8px; }
+#profile-view .profile-copy { color: #bcbcca; }
+#profile-view .access-label { color: #ddafbd; border-color: #bb7d913d; border-radius: 30px; padding: 7px 10px; }
+#profile-view .locked-tags span { color: #c4bed0; background: #202436; border-color: #ffffff26; }
+#profile-view .locked-preview {
+  border-radius: 12px;
+  border-color: #ffffff18;
+  background: linear-gradient(135deg, #25293b, #1b1e2e);
+}
+#profile-view .locked-indicator { color: #d3a0b0; }
+#profile-view .locked-preview h3 { font-size: 14px; }
+#profile-view .locked-preview p { color: #b0b1c3; }
+#profile-view .availability-empty { border-color: #ffffff26; border-radius: 12px; }
+#profile-view .subscription-card {
+  border-radius: 18px;
+  border-color: #c17a9040;
+  background: radial-gradient(ellipse at 100% 0, #b6192e24, transparent 65%), #1b1e2e;
+  padding: 30px 25px;
+  box-shadow: 0 16px 50px #07091330;
+}
+#profile-view .subscription-card .eyebrow { color: #dba5b3; line-height: 1.8; }
+#profile-view .subscription-card h2 { font-size: 30px; font-weight: 300; color: #e3c6cd; }
+#profile-view .subscription-price { font-size: 29px; }
+#profile-view .profile-subscribe {
+  border-radius: 30px;
+  background: linear-gradient(110deg, #b6192e, #8e1b35);
+  box-shadow: inset 0 1px #ffffff20;
+}
+#profile-view .profile-subscribe:hover { background: #c1223e; }
+#profile-view .subscription-card .outline { border-radius: 30px; }
+@media (max-width: 1000px) {
+  #profile-view .profile-layout { gap: 30px; }
+  #profile-view .profile-hero { height: 420px; }
+}
+@media (max-width: 700px) {
+  #profile-view .profile-hero { height: 380px; border-radius: 14px; }
+  #profile-view .profile-photo-label { left: 14px; bottom: 15px; font-size: 7px; }
+  #profile-view .profile-identity { padding: 27px 5px; gap: 20px; }
+  #profile-view .profile-identity h1 { font-size: 43px; margin: 10px 0 13px; }
+  #profile-view .profile-location { font-size: 11px; letter-spacing: 0; }
+  #profile-view .profile-tagline { font-size: 18px; }
+  #profile-view .profile-presence { font-size: 10px; padding: 8px 12px; }
+  #profile-view .profile-layout { padding: 24px 5px 0; gap: 8px; }
+  #profile-view .profile-section h2 { font-size: 23px; }
+  #profile-view .profile-section { padding-bottom: 28px; margin-bottom: 18px; }
+  #profile-view .subscription-card { padding: 27px 21px; }
+  #profile-view .profile-subscribe { box-shadow: 0 0 0 14px #121521f5, 0 20px 0 18px #121521f5; }
+}
