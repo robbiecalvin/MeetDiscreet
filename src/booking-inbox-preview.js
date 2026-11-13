@@ -1,3 +1,4 @@
+import './booking-inbox-preview.css';
 import {bookingActivityPreview} from './booking-activity-preview.js';
 import {bookingRevisionPreview} from './booking-revision-preview.js';
 import {bookingCalendarMonth,shiftCalendarMonth} from './booking-calendar.js';

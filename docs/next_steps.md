@@ -19,7 +19,8 @@ Current phase: Frontend development with an initial Supabase development backend
 Current activity:
 Robbie requested a sexier look and feel. Discovery has an editorial visual refresh
 for review, followed by matching companion-profile, Offering detail, Looking For summary
-and account-entry/overview, User/Provider setup and conversation-preview presentation.
+and account-entry/overview, User/Provider setup, conversation and booking-preview
+presentation.
 These preserve the
 selected palette; discovery retains its three-column mobile portrait grid,
 compact ads and existing functionality. Discovery remains synthetic. The combined
@@ -46,6 +47,9 @@ using fictional data; no horizontal overflow. No draft or authorization logic ch
 Conversation refresh: production build, nine conversation checks and one mocked
 backend conversation/sign-out cleanup check passed. Mobile/desktop renders inspected;
 messages remain fictional/local-only, with no delivery or storage integration.
+Booking inbox refresh: production build, 20 inbox/calendar/revision/activity checks
+and two mocked booking-preview cleanup checks passed. Mobile/desktop calendar
+and comparison renders inspected. No booking, payment or schedule logic changed.
 Licensed Agrandir files and macOS Safari verification remain outstanding.
 
 Known status:

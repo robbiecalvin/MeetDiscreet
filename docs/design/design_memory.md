@@ -469,3 +469,10 @@ Applied the editorial style to the fictional conversation workspace after “nex
 Use distinct navy incoming and burgundy outgoing bubbles while keeping example
 and unsent labels readable. Preserve the mobile list-to-thread flow.
 Exact rendering remains provisional for review.
+
+## 2026-11-13 — Booking preview continuation
+
+Extended the editorial treatment to the fictional booking inbox/calendar after
+“next”. Keep state labels and original/proposed terms clear; visual emphasis must
+not imply a request was sent, payment verified or reservation made.
+Exact rendering remains provisional for review.

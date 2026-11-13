@@ -1,0 +1,39 @@
+/* Fictional booking workspace styling; no status or transaction logic. */
+#account-view .booking-inbox-preview > .profile-back { color: #d9b4c0; }
+#account-view .booking-inbox-preview > .eyebrow { color: #dba5b3; letter-spacing: 2.5px; }
+#account-view .booking-inbox-preview > h1 { font-size: clamp(40px, 5vw, 64px); letter-spacing: -.055em; line-height: 1.08; margin: 22px 0; }
+#account-view .booking-inbox-preview .editor-notice { border-radius: 14px; border-color: #bb7d9140; background: #1b1e2e; color: #c4bdcd; }
+#account-view .booking-inbox-preview .booking-inbox-layout { gap: 22px; margin-top: 28px; }
+#account-view .booking-inbox-preview .booking-inbox-list-panel,
+#account-view .booking-inbox-preview .booking-example-detail { border-radius: 18px; border-color: #ffffff18; padding: 26px; background: linear-gradient(135deg, #24283a, #1b1e2e); }
+#account-view .booking-inbox-preview .booking-example-detail { background: radial-gradient(ellipse at 100% 0, #b6192e16, transparent 65%), #191d2b; }
+#account-view .booking-inbox-preview .booking-example-detail > h2 { color: #e3c6cd; font-size: 29px; letter-spacing: -.8px; font-weight: 300; line-height: 1.2; }
+#account-view .booking-inbox-preview .booking-example-card { border-radius: 13px; padding: 20px; border-color: #ffffff1a; background: #12152180; }
+#account-view .booking-inbox-preview .booking-example-card[aria-current=true] { border-color: #d58a99; background: #b6192e16; }
+#account-view .booking-inbox-preview .booking-example-card h2 { font-size: 22px; letter-spacing: -.6px; line-height: 1.25; }
+#account-view .booking-inbox-preview .profile-small { color: #bcbcca; }
+#account-view .booking-inbox-preview .button { border-radius: 30px; white-space: normal; line-height: 1.5; }
+#account-view .booking-inbox-preview .outline { border-color: #ffffff30; }
+#account-view .booking-inbox-preview .primary { background: linear-gradient(110deg, #b6192e, #8e1b35); }
+#account-view .booking-inbox-preview .primary:hover { background: #c1223e; }
+#account-view .booking-inbox-preview .quiet { color: #dfb7c4; }
+#account-view .booking-inbox-preview [role=group] [aria-pressed=true] { background: #6e2439; border-color: #d58a99; }
+#account-view .booking-inbox-preview :is(input, select, textarea) { border-radius: 10px; border-color: #ffffff30; background: #121521b3; }
+#account-view .booking-inbox-preview :is(input, select, textarea):focus-visible { outline: 2px solid #e4b0bf; outline-offset: 3px; }
+#account-view .booking-inbox-preview .booking-example-detail dt { color: #d2a3b3; font-size: 11px; letter-spacing: .4px; }
+#account-view .booking-inbox-preview .booking-example-detail dd { line-height: 1.7; }
+#account-view .booking-inbox-preview .booking-example-detail > dl { border-top: 1px solid #ffffff18; border-bottom: 1px solid #ffffff18; padding: 8px 0; }
+#account-view .booking-inbox-preview details > summary { color: #dfb7c4; line-height: 1.6; }
+#account-view .booking-inbox-preview .booking-calendar caption { color: #e3c6cd; font-weight: 300; font-size: 23px; letter-spacing: -.5px; }
+#account-view .booking-inbox-preview .booking-calendar-day { background: #38476b80; border-radius: 9px; }
+#account-view .booking-inbox-preview .booking-calendar-day[aria-pressed=true] { background: #6e2439; outline-color: #edbdc9; }
+#account-view .booking-inbox-preview .booking-example-activity li { border-left-color: #b87c8b80; }
+@media (max-width: 800px) {
+  #account-view .booking-inbox-preview > h1 { font-size: 40px; }
+  #account-view .booking-inbox-preview .booking-inbox-list-panel,
+  #account-view .booking-inbox-preview .booking-example-detail { padding: 22px 18px; border-radius: 14px; }
+  #account-view .booking-inbox-preview .booking-example-card { padding: 18px; }
+  #account-view .booking-inbox-preview .booking-example-card h2 { font-size: 21px; }
+  #account-view .booking-inbox-preview .booking-example-detail > h2 { font-size: 27px; }
+  #account-view .booking-inbox-preview .booking-calendar .button { padding: 10px 8px; font-size: 12px; }
+}

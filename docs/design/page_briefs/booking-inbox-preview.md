@@ -88,3 +88,19 @@ still explicitly states no payment was processed and no time reserved. No fee,
 quote, deadline, receipt or verification ID is invented. Local revision reviews
 never append events to this history. No event actions, API calls or persistence
 are added. Identity cleanup/reload resets activity display state with the inbox.
+
+## 2026-11-13 — Booking workspace visual continuation
+
+Continued Robbie’s requested visual treatment after “next”. Scoped
+`src/booking-inbox-preview.css` adds rounded navy request/detail panels, blush
+headings and field labels, burgundy selected controls, and softer calendar/form
+controls. Revision comparison and local revision/activity disclosures retain their
+original content and semantics. No status, schedule, deposit, booking or permission
+logic changed. Example dates remain explicitly America/Vancouver wall times.
+Exact rendering awaits visual review.
+
+Validation: production build, 20 inbox/calendar/revision/activity checks and two
+mocked backend booking-preview cleanup checks passed. Mobile/desktop calendar
+and comparison renders inspected; automated layouts cover narrow widths.
+No hosted booking workflow or payment service was introduced or tested.
+Safari and licensed Agrandir remain unverified.
