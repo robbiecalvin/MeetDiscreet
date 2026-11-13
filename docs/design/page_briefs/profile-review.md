@@ -89,13 +89,35 @@ their existing local checks. Feedback/pilot approval operations block these rout
 changes while in flight; sign-out and identity-driven clearing are never blocked.
 
 This covers managed in-app links. Existing native beforeunload handling protects
-full-document exits where the browser permits a prompt. Same-document browser
-Back/Forward remains a follow-up; no complete history-navigation guarantee is
-claimed. No note persistence, backend permissions or mutation semantics changed.
+full-document exits where the browser permits a prompt. Managed browser Back/Forward protection is described below; it supersedes the
+initial link-only limitation. No note persistence, backend permissions or mutation semantics changed.
 
 Route-guard validation: production build and the full 224 standard/135 mocked
 backend suites passed. Final guard-lifecycle cleanup clears old guards whenever
 the router renders, including identity-driven clearing, and was followed by
 focused account/discovery/review navigation checks. New cases cover canceled
 header/footer departure, a single confirmed Back prompt, in-flight blocking and
-sign-out cleanup. Browser Back/Forward remains the limitation stated above.
+sign-out cleanup. The history protection below extends this initial link-only scope.
+
+## Browser Back/Forward protection
+
+Native session-history entries now carry a navigation-only branch/index marker.
+For managed entries, canceling Back, Forward or multi-entry traversal returns to
+the original entry without rerendering or appending history. Unsent notes and
+selection stay in the existing DOM; a confirmed departure discards them once.
+Busy staff actions use the same check, while sign-out/account changes can still
+clear private content during restoration. Fragment-only movement preserves the
+view. The skip link focuses main and replaces its fragment without adding a step.
+
+For an older/unindexed entry, cancel restores the review URL in that slot and
+starts a new managed branch; it does not reconstruct the opaque entry. This
+conservative fallback preserves the draft without inventing a traversal distance.
+Full-document departures retain the browser’s native beforeunload handling.
+No draft text, credentials or role/access decisions enter navigation metadata.
+
+History validation: production build, full 224 standard checks and full 140
+mocked backend checks passed, followed by six focused history checks including
+an additional sign-out-during-restoration race case. Repeated Back/Forward,
+multi-entry moves, unknown entries, skip/fragment focus, in-flight blocking and
+confirmed discard were exercised in Chromium. Safari/native cross-document
+unload behaviour remains unverified; no immediate erasure guarantee is implied.

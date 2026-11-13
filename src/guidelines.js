@@ -1,3 +1,4 @@
+import {pushRouteState} from './route-leave.js';
 import './public-readers.css';
 // Working public policy summary of docs/product/content_and_boundaries.md.
 const sections = [
@@ -44,7 +45,7 @@ export function renderGuidelines(container, onReturn, onExit) {
       event.preventDefault();
       const url = new URL(location.href);
       url.hash = section.id;
-      history.pushState(history.state, '', url);
+      if (!pushRouteState(history.state, '', url)) return;
       const target = document.getElementById(section.id);
       target.scrollIntoView({ block: 'start', behavior: 'instant' });
       target.focus({ preventScroll: true });

@@ -1,4 +1,4 @@
-import {pushRouteState, clearRouteLeave} from './route-leave.js';
+import {pushRouteState, clearRouteLeave, replaceRouteState, acceptRoutePop} from './route-leave.js';
 import { renderBookingInboxPreview } from './booking-inbox-preview.js';
 import { renderProfileReview } from './profile-review.js';
 import { renderPhotoPreview, clearPhotoPreviewState } from './photo-preview.js';
@@ -272,7 +272,8 @@ function showAd(ad) {
   window.scrollTo({ top: 0, behavior: 'instant' });
   $('#main').focus({ preventScroll: true });
 }
-window.addEventListener('popstate', () => {
+window.addEventListener('popstate', event => {
+  if (!acceptRoutePop(event)) return;
   renderRoute();
   if (['guidelines', 'help'].includes(new URL(location.href).searchParams.get('page'))) {
     const main = new URL(location.href).searchParams.get('page') === 'help' ? $('#help-main') : $('#guidelines-main');
@@ -568,3 +569,11 @@ if (backendEnabled) {
     });
   });
 }
+
+$('.skip-link').addEventListener('click', event => {
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  event.preventDefault();
+  const url = new URL(location.href); url.hash = 'main';
+  replaceRouteState(history.state, '', url);
+  $('#main').focus();
+});

@@ -1007,4 +1007,10 @@ A rejected departure must not push a new history entry or render another route.
 Draft text remains solely in the existing form DOM; no storage or autosave is
 introduced. Sign-out/account changes keep their privacy-clearing behaviour.
 This is a data-loss safeguard, not authorization or a server-write cancellation
-guarantee. Same-document browser Back/Forward remains outside this guard.
+guarantee. Managed same-document Back/Forward now invokes the same guard. Navigation
+metadata contains only a random branch identifier and integer position in native
+session history, with no draft text or authorization meaning. Unknown entries use
+an in-place URL restore/new branch on cancellation rather than a guessed distance.
+Callback URL scrubbing retains only that routing marker and still removes one-time
+codes/errors/flow parameters. Identity clearing during restoration must render a
+fresh view rather than revive the old guarded DOM.

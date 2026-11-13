@@ -166,7 +166,7 @@ conflict with approved MeetDiscreet decisions.
 - src/staff-review.css: shared scoped Provider intake/profile-copy inspection and feedback presentation.
 - src/profile-copy-comparison.js / .css: explicit owner-only comparison of recorded and saved public fields.
 - src/profile-copy-differences.js: shared seven-field allowlist and pure comparison rows.
-- src/route-leave.js: active review-view checks before managed in-app history pushes.
+- src/route-leave.js: review-view checks plus managed Back/Forward restoration and navigation-only history markers.
 - src/styles.css: shared tokens, portrait grid, single-column ads, responsive layout.
 - src/discovery.css: scoped editorial discovery treatment and its view dock, including reduced-motion overrides.
 - src/data.js: synthetic public profile and ad fixtures; no live presence.

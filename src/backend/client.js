@@ -30,7 +30,9 @@ export async function processAuthCallback() {
   // Remove one-time codes/errors before requesting any more app resources.
   for (const key of ['code', 'error', 'error_code', 'error_description', 'type', 'sb_flow_id']) url.searchParams.delete(key);
   url.hash = '';
-  history.replaceState(null, '', url);
+  // Keep navigation-only history metadata while removing callback credentials.
+  const navigation = history.state?.meetdiscreetNavigation;
+  history.replaceState(navigation ? {meetdiscreetNavigation: {scope: navigation.scope, position: navigation.position}} : null, '', url);
   if (!backendEnabled) return { error: 'The development backend is not configured.' };
   if (flowId && !/^[a-zA-Z0-9_-]{8,64}$/.test(flowId)) return { error: 'This verification link is invalid. Request a fresh link.' };
   if (!code) return { error: 'This link is incomplete or expired. Request a fresh link.' };

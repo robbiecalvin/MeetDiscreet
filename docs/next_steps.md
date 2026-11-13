@@ -17,14 +17,15 @@ in their dedicated documents.
 Current phase: Frontend development with an initial Supabase development backend.
 
 Current activity:
-Protect shared in-app navigation away from staff feedback drafts. Both review
-workspaces now use one route-leaving check before header/footer/router links
-change the URL, preserving canceled drafts and blocking departure during a staff
-action. Sign-out/account changes continue clearing private forms. Production
-build and full 224 standard/135 mocked backend suites passed. Final guard-lifecycle
-cleanup also passed 26 frontend navigation checks and four focused staff-feedback
-backend checks. Browser Back/Forward needs a
-separate same-document history guard and remains a known follow-up.
+Extend staff feedback protection to managed browser Back, Forward and multi-entry
+history traversal. Cancel restores the original entry without rerendering or
+adding history; confirmed departures discard once. Older/unindexed entries use
+an in-place review-URL restore/new branch instead of guessing a traversal distance.
+Skip-link and fragment focus preserve drafts. Sign-out/account changes remain able
+to clear private forms during restoration. Production build, full 224 standard
+and 140 mocked backend checks passed, plus six focused history checks including
+an additional sign-out/restoration race. Chromium history behaviour is verified;
+Safari/native cross-document unload behaviour remains unverified.
 
 Read-only recorded-copy comparison is implemented and verified separately.
 Publishing decisions OPEN-052/053 remain unanswered; do not infer policy from “next”.
