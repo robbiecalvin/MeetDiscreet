@@ -27,3 +27,18 @@ workspace; version guards discard late responses. No cached/private demo fallbac
 Read operations record protected metadata only. No approval/rejection/feedback,
 role grant, public profile, payment/eligibility claim or staff provisioning is
 introduced. Inspection cannot promise immediate revocation of already-seen data.
+
+## Pending-copy search
+
+Assigned inspectors can explicitly search recorded display names/cities. Matching
+is a case-insensitive literal substring; percent/underscore are not wildcards.
+Only pending copies participate, never withdrawn copies or username/tagline/member
+fields. Apply on Search profile copies; each new search resets to page one and
+closes detail. Retain the applied filter across paging and refresh. Clear restores
+the original queue and focuses the input. Search text stays in view memory.
+
+The 100-character query and existing page/cursor bounds are technical limits.
+Missing search setup gives an unavailable state, with Clear available to use the
+unchanged default listing RPC. No-match results remain distinct. Lost access
+hides the form and clears records; late results cannot replace a newer query.
+The shared review-search form wraps on mobile. No approval action is added.

@@ -37,6 +37,7 @@ test.beforeAll(async () => {
   await db.exec(await readFile(new URL('../supabase/migrations/202611100003_provider_review_search.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611100004_private_profile_submissions.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/202611100005_profile_publication_review.sql', import.meta.url), 'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/202611130001_profile_review_search.sql', import.meta.url), 'utf8'));
 });
 test.afterAll(async () => { await db.close(); });
 test.beforeEach(async () => {
@@ -639,5 +640,34 @@ test.describe('separately scoped profile copy inspection',()=>{
     await asUser(alice);expect((await db.query('select public.can_approve_provider_applications() as allowed')).rows[0].allowed).toBe(true);await expect(list()).rejects.toThrow(/profile review access/i);
     await db.exec('reset role');await db.query("insert into public.staff_capabilities(user_id,capability) values($1,'profile_publication_review')",[alice]);await asUser(alice);await list();
     await db.exec('reset role');await db.query("delete from public.staff_capabilities where user_id=$1 and capability='profile_publication_review'",[alice]);await asUser(alice);await expect(list()).rejects.toThrow(/profile review access/i);expect((await db.query('select public.can_approve_provider_applications() as allowed')).rows[0].allowed).toBe(true);
+  });
+});
+
+test.describe('scoped pending profile-copy search',()=>{
+  async function prepare(){
+    await db.exec('reset role');await db.query("delete from public.account_roles where user_id=$1 and role in ('moderator','admin')",[alice]);await db.query("insert into public.account_roles(user_id,role) values($1,'moderator')",[alice]);await db.query("insert into public.staff_capabilities(user_id,capability) values($1,'profile_publication_review')",[alice]);
+    for(const [id,owner,fields,withdrawn] of [
+      ['11111111-aaaa-4aaa-8aaa-111111111111',alice,{display_name:'Coastal %_ copy',city:'Vancouver',username:'HIDDEN_ONLY',tagline:'HIDDEN_ONLY'},null],
+      ['22222222-aaaa-4aaa-8aaa-222222222222',bob,{display_name:'Remote copy',city:'Vancouver'},null],
+      ['33333333-aaaa-4aaa-8aaa-333333333333',alice,{display_name:'Withdrawn needle',city:'Toronto'},'2026-11-13T13:00:00Z'],
+    ])await db.query("insert into public.profile_publication_submissions(id,owner_id,source_updated_at,submitted_at,public_fields,withdrawn_at) values($1,$2,'2026-11-13T11:00:00Z','2026-11-13T12:00:00Z',$3,$4)",[id,owner,fields,withdrawn]);
+    await asUser(alice);
+  }
+  const search=(query,expected=alice,limit=21,time=null,id=null)=>db.query('select * from public.search_profile_publications_for_review($1,$2,$3,$4,$5)',[expected,query,limit,time,id]);
+  test.afterEach(async()=>{await db.exec('reset role');await db.query("delete from public.account_roles where user_id=$1 and role in ('moderator','admin')",[alice]);});
+  test('matches only pending name/city literals with stable cursor pages and metadata-only read events',async()=>{
+    await prepare();const first=(await search('vAnCoUvEr',alice,1)).rows;expect(first).toHaveLength(1);const next=(await search('vAnCoUvEr',alice,1,first[0].submitted_at,first[0].id)).rows;expect(next).toHaveLength(1);expect(next[0].id).not.toBe(first[0].id);
+    expect((await search('%_')).rows.map(row=>row.display_name)).toEqual(['Coastal %_ copy']);expect((await search('HIDDEN_ONLY')).rows).toEqual([]);expect((await search('Withdrawn needle')).rows).toEqual([]);expect(first[0]).not.toHaveProperty('public_fields');
+    await db.exec('reset role');const events=(await db.query("select * from public.profile_publication_review_access_events where action='queue_search'")).rows;expect(events).toHaveLength(5);expect(JSON.stringify(events)).not.toContain('vAnCoUvEr');expect(JSON.stringify(events)).not.toContain('Coastal');
+  });
+  test('rechecks actual actor and review authority and denies metadata claims, revoked scope and anonymous calls',async()=>{
+    await prepare();await expect(search('Vancouver',bob)).rejects.toThrow(/account changed/i);
+    await db.exec('reset role');await db.query("delete from public.staff_capabilities where user_id=$1",[alice]);await asUser(alice);await expect(search('Vancouver')).rejects.toThrow(/profile review access/i);
+    await db.exec('reset role');await db.query("insert into public.staff_capabilities(user_id,capability) values($1,'profile_publication_review')",[alice]);await db.query("delete from public.account_roles where user_id=$1 and role='moderator'",[alice]);await db.query('update auth.users set raw_user_meta_data=$1 where id=$2',[{role:'admin'},alice]);await asUser(alice);await expect(search('Vancouver')).rejects.toThrow(/profile review access/i);
+    await asUser('','anon');await expect(search('Vancouver')).rejects.toThrow(/permission denied/i);
+  });
+  test('bounds text/pages/cursors and changes no profile, withdrawal or membership state',async()=>{
+    await prepare();await expect(search(null)).rejects.toThrow(/search text/i);await expect(search(' ')).rejects.toThrow(/search text/i);await expect(search('x'.repeat(101))).rejects.toThrow(/search text/i);await expect(search('Van',alice,51)).rejects.toThrow(/page size/i);await expect(search('Van',alice,21,'2026-11-13T12:00:00Z')).rejects.toThrow(/page cursor/i);
+    await search('Van');await db.exec('reset role');expect((await db.query('select count(*)::int as n from public.profile_publication_submissions where withdrawn_at is null')).rows[0].n).toBe(2);expect((await db.query("select * from public.account_roles where role='provider'")).rows).toEqual([]);
   });
 });

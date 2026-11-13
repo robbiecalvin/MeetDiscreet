@@ -159,17 +159,20 @@ async function mockBackend(page, options = {}) {
       if (method === 'POST') { state.catalogue = body.items; return respond(null, 201); }
       return respond(state.catalogue === null ? [] : [{ items: state.catalogue }]);
     }
-    if (['/rest/v1/rpc/can_review_profile_publications','/rest/v1/rpc/list_profile_publications_for_review','/rest/v1/rpc/get_profile_publication_for_review'].includes(url.pathname)) {
+    if (['/rest/v1/rpc/can_review_profile_publications','/rest/v1/rpc/list_profile_publications_for_review','/rest/v1/rpc/search_profile_publications_for_review','/rest/v1/rpc/get_profile_publication_for_review'].includes(url.pathname)) {
       if(options.missingProfileReviewMigration)return respond({message:'Missing'},404);
       const allowed=state.roles.some(role=>['moderator','admin'].includes(role))&&state.capabilities.includes('profile_publication_review');
       if(url.pathname.endsWith('/can_review_profile_publications'))return respond(allowed);
       if(!allowed||body.p_expected_reviewer!==state.user.id)return respond({message:'Denied'},403);
-      const rows=state.profilePublications.filter(row=>!row.withdrawn_at).sort((a,b)=>a.submitted_at.localeCompare(b.submitted_at)||a.id.localeCompare(b.id));
+      const isSearch=url.pathname.endsWith('/search_profile_publications_for_review');
+      if(isSearch&&options.missingProfileSearchMigration)return respond({message:'Missing search'},404);
+      const needle=isSearch?body.p_query.trim().toLowerCase():'';
+      const rows=state.profilePublications.filter(row=>!row.withdrawn_at&&(!needle||`${row.public_fields.display_name||''} ${row.public_fields.city||''}`.toLowerCase().includes(needle))).sort((a,b)=>a.submitted_at.localeCompare(b.submitted_at)||a.id.localeCompare(b.id));
       if(url.pathname.endsWith('/get_profile_publication_for_review')) {
         const row=rows.find(value=>value.id===body.p_submission);if(row)state.profileReviewEvents.push({action:'copy_opened',submission_id:row.id});
         return respond(row?[{...row,public_fields:Object.fromEntries(['display_name','username','adult_age','tagline','city','area','photo_index'].map(key=>[key,row.public_fields[key]??null]))}]:[]);
       }
-      state.profileReviewEvents.push({action:'queue_list'});
+      state.profileReviewEvents.push({action:isSearch?'queue_search':'queue_list'});
       return respond(rows.filter(row=>!body.p_after_submitted_at||row.submitted_at>body.p_after_submitted_at||(row.submitted_at===body.p_after_submitted_at&&row.id>body.p_after_id)).slice(0,body.p_limit).map(({id,owner_id,public_fields,submitted_at,source_updated_at})=>({id,owner_id,display_name:public_fields.display_name,city:public_fields.city,submitted_at,source_updated_at})));
     }
     if (url.pathname === '/rest/v1/profile_publication_submissions') {
@@ -2013,4 +2016,31 @@ test('a delayed profile inspection cannot repopulate private fields after sign-o
   await page.route('**/rest/v1/rpc/get_profile_publication_for_review',async route=>{started();await gate;await route.fallback();});
   await signIn(page);await enter(page,'/?page=profile-review');await page.locator('.profile-review-card').getByRole('button').click();await requested;
   await page.getByRole('button',{name:'Sign out',exact:true}).click();release();await page.waitForLoadState('networkidle');await expect(page.locator('.profile-review-card')).toHaveCount(0);await expect(page.locator('.profile-review-detail')).toBeHidden();
+});
+
+test('profile review search retains its name/city query across pages and refresh, then clears to the original queue',async({page})=>{
+  const state=await mockBackend(page);state.roles=['user','moderator'];state.capabilities=['profile_publication_review'];state.profilePublications=profileReviewRows(27);state.profilePublications.forEach((row,index)=>row.public_fields.city=index<24?'North Vancouver':'Toronto');
+  await signIn(page);await enter(page,'/?page=profile-review');await expect(page.locator('.profile-review-card')).toHaveCount(20);
+  await page.getByLabel('Search pending profile copies',{exact:true}).fill('north VANCOUVER');await page.getByRole('button',{name:'Search profile copies',exact:true}).click();await expect(page.locator('.profile-review > [role=status]')).toContainText('Search active');
+  await page.getByRole('button',{name:'Next profile copies',exact:true}).click();await expect(page.locator('.profile-review-card')).toHaveCount(4);await page.getByRole('button',{name:'Previous profile copies',exact:true}).click();await expect(page.locator('.profile-review-card')).toHaveCount(20);
+  await page.getByRole('button',{name:'Refresh profile review queue',exact:true}).click();await expect(page.locator('.profile-review > [role=status]')).toContainText('Search active');
+  expect(state.requests.filter(row=>row.path.endsWith('/search_profile_publications_for_review')).every(row=>row.body.p_query==='north VANCOUVER')).toBe(true);
+  await page.setViewportSize({width:390,height:900});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.locator('.profile-review .review-search').screenshot({path:'/tmp/profile-review-search-mobile.png'});
+  await page.getByRole('button',{name:'Clear profile search',exact:true}).click();await expect(page.getByLabel('Search pending profile copies',{exact:true})).toHaveValue('');await expect(page.locator('.profile-review > [role=status]')).not.toContainText('Search active');
+});
+test('profile review search treats wildcards literally, distinguishes missing setup and restores default listing with Clear',async({page})=>{
+  const options={missingProfileSearchMigration:false};const state=await mockBackend(page,options);state.roles=['user','moderator'];state.capabilities=['profile_publication_review'];state.profilePublications=profileReviewRows(2);state.profilePublications[0].public_fields.display_name='Literal %_ copy';
+  await signIn(page);await enter(page,'/?page=profile-review');const input=page.getByLabel('Search pending profile copies',{exact:true});
+  await input.fill('%_');await page.getByRole('button',{name:'Search profile copies',exact:true}).click();await expect(page.locator('.profile-review-card')).toHaveCount(1);
+  await input.fill('no matching name');await page.getByRole('button',{name:'Search profile copies',exact:true}).click();await expect(page.locator('.profile-review > [role=status]')).toHaveText('No pending profile copies match this search.');
+  options.missingProfileSearchMigration=true;await input.fill('%_');await page.getByRole('button',{name:'Search profile copies',exact:true}).click();await expect(page.locator('.profile-review > [role=status]')).toContainText('Unable to load matching');await expect(page.locator('.profile-review-card')).toHaveCount(0);
+  await page.getByRole('button',{name:'Clear profile search',exact:true}).click();await expect(page.locator('.profile-review-card')).toHaveCount(1);
+});
+test('a slow profile search cannot replace a newer search result',async({page})=>{
+  const state=await mockBackend(page);state.roles=['user','moderator'];state.capabilities=['profile_publication_review'];state.profilePublications=profileReviewRows(3);state.profilePublications[0].public_fields.city='Slow City';state.profilePublications[1].public_fields.city='Fast City';
+  let started,release;const requested=new Promise(resolve=>{started=resolve;});const gate=new Promise(resolve=>{release=resolve;});
+  await page.route('**/rest/v1/rpc/search_profile_publications_for_review',async route=>{if(route.request().postDataJSON().p_query==='Slow City'){started();await gate;}await route.fallback();});
+  await signIn(page);await enter(page,'/?page=profile-review');const input=page.getByLabel('Search pending profile copies',{exact:true});await input.fill('Slow City');await page.getByRole('button',{name:'Search profile copies',exact:true}).click();await requested;
+  await input.fill('Fast City');await page.getByRole('button',{name:'Search profile copies',exact:true}).click();await expect(page.locator('.profile-review-card')).toHaveCount(1);await expect(page.locator('.profile-review-card')).toContainText('Fast City');
+  release();await page.waitForLoadState('networkidle');await expect(page.locator('.profile-review-card')).toHaveCount(1);await expect(page.locator('.profile-review-card')).toContainText('Fast City');
 });

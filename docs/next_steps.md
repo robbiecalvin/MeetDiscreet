@@ -1339,6 +1339,22 @@ If launch scope is reduced:
   hosted migration is performed. OPEN-052/053 remain unanswered; hosted JWT/
   concurrency and operational retention checks remain pending.
 
+### Staff Profile-Copy Search
+
+- Staff profile inspection now supports explicit name/city search, retained filters
+  across keyset pages/refresh and Clear back to the default queue. Literal matching
+  excludes withdrawn copies and all other recorded fields. New searches close detail.
+- The separate RPC rechecks current inspection scope and actor, bounds input/pages
+  and records protected read metadata without the query. Missing search setup is
+  unavailable rather than empty, and Clear keeps the original list usable. Late
+  responses cannot overwrite newer searches. No approval/public access is added.
+- Build, all 199 standard checks (44 PostgreSQL/config/security cases) and 122
+  backend browser checks passed; mobile form inspected. Coverage includes literal
+  matching, withdrawn/private-field exclusion, actor/scope/input boundaries, query
+  pagination/refresh, missing search setup with Clear fallback and out-of-order
+  responses. The new migration is not applied remotely; staff provisioning and
+  hosted JWT checks remain pending.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

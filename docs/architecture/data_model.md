@@ -1331,3 +1331,11 @@ candidates from the immutable copy, never current private draft/member fields.
 Withdrawn copies are excluded, reads record protected metadata, and no public
 profile, feedback/decision state, role grant or entitlement is introduced.
 OPEN-052/053 still govern the future approval/visibility implementation.
+
+
+The [profile-search migration](../../supabase/migrations/202611130001_profile_review_search.sql)
+adds an actor-bound literal name/city search over pending recorded copies. It
+returns the same curated metadata and keyset ordering as the original queue,
+leaving that RPC unchanged. Current inspection scope, query/page/cursor bounds
+and withdrawal exclusion are enforced. Protected read events record `queue_search`
+without search text. No new entity, staff decision or publication state is added.

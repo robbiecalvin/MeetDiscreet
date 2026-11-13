@@ -783,3 +783,5 @@ underlying feature is operational.
 
 - `src/profile-review.js` / `src/backend/profile-review.js`: independently scoped pending-copy inspection UI/RPC client, with keyset pages, immutable public-field detail and stale-response cleanup.
 - `supabase/migrations/202611100005_profile_publication_review.sql`: new explicit read-capability name, curated pending list/detail RPCs, protected read metadata and query indexes; no publication decisions/grants.
+
+- `supabase/migrations/202611130001_profile_review_search.sql`: bounded, actor-bound literal search of pending profile-copy names/cities with metadata-only read events; default list RPC preserved.

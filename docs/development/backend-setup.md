@@ -545,3 +545,18 @@ explicit unavailable state on direct visits. Authorized intake review remains
 usable. Verify hosted JWTs, actual assigned/revoked scope, owner isolation and
 withdrawn-copy behavior during the deferred walkthrough; local checks do not
 establish hosted enforcement or concurrent revocation guarantees.
+
+
+## Profile inspection name/city search
+
+After scoped profile inspection, apply
+[202611130001_profile_review_search.sql](../../supabase/migrations/202611130001_profile_review_search.sql)
+once. The agent has not applied it remotely. It adds a separate search RPC with
+unchanged actual Moderator/Admin + `profile_publication_review` requirements and
+expected-reviewer binding. It grants no roles, capabilities or public access.
+
+Queries match only pending recorded names/cities as literal case-insensitive
+substrings. Length 1–100, page size 1–50 and paired time/UUID cursor are validated.
+Protected read metadata adds `queue_search` without query text or candidate content.
+The old list RPC remains intact; missing search schema is explicitly unavailable
+and Clear uses that old listing path. Hosted JWT checks remain pending.

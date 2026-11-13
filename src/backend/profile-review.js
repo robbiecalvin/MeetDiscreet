@@ -5,9 +5,10 @@ export async function loadProfileReviewAccess() {
   if(error||typeof data!=='boolean')throw new Error('Profile review access unavailable.');
   return {reviewerId:user.id,allowed:data};
 }
-export async function listProfileReviewQueue(reviewer,cursor=null) {
+export async function listProfileReviewQueue(reviewer,cursor=null,query='') {
   await verify(reviewer);
-  const {data,error}=await backendClient().rpc('list_profile_publications_for_review',{p_expected_reviewer:reviewer,p_limit:21,p_after_submitted_at:cursor?.submitted_at??null,p_after_id:cursor?.id??null});
+  const needle=query.trim();
+  const {data,error}=await backendClient().rpc(needle?'search_profile_publications_for_review':'list_profile_publications_for_review',{...(needle?{p_query:needle}:{}),p_expected_reviewer:reviewer,p_limit:21,p_after_submitted_at:cursor?.submitted_at??null,p_after_id:cursor?.id??null});
   if(error||!Array.isArray(data))throw new Error('Profile review queue unavailable.');return data;
 }
 export async function loadProfileReviewCopy(reviewer,id) {

@@ -916,3 +916,13 @@ cached cards, and identity cleanup/version checks discard delayed responses.
 Already-seen content is not erased by revocation; hosted JWT and concurrency checks
 remain pending. Missing this setup does not disable independently authorized intake
 review. Public activation still requires its separate confirmed server policy.
+
+
+Profile-inspection search uses the same current staff role/scope and actual actor
+checks, with no capability inheritance from intake approval. Literal substring
+matching searches only pending recorded name/city fields. It excludes withdrawn
+copies and all other snapshot fields. Query length and paired cursor/page bounds
+are enforced before the read; protected access events omit query text/content.
+Infrastructure request logging remains separately configured. The UI keeps queries
+out of URLs/storage, drops old responses, and distinguishes missing search setup
+from empty matches while retaining the unchanged default-queue fallback.
