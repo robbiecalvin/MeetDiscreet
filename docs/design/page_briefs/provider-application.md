@@ -77,3 +77,17 @@ activity includes the approved transition. Missing approval-history schema/read
 access keeps other available history usable with an explicit unavailable notice.
 No notification delivery, identity badge, paid privilege or publication is implied.
 Reapplication/revocation interfaces remain separate from intake withdrawal.
+
+## 2026-11-13 — Intake visual continuation
+
+Continued Robbie’s refresh after “next”. Scoped `src/provider-application.css`
+adds a rounded application form and separate state panel, blush headings, matching
+inputs/actions and clearer history/activity sections. Signed-in headers stack below
+450px on this route. Existing authoritative states, submission locking, confirmations,
+feedback, owner checks and approval permissions are unchanged. No eligibility,
+publication or paid access is granted by this presentation. Rendering awaits review.
+
+Validation: production build, four application frontend checks and 11 mocked
+application/history/intake checks passed. Mocked signed-in mobile/desktop renders
+inspected with fictional text; no overflow at 320/390/1440px. Hosted migration/auth,
+Safari and licensed Agrandir remain unverified by this increment.

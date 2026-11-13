@@ -1,0 +1,33 @@
+/* Private intake presentation only; authoritative application states stay separate. */
+#account-view .provider-application > .profile-back { color: #d9b4c0; }
+#account-view .provider-application > .eyebrow { color: #dba5b3; letter-spacing: 2.3px; }
+#account-view .provider-application > h1 { font-size: clamp(40px, 5vw, 64px); letter-spacing: -.055em; line-height: 1.08; margin: 22px 0; }
+#account-view .provider-application > .offering-lead { color: #e3c6cd; }
+#account-view .provider-application .editor-notice { border-radius: 14px; border-color: #bb7d9140; background: #1b1e2e; color: #c4bdcd; }
+#account-view .provider-application .application-state { color: #e3c6cd; line-height: 1.8; max-width: 800px; padding: 18px 22px; border: 1px solid #bb7d9140; border-radius: 14px; background: #1b1e2e; }
+#account-view .provider-application .application-form { padding: 28px; border: 1px solid #ffffff18; border-radius: 18px; background: linear-gradient(135deg, #24283a, #1b1e2e); }
+#account-view .provider-application :is(input, textarea) { border-radius: 10px; border-color: #ffffff30; background: #121521b3; font-family: var(--font); min-width: 0; }
+#account-view .provider-application :is(input, textarea):focus-visible { outline: 2px solid #e4b0bf; outline-offset: 3px; }
+#account-view .provider-application [aria-invalid=true] { border-color: #f395a7; }
+#account-view .provider-application .editor-field > label { color: #e0dbe5; line-height: 1.6; }
+#account-view .provider-application .button { border-radius: 30px; white-space: normal; line-height: 1.5; text-align: center; }
+#account-view .provider-application .primary { background: linear-gradient(110deg, #b6192e, #8e1b35); }
+#account-view .provider-application .primary:hover { background: #c1223e; }
+#account-view .provider-application .outline { border-color: #ffffff30; }
+#account-view .provider-application .quiet { color: #dfb7c4; }
+#account-view .provider-application .profile-small { color: #bcbcca; }
+#account-view .provider-application :is(.application-history, .application-activity) { border-top-color: #ffffff20; padding-top: 30px; }
+#account-view .provider-application :is(.application-history, .application-activity) > h2 { color: #e3c6cd; font-size: 28px; font-weight: 300; letter-spacing: -.7px; }
+#account-view .provider-application .application-history details { border-radius: 14px; border-color: #ffffff20; background: #1b1e2e; padding: 24px; }
+#account-view .provider-application .application-history summary { color: #e3c6cd; }
+#account-view .provider-application .application-activity li { border-bottom-color: #ffffff18; }
+#account-view .provider-application .application-activity time { color: #c4bdcd; }
+@media (max-width: 700px) {
+  #account-view .provider-application > h1 { font-size: 40px; }
+  #account-view .provider-application .application-form { padding: 24px 20px; border-radius: 14px; }
+  #account-view .provider-application .application-history details { padding: 20px; }
+}
+@media (max-width: 450px) {
+  #app:has(#account-view:not([hidden]) > .provider-application) .site-header:has(.backend-session-actions button:not([hidden])) { height: auto; min-height: 66px; padding: 14px 0; flex-wrap: wrap; gap: 12px; }
+  #app:has(#account-view:not([hidden]) > .provider-application) .site-header:has(.backend-session-actions button:not([hidden])) .account-actions { flex-basis: 100%; justify-content: space-between; gap: 12px; }
+}

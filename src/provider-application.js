@@ -1,3 +1,4 @@
+import './provider-application.css';
 import { backendEnabled } from './backend/client.js';
 import { loadProviderApplication, saveProviderApplication, submitProviderApplication, withdrawProviderApplication } from './backend/provider-applications.js';
 import { loadProfileDraft } from './backend/drafts.js';

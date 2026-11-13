@@ -534,3 +534,9 @@ Exact rendering awaits review.
 Reused the account-entry visual treatment for security after “next”. Keep password,
 email and session actions distinct and their existing confirmation language clear.
 No security guarantees are inferred from presentation. Rendering awaits review.
+
+## 2026-11-13 — Provider application continuation
+
+Styled Provider intake after “next”. Keep state separate from editable fields, and
+retain visible disabled submission/withdrawal controls until the workflow permits
+them. History and activity remain separate views. Exact rendering awaits review.
