@@ -1,3 +1,4 @@
+import {registerRouteLeave} from './route-leave.js';
 import './staff-review.css';
 import {trackDraft} from './draft-changes.js';
 import {loadProfileFeedbackAccess} from './backend/profile-feedback.js';
@@ -12,7 +13,7 @@ export function renderProfileReview(container,navigate){
   container.replaceChildren();const root=node('section',null,'provider-review profile-review');
   let feedbackBusy=false;
   function confirmDiscard(){if(feedbackBusy){status.textContent='Wait for the feedback operation to finish before changing the review view.';return false;}return !detail.querySelector('.profile-feedback-form textarea')?.value.trim()||window.confirm('Discard the feedback draft in this view?');}
-  const back=node('a','← Back to account','profile-back');back.href='?page=account';back.addEventListener('click',event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();if(confirmDiscard())navigate('account');});
+  const back=node('a','← Back to account','profile-back');back.href='?page=account';back.addEventListener('click',event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate('account');});
   root.append(back,node('p','STAFF WORKSPACE','eyebrow'),node('h1','Profile submission review.'),node('p','Inspect recorded private profile copies with separately assigned review access.','offering-lead'),node('p','Profile inspection and separately scoped revision feedback. This workspace cannot approve, verify or publish a profile. Recorded copies do not confirm current Provider membership or paid access.','editor-notice'));
   const refresh=node('button','Refresh profile review queue','button outline');refresh.type='button';const status=node('p','','profile-small');status.setAttribute('role','status');status.tabIndex=-1;
   const searchForm=node('form',null,'review-search');searchForm.hidden=true;
@@ -23,7 +24,7 @@ export function renderProfileReview(container,navigate){
   const list=node('div',null,'profile-review-queue');const pages=node('div',null,'editor-actions');pages.hidden=true;
   const previous=node('button','Previous profile copies','button quiet');previous.type='button';const next=node('button','Next profile copies','button outline');next.type='button';pages.append(previous,next);
   const detail=node('section',null,'review-detail profile-review-detail');detail.hidden=true;
-  root.append(refresh,status,searchForm,list,pages,detail);container.append(root);
+  root.append(refresh,status,searchForm,list,pages,detail);container.append(root);registerRouteLeave(root,confirmDiscard);
   if(!backendEnabled){refresh.hidden=true;status.textContent='Profile review requires the connected backend and assigned staff scope. No private copies are available in this preview.';return;}
   let query='',reviewer=null,version=0,page=0,cursors=[null],rows=[],hasNext=false;
   const current=request=>request===version&&root.parentNode===container;

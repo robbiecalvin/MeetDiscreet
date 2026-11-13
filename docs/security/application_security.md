@@ -999,3 +999,12 @@ snapshots. No member biography/interests or owner identifiers render in the tabl
 Reads start only on explicit action. Failed/missing reads clear previous results;
 detached views cannot render late responses. No client write, publication or
 permission change is introduced. The comparison is not a live consistency lock.
+
+## Staff feedback route-leaving checks
+
+The shared router asks the active review view before managed in-app navigation.
+A rejected departure must not push a new history entry or render another route.
+Draft text remains solely in the existing form DOM; no storage or autosave is
+introduced. Sign-out/account changes keep their privacy-clearing behaviour.
+This is a data-loss safeguard, not authorization or a server-write cancellation
+guarantee. Same-document browser Back/Forward remains outside this guard.

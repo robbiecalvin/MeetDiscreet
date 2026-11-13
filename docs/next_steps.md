@@ -17,12 +17,17 @@ in their dedicated documents.
 Current phase: Frontend development with an initial Supabase development backend.
 
 Current activity:
-Added read-only comparison of saved public profile fields against pending and
-historical recorded copies. Providers explicitly load a snapshot, inspect seven
-fields with change labels/timestamps, and refresh it after saving edits. This does
-not submit, withdraw, approve or publish a copy. Production build, all 224 standard checks and all 133 mocked backend browser
-checks passed. Changed/matching comparisons were inspected on mobile/desktop. Two publishing-policy questions (OPEN-052/053) were presented again;
-no publishing implementation may assume their answers.
+Protect shared in-app navigation away from staff feedback drafts. Both review
+workspaces now use one route-leaving check before header/footer/router links
+change the URL, preserving canceled drafts and blocking departure during a staff
+action. Sign-out/account changes continue clearing private forms. Production
+build and full 224 standard/135 mocked backend suites passed. Final guard-lifecycle
+cleanup also passed 26 frontend navigation checks and four focused staff-feedback
+backend checks. Browser Back/Forward needs a
+separate same-document history guard and remains a known follow-up.
+
+Read-only recorded-copy comparison is implemented and verified separately.
+Publishing decisions OPEN-052/053 remain unanswered; do not infer policy from “next”.
 
 The visual refresh covers public pages, account/setup/editor tools and staff
 review; exact rendering remains for Robbie’s review. The selected palette,

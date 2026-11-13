@@ -2140,3 +2140,19 @@ test('history comparison is bound to its recorded copy and a late load cannot re
  await page.route('**/rest/v1/profile_drafts*',async route=>{if(new URL(route.request().url()).searchParams.get('select')?.includes('adult_age')){started();await wait;}await route.fallback();});
  await comparison.getByRole('button',{name:'Refresh saved-field comparison',exact:true}).click();await seen;await page.getByRole('button',{name:'Sign out',exact:true}).click();const finished=page.waitForResponse(response=>response.url().includes('/rest/v1/profile_drafts')&&response.request().method()==='GET');release();await finished;await page.waitForLoadState('networkidle');await expect(page.locator('.profile-copy-comparison')).toHaveCount(0);await expect(page.locator('#account-view')).not.toContainText('Withdrawn record');
 });
+
+test('staff unsent feedback survives cancelled header/footer route changes without duplicate prompts',async({page})=>{
+ const state=await mockBackend(page);state.roles=['user','moderator'];state.capabilities=['provider_application_review','provider_application_feedback'];state.reviewApplications=reviewRows(2);for(const row of state.reviewApplications)row.submission_id='66666666-6666-4666-8666-000000000001';
+ await signIn(page);await enter(page,'/?page=provider-review');await page.getByRole('button',{name:'Inspect Applicant 01',exact:true}).click();const note=page.getByLabel('Changes the applicant should make',{exact:true});await note.fill('Keep this private unsent note.');
+ for(const selector of ['[data-account-link]','[data-editor-link]','[data-help-link]','[data-guidelines-link]','.desktop-nav .how-link']){const link=page.locator(selector).filter({visible:true}).first();page.once('dialog',dialog=>dialog.dismiss());await link.click();await expect(page).toHaveURL(/page=provider-review/);await expect(note).toHaveValue('Keep this private unsent note.');}
+ let prompts=0;page.on('dialog',dialog=>{prompts++;dialog.accept();});await page.getByRole('link',{name:'Back to account',exact:false}).click();await expect(page).toHaveURL(/page=account/);expect(prompts).toBe(1);await expect(page.locator('.review-feedback-form')).toHaveCount(0);
+});
+
+test('profile feedback navigation is blocked during a write and sign-out still clears private text',async({page})=>{
+ const state=await mockBackend(page);state.roles=['user','admin'];state.capabilities=['profile_publication_review','profile_publication_feedback'];state.profilePublications=profileReviewRows(2);
+ await signIn(page);await enter(page,'/?page=profile-review');await page.locator('.profile-review-card').first().getByRole('button').click();const note=page.getByLabel('Revision feedback for this profile copy',{exact:true});await note.fill('Keep this profile note.');
+ page.once('dialog',dialog=>dialog.dismiss());await page.locator('[data-account-link]').click();await expect(page).toHaveURL(/page=profile-review/);await expect(note).toHaveValue('Keep this profile note.');
+ let release;const waiting=new Promise(resolve=>release=resolve);let started;const seen=new Promise(resolve=>started=resolve);await page.route('**/rest/v1/rpc/record_profile_revision_feedback',async route=>{started();await waiting;await route.fallback();});
+ page.once('dialog',dialog=>dialog.accept());await page.getByRole('button',{name:'Record revision feedback',exact:true}).click();await seen;await page.locator('[data-help-link]').filter({visible:true}).first().click();await expect(page).toHaveURL(/page=profile-review/);await expect(page.locator('.profile-review > [role=status]')).toContainText('Wait for the feedback operation');
+ await page.getByRole('button',{name:'Sign out',exact:true}).click();release();await expect(page.locator('.profile-feedback-form')).toHaveCount(0);await expect(page.locator('#account-view')).not.toContainText('Keep this profile note.');
+});

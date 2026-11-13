@@ -1,3 +1,4 @@
+import {registerRouteLeave} from './route-leave.js';
 import './staff-review.css';
 import { trackDraft } from './draft-changes.js';
 import { providerApprovalHistory } from './provider-approval-history.js';
@@ -30,10 +31,10 @@ function submissionDate(value) {
 export function renderProviderReview(container, navigate) {
   container.replaceChildren();
   const root = node('section', null, 'provider-review');
-  let feedbackInput = null;
-  const confirmDiscard = () => !feedbackInput?.value.trim() || window.confirm('Discard this unsent feedback note? It has not been sent to the applicant.');
+  let feedbackInput = null, decisionBusy = false;
+  const confirmDiscard = () => { if (decisionBusy) { status.textContent = 'Wait for the staff action to finish before leaving this review.'; return false; } return !feedbackInput?.value.trim() || window.confirm('Discard this unsent feedback note? It has not been sent to the applicant.'); };
   const back = node('a', '← Back to account', 'profile-back'); back.href = '?page=account';
-  back.addEventListener('click', event => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); if (confirmDiscard()) navigate('account'); });
+  back.addEventListener('click', event => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate('account'); });
   root.append(back, node('p', 'STAFF WORKSPACE', 'eyebrow'), node('h1', 'Provider application queue.'), node('p', 'Inspect submitted introductions with explicitly assigned review access.', 'offering-lead'), node('p', 'Staff review workspace. Requesting changes and approving pilot Provider access require separate permissions. Identity checks, paid access and publishing remain separate.', 'editor-notice'));
   const status = node('p', '', 'review-status'); status.setAttribute('role', 'status');
   const refresh = node('button', 'Refresh review queue', 'button outline'); refresh.type = 'button';
@@ -49,7 +50,7 @@ export function renderProviderReview(container, navigate) {
   const previous = node('button', 'Previous applications', 'button quiet'); previous.type = 'button';
   const next = node('button', 'Next applications', 'button outline'); next.type = 'button';
   pages.append(previous, next); pages.hidden = true;
-  root.append(status, refresh, searchForm, list, pages, detail); container.append(root);
+  root.append(status, refresh, searchForm, list, pages, detail); container.append(root); registerRouteLeave(root, confirmDiscard);
   if (!backendEnabled) { status.textContent = 'Staff review requires the connected backend and explicitly assigned staff permissions. No application data is available in this preview.'; refresh.hidden = true; return; }
   let reviewerId = null;
   let query = '';
@@ -80,7 +81,7 @@ export function renderProviderReview(container, navigate) {
         const canApprove = approvalAccess.status==='fulfilled' && approvalAccess.value;
         let deciding = false;
         const decisionControls = [];
-        const setDeciding = active => { deciding=active; for(const control of decisionControls) control.disabled=active; };
+        const setDeciding = active => { deciding=active; decisionBusy=active; for(const control of decisionControls) control.disabled=active; };
 
         if (!current(request)) return;
         if (canGiveFeedback) {

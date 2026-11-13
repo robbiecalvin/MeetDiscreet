@@ -137,3 +137,24 @@ focused mocked backend review/feedback/approval/preview checks passed. Inspected
 fictional scoped-staff mobile/desktop queues and details; no overflow at
 320/390/1440px. No real staff account/capability was assigned. Hosted setup, Safari
 and licensed Agrandir remain unverified by this presentation increment.
+
+## Shared in-app navigation protection
+
+Review workspaces register their existing discard/busy check with the shared
+route-leaving guard. Header, footer and other router-driven links check it before
+pushing a URL or rerendering. Cancel retains the exact form and location; confirmed
+Back to account asks only once. Queue refresh/search/page/close actions retain
+their existing local checks. Feedback/pilot approval operations block these route
+changes while in flight; sign-out and identity-driven clearing are never blocked.
+
+This covers managed in-app links. Existing native beforeunload handling protects
+full-document exits where the browser permits a prompt. Same-document browser
+Back/Forward remains a follow-up; no complete history-navigation guarantee is
+claimed. No note persistence, backend permissions or mutation semantics changed.
+
+Route-guard validation: production build and the full 224 standard/135 mocked
+backend suites passed. Final guard-lifecycle cleanup clears old guards whenever
+the router renders, including identity-driven clearing, and was followed by
+focused account/discovery/review navigation checks. New cases cover canceled
+header/footer departure, a single confirmed Back prompt, in-flight blocking and
+sign-out cleanup. Browser Back/Forward remains the limitation stated above.

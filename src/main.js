@@ -1,3 +1,4 @@
+import {pushRouteState, clearRouteLeave} from './route-leave.js';
 import { renderBookingInboxPreview } from './booking-inbox-preview.js';
 import { renderProfileReview } from './profile-review.js';
 import { renderPhotoPreview, clearPhotoPreviewState } from './photo-preview.js';
@@ -100,6 +101,7 @@ let selectedCardId = null;
 let selectedAdId = null;
 let callbackStarted = false;
 function renderRoute() {
+  clearRouteLeave();
   const params = new URL(location.href).searchParams;
   if (params.get('page') !== 'photo-preview' || params.has('profile') || params.has('ad')) clearPhotoPreviewState();
   const accountMode = ['account', 'account-security', 'my-listings', 'availability', 'provider-setup', 'user-setup', 'edit-user-profile', 'booking-inbox-preview', 'booking-draft', 'draft-backup', 'photo-preview', 'messages-preview', 'provider-application', 'profile-review', 'provider-review', 'sign-in', 'register', 'recover-account', 'reset-password'].includes(params.get('page')) ? params.get('page') : null;
@@ -225,7 +227,7 @@ function backToDiscovery() {
   url.searchParams.delete('page');
   url.searchParams.delete('draft');
   url.searchParams.delete('copy');
-  history.pushState(null, '', url);
+  if (!pushRouteState(null, '', url)) return;
   renderRoute();
   window.scrollTo({ top: discoveryScroll, behavior: 'instant' });
   const card = state.view === 'ads' ? (selectedAdId && document.querySelector(`[data-ad="${selectedAdId}"]`)) : (selectedCardId && document.querySelector(`[data-provider="${selectedCardId}"]`));
@@ -242,7 +244,7 @@ function showProfile(provider, sourceAd) {
   url.searchParams.delete('ad');
   if (sourceAd) url.searchParams.set('fromAd', sourceAd.id);
   else url.searchParams.delete('fromAd');
-  history.pushState(null, '', url);
+  if (!pushRouteState(null, '', url)) return;
   renderRoute();
   window.scrollTo({ top: 0, behavior: 'instant' });
   $('#main').focus({ preventScroll: true });
@@ -265,7 +267,7 @@ function showAd(ad) {
   url.searchParams.delete('offering');
   url.searchParams.delete('resume');
   url.searchParams.set('ad', ad.id);
-  history.pushState(null, '', url);
+  if (!pushRouteState(null, '', url)) return;
   renderRoute();
   window.scrollTo({ top: 0, behavior: 'instant' });
   $('#main').focus({ preventScroll: true });
@@ -391,7 +393,7 @@ for (const link of document.querySelectorAll('[data-how-link]')) {
     const url = new URL(location.href);
     for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy', 'kind', 'from', 'new', 'provider', 'offering', 'resume']) url.searchParams.delete(key);
     url.searchParams.set('page', 'how-it-works');
-    history.pushState(null, '', url);
+    if (!pushRouteState(null, '', url)) return;
     renderRoute();
     window.scrollTo({ top: 0, behavior: 'instant' });
     $('#main').focus({ preventScroll: true });
@@ -406,7 +408,7 @@ for (const link of document.querySelectorAll('[data-editor-link]')) {
     const url = new URL(location.href);
     for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy', 'kind', 'from', 'new', 'provider', 'offering', 'resume']) url.searchParams.delete(key);
     url.searchParams.set('page', 'create-listing');
-    history.pushState(null, '', url);
+    if (!pushRouteState(null, '', url)) return;
     renderRoute();
     window.scrollTo({ top: 0, behavior: 'instant' });
     $('#main').focus({ preventScroll: true });
@@ -417,7 +419,7 @@ function returnFromGuidelines() {
   const source = history.state?.policyReturnUrl || policyReturnUrl;
   const target = new URL(source || location.href);
   if (!source) { target.searchParams.delete('page'); target.hash = ''; }
-  history.pushState(history.state?.publicSourceState || null, '', target);
+  if (!pushRouteState(history.state?.publicSourceState || null, '', target)) return;
   renderRoute();
   if (target.searchParams.get('page') === 'help') $('#help-main').focus({ preventScroll: true });
   else if (target.searchParams.get('page') === 'guidelines') $('#guidelines-main').focus({ preventScroll: true });
@@ -432,7 +434,7 @@ for (const link of document.querySelectorAll('[data-guidelines-link]')) {
     for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy', 'kind', 'from', 'new', 'provider', 'offering', 'resume']) url.searchParams.delete(key);
     url.searchParams.set('page', 'guidelines');
     url.hash = '';
-    history.pushState({ policyReturnUrl }, '', url);
+    if (!pushRouteState({ policyReturnUrl }, '', url)) return;
     renderRoute();
     window.scrollTo({ top: 0, behavior: 'instant' });
     $('#guidelines-main').focus({ preventScroll: true });
@@ -446,7 +448,7 @@ function navigateFromHelp(page) {
   else url.searchParams.delete('page');
   url.hash = '';
   if (page === 'guidelines') policyReturnUrl = location.href;
-  history.pushState(page === 'guidelines' ? { policyReturnUrl, publicSourceState: history.state } : null, '', url);
+  if (!pushRouteState(page === 'guidelines' ? { policyReturnUrl, publicSourceState: history.state } : null, '', url)) return;
   renderRoute();
   window.scrollTo({ top: 0, behavior: 'instant' });
   if (page === 'guidelines') $('#guidelines-main').focus({ preventScroll: true });
@@ -462,7 +464,7 @@ for (const link of document.querySelectorAll('[data-help-link]')) {
     url.searchParams.set('page', 'help');
     url.hash = '';
     helpReturnUrl = source;
-    history.pushState({ helpReturnUrl: source }, '', url);
+    if (!pushRouteState({ helpReturnUrl: source }, '', url)) return;
     renderRoute();
     window.scrollTo({ top: 0, behavior: 'instant' });
     $('#help-main').focus({ preventScroll: true });
@@ -473,7 +475,7 @@ function returnFromHelp() {
   const source = history.state?.helpReturnUrl || helpReturnUrl;
   const target = new URL(source || location.href);
   if (!source) { target.searchParams.delete('page'); target.hash = ''; }
-  history.pushState(null, '', target);
+  if (!pushRouteState(null, '', target)) return;
   renderRoute();
   if (target.searchParams.get('page') === 'guidelines') $('#guidelines-main').focus({ preventScroll: true });
   else if (hasAgeConfirmation) $('#main').focus({ preventScroll: true });
@@ -500,7 +502,7 @@ function navigateAccount(page, extra = {}) {
   if (extra.fromLibrary) url.searchParams.set('from', 'library');
   if (extra.fresh) url.searchParams.set('new', '1');
   url.hash = '';
-  history.pushState(null, '', url);
+  if (!pushRouteState(null, '', url)) return;
   renderRoute();
   window.scrollTo({ top: 0, behavior: 'instant' });
   if (hasAgeConfirmation) $('#main').focus({ preventScroll: true });
