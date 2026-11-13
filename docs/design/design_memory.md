@@ -540,3 +540,11 @@ No security guarantees are inferred from presentation. Rendering awaits review.
 Styled Provider intake after “next”. Keep state separate from editable fields, and
 retain visible disabled submission/withdrawal controls until the workflow permits
 them. History and activity remain separate views. Exact rendering awaits review.
+
+## 2026-11-13 — Shared consistency pass
+
+Consolidated repeated narrow signed-in header overrides into shared navigation
+styles after “next”. Apply the same layout on discovery, profile and draft routes;
+keep disabled states and keyboard focus visible. Per-page polish is not launch
+readiness. The current-work roadmap now summarizes the pass; detailed validation
+remains in the relevant page briefs.

@@ -149,7 +149,7 @@ conflict with approved MeetDiscreet decisions.
 - src/offering.css: scoped public ad presentation, including Offering detail/related ads and Looking For summary accents.
 - src/profile.css: scoped public companion profile editorial presentation.
 - src/account-entry.css: shared scoped sign-in, registration, recovery and account-security form presentation.
-- src/account-overview.css: shared account overview/User setup/Provider setup presentation and narrow-screen workspace header layout.
+- src/account-overview.css: shared account overview/User setup/Provider setup presentation.
 - src/messages-preview.css: scoped fictional inbox, thread, search and composer presentation.
 - src/booking-inbox-preview.css: scoped fictional request list, detail, calendar and revision presentation.
 - src/booking-draft.css: scoped unsent plan form, companion snapshot, private controls and review presentation.
@@ -161,6 +161,7 @@ conflict with approved MeetDiscreet decisions.
 - src/age-gate.css: scoped entrance dialog, backdrop and responsive presentation.
 - src/public-readers.css: scoped Help search/answers and Community Guidelines reader presentation.
 - src/provider-application.css: scoped private intake form, state/history and activity presentation.
+- src/navigation.css: shared narrow-screen signed-in header, disabled controls and keyboard focus.
 - src/styles.css: shared tokens, portrait grid, single-column ads, responsive layout.
 - src/discovery.css: scoped editorial discovery treatment and its view dock, including reduced-motion overrides.
 - src/data.js: synthetic public profile and ad fixtures; no live presence.

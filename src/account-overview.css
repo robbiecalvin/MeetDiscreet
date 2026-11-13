@@ -45,20 +45,6 @@
   :is(.account-overview, .user-setup, .provider-setup) .account-starting-point .editor-actions { align-items: stretch; }
   :is(.account-overview, .user-setup, .provider-setup) .account-starting-point .editor-actions > .button { width: 100%; }
 }
-@media (max-width: 450px) {
-  #app:has(#account-view:not([hidden]) > :is(.account-overview, .user-setup, .provider-setup)) .site-header {
-    height: auto;
-    min-height: 66px;
-    padding: 14px 0;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  #app:has(#account-view:not([hidden]) > :is(.account-overview, .user-setup, .provider-setup)) .account-actions {
-    flex-basis: 100%;
-    justify-content: space-between;
-    gap: 12px;
-  }
-}
 
 :is(.user-setup, .provider-setup) > .editor-notice {
   border-color: #bb7d9140;

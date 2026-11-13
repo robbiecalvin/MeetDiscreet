@@ -484,3 +484,12 @@ Reuse current decisions until Robbie changes them.
 
 Consistency is the starting point for the next iteration,
 not a prohibition against revision.
+## 2026-11-13 — Shared interaction consistency
+
+The refreshed customer pages retain the selected ink/navy/burgundy palette with
+provisional blush text, softer panels and rounded actions. `src/navigation.css`
+centralizes the signed-in header below 450px so account/post/session controls stay
+reachable across routes. Disabled buttons retain native disabled semantics and
+have subdued presentation; keyboard focus uses a visible blush outline. Page
+styles may specialize focus contrast. No account, state or entitlement is inferred
+from these styles. Exact visual rendering remains subject to Robbie’s review.

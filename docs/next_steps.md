@@ -17,70 +17,25 @@ in their dedicated documents.
 Current phase: Frontend development with an initial Supabase development backend.
 
 Current activity:
-Robbie requested a sexier look and feel. Discovery has an editorial visual refresh
-for review, followed by matching companion-profile, Offering detail, Looking For summary
-and account-entry/overview, User/Provider setup, conversation, booking inbox/plan editor and User/Provider profile-editor, listing-workspace, experience catalogue, availability, local photo-workspace, How it works, entrance-gate, Help, guidelines, account-security and Provider-application
-presentation.
-These preserve the
-selected palette; discovery retains its three-column mobile portrait grid,
-compact ads and existing functionality. Discovery remains synthetic. The combined
-manual walkthrough is still deferred; backend pilot work remains on the roadmap.
-Discovery refresh verification: production build and all 223 standard checks passed;
-Chromium renders inspected at 320, 390 and 1440px, including the compact ads view.
-Profile refresh: production build and all 41 focused profile/discovery/Offering/booking
-preview checks passed. Profile renders inspected at 320, 390 and 1440px.
-Offering refresh: production build and the same 41 focused checks passed again;
-320, 390 and 1440px renders inspected with no horizontal overflow.
-Looking For refresh: production build and 36 focused Looking For/Offering/profile/
-discovery checks passed; 390px and 1440px renders inspected, with 320px automated
-layout checks. Public-summary restrictions and own-draft navigation remain intact.
-Account-entry refresh: production build, 13 account-screen checks and all 131
-mocked backend browser checks passed. Inspected mobile registration/desktop sign-in
-and checked 320px overflow. This does not verify hosted Supabase or email delivery.
-Account overview refresh: 13 account-screen and 131 mocked backend checks passed
-before the narrow-header correction. Production build and 11 targeted account/role/
-starting-point checks passed after it; final 320/390px header renders inspected
-without overflow. Earlier public-page presentation increments did not rerun backend suites.
-User/Provider setup refresh: production build, 21 focused frontend checks and 131
-mocked backend browser checks passed. Signed-in 320/390/1440px renders inspected
-using fictional data; no horizontal overflow. No draft or authorization logic changed.
-Conversation refresh: production build, nine conversation checks and one mocked
-backend conversation/sign-out cleanup check passed. Mobile/desktop renders inspected;
-messages remain fictional/local-only, with no delivery or storage integration.
-Booking inbox refresh: production build, 20 inbox/calendar/revision/activity checks
-and two mocked booking-preview cleanup checks passed. Mobile/desktop calendar
-and comparison renders inspected. No booking, payment or schedule logic changed.
-Booking-plan editor refresh: production build, 30 focused frontend checks and eight
-mocked plan-save/restore/cleanup checks passed. Form/review renders inspected,
-including narrow mobile layouts. No booking or quote logic changed.
-User/Provider profile-editor refresh: production build, 14 editor checks and six
-mocked private-profile/save/delete/cleanup checks passed. Mobile/desktop forms and
-previews inspected, with no overflow at 320/390/1440px. Draft logic is unchanged.
-Listing workspace refresh: production build, 17 frontend checks and 10 mocked
-listing-management checks passed. Desktop editor/mobile library renders inspected;
-signed-in 320px header and overflow checked. No publication or quota logic changed.
-Catalogue/availability refresh: production build, 16 frontend and eight mocked
-catalogue/schedule checks passed. Mocked signed-in renders inspected at mobile/
-desktop widths, with no overflow at 320/390/1440px. No commercial/schedule logic changed.
-Photo workspace refresh: production build, seven photo checks and one mocked
-sign-out cleanup check passed. Mocked signed-in mobile/desktop renders inspected
-with fictional test images; no overflow at 320/390/1440px. Files remain device-local.
-How it works refresh: production build and 20 public-page/discovery checks passed.
-Mobile intro/journey and desktop plan renders inspected; 320/390/1440px overflow
-checks passed. Reference prices, entitlement distinctions and pending policies are unchanged.
-Entrance refresh: production build and 31 discovery/guidelines/help checks passed.
-320×568/mobile/desktop gate renders inspected; no horizontal overflow, with Exit
-reachable on the short screen. Thirty-day retention and Exit navigation are unchanged.
-Help/guidelines refresh: production build and 31 public-reader/discovery checks
-passed. Mobile Help/desktop guidelines renders inspected; no overflow at
-320/390/1440px and no age-confirmation flag set by direct public reader visits.
-Account security refresh: production build, 13 account-screen and 17 mocked
-security/overview checks passed. Fictional signed-in mobile/desktop renders
-inspected without overflow at 320/390/1440px. Authentication logic is unchanged.
-Provider intake refresh: production build, four frontend and 11 mocked intake/
-history checks passed. Fictional signed-in mobile/desktop renders inspected with
-no overflow at 320/390/1440px. State transitions and permissions are unchanged.
-Licensed Agrandir files and macOS Safari verification remain outstanding.
+Complete the shared visual consistency pass following Robbie’s requested sexier
+look and feel. The public discovery/profile/ad pages, account entry/security,
+User/Provider setup and profile editors, listing tools, experience catalogue,
+availability, photo workspace, conversation/booking previews, Help, guidelines
+and entrance gate have matching editorial styling. Exact rendering remains for
+Robbie’s review. The selected palette, three-column mobile portrait grid and
+compact ads remain intact. Relevant page briefs record per-increment validation.
+
+Shared signed-in navigation now uses one narrow-screen layout across routes,
+with consistent disabled-control and keyboard-focus feedback. Production build,
+all 223 standard checks and all 131 mocked backend browser checks passed.
+Mocked signed-in 320px overflow checks passed across 14 routes; discovery, profile
+and conversation renders were inspected. Hosted integrations remain separately
+unverified.
+The combined manual walkthrough remains deferred at Robbie’s request.
+Discovery is synthetic; conversations/bookings/photos remain explicitly labelled
+previews. Visual polish does not establish live marketplace readiness.
+Licensed Agrandir files, macOS Safari, hosted migration/auth/email validation and
+unresolved publishing/payment/scheduling policies remain outstanding.
 
 Known status:
 

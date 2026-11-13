@@ -35,7 +35,3 @@
   :is(#experiences-view, #account-view .availability-editor) :is(.experience-form, .availability-form, .private-draft-controls) { padding: 24px 20px; border-radius: 14px; }
   #account-view .availability-editor .availability-window { padding: 20px; }
 }
-@media (max-width: 450px) {
-  #app:has(:is(#experiences-view:not([hidden]), #account-view:not([hidden]) > .availability-editor)) .site-header:has(.backend-session-actions button:not([hidden])) { height: auto; min-height: 66px; padding: 14px 0; flex-wrap: wrap; gap: 12px; }
-  #app:has(:is(#experiences-view:not([hidden]), #account-view:not([hidden]) > .availability-editor)) .site-header:has(.backend-session-actions button:not([hidden])) .account-actions { flex-basis: 100%; justify-content: space-between; gap: 12px; }
-}

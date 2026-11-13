@@ -44,17 +44,3 @@
   #account-view .listing-library .library-card h2 { font-size: 24px; }
   #account-view .listing-library .library-card-actions { flex-direction: column; align-items: stretch; }
 }
-@media (max-width: 450px) {
-  #app:has(:is(#editor-view:not([hidden]), #account-view:not([hidden]) > .listing-library)) .site-header:has(.backend-session-actions button:not([hidden])) {
-    height: auto;
-    min-height: 66px;
-    padding: 14px 0;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  #app:has(:is(#editor-view:not([hidden]), #account-view:not([hidden]) > .listing-library)) .site-header:has(.backend-session-actions button:not([hidden])) .account-actions {
-    flex-basis: 100%;
-    justify-content: space-between;
-    gap: 12px;
-  }
-}

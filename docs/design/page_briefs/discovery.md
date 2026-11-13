@@ -101,3 +101,15 @@ including gate blocking, retention, storage fallback, policies and Exit behaviou
 Inspected 320×568, 390×844 and 1440×1000 renders; no horizontal dialog/document
 overflow and Exit remains reachable on the short screen. Safari/Agrandir remain
 unverified.
+
+## 2026-11-13 — Shared consistency pass
+
+Signed-in discovery now shares the narrow header layout with profile, account
+and draft routes through `src/navigation.css`; removed duplicate per-page header
+rules. Disabled buttons have subdued feedback and keyboard focus is consistent.
+Unsigned-in layouts, mobile three-column portraits and age-gate semantics remain.
+
+Validation: production build, all 223 standard checks and all 131 mocked backend
+browser checks passed. Mocked signed-in 320px overflow checks passed across 14
+routes; inspected discovery, profile and conversation renders. This is a local
+regression result, not hosted authentication or production-readiness verification.

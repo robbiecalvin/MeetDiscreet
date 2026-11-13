@@ -1,0 +1,22 @@
+/* Shared signed-in navigation and control feedback across public/private pages. */
+#app button:disabled { opacity: .5; filter: none; }
+#app :is(button, a, input, select, textarea, summary):focus-visible {
+  outline: 2px solid #edbdc9;
+  outline-offset: 4px;
+}
+@media (max-width: 450px) {
+  .site-header:has(.backend-session-actions button:not([hidden])) {
+    height: auto;
+    min-height: 66px;
+    padding: 14px 0;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .site-header:has(.backend-session-actions button:not([hidden])) .account-actions {
+    flex-basis: 100%;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .site-header .backend-session-actions { gap: 8px; min-width: 0; }
+  .site-header .backend-session-actions button { white-space: nowrap; }
+}

@@ -27,7 +27,3 @@
   #account-view .provider-application .application-form { padding: 24px 20px; border-radius: 14px; }
   #account-view .provider-application .application-history details { padding: 20px; }
 }
-@media (max-width: 450px) {
-  #app:has(#account-view:not([hidden]) > .provider-application) .site-header:has(.backend-session-actions button:not([hidden])) { height: auto; min-height: 66px; padding: 14px 0; flex-wrap: wrap; gap: 12px; }
-  #app:has(#account-view:not([hidden]) > .provider-application) .site-header:has(.backend-session-actions button:not([hidden])) .account-actions { flex-basis: 100%; justify-content: space-between; gap: 12px; }
-}

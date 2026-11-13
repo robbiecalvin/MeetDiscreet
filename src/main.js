@@ -7,6 +7,7 @@ import { renderProviderReview } from './provider-review.js';
 import { renderProviderApplication, clearProviderApplicationState } from './provider-application.js';
 import { backendEnabled, backendClient, processAuthCallback, signOutCurrentSession } from './backend/client.js';
 import './styles.css';
+import './navigation.css';
 import './age-gate.css';
 import './discovery.css';
 import { renderBookingDraft, clearBookingDraftState } from './booking-draft.js';
