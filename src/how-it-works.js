@@ -1,3 +1,4 @@
+import './how-it-works.css';
 import { backendEnabled } from './backend/client.js';
 import { referencePrices, formatReferencePrice } from './pricing.js';
 

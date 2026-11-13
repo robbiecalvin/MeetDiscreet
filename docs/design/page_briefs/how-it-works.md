@@ -14,8 +14,8 @@ publishing grants neither subscription access nor administrative privileges.
 Do not turn the proposed deposit or posting interpretations into confirmed rules.
 
 Use native FAQ disclosures, useful return-to-discovery links, and accurate preview
-limits. Real registration, publishing, payments, messages, and bookings remain
-unconnected. Page content is product explanation, not final legal documents.
+limits. Development authentication/private drafts are available when configured. Public
+publishing, payments, messaging and live bookings remain unconnected. Page content is product explanation, not final legal documents.
 
 Validate direct visits through the age gate, refresh/history, audience switching,
 price and entitlement distinctions, FAQ keyboard behaviour, navigation/focus,
@@ -28,3 +28,16 @@ works checks covering age-gated direct visits, journeys, plan distinctions,
 keyboard FAQ interaction, browser history, footer navigation, and five widths.
 Desktop and mobile screenshots inspected. macOS Safari and licensed Agrandir
 rendering remain unverified; no live Netlify verification claimed.
+
+## 2026-11-13 — Public explainer visual continuation
+
+Continued Robbie’s refresh after “next”. Scoped `src/how-it-works.css` adds a
+larger editorial headline, burgundy journey selection, rounded navy journey cards,
+softly tinted reference-plan panels and rounded FAQ disclosures. All prices,
+entitlement distinctions and pending policies are unchanged; no checkout or
+publishing action was introduced. Exact rendering awaits Robbie’s review.
+
+Validation: production build and 20 focused How it works/discovery checks passed.
+Inspected mobile intro/journey and desktop reference-plan renders; no overflow at
+320/390/1440px. FAQ keyboard behaviour and journey switching remain covered by
+existing tests. Safari and licensed Agrandir remain unverified.

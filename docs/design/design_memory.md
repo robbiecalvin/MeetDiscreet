@@ -508,3 +508,10 @@ prices, publication or bookable availability. Exact rendering awaits review.
 Styled the device-local photo workspace after “next”. Make the current main
 preview visually distinct while retaining explicit local-only labels and the tall
 photo crop. No upload or profile assignment is implied. Rendering awaits review.
+
+## 2026-11-13 — Public explainer continuation
+
+Styled How it works after “next”. Keep reference plans visually equal rather than
+implying a recommended purchase; preserve exact amounts and unresolved terms.
+Journey cards and FAQ disclosures follow the editorial public-page treatment.
+Exact rendering awaits review.
