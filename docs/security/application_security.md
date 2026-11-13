@@ -941,3 +941,11 @@ Opening the unsent-plan editor passes no fixture terms into an existing draft.
 Actual booking records still need participant/entitlement/block enforcement,
 immutable accepted terms, trusted payment verification and concurrency controls;
 this layout demonstrates none of those backend guarantees.
+
+
+The fictional booking calendar filters existing example request dates only. It
+performs no calendar/provider query or reservation write. Perspective, month and
+day controls are view state, not role or availability grants. Blank cells are
+noninteractive and explicitly carry no availability meaning. UTC date-grid
+calculation prevents viewer-zone day shifts; identity cleanup resets this state
+with the rest of the inbox. Live availability/concurrency checks remain separate.

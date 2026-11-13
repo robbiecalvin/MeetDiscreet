@@ -1371,6 +1371,20 @@ If launch scope is reduced:
   unsent-plan edits and identity cleanup. No migration. Real booking enforcement
   and unresolved lifecycle rules remain open.
 
+### Fictional Booking Calendar View
+
+- Added a Monday-first month calendar alongside the example inbox list. Month
+  navigation, matching-date selection and a day-filter reset reuse current
+  search/status filters. Detail/back restores the selected date and keyboard focus.
+- Dates/counts describe example requests only. Blank days are noninteractive and
+  explicitly not availability; no booking/reservation, permission or calendar
+  subscription is created. Gregorian/UTC grid math avoids viewer-zone date shifts.
+- Build, all 214 standard checks and 123 backend browser checks passed; desktop/
+  mobile inspected. Coverage includes Gregorian leap/year boundaries, month/day
+  filtering, empty-month semantics, preserved filters, selected-day focus, narrow
+  layouts and identity reset. Existing unsent-plan preservation checks pass. No
+  migration, live booking, pricing rule or plan overwrite is introduced.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

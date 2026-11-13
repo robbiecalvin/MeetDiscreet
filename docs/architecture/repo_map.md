@@ -787,3 +787,5 @@ underlying feature is operational.
 - `supabase/migrations/202611130001_profile_review_search.sql`: bounded, actor-bound literal search of pending profile-copy names/cities with metadata-only read events; default list RPC preserved.
 
 - `src/booking-inbox-preview.js`: view-local fictional User/Provider inbox, search/status filters, read-only request detail and original/proposed revision comparison; separate from saved/unsaved booking plans.
+
+- `src/booking-calendar.js`: UTC Gregorian month-grid and bounded month-navigation helpers for the fictional booking inbox; no availability or reservation authority.
