@@ -2052,3 +2052,11 @@ test('booking inbox preview is linked from User setup and resets example context
   await page.getByRole('button',{name:'Sign out',exact:true}).click();await expect(page.getByRole('button',{name:'User example',exact:true})).toHaveAttribute('aria-pressed','true');await expect(page.getByRole('heading',{name:'Choose an example request',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'List view',exact:true})).toHaveAttribute('aria-pressed','true');await expect(page.locator('.booking-calendar')).toBeHidden();
   expect(state.requests.filter(value=>value.method==='POST'&&value.path.startsWith('/rest/'))).toEqual([]);
 });
+
+
+test('sign-out clears local booking revision drafts without saving or submitting a proposal',async({page})=>{
+  const state=await mockBackend(page);await signIn(page);await enter(page,'/?page=booking-inbox-preview');await page.getByRole('button',{name:'View example: A gallery afternoon',exact:true}).click();await page.locator('.booking-local-revision summary').click();
+  await page.getByLabel('Local revision notes (optional)',{exact:true}).fill('LOCAL PROPOSAL TO CLEAR');await page.getByRole('button',{name:'Review local revision',exact:true}).click();await expect(page.locator('.booking-local-revision')).toContainText('LOCAL PROPOSAL TO CLEAR');
+  await page.getByRole('button',{name:'Sign out',exact:true}).click();await expect(page.locator('.booking-local-revision')).toHaveCount(0);await page.getByRole('button',{name:'View example: A gallery afternoon',exact:true}).click();await page.locator('.booking-local-revision summary').click();await expect(page.getByLabel('Local revision notes (optional)',{exact:true})).not.toHaveValue('LOCAL PROPOSAL TO CLEAR');
+  expect(state.requests.filter(value=>value.method==='POST'&&value.path.startsWith('/rest/'))).toEqual([]);
+});

@@ -789,3 +789,5 @@ underlying feature is operational.
 - `src/booking-inbox-preview.js`: view-local fictional User/Provider inbox, search/status filters, read-only request detail and original/proposed revision comparison; separate from saved/unsaved booking plans.
 
 - `src/booking-calendar.js`: UTC Gregorian month-grid and bounded month-navigation helpers for the fictional booking inbox; no availability or reservation authority.
+
+- `src/booking-revision-preview.js`: per-example local revision form, date/time/duration/text checks and safe original/local comparison; no agreement, pricing or request mutation.

@@ -1,3 +1,4 @@
+import {bookingRevisionPreview} from './booking-revision-preview.js';
 import {bookingCalendarMonth,shiftCalendarMonth} from './booking-calendar.js';
 import {durationLabel} from './booking-draft-rules.js';
 const people={taylor:'Taylor',jordan:'Jordan',avery:'Avery',maya:'Maya',james:'James'};
@@ -11,6 +12,7 @@ const examples=[
 function node(tag,text,className){const item=document.createElement(tag);if(text)item.textContent=text;if(className)item.className=className;return item;}
 function date(value){return new Date(`${value}T12:00:00Z`).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric',timeZone:'UTC'});}
 export function renderBookingInboxPreview(container,navigate){
+  const revisionDrafts=new Map();
   container.replaceChildren();const root=node('section',null,'booking-inbox-preview');let perspective='user',active=null,view='list',month=examples[0].date.slice(0,7),selectedDay=null;
   const link=(page,label,className='button outline')=>{const item=node('a',label,className);item.href=`?page=${page}`;item.addEventListener('click',event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate(page);});return item;};
   root.append(link('account','← Back to account','profile-back'),node('p','BOOKING INBOX PREVIEW','eyebrow'),node('h1','Plans worth looking forward to.'),node('p','Fictional requests for exploring the inbox. No booking, payment or reservation is created. Switching examples does not change your account roles.','editor-notice'),link('booking-draft','Open the unsent booking-plan editor'));
@@ -59,6 +61,7 @@ export function renderBookingInboxPreview(container,navigate){
     const fields=node('dl');for(const [label,text] of [['Participants',`${people[value.user]} and ${people[value.provider]} · fictional`],['Status',states[value.status][0]],['Example schedule',`${date(value.date)} · ${value.time} · America/Vancouver`],['Duration',durationLabel(value.minutes)],['Meeting area',value.venue],['Notes',value.notes]])fields.append(node('dt',label),node('dd',text));
     detail.append(back,heading,node('p',states[value.status][1],'editor-notice'),fields,node('p','Quote and deposit are not calculated in this preview. There are no live accept, pay, cancel or messaging actions.','profile-small'));
     if(value.revision){const revision=node('details',null,'booking-example-revision');revision.append(node('summary','Compare the example revision'));const table=node('table');const caption=node('caption','Original and proposed example terms · America/Vancouver');const head=node('thead'),headRow=node('tr');for(const label of ['Term','Original example','Proposed example']){const cell=node('th',label);cell.scope='col';headRow.append(cell);}head.append(headRow);const body=node('tbody');for(const [label,original,proposed] of [['Date',date(value.date),date(value.revision.date)],['Start',value.time,value.revision.time],['Duration',durationLabel(value.minutes),durationLabel(value.revision.minutes)]]){const row=node('tr');const term=node('th',label);term.scope='row';row.append(term,node('td',original),node('td',proposed));body.append(row);}table.append(caption,head,body);revision.append(table,node('p',value.revision.reason,'profile-small'),node('p','Comparison only. Original terms are preserved; no agreement is recorded.','profile-small'));detail.append(revision);}
+    if(['requested','revision_requested'].includes(value.status)){const key=`${perspective}:${value.id}`;if(!revisionDrafts.has(key))revisionDrafts.set(key,{});detail.append(bookingRevisionPreview(value,revisionDrafts.get(key)));}
     if(focus)heading.focus();
   }
   search.addEventListener('input',()=>paint());filter.addEventListener('change',()=>paint());clear.addEventListener('click',()=>{search.value='';filter.value='all';active=null;selectedDay=null;month=examples[0].date.slice(0,7);paint();search.focus();});paint();

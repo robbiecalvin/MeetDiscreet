@@ -1,0 +1,26 @@
+import {test,expect} from '@playwright/test';
+import {bookingRevisionErrors} from '../src/booking-revision-preview.js';
+const valid=()=>({date:'2030-06-15',time:'14:00',minutes:'120',venue:'Example gallery area',notes:''});
+test('local revision validation rejects impossible dates/times, fractional or unsafe durations and oversized text',()=>{
+  expect(bookingRevisionErrors(valid())).toEqual([]);expect(bookingRevisionErrors({...valid(),date:'2028-02-29'})).toEqual([]);
+  for(const date of ['2030-02-29','2030-06-31','0000-01-01',''])expect(bookingRevisionErrors({...valid(),date})[0][0]).toBe('date');
+  for(const time of ['24:00','12:60','2:00',''])expect(bookingRevisionErrors({...valid(),time})[0][0]).toBe('time');
+  for(const minutes of ['0','-1','1.5','1e2','9007199254740992'])expect(bookingRevisionErrors({...valid(),minutes})[0][0]).toBe('minutes');
+  expect(bookingRevisionErrors({...valid(),venue:'x'.repeat(201)})[0][0]).toBe('venue');expect(bookingRevisionErrors({...valid(),notes:'x'.repeat(1001)})[0][0]).toBe('notes');
+});
+async function open(page){await page.goto('/?page=booking-inbox-preview');await page.getByRole('button',{name:'I am 18 or older',exact:true}).click();await page.getByRole('button',{name:'View example: A gallery afternoon',exact:true}).click();await page.locator('.booking-local-revision summary').click();}
+test('local revision comparison preserves source dates and safely renders proposed text, with per-example drafts and confirmed reset',async({page})=>{
+  const writes=[];page.on('request',request=>{if(['POST','PUT','PATCH','DELETE'].includes(request.method()))writes.push(request.url());});await open(page);
+  await page.getByLabel('Local revised date',{exact:true}).fill('2030-06-20');await page.getByLabel('Local revised start',{exact:true}).fill('15:30');await page.getByLabel('Local revised duration (minutes)',{exact:true}).fill('90');await page.getByLabel('Local revision notes (optional)',{exact:true}).fill('<img src=x> Local proposal');
+  await page.getByRole('button',{name:'Review local revision',exact:true}).click();const review=page.locator('.booking-local-revision');await expect(review.getByRole('heading',{name:'Local revision comparison',exact:true})).toBeFocused();await expect(review.locator('tbody tr').first().locator('td')).toHaveText(['2030-06-15','2030-06-20']);await expect(review).toContainText('Nothing sent or agreed');await expect(review.locator('img')).toHaveCount(0);await expect(review).toContainText('<img src=x> Local proposal');
+  await page.getByRole('button',{name:'Back to example requests',exact:false}).click();await expect(page.locator('.booking-example-card').first()).toContainText('Jun 15, 2030');await page.getByRole('button',{name:'View example: A gallery afternoon',exact:true}).click();await expect(page.getByLabel('Local revised date',{exact:true})).toHaveValue('2030-06-20');
+  page.once('dialog',dialog=>dialog.dismiss());await page.getByRole('button',{name:'Reset local revision',exact:true}).click();await expect(page.getByLabel('Local revised date',{exact:true})).toHaveValue('2030-06-20');
+  page.once('dialog',dialog=>dialog.accept());await page.getByRole('button',{name:'Reset local revision',exact:true}).click();await expect(page.getByLabel('Local revised date',{exact:true})).toHaveValue('2030-06-15');await expect(review.getByRole('heading',{name:'Local revision comparison',exact:true})).toHaveCount(0);expect(writes).toEqual([]);
+});
+test('local revision errors focus the invalid field and mobile edits invalidate old comparisons without leaking to another perspective',async({page})=>{
+  await page.setViewportSize({width:390,height:900});await open(page);const date=page.getByLabel('Local revised date',{exact:true});await date.fill('');await page.getByRole('button',{name:'Review local revision',exact:true}).click();await expect(date).toBeFocused();await expect(date).toHaveAttribute('aria-invalid','true');await expect(page.locator('.booking-local-revision [role=alert]')).toContainText('valid date');
+  await date.fill('2030-06-20');await page.getByRole('button',{name:'Review local revision',exact:true}).click();await expect(page.getByRole('heading',{name:'Local revision comparison',exact:true})).toBeVisible();await page.getByLabel('Local revised start',{exact:true}).fill('16:00');await expect(page.getByRole('heading',{name:'Local revision comparison',exact:true})).toHaveCount(0);await page.getByRole('button',{name:'Review local revision',exact:true}).click();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:'/tmp/booking-local-revision-mobile.png',fullPage:true});
+  await page.getByRole('button',{name:'Provider example',exact:true}).click();await page.getByRole('button',{name:'View example: A gallery afternoon',exact:true}).click();await page.locator('.booking-local-revision summary').click();await expect(date).toHaveValue('2030-06-15');
+  await page.reload();await page.getByRole('button',{name:'View example: A gallery afternoon',exact:true}).click();await page.locator('.booking-local-revision summary').click();await expect(date).toHaveValue('2030-06-15');
+});

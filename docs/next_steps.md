@@ -1385,6 +1385,21 @@ If launch scope is reduced:
   layouts and identity reset. Existing unsent-plan preservation checks pass. No
   migration, live booking, pricing rule or plan overwrite is introduced.
 
+### Local Booking Revision Composer
+
+- Early booking examples now offer a local schedule/duration/area/notes composer
+  and original-vs-local review. Source fixtures/calendar dates and the unsent
+  booking plan stay unchanged. No proposal is sent, agreed, quoted or persisted.
+- Calendar/time/duration/text checks show focused validation errors. Safe text
+  rendering, edit invalidation, per-perspective/request drafts and confirmed reset
+  keep the preview explicit. Reload/identity changes clear local drafts.
+- Build, all 217 standard checks and 124 backend browser checks passed; mobile
+  inspected. Coverage includes invalid calendar/time/duration/text input, safe
+  comparisons, edit invalidation, per-context drafts/reset, unsent-plan preservation
+  and sign-out cleanup. Existing inbox selectors now target the named static
+  revision disclosure. No migration, live state restriction, eligibility/availability
+  enforcement, payment rule or booking mutation is added.
+
 ### Next Action
 
 Continue frontend increments using the approved direction and provisional routine

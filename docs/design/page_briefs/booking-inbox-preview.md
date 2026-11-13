@@ -53,3 +53,23 @@ The semantic table has weekday headings and noninteractive blank days. Layout
 fits mobile without document overflow. State remains view-local and resets with
 reload/identity changes. No calendar subscription, live availability check,
 reservation or payment action is introduced.
+
+## Local revision composer
+
+Requested/revision-requested examples offer a Try a local revision disclosure.
+This demonstrates early sample cases only; it does not decide which live states
+may be revised. Start with original example date/time/duration/area/notes, and
+keep new text in a per-request, per-example-perspective map inside the view.
+Nothing is sent, accepted, priced, reserved or saved to an account.
+
+Review validates calendar date, 24-hour time, positive safe whole-minute duration
+and local text bounds (200-character area / 1,000-character notes, aligned with
+the unsent-plan form). It renders a semantic original/local comparison with text
+nodes and focuses its heading. These are prototype checks, not live eligibility,
+DST/availability validation or production limits. No quote/deposit is calculated.
+
+An edit invalidates the old comparison; users review again. Navigating between
+example requests retains local drafts within that perspective. Reset confirmation
+restores original example terms for that context only. Perspective isolation,
+reload and identity cleanup prevent local drafts from appearing in another context.
+Original fixture/calendar dates and the separate unsent booking plan never change.

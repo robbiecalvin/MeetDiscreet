@@ -949,3 +949,12 @@ day controls are view state, not role or availability grants. Blank cells are
 noninteractive and explicitly carry no availability meaning. UTC date-grid
 calculation prevents viewer-zone day shifts; identity cleanup resets this state
 with the rest of the inbox. Live availability/concurrency checks remain separate.
+
+
+The booking example's local revision composer never invokes booking APIs or changes
+source fixtures/unsent plans. Data is scoped by example perspective and request
+inside the current view; identity cleanup/reload discards it. Input checks cover
+calendar date/time format, safe positive minute values and local text bounds, not
+real availability, DST feasibility, entitlements or financial approval. Comparison
+uses text nodes (including user-entered markup). Edits invalidate old comparisons;
+reset requires explicit confirmation and never claims agreement or submission.
