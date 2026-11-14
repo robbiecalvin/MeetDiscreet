@@ -838,3 +838,6 @@ underlying feature is operational.
 - src/listing-copy-fields.js: safe recorded listing field/timestamp rendering.
 - src/listing-review.js and src/backend/listing-review.js: capability-gated staff listing queue, inspection and exact-copy editorial approval.
 - supabase/migrations/202611140003_listing_editorial_review.sql: private listing approvals, scoped staff RPCs and protected operation metadata; no public listing policy.
+
+- src/publishing-readiness.js and src/backend/publishing-readiness.js: explicit owner account readiness check, separate from public visibility and paid plans.
+- supabase/migrations/202611140004_publishing_readiness.sql: trusted server-owned temporary eligibility and owner-only readiness RPC; no grants or public activation.

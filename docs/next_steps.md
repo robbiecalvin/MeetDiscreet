@@ -21,25 +21,25 @@ DEC-024 confirms staged real profiles/listings first, Administrator + explicit
 publishing capability, and retaining the last approved version during replacement
 review. OPEN-052/053 are resolved; do not continue asking these questions.
 
-Private profile editorial approval and owner status, plus listing saved-version
-submission preparation, are implemented in source. Listing owners now have an
-explicit paginated history (20+1, newest first), including withdrawn copies and
-deleted source drafts, per-copy approval lookup and withdrawal independent of the
-editable draft. No bulk approval reads or inferred publication.
+Private editorial approval and owner history are implemented in source for
+profiles/listings. This increment adds server-owned publishing eligibility and an
+explicit account readiness check, separate from roles and approval. Source
+migration 202611140004 exposes only the caller’s role flags, current eligibility
+window and approval counts, never operational provenance or reviewer identities.
+Browser roles have no direct access to eligibility rows and cannot grant plans.
+Public activation is explicitly false; retained approval counts are not posting
+allowances or live listing counts. Failure is distinct from missing eligibility.
 
-New source migration 202611140003 adds separately scoped listing inspection,
-protected read/write operation metadata and Administrator editorial approval via
-`marketplace_publication_approval` plus `listing_publication_review`. Staff route
-`?page=listing-review` lists unapproved active copies, pages oldest first, inspects
-recorded fields and requires confirmation for exact-copy approval. No self approval;
-current owner roles, reviewer authority and withdrawal state checked server-side.
-Prior approvals remain unchanged while replacements are submitted/reviewed.
+DEC-025 now authorizes temporary eligibility for selected invited Providers in a
+no-charge development pilot while published prices remain unchanged and payments
+stay disabled. No real invites/grants, participants or duration have been selected.
+Next: scoped pilot invitation/eligibility issuance and revocation, owner-controlled
+visibility and allowlisted public projections; real media/Looking For visibility
+and listing allowances remain unresolved where applicable. No public activation.
 
-No new migration applied remotely or capability assigned. Public projections,
-publishing eligibility/allowances, media and live activation remain next. No public
-listing or entitlement granted. Automated tests/build remain paused; source review
-only. SQL policy/concurrency, hosted behavior, rendering and functional regression
-remain unverified for this increment.
+No migration applied remotely or capability assigned. Automated tests/build remain
+paused; source review only. SQL policy/concurrency, hosted behavior, rendering and
+functional regression remain unverified for this increment.
 
 ### Live marketplace implementation and acceptance gaps
 

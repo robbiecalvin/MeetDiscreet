@@ -590,3 +590,15 @@ subscriber entitlements or other confirmed eligibility requirements. Payments re
 disabled. Real public activation still requires authoritative eligibility, real media
 and hosted verification. A private editorial approval can be recorded before those
 activation prerequisites are implemented; it must never be described as publication.
+
+## DEC-025 — Invited No-Charge Development Publishing Pilot
+
+Confirmed by Robbie on 2026-11-14: selected invited Providers may receive temporary
+publishing eligibility for a no-charge development pilot while payments remain
+disabled. Normal published plan prices and commercial access rules remain unchanged.
+This is a pilot exception, not a general free publishing plan, subscription grant,
+identity verification or production-launch approval. Eligibility must be temporary,
+server-owned and limited to invited accounts; no client metadata can assign it.
+No real account has been invited or granted eligibility by this source increment.
+Pilot issuance/revocation, chosen invitees and duration remain to implement/select;
+no default duration or participants are invented.

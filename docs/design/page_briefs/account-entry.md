@@ -257,3 +257,15 @@ continue to be scrubbed by the existing callback handler. Safe page-only return
 hints survive account screen navigation, not email callbacks.
 Mobile rendering inspected at 390px. No automated tests/build run under Robbie’s
 temporary pause; hosted email, provider limits and callback acceptance unverified.
+
+## Publishing readiness — 2026-11-14
+
+Account overview offers an explicit publishing-readiness check. Show current
+User/Provider membership, backend publishing eligibility and expiry (when valid),
+approved profile/Offering/Looking For copy counts and activation connection state.
+Counts include retained historical approvals and never imply available posting
+slots or public listings. Missing schema/auth/network is unavailable, not ineligible.
+The query cannot enroll or charge anyone and does not expose provenance/reviewer
+identity. DEC-025 permits an invited no-charge development pilot; no accounts or
+duration have been assigned. Source reviewed; tests/build paused, rendering and
+hosted behavior unverified. Public activation remains explicitly disconnected.

@@ -60,3 +60,11 @@
   :is(.user-setup, .provider-setup) > h1 { font-size: 40px; }
   :is(.user-setup, .provider-setup) .account-permissions .button { white-space: normal; text-align: center; }
 }
+
+.publishing-readiness dl { display: grid; grid-template-columns: minmax(160px, 1fr) minmax(0, 1.5fr); gap: 14px 24px; margin: 26px 0; }
+.publishing-readiness dt { color: #bcbcca; font-size: 13px; line-height: 1.7; }
+.publishing-readiness dd { margin: 0; color: #e3c6cd; line-height: 1.7; overflow-wrap: anywhere; }
+@media (max-width: 700px) {
+  .publishing-readiness dl { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .publishing-readiness dd { margin-bottom: 16px; }
+}

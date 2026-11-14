@@ -1071,3 +1071,15 @@ Owner history uses bounded keyset paging with validated cursor syntax and explic
 per-copy approval requests. Client identity checks, generation guards and auth-route
 clearing prevent late private results entering another view. SQL, hosted lifecycle
 and browser behavior remain unverified while automated tests are paused.
+
+## Publishing eligibility boundary
+
+Source migration 202611140004 keeps eligibility independent of client metadata,
+roles and editorial approval. Browser roles have no direct table privilege; only
+the trusted service role manages bounded, revocable eligibility. A security-definer
+RPC checks the expected caller and projects its own readiness flags/counts, excluding
+operational source references and reviewer identity. Client checks identity before
+and after, clears stale output and discards detached results. Public activation is
+explicitly false; readiness cannot publish, grant entitlements or charge accounts.
+DEC-025 permits an invited temporary no-charge development pilot, not blanket
+eligibility. No real grant is provisioned. Hosted/policy verification remains deferred.

@@ -663,3 +663,22 @@ keyset paging and equal timestamps, deleted sources, revocation/withdrawal races
 duplicate approval, audit rollback, detached responses and missing schema before use.
 Live publication, plans/allowances/expiry, reporting/moderation and full Looking For
 visibility remain separate work.
+
+## Publishing eligibility/readiness (source only)
+
+After listing editorial review, source migration
+[202611140004_publishing_readiness.sql](../../supabase/migrations/202611140004_publishing_readiness.sql)
+creates server-owned bounded eligibility windows and the caller-only readiness RPC.
+It is unapplied and unverified under the test pause. No entitlement rows are seeded.
+The trusted service role alone can manage eligibility; browser roles have no direct
+read/write access. The RPC verifies the expected owner and returns current role
+flags, eligibility/expiry and retained approval counts, without provenance/reviewer
+identity. It explicitly reports public activation as disconnected.
+
+DEC-025 authorizes an invited no-charge development pilot without changing published
+prices. It does not select invitees/durations or grant eligibility automatically.
+Scoped issuance/revocation and public activation remain to build. Source references
+must identify the trusted eligibility basis; never use client metadata as authority.
+Validate owner mismatch, role/eligibility combinations, future/expired/revoked windows,
+read/write denial and missing-schema behavior before any hosted use. No payments,
+public data projection or browser publishing action is introduced by this migration.

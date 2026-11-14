@@ -1,3 +1,4 @@
+import { publishingReadiness } from './publishing-readiness.js';
 import './account-overview.css';
 import { attachProviderApplicationStatus } from './provider-application-status.js';
 import { accountPermissions } from './account-permissions.js';
@@ -72,7 +73,7 @@ export function renderAccountOverview(container, navigate, onBack) {
       buttons.push(button); options.append(button);
     }
     starting.append(options, link('user-setup', 'Explore user setup'), link('provider-setup', 'Explore provider setup'));
-    content.append(starting, accountPermissions(current, navigate));
+    content.append(starting, accountPermissions(current, navigate), publishingReadiness(data.user.id, current));
 
     const grid = node('div', null, 'account-tool-grid');
     for (const [page, title, copy, action] of [
