@@ -387,9 +387,9 @@ Do not enable dependent live charges before the required policy is resolved.
 | OPEN-048 | Moderation | Capabilities, evidence access, and review process |
 | OPEN-049 | Enforcement | Effects on obligations, access, and payouts |
 | OPEN-050 | Retention | Application, financial, and moderation records |
-| OPEN-051 | Launch scope | Exact features enabled in the initial production release |
-| OPEN-052 | Public profile approval authority | Which staff roles may approve with an explicit publishing capability; separate from Provider access approval |
-| OPEN-053 | Public profile revision visibility | Keep the last approved version visible during review, or hide until the replacement is approved |
+| OPEN-051 | Launch scope | Resolved for sequencing: real profiles/listings first, communication/media/bookings later (DEC-024); activation acceptance remains required |
+| OPEN-052 | Public profile approval authority | Resolved: Administrators with explicit publishing capability, for profiles and listings (DEC-024) |
+| OPEN-053 | Public profile revision visibility | Resolved: retain last approved profile/listing version during replacement review (DEC-024) |
 
 ## 13. Resolving a Decision
 
@@ -576,3 +576,17 @@ entitlements and public publishing. Live eligibility, staff provisioning, reject
 reapplication and operational retention remain separate work. Historical approval
 must not substitute for current assigned-role checks. No real staff capability has
 been provisioned and no hosted migration has been applied by this code increment.
+
+## DEC-024 — Staged Live Directory and Explicit Publishing Authority
+
+Confirmed by Robbie on 2026-11-14 (“all recommendations”): begin live marketplace
+work with real profiles and listings, then add messaging, media and bookings in
+stages. Only Administrators with an explicit publishing capability may approve
+public profiles/listings. Keep the last approved version visible while a
+replacement is reviewed. Provider access approval remains a separate capability.
+
+This selects sequencing and review policy; it does not waive publishing-plan fees,
+subscriber entitlements or other confirmed eligibility requirements. Payments remain
+disabled. Real public activation still requires authoritative eligibility, real media
+and hosted verification. A private editorial approval can be recorded before those
+activation prerequisites are implemented; it must never be described as publication.

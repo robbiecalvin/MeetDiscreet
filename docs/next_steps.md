@@ -17,13 +17,21 @@ in their dedicated documents.
 Current phase: Frontend development with an initial Supabase development backend.
 
 Current activity:
-Robbie requested taking live marketplace services to completion. Scope review
-confirms discovery remains fictional and messaging/media/bookings remain local
-previews. No live-service activation or production-completion claim has been made.
-Three questions are pending: staged profiles/listings-first release versus all
-services together; explicit publishing authority (OPEN-052, extended to listings);
-and revision visibility (OPEN-053, extended to listings). Do not treat “next” as
-an answer or treat disabling payments as authorization to bypass paid entitlements.
+DEC-024 confirms staged real profiles/listings first, Administrator + explicit
+publishing capability, and retaining the last approved version during replacement
+review. OPEN-052/053 are resolved; do not continue asking these questions.
+
+First implementation increment: private version-bound editorial approval with
+`marketplace_publication_approval`, separate from publication/entitlements.
+New source migration 202611140001 adds immutable approval snapshots and owner-only
+reads, scoped staff status/RPC, reviewer/owner role checks, no self approval,
+feedback/withdrawal conflict rejection and protected operation metadata. Existing
+approved snapshots survive replacement review. Staff UI explicitly labels approval
+as private and handles missing schema/access. No migration applied remotely, no
+real capability assigned, no public data/entitlement granted. Automated tests and
+build remain paused; SQL authorization/concurrency and hosted behavior unverified.
+Next: owner approval status, listing submission/approval pipeline and public
+projection/activation only after authoritative eligibility and media are ready.
 
 ### Live marketplace implementation and acceptance gaps
 
@@ -51,7 +59,7 @@ two-account ownership checks remain deferred. Current prototype styling coverage
 is complete; Robbie’s review, Agrandir assets and Safari rendering remain open.
 
 Read-only recorded-copy comparison is implemented and verified separately.
-Publishing decisions OPEN-052/053 remain unanswered; do not infer policy from “next”.
+Publishing authority and replacement visibility are confirmed in DEC-024; activation prerequisites remain.
 
 The visual refresh covers public pages, account/setup/editor tools and staff
 review; exact rendering remains for Robbie’s review. The selected palette,

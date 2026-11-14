@@ -125,3 +125,14 @@ unload behaviour remains unverified; no immediate erasure guarantee is implied.
 Canceled history traversals also preserve viewport position, focused note field
 and caret selection. Confirmed departures to other account pages use the normal
 page-top/main-focus behaviour. No extra scroll or draft data is persisted.
+
+## Private editorial approval — 2026-11-14
+
+DEC-024 assigns profile/listing approval to Administrators with explicit publishing
+scope. Profile inspection now includes separately loaded editorial approval status
+and a confirmed exact-copy approval action when allowed. Self approval is hidden
+and rejected server-side. Approval remains private, distinct from publishing,
+identity, media approval and paid access. Missing schema/access leaves actions
+unavailable; ambiguous writes require status refresh. Approval and feedback writes
+both block review navigation while pending. No automated checks under test pause;
+backend/source migration not hosted or verified.

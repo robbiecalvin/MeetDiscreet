@@ -604,3 +604,21 @@ test accounts. Confirm download selection, failures, sign-out and expired sessio
 These hosted checks remain deferred under the temporary test pause. Full account
 erasure/export and retention/operational privacy requirements need separate policy
 and implementation before public account collection.
+
+## Private profile editorial approval (source only)
+
+After revision feedback, source migration
+[202611140001_profile_editorial_approval.sql](../../supabase/migrations/202611140001_profile_editorial_approval.sql)
+adds exact-copy editorial approvals. It is not applied remotely or verified by
+an automated run under the current test pause. No capability was provisioned.
+
+Approval requires current Administrator, profile review access and separate
+`marketplace_publication_approval`. RPC checks identity and source copy, locks
+reviewer authority and owner membership, rejects self/withdrawn/feedback/replay,
+and writes approval + protected operation metadata atomically. Feedback on an
+approved copy is rejected under the same source-copy lock. Approval snapshot
+column reads are owner-only and exclude reviewer identity. New submissions and
+withdrawals do not overwrite previously approved copies. No anonymous policy,
+publishing-plan entitlement, public photo upload or publication is introduced.
+Validate SQL policy/role isolation, concurrent feedback/withdrawal/revocation,
+audit rollback, owner status and hosted JWT behavior before enabling this workflow.

@@ -823,3 +823,7 @@ underlying feature is operational.
 - src/shared-surfaces.css: shared dialogs, empty results, footer and browser form-state finishing styles.
 - src/sign-in-destination.js: allowlisted page-only sign-in navigation hints; no authorization.
 - tests/sign-in-destination.spec.js: destination sanitization and backend-disabled continuation checks.
+
+- src/profile-approval.js: exact-copy editorial approval status/action in staff inspection.
+- src/backend/profile-approval.js: verified-identity SDK approval calls.
+- supabase/migrations/202611140001_profile_editorial_approval.sql: private immutable approval snapshots and separately scoped Administrator approval; no public activation.

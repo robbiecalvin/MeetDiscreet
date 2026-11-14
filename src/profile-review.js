@@ -1,3 +1,4 @@
+import {profileApproval} from './profile-approval.js';
 import {registerRouteLeave} from './route-leave.js';
 import './staff-review.css';
 import {trackDraft} from './draft-changes.js';
@@ -11,10 +12,10 @@ function node(tag,text,className){const item=document.createElement(tag);if(text
 function time(label,value){const line=node('p',null,'profile-small');const parsed=typeof value==='string'?new Date(value):null;if(!parsed||Number.isNaN(parsed.getTime())){line.textContent=`${label}: date unavailable`;return line;}const stamp=node('time',parsed.toLocaleString(undefined,{timeZoneName:'short'}));stamp.dateTime=value;line.append(`${label} `,stamp);return line;}
 export function renderProfileReview(container,navigate){
   container.replaceChildren();const root=node('section',null,'provider-review profile-review');
-  let feedbackBusy=false;
-  function confirmDiscard(){if(feedbackBusy){status.textContent='Wait for the feedback operation to finish before changing the review view.';return false;}return !detail.querySelector('.profile-feedback-form textarea')?.value.trim()||window.confirm('Discard the feedback draft in this view?');}
+  let feedbackBusy=false,approvalBusy=false;
+  function confirmDiscard(){if(feedbackBusy||approvalBusy){status.textContent='Wait for the review operation to finish before changing the review view.';return false;}return !detail.querySelector('.profile-feedback-form textarea')?.value.trim()||window.confirm('Discard the feedback draft in this view?');}
   const back=node('a','← Back to account','profile-back');back.href='?page=account';back.addEventListener('click',event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate('account');});
-  root.append(back,node('p','STAFF WORKSPACE','eyebrow'),node('h1','Profile submission review.'),node('p','Inspect recorded private profile copies with separately assigned review access.','offering-lead'),node('p','Profile inspection and separately scoped revision feedback. This workspace cannot approve, verify or publish a profile. Recorded copies do not confirm current Provider membership or paid access.','editor-notice'));
+  root.append(back,node('p','STAFF WORKSPACE','eyebrow'),node('h1','Profile submission review.'),node('p','Inspect recorded private profile copies with separately assigned review access.','offering-lead'),node('p','Profile inspection, revision feedback and separately scoped Administrator editorial approval. Approval does not verify or publicly publish a profile. Recorded copies do not confirm current Provider membership or paid access.','editor-notice'));
   const refresh=node('button','Refresh profile review queue','button outline');refresh.type='button';const status=node('p','','profile-small');status.setAttribute('role','status');status.tabIndex=-1;
   const searchForm=node('form',null,'review-search');searchForm.hidden=true;
   const label=node('label','Search pending profile copies');label.htmlFor='profile-review-search';
@@ -39,6 +40,7 @@ export function renderProfileReview(container,navigate){
       const close=node('button','Close profile copy','button quiet');close.type='button';close.addEventListener('click',()=>{if(!confirmDiscard())return;version++;detail.replaceChildren();detail.hidden=true;status.textContent='Recorded copy closed.';refresh.focus();});
       detail.append(heading,time('Recorded',value.submitted_at),time('Source saved',value.source_updated_at),profileCopyFields(value.public_fields||{}),node('p','Exact recorded copy. Later private edits are excluded. Demo photo selection is a number, not an approved uploaded image.','profile-small'),close);
       const canFeedback=value.owner_id!==reviewer&&await loadProfileFeedbackAccess(reviewer).catch(()=>false);if(!current(request))return;if(canFeedback)detail.append(profileFeedbackForm(reviewer,value.id,()=>current(request),busy=>{feedbackBusy=busy;if(!busy&&current(request))status.textContent='Recorded profile copy loaded. Check the feedback result below.';}));
+      detail.append(profileApproval(reviewer,value.id,value.owner_id===reviewer,()=>current(request),busy=>{approvalBusy=busy;}));
       detail.hidden=false;status.textContent='Recorded profile copy loaded. Revision feedback requires a separate permission.';heading.focus();
     }catch{if(current(request)){clear();reviewer=null;searchForm.hidden=true;status.textContent='Profile review access or recorded copy is unavailable. Refresh to check current access.';}}
     finally{if(current(request))refresh.disabled=false;}

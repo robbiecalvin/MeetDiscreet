@@ -27,3 +27,8 @@
   #account-view .provider-review :is(.review-search, .review-card, .review-detail) { padding: 24px 20px; border-radius: 14px; }
   #account-view .provider-review .review-feedback-form > .button { align-self: stretch; }
 }
+
+.profile-editorial-approval { margin-top: 30px; padding-top: 24px; border-top: 1px solid #ffffff20; }
+.profile-editorial-approval h3 { color: #e3c6cd; font-size: 22px; letter-spacing: -.5px; margin-bottom: 16px; }
+.profile-editorial-approval .profile-small { margin: 16px 0; line-height: 1.8; }
+.profile-editorial-approval .button { margin: 8px 12px 0 0; }
