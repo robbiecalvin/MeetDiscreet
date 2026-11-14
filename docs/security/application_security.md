@@ -1044,3 +1044,16 @@ performs explicit per-copy reads only, and detached or invalidated views cannot
 populate. Missing rows and unavailable schema/auth/network are different outcomes;
 neither grants publication or entitlements. Automated verification remains deferred
 under the temporary test pause; source migration is not applied remotely.
+
+## Private listing submission preparation
+
+The saved listing library reviews persisted fields explicitly before requesting a
+version-bound server-side copy. The source migration restricts submission to the
+source owner with current User membership and Provider for Offering; it locks the
+source and current memberships before comparing timestamps. Snapshot fields are
+allowlisted by SQL, never accepted as client-provided JSON. Owner-only RLS protects
+reads; RPC-only writes enforce a single active submission and owner withdrawal.
+Recorded copies are retained independently of deleted editable drafts. Client
+reads and mutations verify identity before/after and discard detached results.
+No public visibility or paid eligibility follows. Migration is unapplied and
+verification is deferred under the temporary automated-test pause.

@@ -1,3 +1,4 @@
+import { listingSubmission } from './listing-submission.js';
 import './listing-workspace.css';
 import { backendEnabled } from './backend/client.js';
 import { listListingDraftSummaries, deleteListingDraft } from './backend/drafts.js';
@@ -102,7 +103,7 @@ export function renderListingLibrary(container, navigate, initialKind = 'all') {
       remove.setAttribute('aria-label', `Delete draft: ${row.title}`);
       const result = node('p', '', 'profile-small'); result.setAttribute('role', 'status');
       remove.addEventListener('click', async () => {
-        if (deleting || !window.confirm(`Delete the saved private draft “${row.title}”? This cannot be undone.`)) return;
+        if (deleting || !window.confirm(`Delete the saved private draft “${row.title}”? This cannot be undone. Any recorded submission copies are retained separately.`)) return;
         deleting = true; refresh.disabled = true; controls.inert = true; pages.inert = true; cardActions.inert = true;
         result.textContent = 'Deleting…';
         try {
@@ -119,7 +120,7 @@ export function renderListingLibrary(container, navigate, initialKind = 'all') {
         }
       });
       cardActions.append(link('create-listing', `Edit ${row.title}`, row.id), link('create-listing', `Duplicate ${row.title}`, row.id, true), remove);
-      card.append(cardActions, result);
+      card.append(cardActions, result, listingSubmission(row.id, current));
       list.append(card);
     }
   }

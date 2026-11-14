@@ -21,20 +21,21 @@ DEC-024 confirms staged real profiles/listings first, Administrator + explicit
 publishing capability, and retaining the last approved version during replacement
 review. OPEN-052/053 are resolved; do not continue asking these questions.
 
-Version-bound private editorial approval is implemented in source migration
-202611140001 and staff inspection. Owners can now explicitly check approval and
-its timestamp for active submissions and history copies. Reads select only copy
-ID/time, filter by owner/copy, verify identity before/after and retain owner RLS.
-No automatic bulk reads, reviewer disclosure or inferred rejection/publication.
-Unavailable schema/access produces an explicit unavailable state, not “no approval”.
-Submission withdrawal preserves the editorial record; active-copy labels no longer
-imply that an approved copy is still awaiting an editorial decision.
+Version-bound private profile editorial approval and owner status are implemented
+in source. This increment adds private listing submission preparation in the saved
+listing library: explicit saved-field review, timestamp-bound submit, active-copy
+lookup and confirmed withdrawal. Source migration 202611140002 copies only listing
+fields server-side, requires current User membership (plus Provider for Offering),
+rejects changed/missing sources and duplicate active submissions, and retains
+recorded copies when editable drafts are deleted. Owner identity is verified
+before/after client operations; RLS permits owner-only reads and RPC-only writes.
 
-No migration applied remotely, no real capability assigned and no public data or
-entitlement granted. Automated tests/build remain paused; source/flow review only
-for this owner-status increment. Hosted behavior, SQL policy/concurrency and
-functional regression remain unverified. Next: listing submission/approval pipeline
-and public projection/activation after authoritative eligibility and media are ready.
+No migration applied remotely, staff listing inspection/approval and owner listing
+history UI remain next. Retained copies of deleted drafts have no dedicated history
+UI yet. Public projections, eligibility/allowances and live activation remain
+separate work. No public data or entitlement granted. Automated tests/build remain
+paused; source review only. SQL policy/concurrency, hosted behavior and functional
+regression remain unverified.
 
 ### Live marketplace implementation and acceptance gaps
 

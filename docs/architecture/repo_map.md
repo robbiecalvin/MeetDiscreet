@@ -829,3 +829,7 @@ underlying feature is operational.
 - supabase/migrations/202611140001_profile_editorial_approval.sql: private immutable approval snapshots and separately scoped Administrator approval; no public activation.
 
 - src/profile-copy-approval.js: explicit owner approval-status lookup for active/history profile copies; safe timestamp display and no reviewer identity.
+
+- src/listing-submission.js: owner saved-version review, private submit and withdrawal within saved listing cards.
+- src/backend/listing-submissions.js: identity-checked exact-copy listing reads and RPC calls.
+- supabase/migrations/202611140002_private_listing_submissions.sql: owner-protected immutable listing copies and withdrawal; no public access.

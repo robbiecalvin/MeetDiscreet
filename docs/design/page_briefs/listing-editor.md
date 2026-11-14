@@ -110,3 +110,18 @@ listing-management checks passed. Inspected desktop editor and mobile library
 renders; final signed-in editor/library overflow checks passed at 320px.
 Fixtures were fictional; hosted ownership, Safari and licensed Agrandir remain
 unverified by this presentation increment.
+
+## Private submission preparation — 2026-11-14
+
+Each saved-library card includes a disclosure to review saved fields and current
+active submission, explicitly before submitting. Recorded fields come from the
+saved backend version, not unsaved editor text. Submit/withdraw require confirmation;
+withdrawal preserves editable drafts and recorded history. User membership is
+required; Offering also requires Provider membership. Later draft edits never
+change a copy. A stale save version is rejected; ambiguous failures require review
+before retrying. No public posting, allowance or paid access is granted.
+
+Source migration 202611140002 remains unapplied and unverified. Recorded copies
+survive source draft deletion; a dedicated history UI (including deleted sources)
+is still to build. Staff listing review/approval is next. Source reviewed only;
+automated tests/build paused at Robbie’s request.

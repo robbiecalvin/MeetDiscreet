@@ -622,3 +622,22 @@ withdrawals do not overwrite previously approved copies. No anonymous policy,
 publishing-plan entitlement, public photo upload or publication is introduced.
 Validate SQL policy/role isolation, concurrent feedback/withdrawal/revocation,
 audit rollback, owner status and hosted JWT behavior before enabling this workflow.
+
+## Private listing submissions (source only)
+
+After profile editorial approval, source migration
+[202611140002_private_listing_submissions.sql](../../supabase/migrations/202611140002_private_listing_submissions.sql)
+adds owner-readable versioned listing copies. It has not been applied remotely or
+verified under the test pause. Only RPCs may insert/withdraw; direct client writes
+and anonymous reads are denied. Submit locks current User/Provider membership and
+its owner-filtered source draft, checks exact saved timestamp, and copies the five
+listing fields plus kind. Offering additionally requires current Provider. One
+active copy per source is enforced by a partial unique index. Withdrawal is owner-
+filtered and does not require retaining Provider membership.
+
+Source IDs intentionally have no cascading draft foreign key so deletion cannot
+erase a recorded copy; owner account deletion still cascades. Dedicated owner
+history and staff listing review/approval remain to build. No anonymous projection,
+publishing-plan/allowance grant, discovery mutation or publication is introduced.
+Verify two-account isolation, stale versions, concurrent edits/submission/deletion,
+withdrawal/retry and missing-schema failures before hosted use.
