@@ -1,0 +1,8 @@
+.pilot-eligibility .pilot-form { display: grid; gap: 14px; max-width: 620px; margin-top: 32px; }
+.pilot-eligibility label { display: block; font-size: 13px; color: #e3c6cd; margin: 18px 0 10px; line-height: 1.8; }
+.pilot-eligibility input:not([type=checkbox]) { width: 100%; min-height: 50px; padding: 12px 16px; border: 1px solid #ffffff30; border-radius: 10px; background: #121521b3; font: inherit; color: var(--text); }
+.pilot-eligibility .pilot-invited { display: flex; gap: 12px; align-items: flex-start; }
+.pilot-eligibility .pilot-invited input { margin-top: 6px; flex-shrink: 0; accent-color: #b6192e; }
+.pilot-eligibility .pilot-account-id { overflow-wrap: anywhere; line-height: 1.8; margin: 18px 0; }
+.pilot-eligibility .review-detail { max-width: 780px; }
+.pilot-eligibility .review-detail .button { margin: 12px 12px 0 0; }

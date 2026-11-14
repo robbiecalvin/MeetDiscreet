@@ -670,7 +670,7 @@ After listing editorial review, source migration
 [202611140004_publishing_readiness.sql](../../supabase/migrations/202611140004_publishing_readiness.sql)
 creates server-owned bounded eligibility windows and the caller-only readiness RPC.
 It is unapplied and unverified under the test pause. No entitlement rows are seeded.
-The trusted service role alone can manage eligibility; browser roles have no direct
+The trusted service role alone has direct table management; browser roles have no direct
 read/write access. The RPC verifies the expected owner and returns current role
 flags, eligibility/expiry and retained approval counts, without provenance/reviewer
 identity. It explicitly reports public activation as disconnected.
@@ -682,3 +682,26 @@ must identify the trusted eligibility basis; never use client metadata as author
 Validate owner mismatch, role/eligibility combinations, future/expired/revoked windows,
 read/write denial and missing-schema behavior before any hosted use. No payments,
 public data projection or browser publishing action is introduced by this migration.
+
+## Invited pilot eligibility controls (source only)
+
+After readiness, source migration
+[202611140005_pilot_eligibility_controls.sql](../../supabase/migrations/202611140005_pilot_eligibility_controls.sql)
+adds Administrator + `marketplace_pilot_management` RPCs. No real scope/account has
+been assigned, and no migration was applied remotely. Browser table access stays
+denied; scoped security-definer RPCs now permit explicit pilot-only changes.
+
+Inspection projects target UUID, membership and pilot record metadata, not provenance,
+contact information or private content. Changes lock current actor authority and
+serialize on target via transaction advisory lock; existing rows are row-locked.
+Expected revision must match, and a revision trigger also covers service-role updates.
+New creation deliberately uses a plain insert: a competing trusted insert fails,
+never overwrites a non-pilot entitlement. Existing non-pilot rows cannot be changed.
+Grant/renew requires finite future expiry and current User+Provider. Revoke allows
+role loss but requires an inspected unrevoked pilot row. Self changes are rejected.
+Protected events include actor/target/action/expiry/revision, with atomic rollback.
+
+Validate role/capability denial, target isolation, future/expired/revoked cases,
+concurrent grants/service updates/revocation, audit rollback and detached responses
+before hosted use. No durations, invitees or paid entitlements are seeded. These
+checks remain deferred under the temporary test pause. Public activation remains off.

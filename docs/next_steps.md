@@ -21,25 +21,22 @@ DEC-024 confirms staged real profiles/listings first, Administrator + explicit
 publishing capability, and retaining the last approved version during replacement
 review. OPEN-052/053 are resolved; do not continue asking these questions.
 
-Private editorial approval and owner history are implemented in source for
-profiles/listings. This increment adds server-owned publishing eligibility and an
-explicit account readiness check, separate from roles and approval. Source
-migration 202611140004 exposes only the caller’s role flags, current eligibility
-window and approval counts, never operational provenance or reviewer identities.
-Browser roles have no direct access to eligibility rows and cannot grant plans.
-Public activation is explicitly false; retained approval counts are not posting
-allowances or live listing counts. Failure is distinct from missing eligibility.
+Private editorial approval/history and caller-only publishing readiness are
+implemented in source. Source migration 202611140005 now adds DEC-025 pilot
+management: Administrator + independent `marketplace_pilot_management`, exact
+invited Provider target, explicit future UTC expiry, revision-bound changes and
+revocation. Staff route `?page=pilot-eligibility` inspects the target before any
+confirmed change; no account directory/email invitation or automatic expiry is
+invented. Self changes and non-pilot eligibility changes are rejected. Protected
+operation metadata records reads/grants/revokes; audit failure rolls back changes.
+New grants require current User+Provider; revocation works after role loss.
 
-DEC-025 now authorizes temporary eligibility for selected invited Providers in a
-no-charge development pilot while published prices remain unchanged and payments
-stay disabled. No real invites/grants, participants or duration have been selected.
-Next: scoped pilot invitation/eligibility issuance and revocation, owner-controlled
-visibility and allowlisted public projections; real media/Looking For visibility
-and listing allowances remain unresolved where applicable. No public activation.
-
-No migration applied remotely or capability assigned. Automated tests/build remain
-paused; source review only. SQL policy/concurrency, hosted behavior, rendering and
-functional regression remain unverified for this increment.
+No real invites/grants, capability assignments or migrations applied remotely.
+No prices/payments/subscriptions/public visibility changed. Automated tests/build
+remain paused; source review only. SQL policy/concurrency, hosted behavior,
+rendering and regression remain unverified. Next: owner visibility controls and
+allowlisted pilot public projections, with unresolved media/Looking For visibility
+and allowances kept separate.
 
 ### Live marketplace implementation and acceptance gaps
 

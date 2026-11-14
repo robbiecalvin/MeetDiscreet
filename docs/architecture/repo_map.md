@@ -841,3 +841,6 @@ underlying feature is operational.
 
 - src/publishing-readiness.js and src/backend/publishing-readiness.js: explicit owner account readiness check, separate from public visibility and paid plans.
 - supabase/migrations/202611140004_publishing_readiness.sql: trusted server-owned temporary eligibility and owner-only readiness RPC; no grants or public activation.
+
+- src/pilot-eligibility.js, src/pilot-eligibility.css and src/backend/pilot-eligibility.js: separately scoped staff target inspection, explicitly expiring invited pilot grant and revocation.
+- supabase/migrations/202611140005_pilot_eligibility_controls.sql: pilot-management capability, revision-bound grant/revoke RPCs and protected operation metadata; no public activation.

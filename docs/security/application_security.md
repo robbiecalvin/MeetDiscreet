@@ -1076,10 +1076,27 @@ and browser behavior remain unverified while automated tests are paused.
 
 Source migration 202611140004 keeps eligibility independent of client metadata,
 roles and editorial approval. Browser roles have no direct table privilege; only
-the trusted service role manages bounded, revocable eligibility. A security-definer
+the trusted service role has direct table management. A later separately scoped
+Administrator pilot RPC permits bounded pilot-only changes (see below). A security-definer
 RPC checks the expected caller and projects its own readiness flags/counts, excluding
 operational source references and reviewer identity. Client checks identity before
 and after, clears stale output and discards detached results. Public activation is
 explicitly false; readiness cannot publish, grant entitlements or charge accounts.
 DEC-025 permits an invited temporary no-charge development pilot, not blanket
 eligibility. No real grant is provisioned. Hosted/policy verification remains deferred.
+
+## Invited pilot management boundary
+
+DEC-025 pilot changes require current Administrator and independent
+`marketplace_pilot_management`, never inherited publishing approval permission.
+Inspection targets one UUID and exposes only membership/pilot state. Mutation
+rechecks and locks actor authority, rejects self changes and non-pilot records,
+serializes per target, checks expected revision and records protected metadata
+atomically. A plain insert prevents competing trusted rows being overwritten;
+existing updates hold a row lock, and all updates rotate revision. Grant needs
+finite explicit future expiry and current User+Provider; revoke does not depend
+on retained Provider membership. No client can directly write eligibility.
+The UI confirms invitation/expiry and the exact action, clears stale records after
+ambiguous outcomes, blocks route changes while busy and discards identity/detached
+responses. No invitation is emailed, capability provisioned or public activation
+performed. Source migration remains unapplied; automated verification is deferred.

@@ -1,3 +1,4 @@
+import { loadPilotManagementAccess } from './backend/pilot-eligibility.js';
 import { loadListingReviewAccess } from './backend/listing-review.js';
 import { loadProfileReviewAccess } from './backend/profile-review.js';
 import { loadProviderReviewAccess } from './backend/provider-review.js';
@@ -16,17 +17,19 @@ export function accountPermissions(current, navigate = null) {
   profileReview.addEventListener('click',event=>{if(!navigate||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate('profile-review');});
   const listingReview = document.createElement('a'); listingReview.href = '?page=listing-review'; listingReview.className = 'button outline'; listingReview.textContent = 'Open listing submission review'; listingReview.hidden = true;
   listingReview.addEventListener('click', event => { if (!navigate || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate('listing-review'); });
-  section.append(title, copy, status, retry, review, profileReview, listingReview);
+  const pilot = document.createElement('a'); pilot.href = '?page=pilot-eligibility'; pilot.className = 'button outline'; pilot.textContent = 'Manage invited publishing pilot'; pilot.hidden = true;
+  pilot.addEventListener('click', event => { if (!navigate || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate('pilot-eligibility'); });
+  section.append(title, copy, status, retry, review, profileReview, listingReview, pilot);
   let busy = false;
   async function check() {
     if (busy) return;
-    busy = true; retry.disabled = true; review.hidden = true; profileReview.hidden = true; listingReview.hidden = true; status.textContent = 'Checking assigned roles…';
+    busy = true; retry.disabled = true; review.hidden = true; profileReview.hidden = true; listingReview.hidden = true; pilot.hidden = true; status.textContent = 'Checking assigned roles…';
     try {
       const roles = await loadOwnAccountRoles();
       if (!current()) return;
       if (roles.some(role => ['moderator', 'admin'].includes(role))) {
-        const [intake, profiles, listings] = await Promise.allSettled([loadProviderReviewAccess(),loadProfileReviewAccess(),loadListingReviewAccess()]);
-        if (current()) { review.hidden = intake.status !== 'fulfilled' || !intake.value.allowed; profileReview.hidden = profiles.status !== 'fulfilled' || !profiles.value.allowed; listingReview.hidden = listings.status !== 'fulfilled' || !listings.value.allowed; }
+        const [intake, profiles, listings, pilotAccess] = await Promise.allSettled([loadProviderReviewAccess(),loadProfileReviewAccess(),loadListingReviewAccess(),loadPilotManagementAccess()]);
+        if (current()) { review.hidden = intake.status !== 'fulfilled' || !intake.value.allowed; profileReview.hidden = profiles.status !== 'fulfilled' || !profiles.value.allowed; listingReview.hidden = listings.status !== 'fulfilled' || !listings.value.allowed; pilot.hidden = pilotAccess.status !== 'fulfilled' || !pilotAccess.value.allowed; }
         if (!current()) return;
       }
       status.textContent = `${roles.length ? `Assigned roles: ${roles.map(role => labels[role]).join(', ')}.` : 'No account roles assigned.'} Provider role: ${roles.includes('provider') ? 'Assigned' : 'Not assigned'}.`;
