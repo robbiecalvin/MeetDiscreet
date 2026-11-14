@@ -853,3 +853,7 @@ underlying feature is operational.
 
 - src/visibility-diagnostics.js and src/backend/visibility-diagnostics.js: explicit owner visibility explanation tied to the exact approval, read-only and stale-result guarded.
 - supabase/migrations/202611140008_owner_visibility_diagnostics.sql: owner-only diagnostic RPC sharing actual public projection rules, plus non-browser internal Offering projection.
+
+- docs/development/pilot-activation.md: hosted invited-pilot inventory/setup, release prerequisites and explicit shutdown workflow.
+- supabase/operations/pilot_preflight.sql: unexecuted read-only schema/privilege inventory, without user data; not behavioral verification.
+- supabase/operations/pilot_shutdown.sql: unexecuted explicit global OFF-switch operation retaining private data.

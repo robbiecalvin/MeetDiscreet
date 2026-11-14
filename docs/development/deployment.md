@@ -563,3 +563,10 @@ Verify the deployed result.
 Keep environments separate.
 Preserve recovery paths.
 Report actual outcomes rather than assuming success from a push.
+## Invited text-only development pilot
+
+The [pilot runbook](./pilot-activation.md) owns hosted setup and activation/shutdown
+steps for DEC-024/025. Public-directory source defaults OFF. Frontend deployment
+does not apply SQL migrations, grant eligibility or enable the database switch.
+Do not equate a source push or inventory result with hosted or release acceptance.
+Operations scripts remain unexecuted and activation deferred while tests are paused.

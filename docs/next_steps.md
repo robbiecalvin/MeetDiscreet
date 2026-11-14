@@ -21,24 +21,25 @@ DEC-024 confirms staged real profiles/listings first, Administrator + explicit
 publishing capability, and retaining the last approved version during replacement
 review. OPEN-052/053 are resolved; do not continue asking these questions.
 
-Text-only pilot directory/public projections remain disabled by default. Source
-migration 202611140008 adds owner-only visibility diagnostics for exact approved
-profile/Offering copies. UI explains activation, role, invited-pilot eligibility,
-selection/hidden state and Offering profile/capacity prerequisites. The final
-currently-readable result reuses the exact internal public-read projections, so it
-is not inferred from approval or from only the first page of public results.
+Hosted setup/activation preparation is recorded in
+[the pilot runbook](./development/pilot-activation.md): chronological missing-only
+migrations, scoped staff roles, explicit invited Provider/expiry selection, owner
+review and a release/shutdown path. New operations SQL provides a read-only schema /
+privilege inventory and a separate explicit OFF-switch shutdown command. Neither
+script has been executed; inventory is not a behavior/security pass.
 
-Diagnostics are explicit, read-only and restricted to the approval owner. Client
-identity/generation guards discard stale results; selection changes clear diagnostics
-and block diagnostics while a selection operation runs. Unavailable is distinct
-from not publicly readable. No real grants/selections/activation or remote migration
-performed. Automated tests/build remain paused; source review only. SQL isolation,
-concurrency, hosted behavior, rendering and regression remain unverified.
+No authenticated Supabase administration connector is available. Public URL/key
+cannot apply migrations or assign staff. Hosted schema inventory/application must
+use trusted SQL Editor/database tooling; do not request secrets in chat/frontend.
+No accounts/capabilities/eligibility selected or provisioned, and no directory
+activation or remote schema mutation performed. Automated tests/build remain paused.
+No current build, SQL execution or hosted verification is claimed.
 
-Next: operational pilot activation checklist and a focused hosted walkthrough when
-verification resumes. Reporting/enforcement, real media and full Looking For policy
-remain separate prerequisites for broader live marketplace use. No production
-marketplace, payments or communication activation.
+Next dependency: obtain the actual hosted migration inventory, apply missing source
+migrations through 202611140008, provision deliberately chosen test staff/Provider
+accounts and resume focused functional/security verification before activation.
+Independent support/reporting work may continue while hosted setup is pending.
+Broader marketplace/media/Looking For remain incomplete; no production activation.
 
 ### Live marketplace implementation and acceptance gaps
 

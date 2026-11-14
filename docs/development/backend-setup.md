@@ -764,3 +764,11 @@ use internal public projections for the final readable result, independent of
 pagination position. No private content, provenance or reviewer identities are
 returned. Validate cross-owner/kind IDs, all activation/role/expiry/selection/capacity
 combinations, shared public predicates and stale UI results before hosted use.
+
+## Hosted pilot preparation
+
+Use the [pilot activation runbook](./pilot-activation.md) for actual hosted inventory,
+missing-only migration sequencing, staff/Provider setup and shutdown. Operations
+scripts are prepared but unexecuted. The read-only inventory is not an automated
+policy test or proof that a schema is correct. Activation remains deferred while
+verification is paused; no privileged credentials belong in chat/frontend config.
