@@ -17,29 +17,38 @@ in their dedicated documents.
 Current phase: Frontend development with an initial Supabase development backend.
 
 Current activity:
-Accounts/private-drafts completion pass: added a registration-confirmation resend
-screen and actionable failed/expired callback recovery. Sign-in/register/recovery
-link to confirmation resend; provider-managed email requests use generic outcomes,
-clear the email field, prevent duplicate submissions while pending and never grant
-access. Callback failures offer confirmation, recovery and sign-in routes without
-reusing one-time codes. Inspected the mobile preview screen and callback failure.
-No automated tests or build run, per Robbie’s temporary testing pause.
+Robbie requested taking live marketplace services to completion. Scope review
+confirms discovery remains fictional and messaging/media/bookings remain local
+previews. No live-service activation or production-completion claim has been made.
+Three questions are pending: staged profiles/listings-first release versus all
+services together; explicit publishing authority (OPEN-052, extended to listings);
+and revision visibility (OPEN-053, extended to listings). Do not treat “next” as
+an answer or treat disabling payments as authorization to bypass paid entitlements.
 
-Implemented development scope: registration/sign-in, PKCE confirmation/recovery,
-confirmation resend, sign-out, User/Provider starting preference, assigned-role
-status, password/email changes, other-session revocation and private CRUD for
-Provider profile, User profile, listings, catalogue, availability and unsent
-booking plan; selected saved-draft reference download and safe sign-in return.
-This is implementation coverage, not verified completion. Remaining: outstanding
-hosted migrations, email/redirect configuration and delivery, recovery/session
-lifecycle, two-account ownership isolation and cross-browser walkthrough. Full
-account erasure/export and operational privacy/retention policy are outside the
-current private-draft prototype and must be defined before public collection.
+### Live marketplace implementation and acceptance gaps
 
-Robbie temporarily suspended automated end-of-step tests on 2026-11-14 to reduce
-usage. Resume functional regression testing when requested or before release.
-Current prototype visual styling coverage is complete; Robbie’s review, licensed
-Agrandir assets and Safari rendering remain open.
+| Service | Existing implementation | Required before live use |
+|---|---|---|
+| Public profiles | Fictional profiles; owner private copy submission, staff inspection and feedback | Publishing authority and revision visibility; authoritative publish/unpublish lifecycle; allowlisted public projections; real identity/photo association; approved publishing-plan eligibility |
+| Public listings | Fictional discovery and owner private draft CRUD | Submission/review/publication lifecycle; confirmed allowances/expiry; public projection and approved publication eligibility; full Looking For visibility policy |
+| Messaging | Fictional threads and in-memory composer | Participant and companion-entitlement enforcement; block rules and expiry/history policy; persisted text, authorized realtime, read state and abuse controls |
+| Private media | Device-local selection/crop, no upload | Type/size/quota/retention/deletion policy; private bucket ownership, validated uploads and authorized delivery; moderation access |
+| Bookings | Private unsent plan; fictional inbox/calendar/revisions | Authoritative request/revision/acceptance states and terms; entitlement/block checks; holds/deadlines/time conflicts; confirmed cancellation/deposit policies before paid confirmation |
+| Calls | Product requirements only | Selected signaling/connectivity service; participant authorization and invitation lifecycle; microphone/camera permissions; no default recording |
+| Blocking/reporting | Product requirements; no live submission | Defined cross-feature effects; owner-managed blocks; report intake, restricted evidence access, moderation/audit workflow and retention |
+
+Local implementation cannot establish hosted readiness. Each enabled service
+needs applied schema/configuration and end-to-end owner/participant isolation,
+failure and lifecycle verification before live activation. Automated end-of-step
+tests remain temporarily paused at Robbie’s request; release verification remains
+outstanding. No paid service, production marketplace or real communication has
+been activated by this review.
+
+Accounts/private drafts: development implementation includes confirmation resend
+and callback recovery, SDK authentication/settings, assigned-role checks and six
+private draft types. Outstanding hosted migrations, email/recovery/session and
+two-account ownership checks remain deferred. Current prototype styling coverage
+is complete; Robbie’s review, Agrandir assets and Safari rendering remain open.
 
 Read-only recorded-copy comparison is implemented and verified separately.
 Publishing decisions OPEN-052/053 remain unanswered; do not infer policy from “next”.
