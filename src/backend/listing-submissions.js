@@ -26,3 +26,23 @@ export function submitListingCopy(owner, listing, version) {
 export function withdrawListingCopy(owner, submission) {
   return change(owner, 'withdraw_private_listing_copy', { p_submission: submission });
 }
+
+export async function loadListingCopyHistory(owner, cursor = null) {
+  await verify(owner);
+  let query = backendClient().from('listing_publication_submissions').select(columns)
+    .eq('owner_id', owner).order('submitted_at', { ascending: false }).order('id', { ascending: false }).limit(21);
+  if (cursor) {
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/.test(cursor.submitted_at) || !Number.isFinite(Date.parse(cursor.submitted_at)) || !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(cursor.id)) throw new Error('Invalid history cursor.');
+    query = query.or(`submitted_at.lt.${cursor.submitted_at},and(submitted_at.eq.${cursor.submitted_at},id.lt.${cursor.id})`);
+  }
+  const { data, error } = await query;
+  if (error || !Array.isArray(data) || data.some(row => row.owner_id !== owner)) throw new Error('History unavailable.');
+  await verify(owner); return data;
+}
+export async function loadOwnerListingApproval(owner, id) {
+  await verify(owner);
+  const { data, error } = await backendClient().from('listing_editorial_approvals').select('submission_id,approved_at')
+    .eq('owner_id', owner).eq('submission_id', id).maybeSingle();
+  if (error || (data && data.submission_id !== id)) throw new Error('Approval status unavailable.');
+  await verify(owner); return data;
+}

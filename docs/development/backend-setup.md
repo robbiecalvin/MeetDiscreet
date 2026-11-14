@@ -641,3 +641,25 @@ history and staff listing review/approval remain to build. No anonymous projecti
 publishing-plan/allowance grant, discovery mutation or publication is introduced.
 Verify two-account isolation, stale versions, concurrent edits/submission/deletion,
 withdrawal/retry and missing-schema failures before hosted use.
+
+## Listing editorial review (source only)
+
+After private listing submissions, source migration
+[202611140003_listing_editorial_review.sql](../../supabase/migrations/202611140003_listing_editorial_review.sql)
+adds private immutable listing approvals, owner-scoped approval column reads,
+`listing_publication_review` and protected review events. It is not applied
+remotely or verified under the test pause. No real staff scope was provisioned.
+
+Inspection requires Moderator/Admin + listing scope; approval additionally requires
+Admin + `marketplace_publication_approval`. Approval locks current reviewer authority,
+source submission and owner membership, rejects self/withdrawal/replay and atomically
+writes snapshot and event. Looking For needs current User; Offering also needs
+Provider. Withdrawal serializes on the source row and does not erase approval.
+No public reads or direct authenticated writes are granted. Source draft deletion
+cannot erase submission/approval; Auth-owner deletion still cascades.
+
+Validate role/capability combinations, owner isolation, private field projection,
+keyset paging and equal timestamps, deleted sources, revocation/withdrawal races,
+duplicate approval, audit rollback, detached responses and missing schema before use.
+Live publication, plans/allowances/expiry, reporting/moderation and full Looking For
+visibility remain separate work.

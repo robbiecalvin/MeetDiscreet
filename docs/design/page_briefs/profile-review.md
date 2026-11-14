@@ -1,8 +1,8 @@
 # Private Profile Submission Inspection
 
-Status: staff inspection and separately scoped revision feedback implemented, not publication approval. Use the existing
+Status: staff inspection, revision feedback and private editorial approval implemented in source; no public activation. Use the existing
 staff queue layout and provisional routine styling under Robbie's build-now
-instruction. Public approval authority/edited-version visibility remain OPEN-052/053.
+instruction. Approval authority and edited-version visibility are confirmed in DEC-024.
 
 The age-gated `?page=profile-review` workspace requires current Moderator or
 Administrator membership plus the separate `profile_publication_review` capability.

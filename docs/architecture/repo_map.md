@@ -833,3 +833,8 @@ underlying feature is operational.
 - src/listing-submission.js: owner saved-version review, private submit and withdrawal within saved listing cards.
 - src/backend/listing-submissions.js: identity-checked exact-copy listing reads and RPC calls.
 - supabase/migrations/202611140002_private_listing_submissions.sql: owner-protected immutable listing copies and withdrawal; no public access.
+
+- src/listing-copy-history.js: owner history and withdrawal independent of editable source drafts, with per-copy approval checks.
+- src/listing-copy-fields.js: safe recorded listing field/timestamp rendering.
+- src/listing-review.js and src/backend/listing-review.js: capability-gated staff listing queue, inspection and exact-copy editorial approval.
+- supabase/migrations/202611140003_listing_editorial_review.sql: private listing approvals, scoped staff RPCs and protected operation metadata; no public listing policy.

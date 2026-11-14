@@ -53,3 +53,14 @@
 .listing-submission dl { margin: 20px 0; }
 .listing-submission dt { font-size: 12px; color: #bcbcca; margin-top: 16px; }
 .listing-submission dd { margin: 6px 0 0; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.listing-copy-history { margin-top: 44px; padding-top: 30px; border-top: 1px solid #ffffff20; }
+.listing-copy-history > h2 { color: #e3c6cd; font-size: 26px; letter-spacing: -.7px; }
+.listing-copy-history .profile-small { margin: 16px 0; line-height: 1.8; }
+.listing-copy-history .library-card { margin-top: 20px; }
+.listing-copy-card details { margin-top: 18px; }
+.listing-copy-card summary { color: #e3c6cd; cursor: pointer; line-height: 1.7; }
+.listing-copy-card dl { margin: 24px 0; }
+.listing-copy-card dt { color: #bcbcca; font-size: 12px; margin-top: 16px; }
+.listing-copy-card dd { margin: 6px 0 0; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; }
+.listing-copy-card .button { margin: 8px 12px 8px 0; }

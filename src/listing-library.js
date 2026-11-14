@@ -1,3 +1,4 @@
+import { listingCopyHistory } from './listing-copy-history.js';
 import { listingSubmission } from './listing-submission.js';
 import './listing-workspace.css';
 import { backendEnabled } from './backend/client.js';
@@ -79,6 +80,7 @@ export function renderListingLibrary(container, navigate, initialKind = 'all') {
   let loaded = false;
   let deleting = false;
   const current = () => root.parentNode === container;
+  root.append(listingCopyHistory(current));
   function paint(resetPage = false) {
     if (resetPage) page = 0;
     updateCreate();

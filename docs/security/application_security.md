@@ -1057,3 +1057,17 @@ Recorded copies are retained independently of deleted editable drafts. Client
 reads and mutations verify identity before/after and discard detached results.
 No public visibility or paid eligibility follows. Migration is unapplied and
 verification is deferred under the temporary automated-test pause.
+
+## Listing inspection and editorial approval
+
+Source migration 202611140003 separates listing inspection scope from shared
+Administrator publishing approval scope. Staff never read tables directly: scoped
+RPCs project recorded listing fields and write protected operation metadata, not
+copy text. Exact-copy approval checks current authority/owner roles under locks,
+rejects self/withdrawn/duplicate copies and writes snapshot + audit event atomically.
+Authenticated owners receive approval ID/time through owner RLS and column-limited
+reads excluding reviewer identity. No public RLS policy or publishing entitlement.
+Owner history uses bounded keyset paging with validated cursor syntax and explicit
+per-copy approval requests. Client identity checks, generation guards and auth-route
+clearing prevent late private results entering another view. SQL, hosted lifecycle
+and browser behavior remain unverified while automated tests are paused.
