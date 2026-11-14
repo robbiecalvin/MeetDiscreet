@@ -21,23 +21,26 @@ DEC-024 confirms staged real profiles/listings first, Administrator + explicit
 publishing capability, and retaining the last approved version during replacement
 review. OPEN-052/053 are resolved; do not continue asking these questions.
 
-Private editorial approval/history, publishing readiness and invited pilot control
-are implemented in source. Source migration 202611140006 adds owner selections
-bound to exact approved profile/Offering copies, independent of draft edits,
-replacement review or subsequent approvals. Owner approval/history UI explicitly
-checks selection before offering confirmed select/replace/hide actions. Current
-User+Provider and valid unrevoked eligibility are required to select visible;
-hiding remains available after role/eligibility loss. Revision-bound RPC writes
-serialize per resource and reject stale updates. No browser table access.
+Source migration 202611140007 adds disabled-by-default public text-only pilot
+projections and a separate `?page=pilot-directory` page, linked from account/footer.
+Lists approved owner-selected profiles/Offering copies with current User+Provider
+and unexpired/unrevoked development-pilot eligibility. Public profiles project only
+name/username/adult age/tagline/city/area; Offering projects approved listing text.
+No Auth-owner IDs, private fields, reviewer metadata or demo-photo numbers are
+returned. Looking For remains excluded. Public reads page 20+1 by approval UUID.
 
-Selections are preparation for future activation, not public publication or posting
-allowances. Looking For is unsupported pending its separate visibility policy.
-No real selections/grants, capability assignments or migrations applied remotely.
-No prices/payments/subscriptions/public visibility changed. Automated tests/build
-remain paused; source review only. SQL policy/concurrency, hosted behavior,
-rendering and regression remain unverified. Next: allowlisted pilot public read
-projections and explicit activation prerequisites, including approved real media
-and authoritative Offering allowances before publication.
+One included Offering per Provider is supported; more than one visible selection
+suppresses that Provider’s ads rather than choosing silently. An Offering also
+requires a visible eligible selected profile. Existing approved selections remain
+while replacements are reviewed. Owner readiness distinguishes connected endpoints
+from enabled activation. A server-only switch is seeded OFF and missing setup is
+unavailable, never fictional fallback. No activation/grants/migrations performed.
+
+Automated tests/build remain paused; source review only. Rendering, public RPC
+isolation, activation/expiry/revocation, capacity and hosted behavior unverified.
+Next: pilot activation preflight and owner visibility diagnostics; real photos,
+Looking For access policy, enforcement/reporting and deferred end-to-end verification
+remain before broad live use. No payment or production marketplace activation.
 
 ### Live marketplace implementation and acceptance gaps
 

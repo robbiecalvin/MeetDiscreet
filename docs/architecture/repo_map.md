@@ -847,3 +847,6 @@ underlying feature is operational.
 
 - src/pilot-visibility.js and src/backend/pilot-visibility.js: owner exact-approved-version selection/replacement/hide controls for profile and Offering copies, before public activation.
 - supabase/migrations/202611140006_owner_visibility_selections.sql: owner-scoped revision-bound selection RPCs, eligibility checks for visible requests and hide without retained eligibility.
+
+- src/pilot-directory.js, src/pilot-directory.css and src/backend/pilot-directory.js: separate text-only public pilot listing/profile reader with explicit disabled/empty/error states; no fictional fallback.
+- supabase/migrations/202611140007_pilot_public_directory.sql: allowlisted bounded public RPCs behind an OFF-by-default server switch, current eligibility and exact owner selections; owner readiness activation status.

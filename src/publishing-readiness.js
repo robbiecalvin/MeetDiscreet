@@ -24,12 +24,13 @@ export function publishingReadiness(owner, isCurrent) {
         ['Editorially approved profile copies', String(value.approved_profile_copies)],
         ['Editorially approved Offering copies', String(value.approved_offering_copies)],
         ['Editorially approved Looking For copies', String(value.approved_looking_copies)],
-        ['Public activation', value.public_activation_connected ? 'Connected; visibility requires its own check' : 'Not connected'],
+        ['Public read endpoints', value.public_activation_connected ? 'Connected' : 'Not connected'],
+        ['Pilot directory activation', value.public_activation_enabled ? 'Enabled; each selected entry still needs eligibility' : 'Disabled'],
       ]) list.append(node('dt', label), node('dd', text));
       content.append(list);
       if (value.publishing_eligible) content.append(listingCopyTime('Eligibility recorded until', value.eligibility_until));
       content.append(node('p', 'Approval counts include retained historical versions. They are not live listing counts or posting allowances. Publishing eligibility does not unlock subscriptions, messaging or bookings.', 'profile-small'));
-      status.textContent = value.public_activation_connected ? 'Readiness loaded. This is not proof that a profile or listing is public.' : 'Readiness loaded. Public activation is not connected, so these records do not make a profile or listing visible.';
+      status.textContent = value.public_activation_enabled ? 'Readiness loaded. This does not prove that an individual profile or listing is public.' : 'Readiness loaded. The pilot directory is disabled; no entry is publicly exposed through these endpoints.';
     } catch { if (current()) status.textContent = 'Publishing readiness unavailable. Check sign-in, connection and database setup, then retry. No eligibility or approval is inferred.'; }
     finally { busy = false; if (current()) { check.disabled = false; status.focus(); } }
   });

@@ -1,3 +1,4 @@
+import { renderPilotDirectory } from './pilot-directory.js';
 import { renderPilotEligibility } from './pilot-eligibility.js';
 import { renderListingReview } from './listing-review.js';
 import { signInDestination } from './sign-in-destination.js';
@@ -108,7 +109,7 @@ function renderRoute() {
   clearRouteLeave();
   const params = new URL(location.href).searchParams;
   if (params.get('page') !== 'photo-preview' || params.has('profile') || params.has('ad')) clearPhotoPreviewState();
-  const accountMode = ['account', 'account-security', 'my-listings', 'availability', 'provider-setup', 'user-setup', 'edit-user-profile', 'booking-inbox-preview', 'booking-draft', 'draft-backup', 'photo-preview', 'messages-preview', 'provider-application', 'profile-review', 'listing-review', 'pilot-eligibility', 'provider-review', 'sign-in', 'register', 'confirm-account', 'recover-account', 'reset-password'].includes(params.get('page')) ? params.get('page') : null;
+  const accountMode = ['account', 'account-security', 'my-listings', 'availability', 'provider-setup', 'user-setup', 'edit-user-profile', 'booking-inbox-preview', 'booking-draft', 'draft-backup', 'photo-preview', 'messages-preview', 'provider-application', 'profile-review', 'listing-review', 'pilot-eligibility', 'pilot-directory', 'provider-review', 'sign-in', 'register', 'confirm-account', 'recover-account', 'reset-password'].includes(params.get('page')) ? params.get('page') : null;
   const isAccount = !params.has('profile') && !params.has('ad') && accountMode !== null;
   $('#account-view').hidden = !isAccount;
   if (!isAccount) $('#account-view').replaceChildren();
@@ -183,6 +184,7 @@ function renderRoute() {
     else if (accountMode === 'photo-preview') renderPhotoPreview($('#account-view'), navigateAccount);
     else if (accountMode === 'messages-preview') renderMessagesPreview($('#account-view'), navigateAccount);
     else if (accountMode === 'draft-backup') renderDraftBackup($('#account-view'), navigateAccount);
+    else if (accountMode === 'pilot-directory') renderPilotDirectory($('#account-view'), backToDiscovery);
     else if (accountMode === 'pilot-eligibility') renderPilotEligibility($('#account-view'), navigateAccount);
     else if (accountMode === 'listing-review') renderListingReview($('#account-view'), navigateAccount);
     else if (accountMode === 'profile-review') renderProfileReview($('#account-view'), navigateAccount);
@@ -200,7 +202,7 @@ function renderRoute() {
     else if (accountMode === 'my-listings') renderListingLibrary($('#account-view'), navigateAccount, params.get('kind'));
     else if (accountMode === 'account-security') renderAccountSecurity($('#account-view'), navigateAccount);
     else renderAccount($('#account-view'), accountMode, navigateAccount, backToDiscovery, continueAfterSignIn);
-    document.title = `${accountMode === 'booking-inbox-preview' ? 'Booking inbox preview' : accountMode === 'pilot-eligibility' ? 'Pilot publishing eligibility' : accountMode === 'listing-review' ? 'Listing submission review' : accountMode === 'profile-review' ? 'Profile submission review' : accountMode === 'photo-preview' ? 'Photo workspace preview' : accountMode === 'messages-preview' ? 'Conversation preview' : accountMode === 'draft-backup' ? 'Saved draft download' : accountMode === 'provider-review' ? 'Provider review queue' : accountMode === 'provider-application' ? 'Provider application' : accountMode === 'booking-draft' ? 'Booking request preview' : accountMode === 'edit-user-profile' ? 'User profile draft' : accountMode === 'user-setup' ? 'User setup' : accountMode === 'provider-setup' ? 'Provider setup' : accountMode === 'availability' ? 'Availability draft' : accountMode === 'my-listings' ? 'Saved listing drafts' : accountMode === 'account-security' ? 'Account security' : accountMode === 'account' ? 'Your account' : accountMode === 'register' ? 'Create account' : accountMode === 'confirm-account' ? 'Confirm account' : accountMode === 'recover-account' ? 'Account recovery' : 'Sign in'} · MeetDiscreet`;
+    document.title = `${accountMode === 'booking-inbox-preview' ? 'Booking inbox preview' : accountMode === 'pilot-directory' ? 'Pilot directory' : accountMode === 'pilot-eligibility' ? 'Pilot publishing eligibility' : accountMode === 'listing-review' ? 'Listing submission review' : accountMode === 'profile-review' ? 'Profile submission review' : accountMode === 'photo-preview' ? 'Photo workspace preview' : accountMode === 'messages-preview' ? 'Conversation preview' : accountMode === 'draft-backup' ? 'Saved draft download' : accountMode === 'provider-review' ? 'Provider review queue' : accountMode === 'provider-application' ? 'Provider application' : accountMode === 'booking-draft' ? 'Booking request preview' : accountMode === 'edit-user-profile' ? 'User profile draft' : accountMode === 'user-setup' ? 'User setup' : accountMode === 'provider-setup' ? 'Provider setup' : accountMode === 'availability' ? 'Availability draft' : accountMode === 'my-listings' ? 'Saved listing drafts' : accountMode === 'account-security' ? 'Account security' : accountMode === 'account' ? 'Your account' : accountMode === 'register' ? 'Create account' : accountMode === 'confirm-account' ? 'Confirm account' : accountMode === 'recover-account' ? 'Account recovery' : 'Sign in'} · MeetDiscreet`;
   } else if (isProfileEditor) {
     renderProfileEditor($('#profile-editor-view'), backToDiscovery, navigateAccount);
     document.title = 'Profile editor · MeetDiscreet';
@@ -549,6 +551,12 @@ function navigateAccount(page, extra = {}) {
   window.scrollTo({ top: 0, behavior: 'instant' });
   if (hasAgeConfirmation) $('#main').focus({ preventScroll: true });
 }
+for (const link of document.querySelectorAll('[data-pilot-directory-link]')) {
+  link.addEventListener('click', event => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault(); navigateAccount('pilot-directory');
+  });
+}
 for (const link of document.querySelectorAll('[data-account-link]')) {
   link.addEventListener('click', (event) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -599,14 +607,14 @@ if (backendEnabled) {
     currentUserId = nextUserId;
     if (changed) {
       clearPhotoPreviewState(); clearProfileDraftState(); clearListingDraftState(); clearExperienceDraftState(); clearAvailabilityState(); clearUserProfileState(); clearBookingDraftState(); clearProviderApplicationState();
-      for (const selector of ['#profile-editor-view', '#editor-view', '#experiences-view', ...(['account', 'account-security', 'my-listings', 'availability', 'provider-setup', 'user-setup', 'edit-user-profile', 'booking-inbox-preview', 'booking-draft', 'draft-backup', 'photo-preview', 'messages-preview', 'provider-application', 'profile-review', 'listing-review', 'pilot-eligibility', 'provider-review'].includes(new URL(location.href).searchParams.get('page')) ? ['#account-view'] : [])]) $(selector).replaceChildren();
+      for (const selector of ['#profile-editor-view', '#editor-view', '#experiences-view', ...(['account', 'account-security', 'my-listings', 'availability', 'provider-setup', 'user-setup', 'edit-user-profile', 'booking-inbox-preview', 'booking-draft', 'draft-backup', 'photo-preview', 'messages-preview', 'provider-application', 'profile-review', 'listing-review', 'pilot-eligibility', 'pilot-directory', 'provider-review'].includes(new URL(location.href).searchParams.get('page')) ? ['#account-view'] : [])]) $(selector).replaceChildren();
     }
     queueMicrotask(() => {
       $('[data-account-link]').textContent = nextUserId ? 'Account' : 'Sign in';
       $('[data-account-link]').href = nextUserId ? '?page=account' : '?page=sign-in';
       signOut.hidden = !nextUserId;
       status.textContent = nextUserId ? 'Development session' : '';
-      if (changed && ['account', 'account-security', 'my-listings', 'availability', 'provider-setup', 'user-setup', 'edit-user-profile', 'booking-inbox-preview', 'booking-draft', 'draft-backup', 'photo-preview', 'messages-preview', 'provider-application', 'profile-review', 'listing-review', 'pilot-eligibility', 'provider-review', 'edit-profile', 'create-listing', 'experiences'].includes(new URL(location.href).searchParams.get('page'))) renderRoute();
+      if (changed && ['account', 'account-security', 'my-listings', 'availability', 'provider-setup', 'user-setup', 'edit-user-profile', 'booking-inbox-preview', 'booking-draft', 'draft-backup', 'photo-preview', 'messages-preview', 'provider-application', 'profile-review', 'listing-review', 'pilot-eligibility', 'pilot-directory', 'provider-review', 'edit-profile', 'create-listing', 'experiences'].includes(new URL(location.href).searchParams.get('page'))) renderRoute();
     });
   });
 }

@@ -1113,3 +1113,22 @@ approval changes cannot silently swap that ID. No anonymous read/publication API
 or posting allowance is granted. Owner UI distinguishes requested visibility from
 actual public activation, requires confirmation and discards detached/identity-
 changed results. Migration and automated verification remain deferred.
+
+## Public pilot projection boundary
+
+Source migration 202611140007 introduces bounded anonymous/authenticated read RPCs
+behind an OFF-by-default server-only switch. Internal owner-bearing projections
+remain non-executable by browser roles. Public profile output is reconstructed from
+six allowlisted fields and a version ID, excluding photo_index, private/member fields,
+Auth-owner identity and staff metadata. Offering output contains approved listing
+text and the public profile version ID only. Looking For is excluded.
+
+Every query checks current roles, exact owner-selected approved versions, current
+unrevoked development-pilot eligibility and activation. Offering also requires a
+visible profile and exactly one selected Offering per owner; ambiguous/excess
+selections return no ads. No client or visibility RPC can enable activation.
+Selections are not public authority without these checks. Public text is rendered
+with textContent, never interpreted as markup. Backend-disabled/error states never
+substitute fictional data. This source increment is unapplied and unverified under
+the test pause; it does not establish production publication, abuse prevention or
+media readiness. Public data already fetched cannot be recalled by subsequent hide.

@@ -725,3 +725,27 @@ posting allowances; authoritative capacity enforcement remains mandatory before
 activation. Real approved media is also unresolved. Validate cross-owner/kind IDs,
 stale/replayed changes, concurrent selects/hides, role/eligibility loss and ambiguous
 writes before hosted use. No public visibility is inferred from requested_visible.
+
+## Public text-only pilot projections (source only, disabled)
+
+After owner selections, source migration
+[202611140007_pilot_public_directory.sql](../../supabase/migrations/202611140007_pilot_public_directory.sql)
+adds a server-only global switch seeded OFF, public status and bounded profile /
+Offering RPCs. It remains unapplied and unverified. No activation was performed.
+Do not enable it before policy/ownership/exposure and lifecycle verification.
+
+The internal profile projection is not executable by browser roles; public wrappers
+return only allowlisted approved text and approval-version IDs, excluding Auth-owner
+IDs, demo photo_index, private copy history, membership biography and reviewer data.
+Every page query requires enabled switch, exact owner-visible selection, current
+User+Provider and current unrevoked `development_pilot` eligibility. Non-pilot
+entitlements do not populate this pilot. Offering reads require an eligible visible
+profile and exactly one requested-visible Offering resource per owner; multiple
+selections yield no ads. Paid additional-ad capacity and Looking For are unsupported.
+
+Owner readiness now reports endpoint connection and activation separately; the
+function return shape changes atomically in the migration. Client setup must be
+migrated through 007 for the new readiness shape. Validate switch OFF/ON, no anonymous
+internal/table reads, field projection, owner hide/swap, expired/revoked membership /
+eligibility, multiple Offering selections, paging and missing schema before use.
+Automated tests/build remain paused; source review only. No real media is exposed.

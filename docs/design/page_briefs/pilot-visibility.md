@@ -2,7 +2,7 @@
 
 Provisional continuation of the existing owner-copy/account styling. DEC-024
 retains approved versions during replacement review; DEC-025 defines the invited
-no-charge development pilot. Public activation remains disconnected.
+no-charge development pilot. Public read endpoints now exist in source, with activation defaulting OFF.
 
 After checking a profile or Offering copy’s editorial approval, owners can explicitly
 check the selected version for that resource. Show no selection, hidden selection,
@@ -25,3 +25,8 @@ Submission withdrawal does not remove editorial approval or its separate selecti
 Source migration 202611140006 is unapplied. Source reviewed only; tests/build
 paused, rendering, SQL/concurrency and hosted behavior unverified. No real owner
 selection or public data exposure was performed by this code increment.
+
+Public selection wording now accounts for later activation: selecting an approved
+copy may expose it when the directory is enabled and all current eligibility checks
+pass. The selection action never enables the global directory switch. Readiness
+shows endpoint connection and activation as separate facts.

@@ -77,6 +77,7 @@ export function renderAccountOverview(container, navigate, onBack) {
 
     const grid = node('div', null, 'account-tool-grid');
     for (const [page, title, copy, action] of [
+      ['pilot-directory', 'Pilot directory', 'Browse the separate text-only pilot when it is explicitly activated. No fictional entries are substituted.', 'Open pilot directory'],
       ['provider-application', 'Provider application', 'Save an introduction and submit it to the private development intake queue.', 'Open provider application'],
       ['booking-draft', 'Booking request preview', 'Prepare, privately save and review a fictional plan without sending, reserving or paying.', 'Build a booking draft'],
       ['edit-user-profile', 'User profile draft', 'Prepare your personal introduction separately from provider profile drafts.', 'Edit User profile draft'],

@@ -1,0 +1,15 @@
+.pilot-directory { padding-top: 28px; }
+.pilot-directory > .eyebrow { margin-top: 38px; color: #dba5b3; }
+.pilot-directory h1 { margin: 22px 0; font-size: clamp(38px, 5vw, 64px); letter-spacing: -.05em; line-height: 1.08; }
+.pilot-directory > .offering-lead { max-width: 760px; color: #bcbcca; line-height: 1.8; }
+.pilot-directory > .editor-actions { margin-top: 30px; }
+.pilot-directory [aria-pressed=true] { border-color: #d58a99; background: #b6192e20; }
+.pilot-directory > .profile-small { margin: 22px 0; line-height: 1.8; }
+.pilot-directory-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 22px; }
+.pilot-directory-card { padding: 28px; border: 1px solid #ffffff20; border-radius: 18px; background: radial-gradient(ellipse at 100% 0,#b6192e18,transparent 60%),#1b1e2e; min-width: 0; }
+.pilot-directory-card .eyebrow { color: #dba5b3; }
+.pilot-directory-card h2 { margin: 18px 0; font-size: 27px; letter-spacing: -.7px; overflow-wrap: anywhere; }
+.pilot-directory-card .profile-small { margin: 16px 0; color: #bcbcca; line-height: 1.8; }
+.pilot-directory-identity { color: #e3c6cd; }
+.pilot-directory-copy { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; }
+@media (max-width:700px) { .pilot-directory-grid { grid-template-columns: minmax(0,1fr); } .pilot-directory-card { padding: 24px 20px; } }
