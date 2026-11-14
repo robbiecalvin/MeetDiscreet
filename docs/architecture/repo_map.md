@@ -142,7 +142,7 @@ conflict with approved MeetDiscreet decisions.
 - src/listing-editor.js: in-memory Offering/Looking For draft form, validation, and safe preview.
 - src/guidelines.js: standalone pre-confirmation guidelines reader; no age or policy acceptance record.
 - src/help.js: public searchable FAQ, topic filtering, help navigation, and accurate support integration limits.
-- src/account.js: sign-in/registration/recovery layout validation using fictional data; no authentication or credential persistence.
+- src/account.js: sign-in, registration, recovery, password-reset and confirmation-resend forms; explicit backend-disabled previews and optional SDK development authentication.
 - src/profile-editor.js: in-memory companion draft, validation, and owner-style audience previews; no persisted profile or access grant.
 - src/draft-tools.js: shared navigation between implemented companion draft tools.
 - src/experiences.js: in-memory experience catalogue, exact draft-amount parsing, and labelled audience previews; no billing authority.

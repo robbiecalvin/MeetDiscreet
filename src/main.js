@@ -106,7 +106,7 @@ function renderRoute() {
   clearRouteLeave();
   const params = new URL(location.href).searchParams;
   if (params.get('page') !== 'photo-preview' || params.has('profile') || params.has('ad')) clearPhotoPreviewState();
-  const accountMode = ['account', 'account-security', 'my-listings', 'availability', 'provider-setup', 'user-setup', 'edit-user-profile', 'booking-inbox-preview', 'booking-draft', 'draft-backup', 'photo-preview', 'messages-preview', 'provider-application', 'profile-review', 'provider-review', 'sign-in', 'register', 'recover-account', 'reset-password'].includes(params.get('page')) ? params.get('page') : null;
+  const accountMode = ['account', 'account-security', 'my-listings', 'availability', 'provider-setup', 'user-setup', 'edit-user-profile', 'booking-inbox-preview', 'booking-draft', 'draft-backup', 'photo-preview', 'messages-preview', 'provider-application', 'profile-review', 'provider-review', 'sign-in', 'register', 'confirm-account', 'recover-account', 'reset-password'].includes(params.get('page')) ? params.get('page') : null;
   const isAccount = !params.has('profile') && !params.has('ad') && accountMode !== null;
   $('#account-view').hidden = !isAccount;
   if (!isAccount) $('#account-view').replaceChildren();
@@ -196,7 +196,7 @@ function renderRoute() {
     else if (accountMode === 'my-listings') renderListingLibrary($('#account-view'), navigateAccount, params.get('kind'));
     else if (accountMode === 'account-security') renderAccountSecurity($('#account-view'), navigateAccount);
     else renderAccount($('#account-view'), accountMode, navigateAccount, backToDiscovery, continueAfterSignIn);
-    document.title = `${accountMode === 'booking-inbox-preview' ? 'Booking inbox preview' : accountMode === 'profile-review' ? 'Profile submission review' : accountMode === 'photo-preview' ? 'Photo workspace preview' : accountMode === 'messages-preview' ? 'Conversation preview' : accountMode === 'draft-backup' ? 'Saved draft download' : accountMode === 'provider-review' ? 'Provider review queue' : accountMode === 'provider-application' ? 'Provider application' : accountMode === 'booking-draft' ? 'Booking request preview' : accountMode === 'edit-user-profile' ? 'User profile draft' : accountMode === 'user-setup' ? 'User setup' : accountMode === 'provider-setup' ? 'Provider setup' : accountMode === 'availability' ? 'Availability draft' : accountMode === 'my-listings' ? 'Saved listing drafts' : accountMode === 'account-security' ? 'Account security' : accountMode === 'account' ? 'Your account' : accountMode === 'register' ? 'Create account' : accountMode === 'recover-account' ? 'Account recovery' : 'Sign in'} · MeetDiscreet`;
+    document.title = `${accountMode === 'booking-inbox-preview' ? 'Booking inbox preview' : accountMode === 'profile-review' ? 'Profile submission review' : accountMode === 'photo-preview' ? 'Photo workspace preview' : accountMode === 'messages-preview' ? 'Conversation preview' : accountMode === 'draft-backup' ? 'Saved draft download' : accountMode === 'provider-review' ? 'Provider review queue' : accountMode === 'provider-application' ? 'Provider application' : accountMode === 'booking-draft' ? 'Booking request preview' : accountMode === 'edit-user-profile' ? 'User profile draft' : accountMode === 'user-setup' ? 'User setup' : accountMode === 'provider-setup' ? 'Provider setup' : accountMode === 'availability' ? 'Availability draft' : accountMode === 'my-listings' ? 'Saved listing drafts' : accountMode === 'account-security' ? 'Account security' : accountMode === 'account' ? 'Your account' : accountMode === 'register' ? 'Create account' : accountMode === 'confirm-account' ? 'Confirm account' : accountMode === 'recover-account' ? 'Account recovery' : 'Sign in'} · MeetDiscreet`;
   } else if (isProfileEditor) {
     renderProfileEditor($('#profile-editor-view'), backToDiscovery, navigateAccount);
     document.title = 'Profile editor · MeetDiscreet';
@@ -209,14 +209,26 @@ function renderRoute() {
       callbackStarted = true;
       processAuthCallback().then((result) => {
         if (new URL(location.href).searchParams.get('page') !== 'auth-callback') return;
-        if (result.error) $('.auth-callback-status').textContent = result.error;
+        if (result.error) showCallbackError(result.error);
         else {
           $('.auth-callback-status').textContent = 'Account link verified.';
           navigateAccount(result.recovery ? 'reset-password' : 'account');
         }
-      }).catch(() => { $('.auth-callback-status').textContent = 'Unable to verify this link. Request a fresh link and try again.'; });
+      }).catch(() => showCallbackError('Unable to verify this link. Request a fresh link and try again.'));
     }
   } else document.title = 'Discover · MeetDiscreet';
+}
+function showCallbackError(message) {
+  if (new URL(location.href).searchParams.get('page') !== 'auth-callback') return;
+  $('.auth-callback-status').textContent = message;
+  $('.auth-callback-actions').hidden = false;
+  if (hasAgeConfirmation) $('.auth-callback-status').focus();
+}
+for (const link of document.querySelectorAll('[data-auth-retry]')) {
+  link.addEventListener('click', event => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault(); navigateAccount(link.dataset.authRetry);
+  });
 }
 function backToDiscovery() {
   const url = new URL(location.href);
@@ -390,7 +402,7 @@ render();
 renderRoute();
 
 $('.desktop-nav a').addEventListener('click', (event) => {
-  if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && (new URL(location.href).searchParams.has('profile') || new URL(location.href).searchParams.has('ad') || ['how-it-works', 'create-listing', 'sign-in', 'register', 'recover-account', 'edit-profile', 'experiences', 'auth-callback', 'reset-password'].includes(new URL(location.href).searchParams.get('page')))) {
+  if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && (new URL(location.href).searchParams.has('profile') || new URL(location.href).searchParams.has('ad') || ['how-it-works', 'create-listing', 'sign-in', 'register', 'confirm-account', 'recover-account', 'edit-profile', 'experiences', 'auth-callback', 'reset-password'].includes(new URL(location.href).searchParams.get('page')))) {
     event.preventDefault();
     backToDiscovery();
   }
@@ -511,10 +523,10 @@ function continueAfterSignIn(destination) {
 function navigateAccount(page, extra = {}) {
   if (!$('#discovery-view').hidden) discoveryScroll = window.scrollY;
   const url = new URL(location.href);
-  const next = ['sign-in', 'register', 'recover-account'].includes(url.searchParams.get('page'))
+  const next = ['sign-in', 'register', 'confirm-account', 'recover-account'].includes(url.searchParams.get('page'))
     ? signInDestination(url.searchParams.get('next')) : signInDestination(url.search);
   url.searchParams.delete('next');
-  if (['sign-in', 'register', 'recover-account'].includes(page) && next) url.searchParams.set('next', next);
+  if (['sign-in', 'register', 'confirm-account', 'recover-account'].includes(page) && next) url.searchParams.set('next', next);
   for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy', 'kind', 'from', 'new', 'provider', 'offering', 'resume']) url.searchParams.delete(key);
   url.searchParams.delete('draft');
   url.searchParams.delete('copy');

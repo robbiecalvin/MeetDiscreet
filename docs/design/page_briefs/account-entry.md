@@ -242,3 +242,18 @@ do not retain it. The destination performs its existing access checks. Backend-
 disabled preview never offers authenticated continuation. Three focused standard
 checks and one mocked backend permission check passed before the test pause;
 hosted behavior and broad regression remain unverified.
+
+## Confirmation resend and callback recovery — 2026-11-14
+
+`/?page=confirm-account` provides an email-only confirmation resend form, linked
+from sign-in, registration and recovery. In backend mode it invokes the official
+SDK `auth.resend` for signup confirmation with the existing same-origin PKCE
+callback. Uses generic eligibility/delivery wording; no account existence or
+successful delivery claim. The email is cleared before the request; pending
+submission disables the action. Backend-disabled preview sends nothing.
+A failed callback offers new confirmation, new recovery and sign-in links and
+focuses its status only while that route is active. One-time callback credentials
+continue to be scrubbed by the existing callback handler. Safe page-only return
+hints survive account screen navigation, not email callbacks.
+Mobile rendering inspected at 390px. No automated tests/build run under Robbie’s
+temporary pause; hosted email, provider limits and callback acceptance unverified.

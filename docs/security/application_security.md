@@ -1024,3 +1024,13 @@ auth routes and duplicate page parameters are rejected. The continuation link is
 shown only after successful SDK sign-in with a session. Navigation grants no
 permissions; each destination retains authentication/ownership/capability checks.
 The hint is not persisted through confirmation/recovery email flows.
+
+## Registration confirmation resend
+
+The email-only confirmation route invokes SDK signup resend explicitly, using the
+existing same-origin callback URL. It uses generic eligibility wording, clears
+email input before awaiting the request, blocks concurrent form submissions and
+leaves eligibility, delivery and rate limits to Supabase. It persists no submitted
+email, logs no credentials and grants no access. Failed callbacks show navigation
+to fresh request forms rather than retrying a consumed code. Hosted configuration,
+email delivery and provider rate-limit behavior remain to verify.

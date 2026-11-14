@@ -16,6 +16,6 @@ export function signInDestination(value) {
 export function accountEntryLink(page, destination) {
   const params = new URLSearchParams({ page });
   const next = signInDestination(destination);
-  if (['sign-in', 'register', 'recover-account'].includes(page) && next) params.set('next', next);
+  if (['sign-in', 'register', 'confirm-account', 'recover-account'].includes(page) && next) params.set('next', next);
   return `?${params}`;
 }

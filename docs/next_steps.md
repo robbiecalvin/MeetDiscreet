@@ -17,24 +17,29 @@ in their dedicated documents.
 Current phase: Frontend development with an initial Supabase development backend.
 
 Current activity:
-Complete the current prototype’s shared visual treatment: matching filters and
-information dialogs, empty results, footer spacing/link targets, autofill and
-text-selection states. Inspected rendered filter dialogs at 390 and 1440px and
-the mobile footer. Existing page layouts retain the approved palette and
-three-column mobile portraits. Current prototype styling coverage is complete;
-Robbie’s visual review, licensed Agrandir assets and Safari rendering remain open.
-This does not cover unbuilt live-service pages or establish launch readiness.
+Accounts/private-drafts completion pass: added a registration-confirmation resend
+screen and actionable failed/expired callback recovery. Sign-in/register/recovery
+link to confirmation resend; provider-managed email requests use generic outcomes,
+clear the email field, prevent duplicate submissions while pending and never grant
+access. Callback failures offer confirmation, recovery and sign-in routes without
+reusing one-time codes. Inspected the mobile preview screen and callback failure.
+No automated tests or build run, per Robbie’s temporary testing pause.
+
+Implemented development scope: registration/sign-in, PKCE confirmation/recovery,
+confirmation resend, sign-out, User/Provider starting preference, assigned-role
+status, password/email changes, other-session revocation and private CRUD for
+Provider profile, User profile, listings, catalogue, availability and unsent
+booking plan; selected saved-draft reference download and safe sign-in return.
+This is implementation coverage, not verified completion. Remaining: outstanding
+hosted migrations, email/redirect configuration and delivery, recovery/session
+lifecycle, two-account ownership isolation and cross-browser walkthrough. Full
+account erasure/export and operational privacy/retention policy are outside the
+current private-draft prototype and must be defined before public collection.
 
 Robbie temporarily suspended automated end-of-step tests on 2026-11-14 to reduce
-usage. No automated suite or production build was run for this visual increment;
-rendered inspection and source review only. Resume functional regression testing
-when requested or before release.
-
-The previously interrupted sign-in return increment is included: a successful
-sign-in can explicitly continue to an allowlisted account tool, with fresh access
-checks at the destination. Only the page is retained; record identifiers, editor
-flags and auth parameters are discarded. Focused checks passed before the test
-pause (three standard and one mocked backend check); no broad regression run.
+usage. Resume functional regression testing when requested or before release.
+Current prototype visual styling coverage is complete; Robbie’s review, licensed
+Agrandir assets and Safari rendering remain open.
 
 Read-only recorded-copy comparison is implemented and verified separately.
 Publishing decisions OPEN-052/053 remain unanswered; do not infer policy from “next”.
@@ -309,7 +314,10 @@ Not a working paid marketplace.
 
 ## 9. Phase 3 — Accounts and Access Boundaries
 
-Status: Not started.
+Status: Development authentication, settings, assigned-role checks and private
+owner draft tools implemented. Hosted integration/acceptance remains incomplete;
+member-tier live marketplace access and operational account administration remain
+separate work. See current activity above and backend setup for migration scope.
 
 Dependencies: Selected backend, data model, and access rules.
 

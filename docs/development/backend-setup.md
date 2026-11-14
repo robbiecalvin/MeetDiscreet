@@ -587,3 +587,20 @@ feedback setup preserves inspection and copy actions while showing feedback as
 unavailable. Check recorded feedback after an ambiguous response before retrying.
 Hosted JWT, real staff provisioning and concurrent revocation/withdrawal behavior
 remain to verify during the deferred walkthrough; local tests do not establish them.
+
+## Account completion acceptance still outstanding
+
+The development UI includes signup-confirmation resend at
+`/?page=confirm-account`; configure the existing `/?page=auth-callback` redirect
+for each authorized environment. Resend uses Supabase signup confirmation and
+provider-managed eligibility/rate limits. Failed links now offer fresh-request
+navigation. No live email was sent during implementation.
+
+Before treating accounts/private drafts as complete, apply the outstanding
+migration sequence, confirm email and redirect configuration, exercise signup /
+resend / PKCE confirmation / recovery / email change / password change / session
+revocation, and verify each of the six private draft kinds with two independent
+test accounts. Confirm download selection, failures, sign-out and expired sessions.
+These hosted checks remain deferred under the temporary test pause. Full account
+erasure/export and retention/operational privacy requirements need separate policy
+and implementation before public account collection.

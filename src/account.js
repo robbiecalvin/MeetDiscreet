@@ -5,6 +5,7 @@ const modes = {
   'sign-in': { title: 'Good to see you again.', intro: 'A familiar face. A new plan.', action: 'Check sign-in preview' },
   register: { title: 'A new connection starts here.', intro: 'A little introduction, and room for something new.', action: 'Check registration preview' },
   'reset-password': { title: 'Choose a new password.', intro: 'Complete recovery using your verified link.', action: 'Update password' },
+  'confirm-account': { title: 'One last step to your account.', intro: 'Request a fresh registration confirmation link.', action: 'Check confirmation preview' },
   'recover-account': { title: 'Let’s find your way back.', intro: 'A preview of the account-recovery screen.', action: 'Check recovery preview' },
 };
 function element(tag, text, className) {
@@ -19,7 +20,7 @@ export function renderAccount(container, mode, onMode, onBack, onContinue) {
   if (mode === 'reset-password' && !backendEnabled) mode = 'recover-account';
   const destination = signInDestination(new URLSearchParams(location.search).get('next'));
   const config = modes[mode];
-  const actionLabel = backendEnabled ? ({ 'sign-in': 'Sign in', register: 'Create account', 'recover-account': 'Send recovery email', 'reset-password': 'Update password' })[mode] : config.action;
+  const actionLabel = backendEnabled ? ({ 'sign-in': 'Sign in', register: 'Create account', 'recover-account': 'Send recovery email', 'confirm-account': 'Request confirmation email', 'reset-password': 'Update password' })[mode] : config.action;
   const back = element('a', '← Back to discovery', 'profile-back');
   back.href = './';
   back.addEventListener('click', (event) => {
@@ -95,7 +96,7 @@ export function renderAccount(container, mode, onMode, onBack, onContinue) {
   }
   if (mode === 'register') addField('username', 'Username', 'text');
   if (mode !== 'reset-password') addField('email', 'Email', 'email');
-  if (mode !== 'recover-account') addField('password', 'Password', 'password');
+  if (!['recover-account', 'confirm-account'].includes(mode)) addField('password', 'Password', 'password');
   if (mode === 'register' || mode === 'reset-password') addField('confirm-password', 'Confirm password', 'password');
   const intentInputs = [];
   const intentError = element('p', '', 'account-field-error');
@@ -211,6 +212,7 @@ export function renderAccount(container, mode, onMode, onBack, onContinue) {
         let response;
         if (mode === 'sign-in') response = await auth.signInWithPassword({ email: credentials.email, password: credentials.password });
         else if (mode === 'register') response = await auth.signUp({ email: credentials.email, password: credentials.password, options: { emailRedirectTo: authRedirect(), data: { requested_username: credentials.username, onboarding_intent: credentials.intent } } });
+        else if (mode === 'confirm-account') response = await auth.resend({ type: 'signup', email: credentials.email, options: { emailRedirectTo: authRedirect() } });
         else if (mode === 'recover-account') response = await auth.resetPasswordForEmail(credentials.email, { redirectTo: authRedirect(true) });
         else response = await auth.updateUser({ password: credentials.password });
         if (response.error) throw response.error;
@@ -221,6 +223,8 @@ export function renderAccount(container, mode, onMode, onBack, onContinue) {
           ? 'Signed in to the development backend. You can save your own private drafts. No publishing, subscription, or administrative access is granted.'
           : mode === 'register'
             ? (response.data.session ? 'Development account created and signed in. You can save private drafts; no paid or publishing access is granted.' : 'If registration is eligible, check your email for confirmation before signing in. No paid or publishing access is granted.')
+            : mode === 'confirm-account'
+              ? 'If this account is eligible for confirmation, a fresh link will be sent. Check your inbox and spam folder, then open the link in this same browser. Delivery and request limits are managed by the authentication provider.'
             : mode === 'recover-account'
               ? 'If this email is eligible for recovery, a recovery message will be sent. Check the inbox and open the link in this same browser.'
               : 'Your password was updated by the authentication provider.';
@@ -234,7 +238,9 @@ export function renderAccount(container, mode, onMode, onBack, onContinue) {
       }
       return;
     }
-    result.textContent = mode === 'recover-account'
+    result.textContent = mode === 'confirm-account'
+      ? 'Confirmation form preview checked. Authentication is not connected; no email was sent and no confirmation link was created. Demo fields have been cleared.'
+      : mode === 'recover-account'
       ? 'Recovery form preview checked. Authentication is not connected; no email was sent and no reset link was created. Demo fields have been cleared.'
       : mode === 'register'
         ? 'Registration form preview checked. No account, role, session, or policy acceptance was created. Authentication is not connected. Demo fields have been cleared.'
@@ -245,11 +251,16 @@ export function renderAccount(container, mode, onMode, onBack, onContinue) {
   if (!backendEnabled) form.append(example);
   form.append(result, continueRequested, continueAccount);
   panel.append(tabs, form);
-  if (!['recover-account', 'reset-password'].includes(mode)) {
+  if (!['recover-account', 'confirm-account', 'reset-password'].includes(mode)) {
     const recovery = modeLink('recover-account', 'Forgot your password?');
     recovery.className = 'account-recovery-link';
     panel.append(recovery);
   } else panel.append(modeLink('sign-in', 'Back to sign in'));
+  if (['sign-in', 'register', 'recover-account'].includes(mode)) {
+    const confirmation = modeLink('confirm-account', 'Need a new confirmation email?');
+    confirmation.className = 'account-recovery-link';
+    panel.append(confirmation);
+  }
   if (mode === 'register') panel.append(modeLink('provider-setup', 'Explore provider setup'));
   layout.append(intro, panel);
   container.append(layout);

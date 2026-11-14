@@ -62,3 +62,13 @@
 .account-security-layout .account-preview-result { overflow-wrap: anywhere; }
 .account-security-layout .account-panel .profile-small { color: #bcbcca; }
 .account-security-layout .account-field > label { line-height: 1.6; }
+
+.auth-callback-panel { max-width: 720px; margin: 60px auto; padding: 36px; border: 1px solid #c17a9040; border-radius: 20px; background: radial-gradient(ellipse at 100% 0, #b6192e20, transparent 60%), #1b1e2e; }
+.auth-callback-panel h1 { font-size: clamp(30px, 4vw, 46px); letter-spacing: -.04em; line-height: 1.12; margin: 22px 0; }
+.auth-callback-panel .auth-callback-status { color: #e3c6cd; line-height: 1.8; overflow-wrap: anywhere; }
+.auth-callback-panel .auth-callback-actions { margin-top: 28px; }
+.auth-callback-panel .button { border-radius: 30px; }
+@media (max-width: 700px) {
+  .auth-callback-panel { margin: 30px 0; padding: 26px 20px; }
+  .auth-callback-panel .auth-callback-actions { align-items: stretch; flex-direction: column; }
+}
