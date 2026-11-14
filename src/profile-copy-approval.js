@@ -1,3 +1,4 @@
+import { pilotVisibility } from './pilot-visibility.js';
 import { loadOwnerProfileApproval } from './backend/profile-approval.js';
 
 export function profileCopyApproval(owner, id, isCurrent) {
@@ -8,11 +9,13 @@ export function profileCopyApproval(owner, id, isCurrent) {
   button.textContent = 'Check editorial approval for this copy';
   const result = document.createElement('p');
   result.className = 'profile-small'; result.setAttribute('role', 'status'); result.tabIndex = -1;
+  const selection = document.createElement('div');
   const current = () => section.isConnected && isCurrent();
   let busy = false;
   button.addEventListener('click', async () => {
     if (busy || !current()) return;
     busy = true; button.disabled = true;
+    selection.replaceChildren();
     result.replaceChildren('Checking editorial approval…');
     try {
       const value = await loadOwnerProfileApproval(owner, id);
@@ -28,6 +31,7 @@ export function profileCopyApproval(owner, id, isCurrent) {
           time.textContent = parsed.toLocaleString(undefined, { timeZoneName: 'short' });
           result.append(' Approved ', time, '.');
         } else result.append(' Approval date unavailable.');
+        selection.append(pilotVisibility(owner, 'profile', id, isCurrent));
         result.append(' Withdrawing a submission or reviewing a replacement does not overwrite this approval record.');
       }
     } catch {
@@ -37,6 +41,6 @@ export function profileCopyApproval(owner, id, isCurrent) {
       if (current()) { button.disabled = false; result.focus(); }
     }
   });
-  section.append(button, result);
+  section.append(button, result, selection);
   return section;
 }

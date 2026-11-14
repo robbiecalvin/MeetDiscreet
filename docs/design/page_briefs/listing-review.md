@@ -29,3 +29,10 @@ and build paused at Robbie’s request. Rendering, SQL/concurrency, hosted autho
 and end-to-end behavior remain unverified. Listing feedback/rejection, public
 activation, plan/allowance/expiry enforcement and full Looking For visibility remain
 separate work. No fake private-data fallback or public-listing mutation.
+
+## Owner Offering version selection — 2026-11-14
+
+After an explicit approval lookup, approved Offering history copies expose the
+[owner pilot visibility controls](./pilot-visibility.md). Looking For remains
+unsupported pending its separate public-access policy. No posting slots or public
+activation follow from a selection. Source reviewed only; tests/build paused.

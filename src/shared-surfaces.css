@@ -71,3 +71,9 @@ input:autofill { box-shadow: inset 0 0 0 100px #1b2031; -webkit-text-fill-color:
 @media (prefers-reduced-motion: reduce) {
   #app .desktop-nav a { transition: none; }
 }
+
+.pilot-visibility { margin-top: 26px; padding: 22px; border: 1px solid #ffffff20; border-radius: 14px; background: #12152180; }
+.pilot-visibility h4 { margin: 0 0 14px; color: #e3c6cd; font-size: 18px; letter-spacing: -.3px; }
+.pilot-visibility .profile-small { margin: 16px 0; line-height: 1.8; }
+.pilot-visibility .button { margin: 6px 10px 6px 0; }
+@media (max-width: 700px) { .pilot-visibility { padding: 18px 16px; } }

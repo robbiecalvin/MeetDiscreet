@@ -844,3 +844,6 @@ underlying feature is operational.
 
 - src/pilot-eligibility.js, src/pilot-eligibility.css and src/backend/pilot-eligibility.js: separately scoped staff target inspection, explicitly expiring invited pilot grant and revocation.
 - supabase/migrations/202611140005_pilot_eligibility_controls.sql: pilot-management capability, revision-bound grant/revoke RPCs and protected operation metadata; no public activation.
+
+- src/pilot-visibility.js and src/backend/pilot-visibility.js: owner exact-approved-version selection/replacement/hide controls for profile and Offering copies, before public activation.
+- supabase/migrations/202611140006_owner_visibility_selections.sql: owner-scoped revision-bound selection RPCs, eligibility checks for visible requests and hide without retained eligibility.

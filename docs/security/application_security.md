@@ -1100,3 +1100,16 @@ The UI confirms invitation/expiry and the exact action, clears stale records aft
 ambiguous outcomes, blocks route changes while busy and discards identity/detached
 responses. No invitation is emailed, capability provisioned or public activation
 performed. Source migration remains unapplied; automated verification is deferred.
+
+## Owner visibility selection boundary
+
+Source migration 202611140006 restricts visibility preferences to the owner of an
+existing exact editorial approval. Kind/resource IDs are derived from trusted
+approval records; Looking For is rejected. Browser direct table access is denied.
+Revision comparison and per-resource serialization reject stale selection changes.
+Visible requests lock and validate current roles/eligibility; hide does not require
+retaining those privileges and preserves the selected copy ID. Subsequent draft or
+approval changes cannot silently swap that ID. No anonymous read/publication API
+or posting allowance is granted. Owner UI distinguishes requested visibility from
+actual public activation, requires confirmation and discards detached/identity-
+changed results. Migration and automated verification remain deferred.

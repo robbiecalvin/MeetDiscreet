@@ -1,3 +1,4 @@
+import { pilotVisibility } from './pilot-visibility.js';
 import { requireUser } from './backend/client.js';
 import { loadListingCopyHistory, loadOwnerListingApproval, withdrawListingCopy } from './backend/listing-submissions.js';
 import { listingCopyFields, listingCopyTime } from './listing-copy-fields.js';
@@ -30,16 +31,21 @@ export function listingCopyHistory(isCurrent) {
         if (row.withdrawn_at) card.append(listingCopyTime('Withdrawn', row.withdrawn_at));
         const details = node('details'); details.append(node('summary', 'View recorded listing fields'), listingCopyFields(row.recorded_fields));
         const resultLine = node('div', '', 'profile-small'); resultLine.setAttribute('role', 'status');
+        const visibility = node('div');
         const check = node('button', 'Check listing editorial approval', 'button quiet'); check.type = 'button';
         check.addEventListener('click', async () => {
-          check.disabled = true; resultLine.replaceChildren('Checking editorial approval…');
+          check.disabled = true; visibility.replaceChildren(); resultLine.replaceChildren('Checking editorial approval…');
           try { const approval = await loadOwnerListingApproval(owner, row.id); if (!current(request)) return;
             resultLine.textContent = approval ? 'Editorial approval recorded for this exact copy. This does not publish it or grant paid access.' : 'No editorial approval recorded for this copy. This does not indicate rejection.';
-            if (approval) resultLine.append(listingCopyTime('Approved', approval.approved_at));
+            if (approval) {
+              resultLine.append(listingCopyTime('Approved', approval.approved_at));
+              if (row.kind === 'offering') visibility.append(pilotVisibility(owner, 'offering', row.id, () => current(request)));
+              else resultLine.append(' Looking For visibility remains pending its separate access policy.');
+            }
           } catch { if (current(request)) resultLine.textContent = 'Editorial approval unavailable. Check sign-in and setup, then retry.'; }
           finally { if (current(request)) check.disabled = false; }
         });
-        details.append(check, resultLine);
+        details.append(check, resultLine, visibility);
         if (!row.withdrawn_at) {
           const withdraw = node('button', 'Withdraw this recorded listing copy', 'button quiet'); withdraw.type = 'button';
           withdraw.addEventListener('click', async () => {

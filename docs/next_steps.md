@@ -21,22 +21,23 @@ DEC-024 confirms staged real profiles/listings first, Administrator + explicit
 publishing capability, and retaining the last approved version during replacement
 review. OPEN-052/053 are resolved; do not continue asking these questions.
 
-Private editorial approval/history and caller-only publishing readiness are
-implemented in source. Source migration 202611140005 now adds DEC-025 pilot
-management: Administrator + independent `marketplace_pilot_management`, exact
-invited Provider target, explicit future UTC expiry, revision-bound changes and
-revocation. Staff route `?page=pilot-eligibility` inspects the target before any
-confirmed change; no account directory/email invitation or automatic expiry is
-invented. Self changes and non-pilot eligibility changes are rejected. Protected
-operation metadata records reads/grants/revokes; audit failure rolls back changes.
-New grants require current User+Provider; revocation works after role loss.
+Private editorial approval/history, publishing readiness and invited pilot control
+are implemented in source. Source migration 202611140006 adds owner selections
+bound to exact approved profile/Offering copies, independent of draft edits,
+replacement review or subsequent approvals. Owner approval/history UI explicitly
+checks selection before offering confirmed select/replace/hide actions. Current
+User+Provider and valid unrevoked eligibility are required to select visible;
+hiding remains available after role/eligibility loss. Revision-bound RPC writes
+serialize per resource and reject stale updates. No browser table access.
 
-No real invites/grants, capability assignments or migrations applied remotely.
+Selections are preparation for future activation, not public publication or posting
+allowances. Looking For is unsupported pending its separate visibility policy.
+No real selections/grants, capability assignments or migrations applied remotely.
 No prices/payments/subscriptions/public visibility changed. Automated tests/build
 remain paused; source review only. SQL policy/concurrency, hosted behavior,
-rendering and regression remain unverified. Next: owner visibility controls and
-allowlisted pilot public projections, with unresolved media/Looking For visibility
-and allowances kept separate.
+rendering and regression remain unverified. Next: allowlisted pilot public read
+projections and explicit activation prerequisites, including approved real media
+and authoritative Offering allowances before publication.
 
 ### Live marketplace implementation and acceptance gaps
 

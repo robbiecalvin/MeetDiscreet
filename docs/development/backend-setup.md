@@ -705,3 +705,23 @@ Validate role/capability denial, target isolation, future/expired/revoked cases,
 concurrent grants/service updates/revocation, audit rollback and detached responses
 before hosted use. No durations, invitees or paid entitlements are seeded. These
 checks remain deferred under the temporary test pause. Public activation remains off.
+
+## Owner pilot visibility selections (source only)
+
+After pilot controls, source migration
+[202611140006_owner_visibility_selections.sql](../../supabase/migrations/202611140006_owner_visibility_selections.sql)
+adds exact-approved-version selections for profiles and Offering sources. It is
+unapplied and unverified under the test pause; no real selection has been made.
+There are no browser table privileges, only expected-owner RPCs which verify
+ownership of the referenced editorial approval and derive resource IDs server-side.
+Mutations serialize per owner/kind/resource and compare inspected revisions.
+Selecting visible checks locked current User+Provider and valid unrevoked eligibility;
+hide needs only an owned approval/current selection, preserving the prior selected
+ID. No draft or later approval automatically alters a selection.
+
+Looking For is explicitly unsupported. No anonymous read policy/projection or
+public activation is added. Multiple prepared Offering selections do not establish
+posting allowances; authoritative capacity enforcement remains mandatory before
+activation. Real approved media is also unresolved. Validate cross-owner/kind IDs,
+stale/replayed changes, concurrent selects/hides, role/eligibility loss and ambiguous
+writes before hosted use. No public visibility is inferred from requested_visible.

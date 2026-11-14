@@ -169,3 +169,11 @@ not recorded from unavailable and show approval time when valid. Approval stays
 separate from identity, paid access and public visibility. Withdrawal retains the
 approval record. Source reviewed; automated tests/build remain paused. Migration
 202611140001 is not hosted/applied and hosted behavior remains unverified.
+
+## Pilot version selection — 2026-11-14
+
+An approved profile copy now exposes a separate explicit visibility-selection
+check. See [owner pilot visibility](./pilot-visibility.md). Selecting an approved
+copy prepares future visibility only, with no public activation. Hiding remains
+available without current roles/eligibility. This increment is source reviewed;
+automated tests/build remain paused and migration 202611140006 is unapplied.
