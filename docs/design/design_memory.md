@@ -560,3 +560,13 @@ extra data reads. Exact rendering awaits review.
 Matched staff review queues to the refreshed visual system after “next”, while
 keeping operational actions distinct and preserving capability checks. Staff
 fixtures are test-only, never a private-data fallback. Rendering awaits review.
+
+## 2026-11-14 — Shared surface completion pass
+
+Robbie requested finishing visual design and temporarily pausing automated
+end-of-step tests. Matched shared dialogs, empty discovery results, footer links,
+autofill and selection states to existing page styling. Inspected filter dialogs
+at 390 and 1440px and the mobile footer. No automated suite/build for this pass.
+Current prototype styling coverage is complete; exact visual acceptance, Safari
+and licensed Agrandir assets remain pending. Future unbuilt pages are outside
+this coverage statement.

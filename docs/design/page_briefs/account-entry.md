@@ -231,3 +231,14 @@ mocked backend browser checks passed. New coverage reproduces account Forward
 using discovery’s offset with automatic restoration disabled, verifies account
 top/main focus and discovery return, and checks canceled staff viewport/caret
 retention. Safari/native cross-document restoration remain unverified.
+
+## Requested tool after sign-in
+
+Successful development sign-in may reveal an explicit continuation link to an
+allowlisted account tool. No automatic redirect; the normal account link remains.
+Only the page is retained, without object IDs, auth parameters or reset flags.
+Mode links preserve the safe destination; email confirmation/recovery callbacks
+do not retain it. The destination performs its existing access checks. Backend-
+disabled preview never offers authenticated continuation. Three focused standard
+checks and one mocked backend permission check passed before the test pause;
+hosted behavior and broad regression remain unverified.

@@ -17,15 +17,24 @@ in their dedicated documents.
 Current phase: Frontend development with an initial Supabase development backend.
 
 Current activity:
-Make Back/Forward scroll and focus deterministic across account and public reader
-pages. Removed the stale discovery-route exclusion list, set explicit app history
-restoration and retained discovery’s existing scroll/card return. Account routes
-start at the top/main landmark; public readers focus valid local fragments.
-Canceled staff history preserves viewport, focused field and caret. Reproduced
-the legacy forward-scroll error with automatic restoration disabled, then passed
-six focused navigation/history checks after the fix. Production build, all 224
-standard checks and all 142 mocked backend browser checks passed. Safari and native
-cross-document restoration remain unverified.
+Complete the current prototype’s shared visual treatment: matching filters and
+information dialogs, empty results, footer spacing/link targets, autofill and
+text-selection states. Inspected rendered filter dialogs at 390 and 1440px and
+the mobile footer. Existing page layouts retain the approved palette and
+three-column mobile portraits. Current prototype styling coverage is complete;
+Robbie’s visual review, licensed Agrandir assets and Safari rendering remain open.
+This does not cover unbuilt live-service pages or establish launch readiness.
+
+Robbie temporarily suspended automated end-of-step tests on 2026-11-14 to reduce
+usage. No automated suite or production build was run for this visual increment;
+rendered inspection and source review only. Resume functional regression testing
+when requested or before release.
+
+The previously interrupted sign-in return increment is included: a successful
+sign-in can explicitly continue to an allowlisted account tool, with fresh access
+checks at the destination. Only the page is retained; record identifiers, editor
+flags and auth parameters are discarded. Focused checks passed before the test
+pause (three standard and one mocked backend check); no broad regression run.
 
 Read-only recorded-copy comparison is implemented and verified separately.
 Publishing decisions OPEN-052/053 remain unanswered; do not infer policy from “next”.

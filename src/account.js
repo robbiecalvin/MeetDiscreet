@@ -1,3 +1,4 @@
+import { signInDestination, accountEntryLink } from './sign-in-destination.js';
 import './account-entry.css';
 import { backendEnabled, backendClient, authRedirect } from './backend/client.js';
 const modes = {
@@ -13,9 +14,10 @@ function element(tag, text, className) {
   return node;
 }
 
-export function renderAccount(container, mode, onMode, onBack) {
+export function renderAccount(container, mode, onMode, onBack, onContinue) {
   container.replaceChildren();
   if (mode === 'reset-password' && !backendEnabled) mode = 'recover-account';
+  const destination = signInDestination(new URLSearchParams(location.search).get('next'));
   const config = modes[mode];
   const actionLabel = backendEnabled ? ({ 'sign-in': 'Sign in', register: 'Create account', 'recover-account': 'Send recovery email', 'reset-password': 'Update password' })[mode] : config.action;
   const back = element('a', '← Back to discovery', 'profile-back');
@@ -33,7 +35,7 @@ export function renderAccount(container, mode, onMode, onBack) {
   tabs.setAttribute('aria-label', 'Account screens');
   function modeLink(page, label) {
     const link = element('a', label);
-    link.href = `?page=${page}`;
+    link.href = accountEntryLink(page, destination);
     if (page === mode) link.setAttribute('aria-current', 'page');
     link.addEventListener('click', (event) => {
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -149,10 +151,19 @@ export function renderAccount(container, mode, onMode, onBack) {
   const continueAccount = modeLink('account', 'Open your account');
   continueAccount.className = 'button outline';
   continueAccount.hidden = true;
+  const continueRequested = element('a', 'Continue to your requested page', 'button primary');
+  continueRequested.href = destination || '?page=account';
+  continueRequested.hidden = true;
+  continueRequested.addEventListener('click', event => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || !onContinue) return;
+    event.preventDefault(); onContinue(destination);
+  });
   let busy = false;
   form.addEventListener('submit', async (event) => {
     if (busy) { event.preventDefault(); return; }
     event.preventDefault();
+    continueAccount.hidden = true;
+    continueRequested.hidden = true;
     const errors = [];
     for (const [key, field] of fields) {
       if (!field.error) continue;
@@ -204,6 +215,7 @@ export function renderAccount(container, mode, onMode, onBack) {
         else response = await auth.updateUser({ password: credentials.password });
         if (response.error) throw response.error;
         if (!result.isConnected) return;
+        continueRequested.hidden = !(mode === 'sign-in' && destination && response.data?.session);
         continueAccount.hidden = !(mode === 'sign-in' || (mode === 'register' && response.data.session));
         result.textContent = mode === 'sign-in'
           ? 'Signed in to the development backend. You can save your own private drafts. No publishing, subscription, or administrative access is granted.'
@@ -231,7 +243,7 @@ export function renderAccount(container, mode, onMode, onBack) {
   });
   form.append(submit);
   if (!backendEnabled) form.append(example);
-  form.append(result, continueAccount);
+  form.append(result, continueRequested, continueAccount);
   panel.append(tabs, form);
   if (!['recover-account', 'reset-password'].includes(mode)) {
     const recovery = modeLink('recover-account', 'Forgot your password?');

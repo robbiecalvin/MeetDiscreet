@@ -113,3 +113,11 @@ Validation: production build, all 223 standard checks and all 131 mocked backend
 browser checks passed. Mocked signed-in 320px overflow checks passed across 14
 routes; inspected discovery, profile and conversation renders. This is a local
 regression result, not hosted authentication or production-readiness verification.
+
+## Shared surface finishing — 2026-11-14
+
+Filters and information dialogs now share rounded navy/burgundy panels, blush
+focus outlines and pill actions. Empty results and the shared footer use matching
+spacing and borders, with 44px footer link targets. Inspected filter dialogs at
+390 and 1440px and the mobile footer. Three-column mobile portraits preserved.
+Automated tests/build temporarily paused at Robbie’s request; visual review pending.

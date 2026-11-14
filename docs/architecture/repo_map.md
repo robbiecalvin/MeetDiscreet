@@ -819,3 +819,7 @@ underlying feature is operational.
 - `src/backend/profile-feedback.js`: independent staff feedback scope/read/write helpers and owner-only projected note reads.
 - `src/profile-feedback-form.js` / `src/profile-copy-feedback.js`: immutable staff note entry and explicit owner/version feedback display, with safe text and stale-view cleanup.
 - `supabase/migrations/202611130002_profile_revision_feedback.sql`: one protected note per profile copy, owner column/RLS reads, actor-bound scoped staff operations and atomic audit metadata.
+
+- src/shared-surfaces.css: shared dialogs, empty results, footer and browser form-state finishing styles.
+- src/sign-in-destination.js: allowlisted page-only sign-in navigation hints; no authorization.
+- tests/sign-in-destination.spec.js: destination sanitization and backend-disabled continuation checks.

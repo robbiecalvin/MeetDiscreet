@@ -1014,3 +1014,13 @@ an in-place URL restore/new branch on cancellation rather than a guessed distanc
 Callback URL scrubbing retains only that routing marker and still removes one-time
 codes/errors/flow parameters. Identity clearing during restoration must render a
 fresh view rather than revive the old guarded DOM.
+
+## Sign-in navigation hints
+
+`src/sign-in-destination.js` accepts query-only destinations with exactly one
+allowlisted account-tool page and emits only that page. It drops object IDs,
+credentials, nested redirects, fragments and editor-reset flags. External URLs,
+auth routes and duplicate page parameters are rejected. The continuation link is
+shown only after successful SDK sign-in with a session. Navigation grants no
+permissions; each destination retains authentication/ownership/capability checks.
+The hint is not persisted through confirmation/recovery email flows.

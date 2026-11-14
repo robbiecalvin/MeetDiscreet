@@ -2194,3 +2194,22 @@ test('account history starts at the page heading while discovery restores its ow
  await page.evaluate(()=>history.forward());await expect(page).toHaveURL(/page=edit-user-profile/);await expect.poll(()=>page.evaluate(()=>scrollY)).toBe(0);await expect(page.locator('#main')).toBeFocused();
  await page.evaluate(()=>history.go(-3));await expect(page).not.toHaveURL(/page=/);await expect.poll(()=>page.evaluate(()=>scrollY)).toBeCloseTo(discoveryScroll,0);await expect(page.locator('#main')).toBeFocused();
 });
+
+test('sign-in preserves a requested staff tool without granting its permissions', async ({ page }) => {
+  await mockBackend(page);
+  await enter(page, '/?page=provider-review');
+  await page.locator('header [data-account-link]').click();
+  await expect(page).toHaveURL(/next=%3Fpage%3Dprovider-review/);
+  const continuation = page.getByRole('link', { name: 'Continue to your requested page' });
+  await expect(continuation).toBeHidden();
+  await page.getByRole('link', { name: 'Create account', exact: true }).click();
+  await page.getByRole('link', { name: 'Sign in', exact: true }).last().click();
+  await page.getByLabel('Email', { exact: true }).fill('test@example.invalid');
+  await page.getByLabel('Password', { exact: true }).fill('test-password-not-real');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await expect(continuation).toBeVisible();
+  await continuation.click();
+  await expect(page).toHaveURL(/\?page=provider-review$/);
+  await expect(page.getByRole('button', { name: /approve/i })).toHaveCount(0);
+  await expect(page.locator('#account-view')).toContainText(/permission|access|capability/i);
+});

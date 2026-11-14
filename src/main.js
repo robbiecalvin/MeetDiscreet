@@ -1,3 +1,4 @@
+import { signInDestination } from './sign-in-destination.js';
 import {pushRouteState, clearRouteLeave, replaceRouteState, acceptRoutePop} from './route-leave.js';
 import { renderBookingInboxPreview } from './booking-inbox-preview.js';
 import { renderProfileReview } from './profile-review.js';
@@ -9,6 +10,7 @@ import { renderProviderApplication, clearProviderApplicationState } from './prov
 import { backendEnabled, backendClient, processAuthCallback, signOutCurrentSession } from './backend/client.js';
 import './styles.css';
 import './navigation.css';
+import './shared-surfaces.css';
 import './age-gate.css';
 import './discovery.css';
 import { renderBookingDraft, clearBookingDraftState } from './booking-draft.js';
@@ -193,7 +195,7 @@ function renderRoute() {
     else if (accountMode === 'availability') renderAvailability($('#account-view'), navigateAccount);
     else if (accountMode === 'my-listings') renderListingLibrary($('#account-view'), navigateAccount, params.get('kind'));
     else if (accountMode === 'account-security') renderAccountSecurity($('#account-view'), navigateAccount);
-    else renderAccount($('#account-view'), accountMode, navigateAccount, backToDiscovery);
+    else renderAccount($('#account-view'), accountMode, navigateAccount, backToDiscovery, continueAfterSignIn);
     document.title = `${accountMode === 'booking-inbox-preview' ? 'Booking inbox preview' : accountMode === 'profile-review' ? 'Profile submission review' : accountMode === 'photo-preview' ? 'Photo workspace preview' : accountMode === 'messages-preview' ? 'Conversation preview' : accountMode === 'draft-backup' ? 'Saved draft download' : accountMode === 'provider-review' ? 'Provider review queue' : accountMode === 'provider-application' ? 'Provider application' : accountMode === 'booking-draft' ? 'Booking request preview' : accountMode === 'edit-user-profile' ? 'User profile draft' : accountMode === 'user-setup' ? 'User setup' : accountMode === 'provider-setup' ? 'Provider setup' : accountMode === 'availability' ? 'Availability draft' : accountMode === 'my-listings' ? 'Saved listing drafts' : accountMode === 'account-security' ? 'Account security' : accountMode === 'account' ? 'Your account' : accountMode === 'register' ? 'Create account' : accountMode === 'recover-account' ? 'Account recovery' : 'Sign in'} · MeetDiscreet`;
   } else if (isProfileEditor) {
     renderProfileEditor($('#profile-editor-view'), backToDiscovery, navigateAccount);
@@ -495,9 +497,24 @@ function consumeBookingResume() {
   if (clean.searchParams.get('page') !== 'booking-draft' || clean.searchParams.get('resume') !== '1') return;
   clean.searchParams.delete('resume'); history.replaceState(history.state, '', clean);
 }
+function continueAfterSignIn(destination) {
+  const safe = signInDestination(destination);
+  if (!safe) return;
+  const url = new URL(location.href);
+  url.search = safe;
+  url.hash = '';
+  if (!pushRouteState(null, '', url)) return;
+  renderRoute();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  if (hasAgeConfirmation) $('#main').focus({ preventScroll: true });
+}
 function navigateAccount(page, extra = {}) {
   if (!$('#discovery-view').hidden) discoveryScroll = window.scrollY;
   const url = new URL(location.href);
+  const next = ['sign-in', 'register', 'recover-account'].includes(url.searchParams.get('page'))
+    ? signInDestination(url.searchParams.get('next')) : signInDestination(url.search);
+  url.searchParams.delete('next');
+  if (['sign-in', 'register', 'recover-account'].includes(page) && next) url.searchParams.set('next', next);
   for (const key of ['profile', 'ad', 'fromAd', 'draft', 'copy', 'kind', 'from', 'new', 'provider', 'offering', 'resume']) url.searchParams.delete(key);
   url.searchParams.delete('draft');
   url.searchParams.delete('copy');
