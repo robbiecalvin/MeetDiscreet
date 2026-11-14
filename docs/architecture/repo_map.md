@@ -827,3 +827,5 @@ underlying feature is operational.
 - src/profile-approval.js: exact-copy editorial approval status/action in staff inspection.
 - src/backend/profile-approval.js: verified-identity SDK approval calls.
 - supabase/migrations/202611140001_profile_editorial_approval.sql: private immutable approval snapshots and separately scoped Administrator approval; no public activation.
+
+- src/profile-copy-approval.js: explicit owner approval-status lookup for active/history profile copies; safe timestamp display and no reviewer identity.

@@ -1,3 +1,4 @@
+import {profileCopyApproval} from './profile-copy-approval.js';
 import {profileCopyComparison} from './profile-copy-comparison.js';
 import {profileCopyFieldDefinitions} from './profile-copy-differences.js';
 import {profileCopyFeedback} from './profile-copy-feedback.js';
@@ -35,9 +36,9 @@ export function profileSubmissionHistory(owner,isCurrent) {
       hasOlder=result.length>20;rows=result.slice(0,20);
       for(const value of rows) {
         const fields=value.public_fields||{};const card=node('article',null,'staff-approval-card');
-        card.append(node('h3',typeof fields.display_name==='string'&&fields.display_name.trim()?fields.display_name:'Unnamed profile copy'),node('p',value.withdrawn_at?'Withdrawn private copy':'Pending private copy','eyebrow'),timestamp('Recorded',value.submitted_at));
+        card.append(node('h3',typeof fields.display_name==='string'&&fields.display_name.trim()?fields.display_name:'Unnamed profile copy'),node('p',value.withdrawn_at?'Withdrawn private copy':'Active private copy','eyebrow'),timestamp('Recorded',value.submitted_at));
         if(value.withdrawn_at)card.append(timestamp('Withdrawn',value.withdrawn_at));
-        const details=node('details');details.append(node('summary','View recorded public fields'),profileCopyFields(fields),profileCopyFeedback(owner,value.id,()=>current(request)),profileCopyComparison(owner,value,()=>current(request)));card.append(details);list.append(card);
+        const details=node('details');details.append(node('summary','View recorded public fields'),profileCopyFields(fields),profileCopyApproval(owner,value.id,()=>current(request)),profileCopyFeedback(owner,value.id,()=>current(request)),profileCopyComparison(owner,value,()=>current(request)));card.append(details);list.append(card);
       }
       status.textContent=rows.length?`${rows.length} private profile copies on this page. Newest first.`:'No private profile copies on this page.';
       newer.disabled=page===0;older.disabled=!hasOlder;pages.hidden=!rows.length&&page===0;refresh.textContent='Refresh my profile copy history';

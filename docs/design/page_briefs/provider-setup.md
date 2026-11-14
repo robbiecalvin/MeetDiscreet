@@ -159,3 +159,13 @@ mocked backend browser checks passed. Added pure field-allowlist/value tests and
 owner-projection, safe-text, refresh/error/absence, history and late sign-out checks.
 Changed/matching tables inspected on mobile/desktop; responsive checks include
 320px. No hosted migration, publishing or private-data policy change is required.
+
+## Owner editorial approval status — 2026-11-14
+
+Active recorded profile copies and history disclosures include an explicit
+“Check editorial approval for this copy” action. Loads only the owner’s matching
+approval ID/time, without reviewer identity; no automatic per-copy fetch. Distinguish
+not recorded from unavailable and show approval time when valid. Approval stays
+separate from identity, paid access and public visibility. Withdrawal retains the
+approval record. Source reviewed; automated tests/build remain paused. Migration
+202611140001 is not hosted/applied and hosted behavior remains unverified.

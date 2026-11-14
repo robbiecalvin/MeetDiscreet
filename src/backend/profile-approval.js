@@ -20,3 +20,12 @@ export async function approveProfileCopy(reviewer, id) {
   await verify(reviewer);
   return data;
 }
+
+export async function loadOwnerProfileApproval(owner, id) {
+  await verify(owner);
+  const { data, error } = await backendClient().from('profile_editorial_approvals')
+    .select('submission_id,approved_at').eq('owner_id', owner).eq('submission_id', id).maybeSingle();
+  if (error || (data && data.submission_id !== id)) throw new Error('Approval status unavailable.');
+  await verify(owner);
+  return data;
+}

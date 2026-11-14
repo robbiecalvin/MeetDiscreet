@@ -21,17 +21,20 @@ DEC-024 confirms staged real profiles/listings first, Administrator + explicit
 publishing capability, and retaining the last approved version during replacement
 review. OPEN-052/053 are resolved; do not continue asking these questions.
 
-First implementation increment: private version-bound editorial approval with
-`marketplace_publication_approval`, separate from publication/entitlements.
-New source migration 202611140001 adds immutable approval snapshots and owner-only
-reads, scoped staff status/RPC, reviewer/owner role checks, no self approval,
-feedback/withdrawal conflict rejection and protected operation metadata. Existing
-approved snapshots survive replacement review. Staff UI explicitly labels approval
-as private and handles missing schema/access. No migration applied remotely, no
-real capability assigned, no public data/entitlement granted. Automated tests and
-build remain paused; SQL authorization/concurrency and hosted behavior unverified.
-Next: owner approval status, listing submission/approval pipeline and public
-projection/activation only after authoritative eligibility and media are ready.
+Version-bound private editorial approval is implemented in source migration
+202611140001 and staff inspection. Owners can now explicitly check approval and
+its timestamp for active submissions and history copies. Reads select only copy
+ID/time, filter by owner/copy, verify identity before/after and retain owner RLS.
+No automatic bulk reads, reviewer disclosure or inferred rejection/publication.
+Unavailable schema/access produces an explicit unavailable state, not “no approval”.
+Submission withdrawal preserves the editorial record; active-copy labels no longer
+imply that an approved copy is still awaiting an editorial decision.
+
+No migration applied remotely, no real capability assigned and no public data or
+entitlement granted. Automated tests/build remain paused; source/flow review only
+for this owner-status increment. Hosted behavior, SQL policy/concurrency and
+functional regression remain unverified. Next: listing submission/approval pipeline
+and public projection/activation after authoritative eligibility and media are ready.
 
 ### Live marketplace implementation and acceptance gaps
 

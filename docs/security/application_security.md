@@ -1034,3 +1034,13 @@ leaves eligibility, delivery and rate limits to Supabase. It persists no submitt
 email, logs no credentials and grants no access. Failed callbacks show navigation
 to fresh request forms rather than retrying a consumed code. Hosted configuration,
 email delivery and provider rate-limit behavior remain to verify.
+
+## Owner editorial approval status
+
+Owner approval lookups verify current identity before and after the database read,
+filter exact owner/submission and select only submission ID and approval timestamp.
+Owner RLS remains authoritative; no staff identity is requested. Active/history UI
+performs explicit per-copy reads only, and detached or invalidated views cannot
+populate. Missing rows and unavailable schema/auth/network are different outcomes;
+neither grants publication or entitlements. Automated verification remains deferred
+under the temporary test pause; source migration is not applied remotely.
