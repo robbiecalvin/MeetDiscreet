@@ -30,3 +30,20 @@ Public selection wording now accounts for later activation: selecting an approve
 copy may expose it when the directory is enabled and all current eligibility checks
 pass. The selection action never enables the global directory switch. Readiness
 shows endpoint connection and activation as separate facts.
+
+## Read-only visibility diagnostics — 2026-11-14
+
+Explicit “Explain this copy’s public visibility” checks the exact owned approval.
+Show whether it is currently readable through the public endpoints, then list
+activation, User/Provider roles, current invited-pilot eligibility, exact-version
+selection and resource visibility request. Offering additionally shows currently
+readable Provider profile and selected Offering count (exactly one required).
+The final readable flag comes from the actual public projection, not a client-side
+checklist calculation or first-page search. No reviewer/contact/provenance fields.
+
+Results are time-of-check snapshots, not view counts or enduring visibility promises.
+A selection operation clears previous diagnostics, invalidates late requests and
+blocks a fresh diagnostic request until the write finishes. Missing setup/auth/network
+is unavailable, distinct from not readable. Source migration 202611140008 remains
+unapplied; source review only, tests/build paused and rendering/hosted behavior
+unverified. No activation or entitlement changes.

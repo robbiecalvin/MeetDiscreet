@@ -749,3 +749,18 @@ migrated through 007 for the new readiness shape. Validate switch OFF/ON, no ano
 internal/table reads, field projection, owner hide/swap, expired/revoked membership /
 eligibility, multiple Offering selections, paging and missing schema before use.
 Automated tests/build remain paused; source review only. No real media is exposed.
+
+## Owner visibility diagnostics (source only)
+
+After public projections, source migration
+[202611140008_owner_visibility_diagnostics.sql](../../supabase/migrations/202611140008_owner_visibility_diagnostics.sql)
+adds a caller/approval-owner diagnostic RPC. It is unapplied and unverified under
+the test pause. No global switch or eligibility is changed.
+
+The Offering query is moved unchanged into a non-browser-executable internal
+projection; the public wrapper retains its exact signature, grants and 21-row bound.
+Diagnostics check exact owned approval/kind, expose current caller flags/capacity and
+use internal public projections for the final readable result, independent of
+pagination position. No private content, provenance or reviewer identities are
+returned. Validate cross-owner/kind IDs, all activation/role/expiry/selection/capacity
+combinations, shared public predicates and stale UI results before hosted use.

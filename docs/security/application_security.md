@@ -1132,3 +1132,15 @@ with textContent, never interpreted as markup. Backend-disabled/error states nev
 substitute fictional data. This source increment is unapplied and unverified under
 the test pause; it does not establish production publication, abuse prevention or
 media readiness. Public data already fetched cannot be recalled by subsequent hide.
+
+## Owner public visibility diagnostics
+
+Source migration 202611140008 verifies caller identity and exact owned editorial
+approval before returning current prerequisite flags and the actual public-readable
+result. Unsupported kinds/unowned approvals are rejected. Final results reuse the
+non-browser internal public profile/Offering projections, never a first-page scan.
+Only owner role/eligibility/selection flags and capacity counts are exposed; no
+reviewer/contact/provenance or private draft content. Diagnostics are read-only and
+cannot activate the directory or grant access. UI identity/generation checks clear
+stale outcomes during selection operations; backend failures do not imply hidden
+or visible. Migration is unapplied; automated verification remains deferred.

@@ -850,3 +850,6 @@ underlying feature is operational.
 
 - src/pilot-directory.js, src/pilot-directory.css and src/backend/pilot-directory.js: separate text-only public pilot listing/profile reader with explicit disabled/empty/error states; no fictional fallback.
 - supabase/migrations/202611140007_pilot_public_directory.sql: allowlisted bounded public RPCs behind an OFF-by-default server switch, current eligibility and exact owner selections; owner readiness activation status.
+
+- src/visibility-diagnostics.js and src/backend/visibility-diagnostics.js: explicit owner visibility explanation tied to the exact approval, read-only and stale-result guarded.
+- supabase/migrations/202611140008_owner_visibility_diagnostics.sql: owner-only diagnostic RPC sharing actual public projection rules, plus non-browser internal Offering projection.

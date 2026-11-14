@@ -21,26 +21,24 @@ DEC-024 confirms staged real profiles/listings first, Administrator + explicit
 publishing capability, and retaining the last approved version during replacement
 review. OPEN-052/053 are resolved; do not continue asking these questions.
 
-Source migration 202611140007 adds disabled-by-default public text-only pilot
-projections and a separate `?page=pilot-directory` page, linked from account/footer.
-Lists approved owner-selected profiles/Offering copies with current User+Provider
-and unexpired/unrevoked development-pilot eligibility. Public profiles project only
-name/username/adult age/tagline/city/area; Offering projects approved listing text.
-No Auth-owner IDs, private fields, reviewer metadata or demo-photo numbers are
-returned. Looking For remains excluded. Public reads page 20+1 by approval UUID.
+Text-only pilot directory/public projections remain disabled by default. Source
+migration 202611140008 adds owner-only visibility diagnostics for exact approved
+profile/Offering copies. UI explains activation, role, invited-pilot eligibility,
+selection/hidden state and Offering profile/capacity prerequisites. The final
+currently-readable result reuses the exact internal public-read projections, so it
+is not inferred from approval or from only the first page of public results.
 
-One included Offering per Provider is supported; more than one visible selection
-suppresses that Provider’s ads rather than choosing silently. An Offering also
-requires a visible eligible selected profile. Existing approved selections remain
-while replacements are reviewed. Owner readiness distinguishes connected endpoints
-from enabled activation. A server-only switch is seeded OFF and missing setup is
-unavailable, never fictional fallback. No activation/grants/migrations performed.
+Diagnostics are explicit, read-only and restricted to the approval owner. Client
+identity/generation guards discard stale results; selection changes clear diagnostics
+and block diagnostics while a selection operation runs. Unavailable is distinct
+from not publicly readable. No real grants/selections/activation or remote migration
+performed. Automated tests/build remain paused; source review only. SQL isolation,
+concurrency, hosted behavior, rendering and regression remain unverified.
 
-Automated tests/build remain paused; source review only. Rendering, public RPC
-isolation, activation/expiry/revocation, capacity and hosted behavior unverified.
-Next: pilot activation preflight and owner visibility diagnostics; real photos,
-Looking For access policy, enforcement/reporting and deferred end-to-end verification
-remain before broad live use. No payment or production marketplace activation.
+Next: operational pilot activation checklist and a focused hosted walkthrough when
+verification resumes. Reporting/enforcement, real media and full Looking For policy
+remain separate prerequisites for broader live marketplace use. No production
+marketplace, payments or communication activation.
 
 ### Live marketplace implementation and acceptance gaps
 

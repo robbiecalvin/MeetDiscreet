@@ -1,3 +1,4 @@
+import { visibilityDiagnostics } from './visibility-diagnostics.js';
 import { loadPilotVisibility, setPilotVisibility } from './backend/pilot-visibility.js';
 export function pilotVisibility(owner, kind, id, isCurrent) {
   const section = document.createElement('section'); section.className = 'pilot-visibility';
@@ -7,12 +8,13 @@ export function pilotVisibility(owner, kind, id, isCurrent) {
   const refresh = document.createElement('button'); refresh.type = 'button'; refresh.className = 'button quiet'; refresh.textContent = 'Check selected pilot version';
   const select = document.createElement('button'); select.type = 'button'; select.className = 'button outline'; select.textContent = 'Select this approved version for pilot'; select.hidden = true;
   const hide = document.createElement('button'); hide.type = 'button'; hide.className = 'button quiet'; hide.textContent = 'Hide the selected version'; hide.hidden = true;
-  section.append(title, note, refresh, status, select, hide);
+  const diagnostics = visibilityDiagnostics(owner, kind, id, isCurrent);
+  section.append(title, note, refresh, status, select, hide, diagnostics.section);
   let busy = false, value = null;
   const current = () => section.isConnected && isCurrent();
-  function controls() { refresh.disabled = busy; select.disabled = busy; hide.disabled = busy; }
+  function controls() { diagnostics.setBlocked(busy); refresh.disabled = busy; select.disabled = busy; hide.disabled = busy; }
   async function run(action) {
-    if (busy || !current()) return; busy = true; controls(); select.hidden = true; hide.hidden = true; status.textContent = 'Checking pilot visibility selection…';
+    if (busy || !current()) return; busy = true; diagnostics.reset(); controls(); select.hidden = true; hide.hidden = true; status.textContent = 'Checking pilot visibility selection…';
     try {
       const result = await action(); if (!current()) return; value = result;
       const thisVersion = value.selected_submission_id === id;
