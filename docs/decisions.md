@@ -338,9 +338,9 @@ on unrelated provider decisions.
 | OPEN-015 | Looking For detail | Visibility of full posts |
 | OPEN-016 | Publishing expiry | Effects on profiles, ads, subscribers, and bookings |
 | OPEN-017 | Premium expiry | Excess posts and unused boosts |
-| OPEN-018 | Subscription expiry | Historical messages and existing-booking communication |
+| OPEN-018 | Subscription expiry | Text history resolved: retained read-only (DEC-026); broader existing-booking communication remains pending |
 | OPEN-019 | Two-companion bookings | Subscriptions, approvals, availability, and management |
-| OPEN-020 | Blocking | Effects across discovery, communication, and bookings |
+| OPEN-020 | Blocking | Pilot new text/request contact blocked bilaterally with records preserved (DEC-026/027); discovery/calls/broader effects remain pending |
 | OPEN-021 | Reviews | Eligibility, timing, responses, and editing |
 | OPEN-022 | Verification | Age/identity checks and displayed claims |
 | OPEN-023 | Gate retention | Resolved: 30 days on this browser (DEC-014) |
@@ -602,3 +602,30 @@ server-owned and limited to invited accounts; no client metadata can assign it.
 No real account has been invited or granted eligibility by this source increment.
 Pilot issuance/revocation, chosen invitees and duration remain to implement/select;
 no default duration or participants are invented.
+
+## DEC-026 — Retained Text History, Bilateral Contact Blocks and Invited Text Pairs
+
+Confirmed by Robbie on 2026-11-14: existing participants keep read-only conversation
+history after companion access expires; new messages need current access. In the
+pilot, blocking prevents new messages and booking requests in both directions,
+while preserving history and existing booking records. Blocking does not cancel
+obligations, erase records or create a payment/refund action. Discovery/calls and
+broader enforcement effects remain separate policy work.
+
+Selected invited pilot pairs may receive explicit temporary no-charge text access,
+separate from publishing eligibility. Normal subscription prices remain unchanged.
+Administrator + independent messaging-pilot capability manages an exact User/Provider
+pair with a chosen expiry; no actual pair, duration or capability is seeded. Publishing
+approval/pilot eligibility never grants this access. Text pilot supports manual
+refresh; realtime notifications, attachments and calls are not implemented.
+
+## DEC-027 — Request-Only Invited Booking Pilot
+
+Confirmed by Robbie on 2026-11-14: explicitly invited pairs may exchange real private
+booking requests, proposed revisions, declines and withdrawals. Paid confirmation,
+deposits, reservations and cancellation fees remain disabled. Request terms and
+versions must not imply accepted paid terms or reserved availability. Separate
+expiring pair access is required; neither publishing nor text access substitutes.
+History and participant closure actions remain available after expiry/block; new
+requests/revisions require current unblocked access. No normal price or proposed
+deposit interpretation is changed. No actual pair is enrolled by source code.

@@ -16,6 +16,7 @@ export function visibilityDiagnostics(owner, kind, id, isCurrent) {
       status.textContent = value.visible_now ? 'This exact approved version is currently readable through the pilot public endpoints.' : 'This exact approved version is not currently readable through the pilot public endpoints.';
       const list = node('ul');
       const checks = [
+        ['Pilot publication pause', value.moderation_paused ? 'Paused by moderation' : 'No publication pause'],
         ['Pilot directory', value.directory_enabled ? 'Enabled' : 'Disabled'],
         ['User membership', value.user_member ? 'Assigned' : 'Not assigned'],
         ['Provider membership', value.provider_member ? 'Assigned' : 'Not assigned'],

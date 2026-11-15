@@ -1,7 +1,12 @@
+import { pilotEntryBlock } from './pilot-entry-block.js';
+import { marketplaceReport } from './marketplace-report.js';
+import { registerRouteLeave } from './route-leave.js';
+import { trackDraft } from './draft-changes.js';
 import './pilot-directory.css';
 import { backendEnabled } from './backend/client.js';
 import { loadPilotDirectoryStatus, loadPilotDirectoryPage } from './backend/pilot-directory.js';
 function node(tag, text, className) { const item = document.createElement(tag); if (text) item.textContent = text; if (className) item.className = className; return item; }
+trackDraft('marketplace-report-drafts', () => [...document.querySelectorAll('.marketplace-report textarea')].map(input => input.value.trim()).filter(Boolean), backendEnabled);
 export function renderPilotDirectory(container, onBack) {
   container.replaceChildren(); const root = node('section', null, 'pilot-directory');
   const back = node('a', '← Back to discovery', 'profile-back'); back.href = './';
@@ -18,11 +23,16 @@ export function renderPilotDirectory(container, onBack) {
   const next = node('button', 'Next pilot page', 'button outline'); next.type = 'button'; pages.append(previous, next);
   root.append(tabs, refresh, status, list, pages); container.append(root);
   let busy = false, kind = 'profiles', page = 0, cursors = [null], rows = [], hasNext = false, generation = 0;
+  function canLeaveReports() {
+    if (root.querySelector('[data-busy=true]')) { status.textContent = 'Wait for the private report request to finish.'; return false; }
+    return ![...root.querySelectorAll('.marketplace-report textarea')].some(input => input.value.trim()) || window.confirm('Discard the report text in this view?');
+  }
+  registerRouteLeave(root, canLeaveReports);
   const current = request => generation === request && root.parentNode === container;
   function controls() { profiles.disabled = busy; offerings.disabled = busy; refresh.disabled = busy; previous.disabled = busy || page === 0; next.disabled = busy || !hasNext; profiles.setAttribute('aria-pressed', String(kind === 'profiles')); offerings.setAttribute('aria-pressed', String(kind === 'offerings')); }
   function field(value) { return typeof value === 'string' ? value : ''; }
-  async function load(reset = false) {
-    if (busy) return; busy = true; const request = ++generation;
+  async function load(reset = false, confirmed = false) {
+    if (busy || (!confirmed && !canLeaveReports())) return; busy = true; const request = ++generation;
     if (reset) { page = 0; cursors = [null]; }
     controls(); list.replaceChildren(); pages.hidden = true; status.textContent = 'Checking pilot directory…';
     try {
@@ -41,6 +51,7 @@ export function renderPilotDirectory(container, onBack) {
         } else {
           card.append(node('p', 'PILOT OFFERING', 'eyebrow'), node('h2', field(fields.title) || 'Offering listing'), node('p', [field(fields.area), field(fields.city), field(fields.activity)].filter(Boolean).join(' · '), 'profile-small'), node('p', field(fields.description), 'pilot-directory-copy'));
         }
+        card.append(marketplaceReport(kind === 'profiles' ? 'profile' : 'offering', row.id, () => current(request)), pilotEntryBlock(kind === 'profiles' ? 'profile' : 'offering', row.id, () => current(request)));
         list.append(card);
       }
       status.textContent = rows.length ? `${rows.length} pilot ${kind === 'profiles' ? 'profiles' : 'Offering listings'} on this page.` : 'No eligible owner-selected entries on this page.';
@@ -48,10 +59,10 @@ export function renderPilotDirectory(container, onBack) {
     } catch { if (current(request)) status.textContent = 'Pilot directory unavailable. Check connection and database setup, then refresh. No fictional entries are substituted.'; }
     finally { busy = false; if (current(request)) controls(); }
   }
-  profiles.addEventListener('click', () => { if (busy) return; kind = 'profiles'; load(true); });
-  offerings.addEventListener('click', () => { if (busy) return; kind = 'offerings'; load(true); });
+  profiles.addEventListener('click', () => { if (busy || !canLeaveReports()) return; kind = 'profiles'; load(true, true); });
+  offerings.addEventListener('click', () => { if (busy || !canLeaveReports()) return; kind = 'offerings'; load(true, true); });
   refresh.addEventListener('click', () => load(true));
-  previous.addEventListener('click', () => { if (!busy && page > 0) { page--; load(); } });
-  next.addEventListener('click', () => { if (!busy && hasNext && rows.length) { cursors[page + 1] = rows.at(-1).id; page++; load(); } });
+  previous.addEventListener('click', () => { if (!busy && page > 0 && canLeaveReports()) { page--; load(false, true); } });
+  next.addEventListener('click', () => { if (!busy && hasNext && rows.length && canLeaveReports()) { cursors[page + 1] = rows.at(-1).id; page++; load(false, true); } });
   load(true);
 }

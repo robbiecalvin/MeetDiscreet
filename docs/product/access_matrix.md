@@ -286,7 +286,7 @@ transaction records merely because a subscription expires.
 |---|---|---|---|
 | Initiate subscriber-gated conversation | Active relevant entitlement required | Denied | Assigned support route only |
 | Send message | Membership, entitlement, and block checks required | Denied | No impersonation |
-| Read conversation history | Participating; expiry rule pending | Denied | Assigned, necessary review only |
+| Read conversation history | Participating; read-only after expiry (DEC-026) | Denied | Assigned, necessary review only |
 | Upload attachment | Authorized conversation participant | Denied | Assigned |
 | Retrieve attachment | Authorized access required | Denied | Assigned |
 | Update own read receipt | Participating | Denied | Denied |
@@ -298,7 +298,7 @@ Subscription alone does not grant access to unrelated conversations.
 Moderation access to private communication must have a defined purpose,
 scope, and audit trail.
 
-Historical message access after expiry remains pending.
+DEC-026 confirms retained read-only history for existing participants after access expiry. New messages still require current relevant access; no new conversation membership is granted by historical access.
 
 ## 15. Calls
 
@@ -335,7 +335,7 @@ Blocking and reporting must not require a subscription or premium plan.
 
 Registered accounts can manage their own block list.
 
-Define block effects on:
+DEC-026/027 define bilateral blocking for new pilot text and booking requests/revisions, while retaining history, existing request records and closure actions. Broader block effects still require definition for:
 
 - Discovery.
 - Profile visibility.
@@ -499,3 +499,17 @@ reviewer identity stays protected. An approved intake record is historical evide
 not proof of current role assignment after subsequent trusted revocation. The browser
 cannot grant roles, assign staff capabilities or modify approval records directly.
 No identity/paid/publishing entitlement is granted by this pilot operation.
+
+## Invited request/text pilot
+
+DEC-026/027 introduce separately scoped temporary pair access, not a paid companion
+subscription or publishing entitlement. Only selected invited User/Provider pairs
+receive an explicit expiry. New sends/requests additionally require the relevant
+server-only pilot switch, current roles and no block in either direction. No
+browser may grant access. Participant history stays readable after expiry/revocation;
+existing request withdrawal/decline remains possible without new-contact privileges.
+No paid confirmation/reservation or cancellation/refund calculation is introduced.
+Reporting/blocking remain unpaid account capabilities. Staff see only voluntarily
+reported public-copy/single-message evidence under explicit report scope, not entire
+private conversations. Publication pauses are separately scoped Administrator actions
+and do not alter role assignments, payments or private participant history.

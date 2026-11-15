@@ -77,6 +77,10 @@ export function renderAccountOverview(container, navigate, onBack) {
 
     const grid = node('div', null, 'account-tool-grid');
     for (const [page, title, copy, action] of [
+      ['booking-requests', 'Request-only booking pilot', 'Exchange real requests and proposed revisions in invited pairs. No reservations, confirmation or payments.', 'Open request inbox'],
+      ['messages', 'Private text messages', 'Read and send text in explicitly invited pilot pairs. Separate access and blocking rules apply.', 'Open private conversations'],
+      ['blocked-participants', 'Blocked participants', 'Manage your contact blocks without paid access. Existing records are preserved.', 'Manage blocked contact'],
+      ['my-reports', 'My reports', 'Check your own private report references and processing states without paid access.', 'Open my reports'],
       ['pilot-directory', 'Pilot directory', 'Browse the separate text-only pilot when it is explicitly activated. No fictional entries are substituted.', 'Open pilot directory'],
       ['provider-application', 'Provider application', 'Save an introduction and submit it to the private development intake queue.', 'Open provider application'],
       ['booking-draft', 'Booking request preview', 'Prepare, privately save and review a fictional plan without sending, reserving or paying.', 'Build a booking draft'],

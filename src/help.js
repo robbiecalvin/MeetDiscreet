@@ -10,7 +10,7 @@ const questions = [
   { topic: 'drafts', question: 'Why did my draft disappear after refreshing?', answer: backendEnabled ? 'Unsaved edits stay only in memory and clear on refresh. Signed-in development accounts can explicitly save and load their own private profile, listing, catalogue and availability drafts when configured. Unsent booking plans can also be saved privately when the booking-plan migration is applied. Saving does not publish drafts or change discovery.' : 'The editor keeps a draft only in memory. It survives navigation within the running app, but a full page refresh clears it. No listing is saved, published, or added to discovery.' },
   { topic: 'plans-support', question: 'How are subscriptions, Premium, and publishing different?', answer: 'A companion subscription applies to one companion. Premium provides user posting and boost benefits. A companion publishing plan is a separate product for profile/ad eligibility. A booked experience is priced separately. See How it works for the established reference amounts.' },
   { topic: 'plans-support', question: 'Can I pay or manage a refund here?', answer: 'No. There is no checkout, charge, billing account, or refund action in this frontend demo. Currency, renewals, cancellations, taxes, and booking-payment rules remain pending. No payment or refund request can be submitted here.' },
-  { topic: 'plans-support', question: 'How do I contact support or report a concern?', answer: 'A support inbox, report submission, and blocking tools have not been connected to this preview. This page answers demo questions only and does not send messages or reports. The planned service must provide reporting and blocking without requiring paid access; its operational contact route remains to be selected.' },
+  { topic: 'plans-support', question: 'How do I contact support or report a concern?', answer: 'The separate connected pilot supports private reports on readable pilot entries and received pilot messages, plus unpaid block controls. My reports and Blocked participants are in your account. These require the pilot migrations and sign-in; fictional discovery entries cannot be reported as real accounts. This Help page sends nothing. An operational support contact route and response times remain unconfigured.' },
 ];
 function element(tag, text, className) {
   const node = document.createElement(tag);
@@ -102,7 +102,7 @@ export function renderHelp(container, onReturn, onNavigate, onExit) {
   }
   links.append(title, grid);
   const note = element('aside', null, 'help-support-note');
-  note.append(element('h2', 'About support in this preview'), element('p', 'No support inbox or report submission is connected. This page does not collect or send personal messages, account information, or payment details. The operational support route still needs to be selected before live use.', 'profile-copy'));
+  note.append(element('h2', 'About support in this preview'), element('p', 'This Help page sends no support request. Connected pilot reports and account block controls are separate tools and require hosted setup. No response time, emergency channel or operational support inbox is promised. The support contact route still needs to be selected before live use.', 'profile-copy'));
   main.append(links, note);
   container.append(header, main);
 }

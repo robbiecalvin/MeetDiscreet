@@ -718,3 +718,16 @@ A request is not acceptance.
 Acceptance is not payment.
 Payment is not attendance.
 Completion is not payout.
+## Request-only development pilot (DEC-027)
+
+The pilot implements Requested → Revision proposed, with provider Declined or
+requester Withdrawn as terminal outcomes. Each proposal preserves structured,
+immutable schedule/activity/meeting-area/notes terms and is revision-bound. These
+are discussions, not accepted quotes, confirmed bookings or reservations. No paid
+acceptance/deposit/confirmation/in-progress/completed transitions are enabled.
+
+Current explicit pair access, membership, enabled request service and no bilateral
+block are required for new requests/revisions. Existing participants retain their
+records and appropriate decline/withdraw actions after access expires or contact
+is blocked. No availability is locked and no cancellation/refund fee is calculated.
+The full financial lifecycle above remains deferred with its unresolved policies.

@@ -1,0 +1,34 @@
+.marketplace-service { padding-top: 28px; }
+.marketplace-service > .eyebrow { margin-top: 36px; color: #dba5b3; }
+.marketplace-service h1 { margin: 22px 0; font-size: clamp(38px,5vw,64px); letter-spacing: -.05em; line-height: 1.08; }
+.marketplace-service h2 { margin: 22px 0; font-size: 27px; letter-spacing: -.7px; }
+.marketplace-service > .offering-lead { max-width: 820px; line-height: 1.8; color: #bcbcca; }
+.marketplace-service .profile-small { margin: 18px 0; line-height: 1.8; }
+.service-split { display: grid; grid-template-columns: minmax(200px, .65fr) minmax(0, 1.5fr); gap: 26px; margin-top: 26px; }
+.service-conversation { display: flex; width: 100%; margin-bottom: 14px; justify-content: flex-start; text-align: left; overflow-wrap: anywhere; }
+.service-panel,.service-split > section { border: 1px solid #ffffff20; border-radius: 18px; padding: 26px; background: #1b1e2e; min-width: 0; }
+.service-form { display: grid; gap: 14px; max-width: 720px; margin: 26px 0; }
+.service-form label,.service-panel > label { color: #e3c6cd; font-size: 13px; line-height: 1.8; }
+.marketplace-service :is(input:not([type=checkbox]),textarea,select),.marketplace-report :is(textarea,select) { width: 100%; border: 1px solid #ffffff30; border-radius: 10px; background: #121521b3; color: var(--text); min-height: 48px; padding: 12px 16px; font: inherit; }
+.marketplace-service textarea,.marketplace-report textarea { resize: vertical; line-height: 1.8; }
+.service-identifier { overflow-wrap: anywhere; line-height: 1.8; margin: 16px 0; }
+.service-check { display: flex; gap: 12px; align-items: flex-start; margin: 18px 0; }
+.service-check input { accent-color: #b6192e; flex-shrink: 0; margin-top: 6px; }
+.service-message-log { max-height: 570px; overflow-y: auto; padding: 14px 4px; }
+.service-message { margin: 16px 0; padding: 18px; border: 1px solid #ffffff18; border-radius: 16px; max-width: 92%; background: #38476b40; }
+.service-message.outgoing { margin-left: auto; background: #b6192e24; border-color: #d58a9940; }
+.service-message-body { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; margin-top: 12px; }
+.service-message .profile-small { font-size: 11px; margin-bottom: 0; }
+.marketplace-service .button { border-radius: 30px; }
+.marketplace-report { margin-top: 22px; padding-top: 20px; border-top: 1px solid #ffffff20; }
+.marketplace-report summary { color: #e3c6cd; cursor: pointer; line-height: 1.8; }
+.marketplace-report form { display: grid; gap: 14px; margin-top: 20px; }
+.marketplace-report label { color: #e3c6cd; font-size: 13px; line-height: 1.8; }
+@media(max-width:700px) { .service-split { grid-template-columns: minmax(0,1fr); } .service-panel,.service-split > section { padding: 22px 18px; } .service-message { max-width: 96%; } }
+.marketplace-report-review dl { margin: 26px 0; }
+.marketplace-report-review dt { margin-top: 16px; color: #bcbcca; font-size: 12px; }
+.marketplace-report-review dd { margin: 6px 0 0; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.marketplace-service > .button { margin: 10px 12px 0 0; }
+.service-panel > .button { margin: 10px 12px 10px 0; }
+.marketplace-entry-block { margin-top: 18px; }

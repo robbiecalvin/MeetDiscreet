@@ -1,3 +1,6 @@
+import { bookingPilotAccess } from './backend/booking-requests.js';
+import { messagingPilotAccess } from './backend/marketplace-messages.js';
+import { reportReviewAccess } from './backend/marketplace-reports.js';
 import { loadPilotManagementAccess } from './backend/pilot-eligibility.js';
 import { loadListingReviewAccess } from './backend/listing-review.js';
 import { loadProfileReviewAccess } from './backend/profile-review.js';
@@ -19,17 +22,23 @@ export function accountPermissions(current, navigate = null) {
   listingReview.addEventListener('click', event => { if (!navigate || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate('listing-review'); });
   const pilot = document.createElement('a'); pilot.href = '?page=pilot-eligibility'; pilot.className = 'button outline'; pilot.textContent = 'Manage invited publishing pilot'; pilot.hidden = true;
   pilot.addEventListener('click', event => { if (!navigate || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate('pilot-eligibility'); });
-  section.append(title, copy, status, retry, review, profileReview, listingReview, pilot);
+  const messagingPilot = document.createElement('a'); messagingPilot.href = '?page=messaging-pilot'; messagingPilot.className = 'button outline'; messagingPilot.textContent = 'Manage invited text pairs'; messagingPilot.hidden = true;
+  messagingPilot.addEventListener('click', event => { if (!navigate || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate('messaging-pilot'); });
+  const reports = document.createElement('a'); reports.href = '?page=report-review'; reports.className = 'button outline'; reports.textContent = 'Review pilot reports'; reports.hidden = true;
+  reports.addEventListener('click', event => { if (!navigate || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate('report-review'); });
+  const bookings = document.createElement('a'); bookings.href = '?page=booking-request-pilot'; bookings.className = 'button outline'; bookings.textContent = 'Manage request-only booking pairs'; bookings.hidden = true;
+  bookings.addEventListener('click', event => { if (!navigate || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate('booking-request-pilot'); });
+  section.append(title, copy, status, retry, review, profileReview, listingReview, pilot, messagingPilot, reports, bookings);
   let busy = false;
   async function check() {
     if (busy) return;
-    busy = true; retry.disabled = true; review.hidden = true; profileReview.hidden = true; listingReview.hidden = true; pilot.hidden = true; status.textContent = 'Checking assigned roles…';
+    busy = true; retry.disabled = true; review.hidden = true; profileReview.hidden = true; listingReview.hidden = true; pilot.hidden = true; messagingPilot.hidden = true; reports.hidden = true; bookings.hidden = true; status.textContent = 'Checking assigned roles…';
     try {
       const roles = await loadOwnAccountRoles();
       if (!current()) return;
       if (roles.some(role => ['moderator', 'admin'].includes(role))) {
-        const [intake, profiles, listings, pilotAccess] = await Promise.allSettled([loadProviderReviewAccess(),loadProfileReviewAccess(),loadListingReviewAccess(),loadPilotManagementAccess()]);
-        if (current()) { review.hidden = intake.status !== 'fulfilled' || !intake.value.allowed; profileReview.hidden = profiles.status !== 'fulfilled' || !profiles.value.allowed; listingReview.hidden = listings.status !== 'fulfilled' || !listings.value.allowed; pilot.hidden = pilotAccess.status !== 'fulfilled' || !pilotAccess.value.allowed; }
+        const [intake, profiles, listings, pilotAccess, textAccess, reportAccess, bookingAccess] = await Promise.allSettled([loadProviderReviewAccess(),loadProfileReviewAccess(),loadListingReviewAccess(),loadPilotManagementAccess(),messagingPilotAccess(),reportReviewAccess(),bookingPilotAccess()]);
+        if (current()) { review.hidden = intake.status !== 'fulfilled' || !intake.value.allowed; profileReview.hidden = profiles.status !== 'fulfilled' || !profiles.value.allowed; listingReview.hidden = listings.status !== 'fulfilled' || !listings.value.allowed; pilot.hidden = pilotAccess.status !== 'fulfilled' || !pilotAccess.value.allowed; messagingPilot.hidden = textAccess.status !== 'fulfilled' || !textAccess.value.allowed; reports.hidden = reportAccess.status !== 'fulfilled' || !reportAccess.value.allowed; bookings.hidden = bookingAccess.status !== 'fulfilled' || !bookingAccess.value.allowed; }
         if (!current()) return;
       }
       status.textContent = `${roles.length ? `Assigned roles: ${roles.map(role => labels[role]).join(', ')}.` : 'No account roles assigned.'} Provider role: ${roles.includes('provider') ? 'Assigned' : 'Not assigned'}.`;

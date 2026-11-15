@@ -1356,3 +1356,26 @@ targets, bound/trim note text, lock authority and copy, and record protected
 metadata atomically. Feedback creates no approval/withdrawal/publication state or
 role/paid entitlement. Owner reads persist after Provider revocation/withdrawal;
 new copies have separate IDs and notes. Existing publishing choices remain open.
+
+## Contact-services source model (unapplied migrations 009–015)
+
+- `marketplace_blocks`: private owner/target edge with safe public/context label;
+  bilateral effect on new contact, no history deletion.
+- `marketplace_messaging_access`: separately assigned expiring invited pair access;
+  `marketplace_conversations` identifies the immutable pair; `marketplace_messages`
+  stores bounded body, server sequence/time and sender/client retry UUID.
+- `marketplace_reports`: reporter, target, exact snapshot/evidence, category and
+  revisioned triage state; column-limited owner status. `marketplace_report_notes`
+  and events are separately protected operational content/metadata.
+- `marketplace_publication_holds`: reversible resource-level public visibility hold;
+  no role, financial or private-history mutation.
+- `marketplace_booking_request_access`: independent invited request-pilot pair grant.
+  `marketplace_booking_requests` stores participants, state and optimistic revision;
+  immutable `marketplace_booking_request_versions` stores typed schedule/time zone,
+  activity, meeting area and notes. No money, reservation or accepted-quote record.
+- `marketplace_pilot_service_settings`: OFF-by-default switches for new text and
+  booking requests/revisions, with history/closure retained on shutdown.
+
+All user writes use owner/participant-bound RPCs; browser direct contact-table writes
+are denied. Record retention/deletion beyond existing Auth-owner cascades is unresolved;
+source model alone does not establish operational retention or hosted verification.

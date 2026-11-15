@@ -1144,3 +1144,40 @@ reviewer/contact/provenance or private draft content. Diagnostics are read-only 
 cannot activate the directory or grant access. UI identity/generation checks clear
 stale outcomes during selection operations; backend failures do not imply hidden
 or visible. Migration is unapplied; automated verification remains deferred.
+
+## Invited text/request contact and reports (source, migrations 009–015)
+
+RPC-only messaging/request tables have forced RLS and no browser table privileges.
+All user RPCs bind expected actor to auth.uid, verify exact participant ownership
+and recheck client identity before/after. Read-only participant history remains after
+expiry/block; no staff history RPC is granted. New sends/requests/revisions require
+independent expiring pair access, current User/Provider roles, unblocked pair and a
+server-only enabled service switch. No paid subscription is inferred from pilot access.
+
+Pair advisory locks serialize blocks, access changes and new contact; role/access
+rows are locked during writes. Sends and initial requests bind client UUIDs to exact
+text/terms so unchanged retries return the same record. Reused IDs with changed text
+or terms are rejected. Existing request changes compare revision UUIDs and retain
+structured immutable versions; requester withdrawal/Provider decline requires no
+new-contact access. No reservation/payment state exists. Technical bounds: text
+2000 characters, 20 sends/minute per sender; reports 2000 characters and 10/hour per
+reporter; requests 10/hour per requester, 100 revisions/request; these are prototype
+anti-abuse/payload bounds, not commercial quotas. Message bodies/notes are not copied
+to operation-event tables. All text is rendered as text nodes.
+
+Unpaid reporting snapshots only currently public pilot-copy fields or one received
+message voluntarily reported by its participant. Reporter status uses owner RLS and
+column-limited reads. Independent Moderator/Admin with report-review scope can inspect
+evidence/private staff notes, not browse messages. Reversible publication pauses need
+Administrator + separate moderation scope and an exact hold revision; they filter
+actual public projections without deleting copies, altering money or assigning roles.
+Notes/events/status writes are atomic. Private evidence retention/deletion operations
+remain policy work; no retention schedule or guaranteed response time is invented.
+
+New-contact service switches default OFF. Shutdown disables new text/requests while
+retaining participant history, closure, blocking and reporting. Client generation/
+identity checks and route guards discard stale responses and protect unsent text;
+no private text/credentials are stored in browser draft persistence. Build and fixture
+render inspection only; migrations/SQL policy/concurrency and hosted flows are unverified
+while automated tests remain paused. These controls are source implementation, not
+proof of production readiness or comprehensive abuse prevention.

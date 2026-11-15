@@ -857,3 +857,16 @@ underlying feature is operational.
 - docs/development/pilot-activation.md: hosted invited-pilot inventory/setup, release prerequisites and explicit shutdown workflow.
 - supabase/operations/pilot_preflight.sql: unexecuted read-only schema/privilege inventory, without user data; not behavioral verification.
 - supabase/operations/pilot_shutdown.sql: unexecuted explicit global OFF-switch operation retaining private data.
+
+- src/marketplace-messages.js, src/backend/marketplace-messages.js: private invited-pair text inbox/history, retry-safe sends, contact blocks and separately scoped pair management.
+- src/messaging-pilot.js: shared explicit text/request-only pair inspection, chosen-expiry grant/revoke forms; independent capability per service.
+- src/marketplace-report.js, src/marketplace-reports.js, src/marketplace-report-review.js, src/backend/marketplace-reports.js: free evidence reports, reporter status and scoped independent staff triage/publication pause.
+- src/marketplace-blocks.js and src/backend/marketplace-blocks.js: public-entry block and owner free block/unblock list.
+- src/booking-requests.js, src/booking-request-form.js, src/backend/booking-requests.js: request-only pilot inbox, structured version review/revision and participant closure; no reserved/paid booking.
+- src/marketplace-services.css: shared dark/elegant private contact and report layouts.
+- src/backend/contact-service-status.js: caller-verified new-contact switch status.
+- supabase/migrations/202611140009_marketplace_contact_safety.sql through 202611140015_contact_service_switches.sql: unexecuted contact/report/request-only schema, scoped RPCs and OFF-by-default service switches.
+- docs/design/page_briefs/marketplace-contact-services.md: pilot contact workflows, rendering observations and remaining verification gaps.
+
+- src/pilot-entry-block.js: free block action attached to a currently public pilot entry, separated from lazy owner block management.
+- src/main.js contact route loaders: on-demand contact/account modules with stale-route/identity mount guards and retry UI.

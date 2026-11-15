@@ -469,3 +469,14 @@ review capability are required. Approval/rejection and publishing remain absent.
 Account also includes a saved-draft reference download at `/?page=draft-backup`;
 see [brief](./page_briefs/draft-backup.md). It is not a full account export or import
 workflow and grants no additional record access.
+
+## Invited contact services — source implementation, 2026-11-14
+
+`messages`, `messaging-pilot`, `blocked-participants`, `my-reports`, `report-review`,
+`booking-requests` and `booking-request-pilot` query routes are implemented as separate
+connected-pilot surfaces. Fictional messages/booking previews remain separate.
+See [contact-services brief](./page_briefs/marketplace-contact-services.md).
+Production build passed; synthetic mobile/desktop render inspection only. Automated
+suites paused, source migrations unapplied, hosted/security/concurrency verification
+pending. Not an activated or production-ready marketplace. Media, realtime, calls,
+Looking For policy and full financial/reservation booking lifecycle remain incomplete.

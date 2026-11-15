@@ -3,7 +3,7 @@ const destinations = new Set([
   'account', 'account-security', 'provider-setup', 'user-setup', 'edit-profile',
   'edit-user-profile', 'my-listings', 'create-listing', 'experiences', 'availability',
   'booking-draft', 'booking-inbox-preview', 'messages-preview', 'photo-preview',
-  'draft-backup', 'provider-application', 'provider-review', 'profile-review', 'listing-review', 'pilot-eligibility',
+  'draft-backup', 'provider-application', 'provider-review', 'profile-review', 'listing-review', 'pilot-eligibility', 'messages', 'messaging-pilot', 'my-reports', 'report-review', 'blocked-participants', 'booking-requests', 'booking-request-pilot',
 ]);
 export function signInDestination(value) {
   if (typeof value !== 'string' || !value.startsWith('?') || value.length > 2048) return null;

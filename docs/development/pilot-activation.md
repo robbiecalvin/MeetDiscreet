@@ -6,9 +6,12 @@ This runbook does not declare the marketplace production-ready.
 
 ## Scope
 
-DEC-024/025: invited, no-charge development pilot with text-only approved profiles
-and one included Offering per Provider. Published prices remain unchanged. No
-Looking For, uploads, subscriptions, payments, messaging, calls or live bookings.
+DEC-024–027: invited, no-charge development pilot with text-only approved profiles
+and one included Offering per Provider, plus separately invited text and request-only
+booking pairs. Published prices remain unchanged. No Looking For, uploads, paid
+subscriptions, payments, calls, reservations or paid/confirmed bookings. New text and
+booking requests have independent server-only switches defaulting OFF; participant
+history, record closure, blocking and reporting remain available when switches are OFF.
 The separate `?page=pilot-directory` reads real eligible rows only, never demo data.
 
 ## Hosted schema inventory
@@ -27,7 +30,7 @@ Share only its status rows/notices if help is needed.
 
 Apply missing migrations individually in filename order from
 [supabase/migrations](../../supabase/migrations), preserving the existing sequence
-through `202611140008_owner_visibility_diagnostics.sql`. Do not blindly rerun an
+through `202611140015_contact_service_switches.sql`. Do not blindly rerun an
 existing migration. Most files create objects once and are not idempotent.
 An existing table/function alone does not prove the whole migration committed;
 compare the full migration, dashboard history and inventory before proceeding.
@@ -53,7 +56,11 @@ never an assigned role. Separate these operational permissions:
 | Inspect profile copy | Moderator/Admin + `profile_publication_review` |
 | Inspect listing copy | Moderator/Admin + `listing_publication_review` |
 | Editorial approval | Administrator + resource review scope + `marketplace_publication_approval` |
-| Grant/revoke invited pilot eligibility | Administrator + `marketplace_pilot_management` |
+| Grant/revoke invited publishing eligibility | Administrator + `marketplace_pilot_management` |
+| Grant/revoke invited text pairs | Administrator + `marketplace_messaging_pilot_management` |
+| Grant/revoke request-only booking pairs | Administrator + `marketplace_booking_pilot_management` |
+| Review volunteered report evidence/private staff notes | Moderator/Admin + `marketplace_report_review` |
+| Pause/resume reported pilot publication | Independent Administrator + report-review + `marketplace_publication_moderation` |
 
 No self approval or self pilot assignment. A selected invited Provider keeps User
 and Provider roles. Inspect its exact UUID in pilot management, explicitly confirm
@@ -79,14 +86,16 @@ eligibility/roles, one-Offering capacity and public paging. Verify signup/recove
 and clear private DOM on identity changes. Review the exact public text with its
 owner; there are no photos or contact/communication actions in this directory.
 
-Ensure operational support/reporting, incident handling and pilot participant
-expectations are adequate before any actual public exposure; these are not
-implemented by this runbook. Broader launch, real media and Looking For require
+Source report/block/triage tools are prepared, but hosted configuration, staffing,
+operational support, incident handling, retention and participant expectations must
+be established before actual exposure. Source tools alone do not establish an
+operational moderation or support service. Broader launch, real media and Looking For require
 their remaining policies and implementations.
 
 After verification and a deliberate release decision, a trusted operator may
-change only `public.marketplace_pilot_directory_settings.enabled` for the
-`id='directory'` row. Browser roles and staff panels cannot activate it. Record
+change `public.marketplace_pilot_directory_settings.enabled` for the
+`id='directory'` row and independently enable only intended services in
+`public.marketplace_pilot_service_settings` (`text_messaging` / `booking_requests`). Browser roles and staff panels cannot activate it. Record
 project, commit, migration state, operator and verification evidence in the normal
 deployment record; do not record private content or credentials.
 
@@ -97,14 +106,33 @@ build does not apply migrations or enable this database switch.
 ## Shutdown and recovery
 
 Use [pilot_shutdown.sql](../../supabase/operations/pilot_shutdown.sql) through a
-trusted SQL Editor session to set the switch OFF. This is a mutation; it is not
+trusted SQL Editor session to set directory and new-contact switches OFF. This is a mutation; it is not
 part of the read-only inventory and has not been executed by the agent. It keeps
 all drafts, submissions, approvals, selections, eligibility and audit records.
-Confirm the returned row is OFF and verify public queries/UI no longer return
-entries when verification is available. Existing fetched copies cannot be recalled.
+Confirm the SQL notices and inspect the settings to verify they are OFF. Verify
+public queries/UI no longer return entries and new sends/requests are denied when
+verification is available. The shutdown handles absent tables during partial setup.
+It preserves participant history/report access and request decline/withdraw actions. Existing fetched copies cannot be recalled.
 
 For one invited account, use scoped pilot revocation and reinspect the result.
 Owners may hide selections even after roles/eligibility are lost. Keep activation
 OFF during schema repair. Do not undo source migrations by deleting tables or
 rewrite applied migrations to hide history. A frontend rollback alone does not
 revoke backend public access or repair schema compatibility.
+
+## Contact-service walkthrough before enabling switches
+
+Use deliberately selected independent test participants and separately scoped staff.
+Publishing, text and request-only eligibility must not substitute for one another.
+Verify blocked and expired pairs cannot create new contact; retained history and
+closure work; direct table/unrelated-account/staff reads fail; duplicate send/request
+IDs do not create duplicates; concurrent revisions/withdrawals/revocations reject
+stale writes; evidence reporting shares only its selected copy/message; staff scopes
+are independent; self decisions and unauthorized pause/resume fail; public pause
+removes actual projection rows; private notes/IDs do not leak to reporters/public.
+
+Request versions show explicit UTC instants with an IANA display zone. Do not turn
+requests into confirmed/reserved bookings or test real money. Text uses explicit
+refresh; do not promise realtime delivery, notifications or calls. Uploaded/private
+media and full financial lifecycle remain separate unimplemented services. Inventory
+is read-only and cannot substitute for these currently deferred behavioral checks.

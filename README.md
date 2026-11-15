@@ -28,8 +28,12 @@ verification requirements. Local PostgreSQL policy checks and mocked browser
 checks do not establish hosted authentication or email delivery. The unsent
 booking-plan editor supports an explicit private save/load/delete after migration 008;
 unsaved edits remain in memory. It sends no request and calculates no quote.
-No payments, public publishing, messaging, or live booking service is connected. Profiles,
-photos, online statuses, and discovery ads remain fictional.
+Main discovery profiles, photos, online statuses and ads remain fictional.
+A separate disabled-by-default text-only pilot directory, invited-pair text inbox,
+request-only booking discussions, blocking and report/moderation workflows are
+implemented in source and require the additional hosted migrations and assigned
+capabilities. No hosted activation or end-to-end verification is claimed. Payments,
+subscriber media, calls and paid/reserved bookings remain unconnected.
 
 ## Product Overview
 

@@ -772,3 +772,48 @@ missing-only migration sequencing, staff/Provider setup and shutdown. Operations
 scripts are prepared but unexecuted. The read-only inventory is not an automated
 policy test or proof that a schema is correct. Activation remains deferred while
 verification is paused; no privileged credentials belong in chat/frontend config.
+
+## Larger contact-services batch (source migrations 009–015, unapplied)
+
+Apply missing files in order after visibility diagnostics, never rerun an applied
+migration blindly. No source file in this batch has been executed against hosted
+Supabase by the agent:
+
+| Migration | Source scope |
+|---|---|
+| `202611140009_marketplace_contact_safety.sql` | Private bilateral blocks; free public-copy report snapshots and reporter status |
+| `202611140010_pilot_text_messaging.sql` | Off-by-default contact switches, independent invited text pairs, participant history, idempotent sends and conversation block controls |
+| `202611140011_report_review_and_publication_pause.sql` | Independent report-review scope, immutable private notes/audit metadata, Administrator-only reversible publication pauses and diagnostic pause state |
+| `202611140012_private_message_reporting.sql` | Voluntary evidence of one received message; no staff conversation browsing |
+| `202611140013_owner_block_management.sql` | Public-entry block and owner block/unblock list without raw target account IDs |
+| `202611140014_request_only_booking_pilot.sql` | Independent request-pilot pairs, immutable structured versions, paged history, stale-bound revisions, declines and withdrawals; no paid/reserved booking |
+| `202611140015_contact_service_switches.sql` | Final switch/read-contract reinforcement; missing switch defaults to no new contact |
+
+Text/request access is independent of publishing eligibility and normal paid
+subscriptions. New capabilities are `marketplace_messaging_pilot_management`,
+`marketplace_booking_pilot_management`, `marketplace_report_review` and
+`marketplace_publication_moderation`; none are provisioned. Pair management requires
+Administrator plus its service capability, no self grants, two explicit invited
+accounts, current memberships and a chosen finite future expiry. Grant changes bind
+the inspected revision and audit atomically. No duration or participant is seeded.
+
+Participant history is RPC-only and remains readable after expiry/block. New contact
+serializes on pair locks, locks current role/access/service rows and enforces enabled
+service + unblocked pair. Text retries bind a client UUID to exact body; initial
+request retries bind to exact pair/terms. Revisions use immutable versions and
+optimistic request revisions. Closure needs participant authority, not current access.
+No reservation, price, deposit or cancellation fee is computed. Prototype technical
+bounds and remaining service gaps are documented in the contact-services brief.
+
+Reporting snapshots only public fields or one received message voluntarily shared
+by its participant. Reporter status uses owner RLS/column-limited reads. Staff
+inspection/state notes require separate scope; self-target/self-reporter decisions
+are rejected. Publication pause/resume additionally requires Administrator moderation
+scope and expected hold revision. Pauses filter actual public projections, retain
+records and do not affect money/roles. Message evidence cannot pause publication.
+
+Production build passed and synthetic fixture layouts were inspected at 390/1440px.
+Automated suites are paused; no SQL/policy/concurrency or hosted service behavior is
+verified. No real sends, requests, reports, grants, staff provisioning or activation
+occurred. Apply hosted schema and perform focused authorization/lifecycle verification
+before enabling any directory/text/request switch. Never share privileged credentials.

@@ -21,25 +21,35 @@ DEC-024 confirms staged real profiles/listings first, Administrator + explicit
 publishing capability, and retaining the last approved version during replacement
 review. OPEN-052/053 are resolved; do not continue asking these questions.
 
-Hosted setup/activation preparation is recorded in
-[the pilot runbook](./development/pilot-activation.md): chronological missing-only
-migrations, scoped staff roles, explicit invited Provider/expiry selection, owner
-review and a release/shutdown path. New operations SQL provides a read-only schema /
-privilege inventory and a separate explicit OFF-switch shutdown command. Neither
-script has been executed; inventory is not a behavior/security pass.
+Larger authorized marketplace batch implemented in source under DEC-026/027:
+- Expiring explicit text-pilot pairs, private persisted text, participant-only paged
+  history after expiry, idempotent sends, manual refresh and bilateral blocks.
+- Free public-copy/single-received-message reporting, reporter status, independent
+  scoped staff triage/private notes and Administrator-only reversible publication
+  pauses. Message evidence does not grant full conversation browsing.
+- Separate request-only pair access, structured immutable proposal versions, paged
+  inbox/history, stale-write rejection, declines and withdrawals. No reservation,
+  paid confirmation, deposits, quote calculation or cancellation/refund action.
+- Owner block list/unblock without paid access; public-entry and conversation block
+  controls. Existing record access survives blocks/expiry; new sends/requests/
+  revisions enforce current access and bilateral contact blocks.
+- Independent server-only text/request switches seeded OFF and shutdown updated to
+  disable new contact while retaining participant history and report access.
 
-No authenticated Supabase administration connector is available. Public URL/key
-cannot apply migrations or assign staff. Hosted schema inventory/application must
-use trusted SQL Editor/database tooling; do not request secrets in chat/frontend.
-No accounts/capabilities/eligibility selected or provisioned, and no directory
-activation or remote schema mutation performed. Automated tests/build remain paused.
-No current build, SQL execution or hosted verification is claimed.
+Source migrations 202611140009–015 are prepared, not applied remotely. No staff
+capabilities, invited pairs, dates, real sends/reports/requests or activation were
+provisioned/performed. Final production build passed, including on-demand contact-route chunks; mobile text/request and desktop
+report layouts inspected with synthetic mocked responses only. Automated suites
+remain paused. SQL policy/concurrency, hosted migration/auth/session/access and
+end-to-end services remain unverified. These facts do not establish “90% live”.
 
-Next dependency: obtain the actual hosted migration inventory, apply missing source
-migrations through 202611140008, provision deliberately chosen test staff/Provider
-accounts and resume focused functional/security verification before activation.
-Independent support/reporting work may continue while hosted setup is pending.
-Broader marketplace/media/Looking For remain incomplete; no production activation.
+Next external dependency: hosted schema inventory and missing-only migrations
+through 202611140015 using trusted Supabase SQL Editor, then deliberately selected
+staff/pairs and focused verification before enabling any switch. The connected
+public key cannot administer the database; no privileged connector is available.
+Remaining functional gaps include real profile photos/private attachments, realtime
+updates/notifications, calls, full Looking For policy, full financial/reservation
+booking lifecycle and operational support/retention. Payments remain disabled.
 
 ### Live marketplace implementation and acceptance gaps
 
@@ -47,11 +57,11 @@ Broader marketplace/media/Looking For remain incomplete; no production activatio
 |---|---|---|
 | Public profiles | Fictional profiles; owner private copy submission, staff inspection and feedback | Publishing authority and revision visibility; authoritative publish/unpublish lifecycle; allowlisted public projections; real identity/photo association; approved publishing-plan eligibility |
 | Public listings | Fictional discovery and owner private draft CRUD | Submission/review/publication lifecycle; confirmed allowances/expiry; public projection and approved publication eligibility; full Looking For visibility policy |
-| Messaging | Fictional threads and in-memory composer | Participant and companion-entitlement enforcement; block rules and expiry/history policy; persisted text, authorized realtime, read state and abuse controls |
+| Messaging | Source invited text pairs, private persisted inbox/history, idempotent sends and bilateral blocks; fictional preview remains separate | Hosted setup/verification; normal subscription authority, realtime/read state, attachments, notifications and operations |
 | Private media | Device-local selection/crop, no upload | Type/size/quota/retention/deletion policy; private bucket ownership, validated uploads and authorized delivery; moderation access |
-| Bookings | Private unsent plan; fictional inbox/calendar/revisions | Authoritative request/revision/acceptance states and terms; entitlement/block checks; holds/deadlines/time conflicts; confirmed cancellation/deposit policies before paid confirmation |
+| Bookings | Source request-only invited-pair inbox, immutable revisions, decline/withdraw; private plan and fictional inbox remain separate | Hosted setup/verification; acceptance, holds/deadlines/time conflicts, confirmed cancellation/deposit rules before paid confirmation |
 | Calls | Product requirements only | Selected signaling/connectivity service; participant authorization and invitation lifecycle; microphone/camera permissions; no default recording |
-| Blocking/reporting | Product requirements; no live submission | Defined cross-feature effects; owner-managed blocks; report intake, restricted evidence access, moderation/audit workflow and retention |
+| Blocking/reporting | Source free owner blocks, voluntary evidence reports, reporter status, scoped triage and reversible publication pause | Hosted setup/verification, broader cross-feature effects, operational handling and retention |
 
 Local implementation cannot establish hosted readiness. Each enabled service
 needs applied schema/configuration and end-to-end owner/participant isolation,
